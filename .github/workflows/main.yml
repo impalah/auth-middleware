@@ -1,4 +1,4 @@
-name: pydilite
+name: auth-middleware
 
 on:
   # push:
