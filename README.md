@@ -64,14 +64,53 @@ curl -X GET http://localhost:8000/ -H "Authorization: Bearer MY_ID_TOKEN"
 
 ## Middleware configuration
 
-TODO
+The middleware configuration is done by environment variables (or using and .env file if your project uses python-dotenv).
+
+The main variables are shwon in the table below:
+
+| Name | Description | Values | Default |
+| --------- | --------- | --------- | --------- |
+| AUTH_MIDDLEWARE_LOG_LEVEL | Log level for the application | DEBUG, INFO, WARNING, ERROR, CRITICAL | INFO |
+| AUTH_MIDDLEWARE_LOG_FORMAT | Log format | See python logger documentation | %(log_color)s%(levelname)-9s%(reset)s %(asctime)s %(name)s %(message)s |
+| AUTH_MIDDLEWARE_LOGGER_NAME | Auth middleware logger name | A string | auth_middleware |
+| AUTH_MIDDLEWARE_DISABLED | Auth middleware enabled/disabled | false, true | false |
+| AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES | JWKS keys file refreshing interval | An integer value | 20 |
+| AUTH_MIDDLEWARE_JWKS_CACHE_USAGES | JWKS keys refreshing interval (counter) | An integer value | 1000 |
+
+
 
 ## The User property
-TODO
+
+After authentication the Request object contains ifnormation about the current user in the state.current_user variable.
+
+The table below shows the properties of the user object.
+
+| Property | Description |
+| --------- | --------- |
+| id | Id of the user in the identity provider |
+| name | User name (or id if not defined) |
+| email | User email (if any) |
+| groups | Array of user groups as sent by the identity provider |
+
 
 ## Control authentication and authorization
 
-TODO
+There are two utility functions to control the authentication and authorization. These functions return an HttpException if the auth/authn fails.
+
+The functions can be invoked directly or can be used as a dependency in frameworks as FastAPI.
+
+To check if a user is logged in use require_user:
+
+```python
+require_user()
+```
+
+To check if a user has assigned a group or groups use require_groups:
+
+```python
+require_groups(["group1", "group2"])
+```
+
 
 ## Authentication providers
 
@@ -85,6 +124,11 @@ TODO
 
 
 ### Google Idp
+
+TODO
+
+
+## Custom auth provider
 
 TODO
 

@@ -42,6 +42,19 @@ poetry remove PIP_PACKAGE [-G group.name]
 
 Remove dependency from the given group
 
+
+## Documentation generation
+
+Initialize sphinx
+
+```bash
+poetry run sphinx-quickstart docs
+```
+
+
+
+
+
 ## Tests
 
 ### Debug From VS Code
