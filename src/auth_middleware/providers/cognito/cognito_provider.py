@@ -30,15 +30,15 @@ class CognitoProvider(JWTAuthProvider):
 
         # TODO: Control errors
         keys: List[JWK] = requests.get(
-            settings.AWS_COGNITO_JWKS_URL_TEMPLATE.format(
-                settings.AWS_COGNITO_USER_POOL_REGION,
-                settings.AWS_COGNITO_USER_POOL_ID,
+            settings.AUTH_PROVIDER_AWS_COGNITO_JWKS_URL_TEMPLATE.format(
+                settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_REGION,
+                settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID,
             )
         ).json()["keys"]
         timestamp: int = (
-            time_ns() + settings.AUTH_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
+            time_ns() + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
         )
-        usage_counter: int = settings.AUTH_JWKS_CACHE_USAGES
+        usage_counter: int = settings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
 
         return jks

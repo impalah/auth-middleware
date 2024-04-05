@@ -17,7 +17,7 @@ class GroupChecker:
 
     def __call__(self, request: Request):
 
-        if settings.AUTH_DISABLED:
+        if settings.AUTH_MIDDLEWARE_DISABLED:
             return
 
         if not hasattr(request.state, "current_user") or not request.state.current_user:

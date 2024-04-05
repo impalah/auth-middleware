@@ -26,7 +26,7 @@ class JWTBearerManager(HTTPBearer):
     async def get_credentials(
         self, request: Request
     ) -> Optional[JWTAuthorizationCredentials]:
-        if settings.AUTH_DISABLED:
+        if settings.AUTH_MIDDLEWARE_DISABLED:
             return None
 
         try:

@@ -2,78 +2,89 @@
 
 Async Auth Middleware for FastAPI/Starlette.
 
-## Technology Stack:
+## Installation
 
-- FastAPI
-- Pytest (\*)
-
-## Development environment
-
-### Requirements:
-
-- Python >= 3.12 (Pyenv, best option)
-- Poetry as dependency manager
-
-### Activate development environment
-
-```
-poetry install
-```
-
-This will create a new virtual environment (if it does not exists) and will install all the dependencies.
-
-To activate the virtual environment use:
-
-```
-poetry shell
-```
-
-### Add/remove dependencies
-
-```
-poetry add PIP_PACKAGE [-G group.name]
-```
-
-Add dependency to the given group. If not specified will be added to the default group.
-
-```
-poetry remove PIP_PACKAGE [-G group.name]
-```
-
-Remove dependency from the given group
-
-## Tests
-
-### Debug From VS Code
-
-Get the path of the virtual environment created by poetry:
+Using pip:
 
 ```bash
-poetry env info -p
+pip install auth-middleware
 ```
 
-Set in visual studio code the default interpreter to the virtual environment created by poetry.(SHIT+CTRL+P Select interpreter)
+## How to use it
 
-Launch "Pytest launch" from the run/debug tab.
+Auth Middleware follows the middleware protocol and, therefore, should be added as a middleware to your FastApi or Starlette application.
 
-You can set breakpoints and inspections
+The steps, using FastAPI:
 
-### Launch tests from command line
+```python
+
+from fastapi import FastAPI, Depends
+
+from starlette.requests import Request
+from starlette.responses import Response
+
+# Step 1: import the functions to control authentication
+from auth_middleware.functions import require_groups, require_user
+# Step 2: import the Middleware to use
+from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
+# Step 3: import the auth provider
+from auth_middleware.providers.cognito import CognitoProvider
+
+app: FastAPI = FastAPI()
+
+# Step 4: Add Middleware with a Cognito auth Provider
+app.add_middleware(JwtAuthMiddleware, auth_provider=CognitoProvider())
+
+@app.get("/",
+    dependencies=[
+        # Step 5: add the authorization dependencies you want: require_user or requiere_groups
+        # Depends(require_groups(["customer", "administrator"])),
+        Depends(require_user()),
+    ],)
+async def root(request: Request):
+    # Step 6: user information will be available in the request.state.current_user object
+    return {"message": f"Hello {request.state.current_user.name}"}
 
 ```
-poetry run pytest --cov-report term-missing --cov=web_api_template ./tests
-```
 
-This will launch tests and creates a code coverage report.
+Then set the environment variables (or your .env file)
 
-### Exclude code from coverage
-
-When you need to exclude code from the code coverage report set, in the lines or function to be excluded, the line:
+```bash
+AWS_COGNITO_USER_POOL_ID=your_cognito_user_pool_id
+AWS_COGNITO_USER_POOL_REGION=your_cognito_user_pool_region
 
 ```
-# pragma: no cover
+
+Call the method sending the id_token provided by Cognito:
+
+```bash
+curl -X GET http://localhost:8000/ -H "Authorization: Bearer MY_ID_TOKEN"
 ```
 
-See: https://coverage.readthedocs.io/en/6.4.4/excluding.html
 
+## Middleware configuration
+
+TODO
+
+## The User property
+TODO
+
+## Control authentication and authorization
+
+TODO
+
+## Authentication providers
+
+### Amazon Cognito
+
+TODO
+
+### Azure Entra ID
+
+TODO
+
+
+### Google Idp
+
+TODO
 

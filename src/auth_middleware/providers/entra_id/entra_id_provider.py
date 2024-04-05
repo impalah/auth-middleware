@@ -28,8 +28,8 @@ class EntraIDProvider(JWTAuthProvider):
 
         # TODO: Control errors
         openid_config = requests.get(
-            settings.AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
-                settings.AZURE_ENTRA_ID_TENANT_ID,
+            settings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
+                settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
             )
         ).json()
         jwks_uri = openid_config["jwks_uri"]
@@ -41,9 +41,9 @@ class EntraIDProvider(JWTAuthProvider):
                 key["x5c"] = "".join(key["x5c"])
 
         timestamp: int = (
-            time_ns() + settings.AUTH_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
+            time_ns() + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
         )
-        usage_counter: int = settings.AUTH_JWKS_CACHE_USAGES
+        usage_counter: int = settings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
         return jks
 
@@ -84,7 +84,7 @@ class EntraIDProvider(JWTAuthProvider):
                 token.jwt_token,
                 rsa_key,
                 algorithms=["RS256"],
-                audience=settings.AZURE_ENTRA_ID_AUDIENCE_ID,
+                audience=settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID,
                 options={"verify_at_hash": False},  # Disable at_hash verification
             )
             return False if payload.get("sub") is None else True
