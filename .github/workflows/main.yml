@@ -48,6 +48,18 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
 
+    - name: Update version
+      run: |
+        poetry version patch
+
+    - name: Commit and push version update
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add pyproject.toml
+        git commit -m "Update version" || echo "No changes to commit"
+        git push origin HEAD
+
     - name: Run tests
       run: |
         poetry run pytest ./tests
