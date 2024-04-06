@@ -1,9 +1,9 @@
 name: auth-middleware
 
 on:
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
   release:
     types: [created]
