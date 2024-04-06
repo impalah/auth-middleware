@@ -10,6 +10,13 @@ Using pip:
 pip install auth-middleware
 ```
 
+Using poetry
+
+```bash
+poetry auth-middleware
+```
+
+
 ## How to use it
 
 Auth Middleware follows the middleware protocol and, therefore, should be added as a middleware to your FastApi or Starlette application.
