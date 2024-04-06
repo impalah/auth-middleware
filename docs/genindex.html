@@ -43,7 +43,12 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="jwt_auth_middleware.html">jwt_auth_middleware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
         </div>
@@ -75,18 +80,65 @@
 <div class="genindex-jumpbox">
  <a href="#A"><strong>A</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#U"><strong>U</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
+    auth_middleware.exceptions
+
+      <ul>
+        <li><a href="exceptions.html#module-auth_middleware.exceptions">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.functions
+
+      <ul>
+        <li><a href="functions.html#module-auth_middleware.functions">module</a>
+</li>
+      </ul></li>
+      <li>
     auth_middleware.jwt_auth_middleware
 
       <ul>
         <li><a href="jwt_auth_middleware.html#module-auth_middleware.jwt_auth_middleware">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.jwt_auth_provider
+
+      <ul>
+        <li><a href="jwt_auth_provider.html#module-auth_middleware.jwt_auth_provider">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    auth_middleware.jwt_bearer_manager
+
+      <ul>
+        <li><a href="jwt_bearer_manager.html#module-auth_middleware.jwt_bearer_manager">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.providers.cognito.cognito_provider
+
+      <ul>
+        <li><a href="entra_id_provider.html#module-auth_middleware.providers.cognito.cognito_provider">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.types
+
+      <ul>
+        <li><a href="types.html#module-auth_middleware.types">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -100,10 +152,26 @@
   </ul></td>
 </tr></table>
 
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidTokenException">InvalidTokenException</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="types.html#auth_middleware.types.JWKS">JWKS (class in auth_middleware.types)</a>
+</li>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware">JwtAuthMiddleware (class in auth_middleware.jwt_auth_middleware)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials">JWTAuthorizationCredentials (class in auth_middleware.types)</a>
+</li>
+      <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager">JWTBearerManager (class in auth_middleware.jwt_bearer_manager)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -111,13 +179,71 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="types.html#auth_middleware.types.JWKS.model_computed_fields">model_computed_fields (auth_middleware.types.JWKS attribute)</a>
+
+      <ul>
+        <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials.model_computed_fields">(auth_middleware.types.JWTAuthorizationCredentials attribute)</a>
+</li>
+        <li><a href="types.html#auth_middleware.types.User.model_computed_fields">(auth_middleware.types.User attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="types.html#auth_middleware.types.JWKS.model_config">model_config (auth_middleware.types.JWKS attribute)</a>
+
+      <ul>
+        <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials.model_config">(auth_middleware.types.JWTAuthorizationCredentials attribute)</a>
+</li>
+        <li><a href="types.html#auth_middleware.types.User.model_config">(auth_middleware.types.User attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="types.html#auth_middleware.types.JWKS.model_fields">model_fields (auth_middleware.types.JWKS attribute)</a>
+
+      <ul>
+        <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials.model_fields">(auth_middleware.types.JWTAuthorizationCredentials attribute)</a>
+</li>
+        <li><a href="types.html#auth_middleware.types.User.model_fields">(auth_middleware.types.User attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
       <ul>
+        <li><a href="exceptions.html#module-auth_middleware.exceptions">auth_middleware.exceptions</a>
+</li>
+        <li><a href="functions.html#module-auth_middleware.functions">auth_middleware.functions</a>
+</li>
         <li><a href="jwt_auth_middleware.html#module-auth_middleware.jwt_auth_middleware">auth_middleware.jwt_auth_middleware</a>
 </li>
+        <li><a href="jwt_auth_provider.html#module-auth_middleware.jwt_auth_provider">auth_middleware.jwt_auth_provider</a>
+</li>
+        <li><a href="jwt_bearer_manager.html#module-auth_middleware.jwt_bearer_manager">auth_middleware.jwt_bearer_manager</a>
+</li>
+        <li><a href="entra_id_provider.html#module-auth_middleware.providers.cognito.cognito_provider">auth_middleware.providers.cognito.cognito_provider</a>
+</li>
+        <li><a href="types.html#module-auth_middleware.types">auth_middleware.types</a>
+</li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functions.html#auth_middleware.functions.require_groups">require_groups() (in module auth_middleware.functions)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functions.html#auth_middleware.functions.require_user">require_user() (in module auth_middleware.functions)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="types.html#auth_middleware.types.User">User (class in auth_middleware.types)</a>
+</li>
   </ul></td>
 </tr></table>
 

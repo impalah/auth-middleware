@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jwt_auth_middleware &mdash; auth-middleware 0.1.1 documentation</title>
+  <title>jwt_bearer_manager &mdash; auth-middleware 0.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,8 +21,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="jwt_auth_provider" href="jwt_auth_provider.html" />
-    <link rel="prev" title="API" href="api.html" /> 
+    <link rel="next" title="types" href="types.html" />
+    <link rel="prev" title="jwt_auth_provider" href="jwt_auth_provider.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,15 +52,12 @@
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="api.html">API</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">jwt_auth_middleware</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware"><code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user"><code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware.get_current_user()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_middleware.html">jwt_auth_middleware</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html">jwt_auth_provider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">jwt_bearer_manager</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.jwt_bearer_manager.JWTBearerManager"><code class="docutils literal notranslate"><span class="pre">JWTBearerManager</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="types.html">types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html">functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
@@ -85,9 +82,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="api.html">API</a></li>
-      <li class="breadcrumb-item active">jwt_auth_middleware</li>
+      <li class="breadcrumb-item active">jwt_bearer_manager</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/jwt_auth_middleware.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/jwt_bearer_manager.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -95,30 +92,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-auth_middleware.jwt_auth_middleware">
-<span id="jwt-auth-middleware"></span><h1>jwt_auth_middleware<a class="headerlink" href="#module-auth_middleware.jwt_auth_middleware" title="Link to this heading"></a></h1>
+  <section id="module-auth_middleware.jwt_bearer_manager">
+<span id="jwt-bearer-manager"></span><h1>jwt_bearer_manager<a class="headerlink" href="#module-auth_middleware.jwt_bearer_manager" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="auth_middleware.jwt_auth_middleware.JwtAuthMiddleware">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.jwt_auth_middleware.</span></span><span class="sig-name descname"><span class="pre">JwtAuthMiddleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JWTAuthProvider</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware" title="Link to this definition"></a></dt>
-<dd><p>JWT Authorization middleware for FastAPI
-Adds the current user to the request state.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>BaseHTTPMiddleware (_type_): _description_</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_current_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.User" title="auth_middleware.types.User"><span class="pre">User</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user" title="Link to this definition"></a></dt>
-<dd><p>Get current logged in and active user</p>
-<dl class="simple">
-<dt>Raises:</dt><dd><p>HTTPException: _description_</p>
-</dd>
-<dt>Returns:</dt><dd><p>User: Domain object.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
+<dt class="sig sig-object py" id="auth_middleware.jwt_bearer_manager.JWTBearerManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.jwt_bearer_manager.</span></span><span class="sig-name descname"><span class="pre">JWTBearerManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JWTAuthProvider</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.jwt_bearer_manager.JWTBearerManager" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </section>
 
@@ -126,8 +105,8 @@ Adds the current user to the request state.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="jwt_auth_provider.html" class="btn btn-neutral float-right" title="jwt_auth_provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="jwt_auth_provider.html" class="btn btn-neutral float-left" title="jwt_auth_provider" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="types.html" class="btn btn-neutral float-right" title="types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -3,14 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to auth-middleware's documentation!
+Welcome to Auth-Middleware's documentation!
 ===========================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   jwt_auth_middleware
+   installation
+   user-guide
+   middleware-configuration
+   user-property
+   auth-authn
+   api
+   
 
 Indices and tables
 ==================
