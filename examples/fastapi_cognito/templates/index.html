@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <title>{{ title }}</title>
+        <script>
+            window.onload = function() {
+                var fragment = location.hash.substring(1).split('&').reduce(function (initial, item) {
+                    if (item) {
+                        var parts = item.split('=');
+                        initial[parts[0]] = decodeURIComponent(parts[1]);
+                    }
+                    return initial;
+                }, {});
+
+                if (fragment.access_token) {
+                    document.getElementById('access_token').textContent = fragment.access_token;
+                }
+                if (fragment.id_token) {
+                    document.getElementById('id_token').textContent = fragment.id_token;
+                }
+
+            };
+        </script>
+    </head>
+    <body>
+        <h1>{{ message }}</h1>
+        <h2>Configuration</h2>
+        <p><b>Cognito domain:</b> {{ cognito_domain }}</p>
+        <p><b>Region:</b> {{ region }}</p>
+        <p><b>Client id:</b> {{ cognito_client_id }}</p>
+
+        <br/>
+
+        <h2>Session</h2>
+        <p><b>access_token:</b> <span id="access_token"></span><button id="copyAccess">Copy</button></p>
+        <p><b>id_token:</b> <span id="id_token"></span><button id="copyId">Copy</button></p>
+
+        <br/>
+        <h2>Actions</h2>
+        <p><a href="{{ login_url }}">Login</a></p>
+        <p><a href="{{ logout_url }}">Logout</a></p>
+
+        <script>
+            document.getElementById('copyAccess').addEventListener('click', function() {
+                var range = document.createRange();
+                range.selectNode(document.getElementById('access_token'));
+                window.getSelection().removeAllRanges(); // clear current selection
+                window.getSelection().addRange(range); // to select text
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges(); // to deselect
+            });
+            document.getElementById('copyId').addEventListener('click', function() {
+                var range = document.createRange();
+                range.selectNode(document.getElementById('id_token'));
+                window.getSelection().removeAllRanges(); // clear current selection
+                window.getSelection().addRange(range); // to select text
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges(); // to deselect
+            });
+
+        </script>        
+
+
+    
+    </body>
+</html>
