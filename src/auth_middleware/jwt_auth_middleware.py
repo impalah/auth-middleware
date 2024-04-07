@@ -68,7 +68,7 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
         try:
 
             if not self.__validate_credentials(request=request):
-                logger.debug("There are no credentiasl in the request")
+                logger.debug("There are no credentials in the request")
                 return None
 
             token: Optional[JWTAuthorizationCredentials] = (
