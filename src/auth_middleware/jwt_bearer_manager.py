@@ -54,6 +54,7 @@ class JWTBearerManager(HTTPBearer):
 
             jwt_token = credentials.credentials
 
+            # TODO: control exceptions if token is not a valid JWT (does not have a . in it)
             message, signature = jwt_token.rsplit(".", 1)
 
             try:
