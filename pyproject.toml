@@ -12,9 +12,9 @@ fastapi = "^0.105.0"
 python-dotenv = "^1.0.0"
 svix-ksuid = "^0.6.2"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
-requests = "^2.31.0"
 pydantic = {extras = ["email"], version = "^2.5.3"}
 loguru = "^0.7.2"
+httpx = "^0.27.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"
