@@ -1,22 +1,26 @@
 import os
 from typing import Optional
-from fastapi import FastAPI, Depends, status
-from fastapi.responses import JSONResponse, HTMLResponse
+
+from fastapi import Depends, FastAPI, status
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
-
-from uvicorn import run
-
 from starlette.requests import Request
 from starlette.responses import Response
+from uvicorn import run
 
 from auth_middleware.functions import require_groups, require_user
 from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
-from auth_middleware.providers.cognito import CognitoProvider
+from auth_middleware.providers.cognito import (
+    CognitoProvider,
+    get_login_url,
+    get_logout_url,
+)
 
 templates = Jinja2Templates(directory="templates")
 
 app: FastAPI = FastAPI()
 app.add_middleware(JwtAuthMiddleware, auth_provider=CognitoProvider())
+
 
 def get_stranger_message(request: Request) -> JSONResponse:
     """Get a message for a stranger (auth disabled)
@@ -33,34 +37,41 @@ def get_stranger_message(request: Request) -> JSONResponse:
     )
 
 
-
-@app.get(
-    "/",
-    response_class=HTMLResponse
-)
+@app.get("/", response_class=HTMLResponse)
 async def index(
-    request: Request,
-    access_token: Optional[str] = None,
-    id_token: Optional[str] = None
+    request: Request, access_token: Optional[str] = None, id_token: Optional[str] = None
 ) -> HTMLResponse:
-    
+
     # Get variables from environment
     cognito_domain: str = os.getenv("COGNITO_DOMAIN")
     cognito_client_id: str = os.getenv("COGNITO_CLIENT_ID")
     region: str = os.getenv("AWS_REGION")
-    
-    
-    login_url: str = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?client_id={cognito_client_id}&response_type=token&scope=email+openid+phone+profile&redirect_uri=http%3A%2F%2Flocalhost%3A8000"
-    logout_url : str = f"https://{cognito_domain}.auth.{region}.amazoncognito.com/logout?client_id={cognito_client_id}&response_type=token&redirect_uri=http%3A%2F%2Flocalhost%3A8000"    
-    print (logout_url)
+
+    login_url: str = (
+        f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?client_id={cognito_client_id}&response_type=token&scope=email+openid+phone+profile&redirect_uri=http%3A%2F%2Flocalhost%3A8000"
+    )
+    logout_url: str = (
+        f"https://{cognito_domain}.auth.{region}.amazoncognito.com/logout?client_id={cognito_client_id}&response_type=token&redirect_uri=http%3A%2F%2Flocalhost%3A8000"
+    )
+
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "title": "Testing FastAPI with Cognito",
             "message": "Testing FastAPI with Cognito",
-            "login_url": login_url,
-            "logout_url": logout_url,
+            "login_url": get_login_url(
+                cognito_domain,
+                cognito_client_id,
+                region,
+                "http://localhost:8000",
+            ),
+            "logout_url": get_logout_url(
+                cognito_domain,
+                cognito_client_id,
+                region,
+                "http://localhost:8000",
+            ),
             "cognito_domain": cognito_domain,
             "region": region,
             "cognito_client_id": cognito_client_id,
@@ -84,11 +95,12 @@ async def root(request: Request) -> JSONResponse:
     Returns:
         JSONResponse: just a message
     """
-    
+
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": "Everything is fine"},
     )
+
 
 @app.get(
     "/hello/user",
@@ -100,24 +112,25 @@ async def root(request: Request) -> JSONResponse:
 )
 async def root(request: Request) -> JSONResponse:
     """A simple call with user authorization required
-    
+
     Args:
         request (Request): FastAPI request object
-        
+
     Returns:
         JSONResponse: a message
     """
 
     if request.state.current_user is None:
         return get_stranger_message(request)
-    
+
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": f"Hello {request.state.current_user.name}"},
     )
 
 
-@app.get("/hello/admin",
+@app.get(
+    "/hello/admin",
     dependencies=[
         Depends(require_groups(["administrator"])),
     ],
@@ -126,10 +139,10 @@ async def root(request: Request) -> JSONResponse:
 )
 async def root(request: Request) -> JSONResponse:
     """A simple call with admin authorization required
-    
+
     Args:
         request (Request): FastAPI request object
-        
+
     Returns:
         JSONResponse: a message
     """
@@ -143,7 +156,8 @@ async def root(request: Request) -> JSONResponse:
     )
 
 
-@app.get("/hello/customer",
+@app.get(
+    "/hello/customer",
     dependencies=[
         Depends(require_groups(["customer"])),
     ],
@@ -155,7 +169,7 @@ async def root(request: Request) -> JSONResponse:
 
     Args:
         request (Request): FastAPI request object
-        
+
     Returns:
         JSONResponse: a message
     """
@@ -170,6 +184,6 @@ async def root(request: Request) -> JSONResponse:
 
 
 if __name__ == "__main__":
-    
+
     # Be careful!!! This call does not read the .env file
     run(app, host="0.0.0.0", port=8000)

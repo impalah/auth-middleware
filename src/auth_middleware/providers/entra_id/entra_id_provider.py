@@ -41,7 +41,8 @@ class EntraIDProvider(JWTAuthProvider):
                 key["x5c"] = "".join(key["x5c"])
 
         timestamp: int = (
-            time_ns() + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
+            time_ns()
+            + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
         )
         usage_counter: int = settings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
@@ -89,10 +90,10 @@ class EntraIDProvider(JWTAuthProvider):
             )
             return False if payload.get("sub") is None else True
         except JWTError as je:
-            logger.error("Error in EntraIDClient: %s", str(je))
+            logger.error("Error in EntraIDClient: {}", str(je))
             return False
         except Exception as e:
-            logger.error("Error in JWTBearerManager: %s", str(e))
+            logger.error("Error in JWTBearerManager: {}", str(e))
             raise AzureException("Error in JWTBearerManager")
 
     def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
