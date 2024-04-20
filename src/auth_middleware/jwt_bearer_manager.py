@@ -34,10 +34,10 @@ class JWTBearerManager(HTTPBearer):
                 await super().__call__(request)
             )
         except HTTPException as e:
-            logger.error("Error in JWTBearerManager: %s", str(e))
+            logger.error("Error in JWTBearerManager: {}", str(e))
             raise e
         except Exception as e:
-            logger.error("Error in JWTBearerManager: %s", str(e))
+            logger.error("Error in JWTBearerManager: {}", str(e))
             raise InvalidTokenException(
                 status_code=HTTP_403_FORBIDDEN,
                 detail="JWK-invalid",

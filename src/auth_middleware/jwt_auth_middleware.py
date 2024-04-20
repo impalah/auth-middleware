@@ -36,14 +36,14 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
         try:
             request.state.current_user = await self.get_current_user(request=request)
         except InvalidTokenException as ite:
-            logger.error("Invalid Token %s", str(ite))
+            logger.error("Invalid Token {}", str(ite))
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"detail": "Invalid token"},
                 headers={"WWW-Authenticate": "Bearer"},
             )
         except Exception as e:
-            logger.error("Error in AuthMiddleware: %s", str(e))
+            logger.error("Error in AuthMiddleware: {}", str(e))
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"detail": f"Server error: {str(e)}"},
@@ -81,13 +81,13 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
                 if token
                 else self.__create_synthetic_user()
             )
-            logger.debug("Returning %s", user)
+            logger.debug("Returning {}", user)
             return user
         except InvalidTokenException as ite:
-            logger.error("Invalid Token %s", str(ite))
+            logger.error("Invalid Token {}", str(ite))
             raise
         except Exception as e:
-            logger.error("Not controlled exception %s", str(e))
+            logger.error("Not controlled exception {}", str(e))
             raise
 
     def __validate_credentials(self, request: Request) -> bool:

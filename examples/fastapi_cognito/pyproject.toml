@@ -10,9 +10,10 @@ packages = [{include = "demo", from = "src"}]
 python = "^3.12"
 uvicorn = "^0.29.0"
 fastapi = "^0.105.0"
-auth-middleware = { path = "../.." }
 python-dotenv = "^1.0.1"
 jinja2 = "^3.1.3"
+loguru = "^0.7.2"
+auth-middleware = {path = "/Users/linus/projects/press-any-key/auth-middleware"}
 
 
 [tool.poetry.group.dev.dependencies]
