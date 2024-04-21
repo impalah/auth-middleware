@@ -78,6 +78,21 @@ class CognitoProvider(JWTAuthProvider):
 
         return False
 
+    def __get_groups_from_claims(self, claims: dict) -> List[str]:
+        """Extracts groups from claims.
+
+        Args:
+            claims (dict): JWT claims.
+
+        Returns:
+            List[str]: List of groups.
+        """
+        return (
+            claims["cognito:groups"]
+            if "cognito:groups" in claims
+            else [str(scope).split("/")[-1] for scope in claims["scope"]]
+        )
+
     def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
         """Initializes a domain User object with data recovered from a JWT TOKEN.
         Args:
@@ -92,6 +107,12 @@ class CognitoProvider(JWTAuthProvider):
             "username" if "username" in token.claims else "cognito:username"
         )
 
+        groups: List[str] = (
+            self.__get_groups_from_claims(token.claims)
+            if "cognito:groups" in token.claims or "scope" in token.claims
+            else []
+        )
+
         return User(
             id=token.claims["sub"],
             name=(
@@ -99,10 +120,6 @@ class CognitoProvider(JWTAuthProvider):
                 if name_property in token.claims
                 else token.claims["sub"]
             ),
-            groups=(
-                token.claims["cognito:groups"]
-                if "cognito:groups" in token.claims
-                else [str(token.claims["scope"]).split("/")[-1]]
-            ),
+            groups=groups,
             email=token.claims["email"] if "email" in token.claims else None,
         )
