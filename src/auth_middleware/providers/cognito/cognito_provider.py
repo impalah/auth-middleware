@@ -1,7 +1,7 @@
 from time import time, time_ns
 from typing import List
 
-import requests
+import httpx
 from jose import jwk
 from jose.utils import base64url_decode
 
@@ -19,7 +19,24 @@ class CognitoProvider(JWTAuthProvider):
             cls.instance = super(CognitoProvider, cls).__new__(cls)
         return cls.instance
 
-    def load_jwks(
+    async def get_keys(self) -> List[JWK]:
+        """Get keys from AWS Cognito
+
+        Returns:
+            List[JWK]: a list of JWK keys
+        """
+        # TODO: Control errors
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                settings.AUTH_PROVIDER_AWS_COGNITO_JWKS_URL_TEMPLATE.format(
+                    settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_REGION,
+                    settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID,
+                )
+            )
+            keys: List[JWK] = response.json()["keys"]
+        return keys
+
+    async def load_jwks(
         self,
     ) -> JWKS:
         """Load JWKS credentials from remote Identity Provider
@@ -29,23 +46,21 @@ class CognitoProvider(JWTAuthProvider):
         """
 
         # TODO: Control errors
-        keys: List[JWK] = requests.get(
-            settings.AUTH_PROVIDER_AWS_COGNITO_JWKS_URL_TEMPLATE.format(
-                settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_REGION,
-                settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID,
-            )
-        ).json()["keys"]
+        keys: List[JWK] = await self.get_keys()
+
         timestamp: int = (
-            time_ns() + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
+            time_ns()
+            + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
         )
+
         usage_counter: int = settings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
 
         return jks
 
-    def verify_token(self, token: JWTAuthorizationCredentials) -> bool:
+    async def verify_token(self, token: JWTAuthorizationCredentials) -> bool:
 
-        hmac_key_candidate = self._get_hmac_key(token)
+        hmac_key_candidate = await self._get_hmac_key(token)
 
         if not hmac_key_candidate:
             logger.error(
@@ -63,6 +78,21 @@ class CognitoProvider(JWTAuthProvider):
 
         return False
 
+    def __get_groups_from_claims(self, claims: dict) -> List[str]:
+        """Extracts groups from claims.
+
+        Args:
+            claims (dict): JWT claims.
+
+        Returns:
+            List[str]: List of groups.
+        """
+        return (
+            claims["cognito:groups"]
+            if "cognito:groups" in claims
+            else [str(scope).split("/")[-1] for scope in claims["scope"]]
+        )
+
     def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
         """Initializes a domain User object with data recovered from a JWT TOKEN.
         Args:
@@ -77,6 +107,12 @@ class CognitoProvider(JWTAuthProvider):
             "username" if "username" in token.claims else "cognito:username"
         )
 
+        groups: List[str] = (
+            self.__get_groups_from_claims(token.claims)
+            if "cognito:groups" in token.claims or "scope" in token.claims
+            else []
+        )
+
         return User(
             id=token.claims["sub"],
             name=(
@@ -84,10 +120,6 @@ class CognitoProvider(JWTAuthProvider):
                 if name_property in token.claims
                 else token.claims["sub"]
             ),
-            groups=(
-                token.claims["cognito:groups"]
-                if "cognito:groups" in token.claims
-                else [str(token.claims["scope"]).split("/")[-1]]
-            ),
+            groups=groups,
             email=token.claims["email"] if "email" in token.claims else None,
         )

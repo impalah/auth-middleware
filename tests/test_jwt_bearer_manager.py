@@ -1,6 +1,6 @@
 import time
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -31,7 +31,7 @@ async def test_get_credentials_disabled_middleware():
 @pytest.mark.asyncio
 async def test_get_credentials_valid_token():
 
-    mock_auth_provider = MagicMock()
+    mock_auth_provider = AsyncMock()
     mock_auth_provider.verify_token.return_value = True
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
 
@@ -83,7 +83,7 @@ async def test_get_credentials_valid_token():
 @pytest.mark.asyncio
 async def test_get_credentials_invalid_token():
 
-    mock_auth_provider = MagicMock()
+    mock_auth_provider = AsyncMock()
     mock_auth_provider.verify_token.return_value = False
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
 

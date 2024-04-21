@@ -1,6 +1,7 @@
 from time import time, time_ns
+from typing import Any, Dict, List
 
-import requests
+import httpx
 from jose import JWTError, jwt
 
 from auth_middleware.jwt_auth_provider import JWTAuthProvider
@@ -17,7 +18,37 @@ class EntraIDProvider(JWTAuthProvider):
             cls.instance = super(EntraIDProvider, cls).__new__(cls)
         return cls.instance
 
-    def load_jwks(
+    # TODO: implement correct types
+    async def get_keys(self, jwks_uri: str) -> Any:
+        """Get keys
+
+        Returns:
+            TODO: List[JWK]: a list of JWK
+        """
+        # TODO: Control errors
+        async with httpx.AsyncClient() as client:
+            response = await client.get(jwks_uri)
+            response: Dict[str, str] = response.json()
+        return response
+
+    async def get_openid_config(self) -> Dict[str, str]:
+        """Get openid config from entradid
+
+        Returns:
+            List[JWK]: a list of JWK
+        """
+        # TODO: Control errors
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                settings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
+                    settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
+                )
+            )
+            # TODO: can cause errors
+            response: Dict[str, str] = response.json()["keys"]
+        return response
+
+    async def load_jwks(
         self,
     ) -> JWKS:
         """Load JWKS credentials from remote Identity Provider
@@ -27,13 +58,12 @@ class EntraIDProvider(JWTAuthProvider):
         """
 
         # TODO: Control errors
-        openid_config = requests.get(
-            settings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
-                settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
-            )
-        ).json()
+
+        openid_config = await self.get_openid_config()
+
         jwks_uri = openid_config["jwks_uri"]
-        keys = requests.get(jwks_uri).json()["keys"]
+
+        keys = await self.get_keys(jwks_uri)
 
         # Convert 'x5c' field in each key from list to string
         for key in keys:
@@ -48,7 +78,7 @@ class EntraIDProvider(JWTAuthProvider):
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
         return jks
 
-    def verify_token(self, token: JWTAuthorizationCredentials) -> bool:
+    async def verify_token(self, token: JWTAuthorizationCredentials) -> bool:
         """Verifiy token signature
 
         Args:
@@ -61,7 +91,7 @@ class EntraIDProvider(JWTAuthProvider):
             bool: _description_
         """
 
-        hmac_key_candidate = self._get_hmac_key(token)
+        hmac_key_candidate = await self._get_hmac_key(token)
 
         if not hmac_key_candidate:
             logger.error(

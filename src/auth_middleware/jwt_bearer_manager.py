@@ -72,7 +72,7 @@ class JWTBearerManager(HTTPBearer):
                     detail="JWK-invalid",
                 )
 
-            if not self.auth_provider.verify_token(jwt_credentials):
+            if not await self.auth_provider.verify_token(jwt_credentials):
                 logger.error("Error in JWTBearerManager: token not verified")
                 raise InvalidTokenException(
                     status_code=HTTP_403_FORBIDDEN,

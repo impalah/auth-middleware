@@ -10,7 +10,7 @@ from auth_middleware.types import JWK, JWKS, JWTAuthorizationCredentials, User
 
 class JWTAuthProvider(metaclass=ABCMeta):
 
-    def _get_jwks(self) -> JWKS | None:
+    async def _get_jwks(self) -> JWKS | None:
         """
         Returns a structure that caches the public keys used by the auth provider to sign its JWT tokens.
         Cache is refreshed after a settable time or number of reads (usages)
@@ -31,7 +31,7 @@ class JWTAuthProvider(metaclass=ABCMeta):
 
         try:
             if reload_cache:
-                self.jks: JWKS = self.load_jwks()
+                self.jks: JWKS = await self.load_jwks()
             else:
                 if self.jks.usage_counter is not None:
                     self.jks.usage_counter -= 1
@@ -41,8 +41,8 @@ class JWTAuthProvider(metaclass=ABCMeta):
 
         return self.jks
 
-    def _get_hmac_key(self, token: JWTAuthorizationCredentials) -> Optional[JWK]:
-        jwks: Optional[JWKS] = self._get_jwks()
+    async def _get_hmac_key(self, token: JWTAuthorizationCredentials) -> Optional[JWK]:
+        jwks: Optional[JWKS] = await self._get_jwks()
         if jwks is not None and jwks.keys is not None:
             for key in jwks.keys:
                 if key["kid"] == token.header["kid"]:
@@ -50,7 +50,7 @@ class JWTAuthProvider(metaclass=ABCMeta):
         return None
 
     @abstractmethod
-    def load_jwks(
+    async def load_jwks(
         self,
     ) -> JWKS: ...
 
