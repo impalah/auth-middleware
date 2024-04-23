@@ -4,5 +4,7 @@
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "debugpy.debugJustMyCode": false,
+  "jupyter.debugJustMyCode": false
 }

@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${file}",
       "console": "integratedTerminal",
-      "justMyCode": true
+      "justMyCode": false
     },
     {
       "name": "Pytest - Auth Middleware",
@@ -18,7 +18,8 @@
       "request": "launch",
       "module": "pytest",
       "cwd": "${workspaceRoot}/",
-      "args": ["tests"]
+      "args": ["tests"],
+      "justMyCode": false
     },
     {
       "name": "MyPy - Auth Middleware",
