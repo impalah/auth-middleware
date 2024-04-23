@@ -1,9 +1,12 @@
 import asyncio
+import hashlib
+import time
+import uuid
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
-from jose import jwk
+from jose import jwk, jwt
 from jose.utils import base64url_decode
 
 from auth_middleware.providers.cognito.cognito_provider import CognitoProvider
@@ -46,78 +49,206 @@ async def test_load_jwks(mocker, cognito_provider):
     assert jwks.keys == mock_keys
 
 
-# @pytest.mark.asyncio
-# async def test_verify_token_valid(cognito_provider):
-#     # Mock the _get_hmac_key method
-#     mock_hmac_key = Mock()
-#     cognito_provider._get_hmac_key = Mock(return_value=mock_hmac_key)
+@patch(
+    "auth_middleware.providers.cognito.cognito_provider.httpx.AsyncClient.get",
+    return_value=httpx.Response(
+        200,
+        json={
+            "keys": [
+                {
+                    "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+                    "alg": "RS256",
+                    "kty": "RSA",
+                },
+                {
+                    "kid": "key2",
+                    "alg": "RS256",
+                    "kty": "RSA",
+                },
+            ]
+        },
+    ),
+)
+@pytest.mark.asyncio
+async def test_verify_token_valid(mocker, cognito_provider):
 
-#     # Mock the jwk.construct method
-#     mock_jwk_construct = Mock()
-#     jwk.construct = mock_jwk_construct
+    # Mock the jwk.construct method
+    mock_jwk_construct = Mock()
 
-#     # Mock the base64url_decode method
-#     mock_base64url_decode = Mock()
-#     base64url_decode = mock_base64url_decode
+    with patch("jose.jwk.construct", mock_jwk_construct):
 
-#     # Mock the time method
-#     mock_time = Mock()
-#     cognito_provider.time = mock_time
+        # Mock the _get_hmac_key method
+        mock_hmac_key = AsyncMock()
+        cognito_provider._get_hmac_key = mock_hmac_key
+        mock_hmac_key.return_value = {
+            "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+            "alg": "RS256",
+            "kty": "RSA",
+        }
 
-#     # Create a valid token
-#     token = JWTAuthorizationCredentials(
-#         signature="valid_signature", message="valid_message", claims={"exp": 1234567890}
-#     )
+        # Mock the base64url_decode method
+        mock_base64url_decode = Mock(return_value="valid_signature")
+        base64url_decode = mock_base64url_decode
 
-#     # Mock the verify method of the hmac_key
-#     mock_hmac_key.verify.return_value = True
+        # TODO: send to utilities file
+        token = JWTAuthorizationCredentials(
+            jwt_token="my_token",
+            header={
+                "alg": "RS256",
+                "typ": "JWT",
+                "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+            },
+            signature="valid_signature",
+            message="valid_message",
+            claims={
+                "sub": "1234567890",
+                "username": "test_user",
+                "cognito:groups": ["group1", "group2"],
+                "email": "test@example.com",
+                "exp": time.time() + 3600,
+            },
+        )
 
-#     result = await cognito_provider.verify_token(token)
+        # Mock the verify method of the hmac_key
+        mock_hmac_key.verify.return_value = True
 
-#     assert result is True
-#     mock_hmac_key.verify.assert_called_once_with(
-#         token.message.encode(), mock_base64url_decode.return_value
-#     )
-#     mock_time.assert_called_once()
-#     mock_jwk_construct.assert_called_once_with(mock_hmac_key)
+        result = await cognito_provider.verify_token(token)
+
+    assert result is True
 
 
-# @pytest.mark.asyncio
-# async def test_verify_token_invalid(cognito_provider):
-#     # Mock the _get_hmac_key method
-#     mock_hmac_key = Mock()
-#     cognito_provider._get_hmac_key = Mock(return_value=mock_hmac_key)
+@patch(
+    "auth_middleware.providers.cognito.cognito_provider.httpx.AsyncClient.get",
+    return_value=httpx.Response(
+        200,
+        json={
+            "keys": [
+                {
+                    "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+                    "alg": "RS256",
+                    "kty": "RSA",
+                },
+                {
+                    "kid": "key2",
+                    "alg": "RS256",
+                    "kty": "RSA",
+                },
+            ]
+        },
+    ),
+)
+@pytest.mark.asyncio
+async def test_verify_token_invalid(mocker, cognito_provider):
 
-#     # Mock the jwk.construct method
-#     mock_jwk_construct = Mock()
-#     jwk.construct = mock_jwk_construct
+    # Mock the jwk.construct method
+    mock_jwk_construct = Mock()
 
-#     # Mock the base64url_decode method
-#     mock_base64url_decode = Mock()
-#     base64url_decode = mock_base64url_decode
+    with patch("jose.jwk.construct", mock_jwk_construct):
 
-#     # Mock the time method
-#     mock_time = Mock()
-#     cognito_provider.time = mock_time
+        # Mock the _get_hmac_key method
+        mock_hmac_key = AsyncMock()
+        cognito_provider._get_hmac_key = mock_hmac_key
+        mock_hmac_key.return_value = {
+            "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+            "alg": "RS256",
+            "kty": "RSA",
+        }
 
-#     # Create an invalid token
-#     token = JWTAuthorizationCredentials(
-#         signature="invalid_signature",
-#         message="invalid_message",
-#         claims={"exp": 1234567890},
-#     )
+        # Mock the base64url_decode method
+        mock_base64url_decode = Mock()
+        base64url_decode = mock_base64url_decode
 
-#     # Mock the verify method of the hmac_key
-#     mock_hmac_key.verify.return_value = False
+        # TODO: send to utilities file
+        token = JWTAuthorizationCredentials(
+            jwt_token="my_token",
+            header={
+                "alg": "RS256",
+                "typ": "JWT",
+                "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+            },
+            signature="valid_signature",
+            message="valid_message",
+            claims={
+                "sub": "1234567890",
+                "username": "test_user",
+                "cognito:groups": ["group1", "group2"],
+                "email": "test@example.com",
+                "exp": time.time() - 3600,
+            },
+        )
 
-#     result = await cognito_provider.verify_token(token)
+        # Mock the verify method of the hmac_key
+        mock_hmac_key.verify.return_value = True
 
-#     assert result is False
-#     mock_hmac_key.verify.assert_called_once_with(
-#         token.message.encode(), mock_base64url_decode.return_value
-#     )
-#     mock_time.assert_not_called()
-#     mock_jwk_construct.assert_called_once_with(mock_hmac_key)
+        result = await cognito_provider.verify_token(token)
+
+    assert result is False
+
+
+@patch(
+    "auth_middleware.providers.cognito.cognito_provider.httpx.AsyncClient.get",
+    return_value=httpx.Response(
+        200,
+        json={
+            "keys": [
+                {
+                    "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+                    "alg": "RS256",
+                    "kty": "RSA",
+                },
+                {
+                    "kid": "key2",
+                    "alg": "RS256",
+                    "kty": "RSA",
+                },
+            ]
+        },
+    ),
+)
+@pytest.mark.asyncio
+async def test_verify_token_no_hmac_key_candidate(mocker, cognito_provider):
+
+    # Mock the jwk.construct method
+    mock_jwk_construct = Mock()
+
+    with patch("jose.jwk.construct", mock_jwk_construct):
+
+        # Mock the _get_hmac_key method
+        mock_hmac_key = AsyncMock()
+        cognito_provider._get_hmac_key = mock_hmac_key
+        mock_hmac_key.return_value = None
+
+        # Mock the base64url_decode method
+        mock_base64url_decode = Mock(return_value="valid_signature")
+        base64url_decode = mock_base64url_decode
+
+        # TODO: send to utilities file
+        token = JWTAuthorizationCredentials(
+            jwt_token="my_token",
+            header={
+                "alg": "RS256",
+                "typ": "JWT",
+                "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+            },
+            signature="valid_signature",
+            message="valid_message",
+            claims={
+                "sub": "1234567890",
+                "username": "test_user",
+                "cognito:groups": ["group1", "group2"],
+                "email": "test@example.com",
+                "exp": time.time() + 3600,
+            },
+        )
+
+        # Mock the verify method of the hmac_key
+        mock_hmac_key.verify.return_value = True
+
+        with pytest.raises(AWSException) as exc_info:
+            result = await cognito_provider.verify_token(token)
+
+        # Assert that the exception has the correct status code and detail
+        assert str(exc_info.value) == "No public key found!"
 
 
 def test_create_user_from_token(cognito_provider):

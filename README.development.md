@@ -74,7 +74,7 @@ You can set breakpoints and inspections
 ### Launch tests from command line
 
 ```
-poetry run pytest --cov-report term-missing --cov=web_api_template ./tests
+poetry run pytest --cov-report term-missing --cov=auth_middleware ./tests
 ```
 
 This will launch tests and creates a code coverage report.
