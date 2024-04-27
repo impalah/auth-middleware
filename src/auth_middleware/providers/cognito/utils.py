@@ -1,10 +1,4 @@
-from typing import List
 from urllib.parse import quote
-
-from fastapi import HTTPException, Request
-
-from auth_middleware.group_checker import GroupChecker
-from auth_middleware.settings import settings
 
 
 def get_login_url(
