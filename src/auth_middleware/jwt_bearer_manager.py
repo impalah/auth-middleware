@@ -65,6 +65,7 @@ class JWTBearerManager(HTTPBearer):
                     signature=signature,
                     message=message,
                 )
+
             except JWTError:
                 logger.error("Error in JWTBearerManager: JWTError")
                 raise InvalidTokenException(

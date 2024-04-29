@@ -28,7 +28,7 @@ class EntraIDProvider(JWTAuthProvider):
         # TODO: Control errors
         async with httpx.AsyncClient() as client:
             response = await client.get(jwks_uri)
-            response: Dict[str, str] = response.json()
+            response: Dict[str, str] = response.json()["keys"]
         return response
 
     async def get_openid_config(self) -> Dict[str, str]:
@@ -39,13 +39,15 @@ class EntraIDProvider(JWTAuthProvider):
         """
         # TODO: Control errors
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                settings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
-                    settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
+            try:
+                response = await client.get(
+                    settings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
+                        settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
+                    )
                 )
-            )
-            # TODO: can cause errors
-            response: Dict[str, str] = response.json()["keys"]
+                response: Dict[str, str] = response.json()
+            except Exception as e:
+                logger.error("Error in get_openid_config: {}", str(e))
         return response
 
     async def load_jwks(

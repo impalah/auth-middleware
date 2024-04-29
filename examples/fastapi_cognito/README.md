@@ -50,7 +50,7 @@ cognito_user_pool_id = "eu-west-1_TSIhhXWBR"
 
 ### Get private client secrets
 
-Client secrets are protected variables and special command should be used.
+Client secrets are protected variables, and special command should be used.
 
 ```bash
 terraform output -json aws_cognito_user_pool-api_client_secrets

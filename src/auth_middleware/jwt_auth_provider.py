@@ -5,6 +5,7 @@ from typing import Optional
 from jose import jwk
 from jose.utils import base64url_decode
 
+from auth_middleware.logging import logger
 from auth_middleware.types import JWK, JWKS, JWTAuthorizationCredentials, User
 
 
@@ -32,6 +33,7 @@ class JWTAuthProvider(metaclass=ABCMeta):
         try:
             if reload_cache:
                 self.jks: JWKS = await self.load_jwks()
+                logger.debug("JWKS loaded")
             else:
                 if self.jks.usage_counter is not None:
                     self.jks.usage_counter -= 1
