@@ -58,6 +58,7 @@
 <li class="toctree-l2"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
 <li class="toctree-l2"><a class="reference internal" href="types.html">types</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.get_current_user"><code class="docutils literal notranslate"><span class="pre">get_current_user()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.require_groups"><code class="docutils literal notranslate"><span class="pre">require_groups()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.require_user"><code class="docutils literal notranslate"><span class="pre">require_user()</span></code></a></li>
 </ul>
@@ -96,6 +97,12 @@
              
   <section id="module-auth_middleware.functions">
 <span id="functions"></span><h1>functions<a class="headerlink" href="#module-auth_middleware.functions" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="auth_middleware.functions.get_current_user">
+<span class="sig-prename descclassname"><span class="pre">auth_middleware.functions.</span></span><span class="sig-name descname"><span class="pre">get_current_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.functions.get_current_user" title="Link to this definition"></a></dt>
+<dd><p>Returns the current user object if it exists</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="auth_middleware.functions.require_groups">
 <span class="sig-prename descclassname"><span class="pre">auth_middleware.functions.</span></span><span class="sig-name descname"><span class="pre">require_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.functions.require_groups" title="Link to this definition"></a></dt>
