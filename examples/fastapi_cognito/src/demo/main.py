@@ -8,8 +8,13 @@ from starlette.requests import Request
 from starlette.responses import Response
 from uvicorn import run
 
-from auth_middleware.functions import require_groups, require_user
-from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
+from auth_middleware import (
+    JwtAuthMiddleware,
+    User,
+    get_current_user,
+    require_groups,
+    require_user,
+)
 from auth_middleware.providers.cognito import (
     CognitoProvider,
     get_login_url,
@@ -46,13 +51,6 @@ async def index(
     cognito_domain: str = os.getenv("COGNITO_DOMAIN")
     cognito_client_id: str = os.getenv("COGNITO_CLIENT_ID")
     region: str = os.getenv("AWS_REGION")
-
-    login_url: str = (
-        f"https://{cognito_domain}.auth.{region}.amazoncognito.com/login?client_id={cognito_client_id}&response_type=token&scope=email+openid+phone+profile&redirect_uri=http%3A%2F%2Flocalhost%3A8000"
-    )
-    logout_url: str = (
-        f"https://{cognito_domain}.auth.{region}.amazoncognito.com/logout?client_id={cognito_client_id}&response_type=token&redirect_uri=http%3A%2F%2Flocalhost%3A8000"
-    )
 
     return templates.TemplateResponse(
         "index.html",
@@ -110,7 +108,9 @@ async def root(request: Request) -> JSONResponse:
     response_class=JSONResponse,
     status_code=status.HTTP_200_OK,
 )
-async def root(request: Request) -> JSONResponse:
+async def root(
+    request: Request, current_user: User = Depends(get_current_user())
+) -> JSONResponse:
     """A simple call with user authorization required
 
     Args:
@@ -120,12 +120,12 @@ async def root(request: Request) -> JSONResponse:
         JSONResponse: a message
     """
 
-    if request.state.current_user is None:
+    if current_user is None:
         return get_stranger_message(request)
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"message": f"Hello {request.state.current_user.name}"},
+        content={"message": f"Hello dear {current_user.name}"},
     )
 
 
