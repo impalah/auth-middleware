@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import HTTPException, Request
 
-from auth_middleware.functions import require_groups, require_user
+from auth_middleware.functions import get_current_user, require_groups, require_user
 from auth_middleware.types import User
 
 
@@ -98,3 +98,37 @@ def test_require_user_ok():
         result = user_checker(request)
 
         assert result is None
+
+
+def test_get_current_user_not_logged_in():
+    # Create a request object
+    scope = {"type": "http"}
+    request = Request(scope=scope)
+
+    # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
+    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+        get_user = get_current_user()
+        result = get_user(request)
+
+        assert result is None
+
+
+def test_get_current_user_user_ok():
+    # Create a request object
+    scope = {"type": "http"}
+    request = Request(scope=scope)
+
+    request.state.current_user = User(
+        id="user_id",
+        name="John Doe",
+        groups=["admin"],
+        email="mail@mail.com",
+    )
+
+    # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
+    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+        get_user = get_current_user()
+        result = get_user(request)
+
+        assert result is not None
+        assert result.id == "user_id"

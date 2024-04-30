@@ -101,8 +101,6 @@ class EntraIDProvider(JWTAuthProvider):
             )
             raise AzureException("No public key found!")
 
-        # hmac_key = jwk.construct(hmac_key_candidate)
-
         try:
             rsa_key = {
                 "kty": hmac_key_candidate["kty"],

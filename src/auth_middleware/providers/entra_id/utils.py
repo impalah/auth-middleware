@@ -46,6 +46,6 @@ def get_logout_url(
         str: logout URL
     """
 
-    encoded_uri = quote(redirect_uri, safe="")
+    # encoded_uri = quote(redirect_uri, safe="")
     return ""
     # return f"https://{domain}.auth.{region}.amazoncognito.com/logout?client_id={client_id}&response_type=token&redirect_uri={encoded_uri}"

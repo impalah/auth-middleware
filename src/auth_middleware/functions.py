@@ -40,3 +40,17 @@ def require_user():
             raise HTTPException(status_code=401, detail="Authentication required")
 
     return _user_checker
+
+
+def get_current_user():
+    """Returns the current user object if it exists"""
+
+    def _get_user(request: Request):
+
+        return (
+            request.state.current_user
+            if hasattr(request.state, "current_user")
+            else None
+        )
+
+    return _get_user
