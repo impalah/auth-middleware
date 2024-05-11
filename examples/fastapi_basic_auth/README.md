@@ -22,6 +22,17 @@ AUTH_MIDDLEWARE_DISABLED=false
 
 ```
 
+### Generate a hashed password
+
+```python
+
+import hashlib
+
+password = 'demopass'
+hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+```
+
 ### Launch server
 
 From the root folder launch the command:

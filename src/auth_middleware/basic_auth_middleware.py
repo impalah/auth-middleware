@@ -1,4 +1,5 @@
 import base64
+import hashlib
 from typing import List, Optional, Tuple
 
 from fastapi import Request, status
@@ -6,12 +7,18 @@ from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
 
-from auth_middleware.exceptions import InvalidTokenException
+from auth_middleware.auth_provider import AuthProvider
+from auth_middleware.exceptions import (
+    InvalidAuthorizationException,
+    InvalidCredentialsException,
+    InvalidTokenException,
+)
 from auth_middleware.jwt_auth_provider import JWTAuthProvider
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
+from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.settings import settings
-from auth_middleware.types import JWTAuthorizationCredentials, User
+from auth_middleware.types import JWTAuthorizationCredentials, User, UserCredentials
 
 
 class BasicAuthMiddleware(BaseHTTPMiddleware):
@@ -22,23 +29,23 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         BaseHTTPMiddleware (_type_): _description_
     """
 
-    _auth_provider: JWTAuthProvider
+    _credentials_repository: CredentialsRepository
 
-    def __init__(self, auth_provider: JWTAuthProvider, *args, **kwargs):
+    def __init__(self, credentials_repository: CredentialsRepository, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._auth_provider = auth_provider
+        self._credentials_repository = credentials_repository
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response | JSONResponse:
         try:
             request.state.current_user = await self.get_current_user(request=request)
-        except InvalidTokenException as ite:
-            logger.error("Invalid Token {}", str(ite))
+        except InvalidAuthorizationException as ite:
+            logger.error("Invalid authorization {}", str(ite))
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"detail": "Invalid token"},
-                headers={"WWW-Authenticate": "Bearer"},
+                content={"detail": "Invalid authorization header"},
+                headers={"WWW-Authenticate": "Basic realm=Restricted Access"},
             )
         except Exception as e:
             logger.error("Error in AuthMiddleware: {}", str(e))
@@ -74,19 +81,20 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             credentials = get_authorization_scheme_param(authorization)
         except Exception as e:
             logger.error("Error in get_credentials: {}", str(e))
-            raise InvalidTokenException(
+            raise InvalidAuthorizationException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid authorization header",
             )
 
         if not credentials:
+            logger.error("Error in get_credentials: No credentials in the request")
             return None
 
         # Check scheme
         # TODO: use a constant for the string "basic"
         if not credentials[0] or credentials[0].lower() != "basic":
             logger.error("Error in get_credentials: Wrong authentication method")
-            raise InvalidTokenException(
+            raise InvalidAuthorizationException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Wrong authentication method",
             )
@@ -99,7 +107,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
 
         except Exception as e:
             logger.error("Error in JWTBearerManager: {}", str(e))
-            raise InvalidTokenException(
+            raise InvalidCredentialsException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid authentication credentials",
             )
@@ -117,86 +125,39 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
 
         logger.debug("Get Current Active User ...")
 
-        try:
+        # Recover credentials from the request
+        credentials: Tuple[str, str] = await self.get_credentials(request=request)
+        logger.debug("Credentials: {}", credentials)
 
-            if not self.__validate_credentials(request=request):
-                logger.debug("There are no credentials in the request")
-                return None
+        # Get user credentials from the repository
+        user_credentials: UserCredentials = (
+            await self._credentials_repository.get_by_id(id=credentials[0])
+        )
 
-            credentials: Tuple[str, str] = await self.get_credentials(request=request)
-            logger.debug("Credentials: {}", credentials)
-
-            # Validate credentials
-            # First test
-            if credentials[0] != "demouser":
-                logger.error("Invalid User and/or Password")
-                raise InvalidTokenException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Invalid User credentials",
-                )
-
-            # Create User object from token
-            user: User = (
-                self.create_user_from_credentials(credentials=credentials)
-                if credentials
-                else self.__create_synthetic_user()
+        if not user_credentials:
+            logger.error("User not found")
+            raise InvalidAuthorizationException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid User credentials",
             )
-            logger.debug("Returning {}", user)
-            return user
-        except InvalidTokenException as ite:
-            logger.error("Invalid Token {}", str(ite))
-            raise
-        except Exception as e:
-            logger.error("Not controlled exception {}", str(e))
-            raise
 
-    def __validate_credentials(self, request: Request) -> bool:
-        """Validate if credentials exist in the request headers
+        # Validate credentials
+        if (
+            hashlib.sha256(credentials[1].encode()).hexdigest()
+            != user_credentials.hashed_password
+        ):
+            raise InvalidAuthorizationException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid User credentials",
+            )
 
-        Args:
-            request (Request): _description_
-
-        Returns:
-            bool: _description_
-        """
-        authorization = request.headers.get("Authorization")
-        scheme, credentials = get_authorization_scheme_param(authorization)
-        return bool(authorization and scheme and credentials)
-
-    def __create_synthetic_user(self) -> User:
-        """Create a synthetic user for testing purposes
-
-        Returns:
-            User: Domain object.
-        """
-        return User(
-            id="synthetic",
-            name="synthetic",
-            groups=[],
-            email="synthetic@email.com",
+        user: User = User(
+            id=user_credentials.id,
+            name=user_credentials.name,
+            groups=user_credentials.groups,
+            email=user_credentials.email,
         )
 
-    def create_user_from_credentials(self, credentials: Tuple[str, str]) -> User:
-        """Create a User object from credentials
-
-        Args:
-            credentials (Tuple[str, str]): _description_
-
-        Returns:
-            User: _description_
-        """
-
-        groups: List[str] = []
-
-        # groups: List[str] = (
-        #     self.__get_groups_from_claims(token.claims)
-        #     if "cognito:groups" in token.claims or "scope" in token.claims
-        #     else []
-        # )
-
-        return User(
-            id=credentials[0],
-            name=credentials[0],
-            groups=groups,
-            email=None,
-        )
+        # Return user
+        logger.debug("Returning {}", user)
+        return user

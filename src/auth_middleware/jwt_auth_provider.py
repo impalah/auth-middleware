@@ -10,6 +10,11 @@ from auth_middleware.types import JWK, JWKS, JWTAuthorizationCredentials, User
 
 
 class JWTAuthProvider(metaclass=ABCMeta):
+    """Basic interface for a JWT authentication provider
+
+    Args:
+        metaclass (_type_, optional): _description_. Defaults to ABCMeta.
+    """
 
     async def _get_jwks(self) -> JWKS | None:
         """

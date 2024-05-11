@@ -15,11 +15,17 @@ from auth_middleware import (
     require_groups,
     require_user,
 )
+from auth_middleware.repository.json_credentials_repository import (
+    JsonCredentialsRepository,
+)
 
 templates = Jinja2Templates(directory="templates")
 
 app: FastAPI = FastAPI()
-app.add_middleware(BasicAuthMiddleware, auth_provider=None)
+app.add_middleware(
+    BasicAuthMiddleware,
+    credentials_repository=JsonCredentialsRepository(),
+)
 
 
 def get_stranger_message(request: Request) -> JSONResponse:
