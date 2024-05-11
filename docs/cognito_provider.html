@@ -59,7 +59,15 @@
 <li class="toctree-l2"><a class="reference internal" href="types.html">types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html">functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">cognito_provider</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">cognito_provider</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider"><code class="docutils literal notranslate"><span class="pre">CognitoProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.create_user_from_token"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.create_user_from_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.get_keys"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.get_keys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.load_jwks"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.load_jwks()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html">entra_id_provider</a></li>
 </ul>
 </li>
@@ -92,6 +100,43 @@
              
   <section id="module-auth_middleware.providers.cognito.cognito_provider">
 <span id="cognito-provider"></span><h1>cognito_provider<a class="headerlink" href="#module-auth_middleware.providers.cognito.cognito_provider" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.cognito.cognito_provider.</span></span><span class="sig-name descname"><span class="pre">CognitoProvider</span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider.create_user_from_token">
+<span class="sig-name descname"><span class="pre">create_user_from_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#auth_middleware.types.JWTAuthorizationCredentials" title="auth_middleware.types.JWTAuthorizationCredentials"><span class="pre">JWTAuthorizationCredentials</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.User" title="auth_middleware.types.User"><span class="pre">User</span></a></span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.create_user_from_token" title="Link to this definition"></a></dt>
+<dd><p>Initializes a domain User object with data recovered from a JWT TOKEN.
+Args:
+token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>User: Domain object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider.get_keys">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.get_keys" title="Link to this definition"></a></dt>
+<dd><p>Get keys from AWS Cognito</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>List[JWK]: a list of JWK keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider.load_jwks">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_jwks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.JWKS" title="auth_middleware.types.JWKS"><span class="pre">JWKS</span></a></span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.load_jwks" title="Link to this definition"></a></dt>
+<dd><p>Load JWKS credentials from remote Identity Provider</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>JWKS: _description_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
