@@ -35,5 +35,11 @@ class Settings:
         default=1000,
     )
 
+    AUTH_MIDDLEWARE_JSON_REPOSITORY_PATH: str = config(
+        "AUTH_MIDDLEWARE_JSON_REPOSITORY_PATH",
+        cast=str,
+        default=None,
+    )
+
 
 settings = Settings()
