@@ -285,7 +285,7 @@ def test_create_user_from_token_using_scope(cognito_provider):
         claims={
             "sub": "1234567890",
             "username": "test_user",
-            "scope": ["rsid/group1", "rsid/group2"],
+            "scope": "rsid/group1",
             "email": "test@example.com",
         },
     )
@@ -295,7 +295,7 @@ def test_create_user_from_token_using_scope(cognito_provider):
     assert isinstance(user, User)
     assert user.id == "1234567890"
     assert user.name == "test_user"
-    assert user.groups == ["group1", "group2"]
+    assert user.groups == ["group1"]
     assert user.email == "test@example.com"
 
 
