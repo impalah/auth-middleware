@@ -87,10 +87,14 @@ class CognitoProvider(JWTAuthProvider):
         Returns:
             List[str]: List of groups.
         """
+
+        # cognito:groups is a list of groups
+        # scope is only ONE scope
+
         return (
             claims["cognito:groups"]
             if "cognito:groups" in claims
-            else [str(scope).split("/")[-1] for scope in claims["scope"]]
+            else [str(claims["scope"]).split("/")[-1]]
         )
 
     def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
