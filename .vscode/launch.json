@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Current File - Auuth Middleware",
+      "name": "Python: Current File - Auth Middleware",
       "type": "debugpy",
       "request": "launch",
       "program": "${file}",
@@ -28,6 +28,14 @@
       "module": "mypy",
       "cwd": "${workspaceRoot}/",
       "args": ["--ignore-missing-imports", "src/"]
+    },
+    {
+      "name": "Example - Auth Middleware",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "cwd": "${workspaceRoot}/examples/fastapi_cognito/src/demo",
+      "args": ["main:app", "--reload", "--port", "8000"]
     }
   ]
 }

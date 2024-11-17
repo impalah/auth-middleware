@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Optional
 
 from fastapi import Depends, FastAPI, status
@@ -21,7 +22,8 @@ from auth_middleware.providers.cognito import (
     get_logout_url,
 )
 
-templates = Jinja2Templates(directory="templates")
+base_dir = Path(__file__).resolve().parent
+templates = Jinja2Templates(directory=base_dir.joinpath("..", "..", "templates"))
 
 app: FastAPI = FastAPI()
 app.add_middleware(JwtAuthMiddleware, auth_provider=CognitoProvider())
