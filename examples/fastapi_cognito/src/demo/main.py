@@ -82,6 +82,29 @@ async def index(
 
 
 @app.get(
+    "/user",
+    dependencies=[
+        Depends(require_user()),
+    ],
+    response_class=User,
+    status_code=status.HTTP_200_OK,
+)
+async def get_user(
+    request: Request, current_user: User = Depends(get_current_user())
+) -> User:
+    """Returns full user information
+
+    Args:
+        request (Request): FastAPI request object
+
+    Returns:
+        JSONResponse: a message
+    """
+
+    return current_user
+
+
+@app.get(
     "/healthcheck",
     response_class=JSONResponse,
     status_code=status.HTTP_200_OK,

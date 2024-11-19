@@ -2,6 +2,9 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
+from auth_middleware.providers.authz.groups_provider import GroupsProvider
+from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+
 JWK = Dict[str, str]
 
 
@@ -25,6 +28,24 @@ class User(BaseModel):
     Args:
         BaseModel (BaseModel): Inherited properties
     """
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(
+        self,
+        permissions_provider: GroupsProvider = None,
+        groups_provider: PermissionsProvider = None,
+        **data: Any,
+    ):
+
+        super().__init__(**data)
+
+        # Store the permissions provider (e.g., SQL, DynamoDB, etc.)
+        self.permissions_provider = permissions_provider
+
+        # Store the groups provider (e.g., SQL, DynamoDB, etc.)
+        self.groups_provider = groups_provider
 
     id: str = Field(
         ...,

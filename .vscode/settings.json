@@ -1,10 +1,13 @@
 {
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true
+  },
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
-  "editor.formatOnSave": true,
   "debugpy.debugJustMyCode": false,
   "jupyter.debugJustMyCode": false
 }
