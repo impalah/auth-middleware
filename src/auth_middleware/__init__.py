@@ -8,7 +8,8 @@ from .functions import get_current_user, require_groups, require_user
 from .group_checker import GroupChecker
 from .jwt_auth_middleware import JwtAuthMiddleware
 from .jwt_auth_provider import JWTAuthProvider
-from .types import JWK, JWKS, JWTAuthorizationCredentials, User
+from .user import User
+from .jwt import JWK, JWKS, JWTAuthorizationCredentials
 
 __all__ = [
     "require_groups",

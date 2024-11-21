@@ -9,9 +9,10 @@ import pytest
 from jose import jwk, jwt
 from jose.utils import base64url_decode
 
+from auth_middleware.jwt import JWKS, JWTAuthorizationCredentials
 from auth_middleware.providers.cognito.cognito_provider import CognitoProvider
 from auth_middleware.providers.cognito.exceptions import AWSException
-from auth_middleware.types import JWKS, JWTAuthorizationCredentials, User
+from auth_middleware.user import User
 
 
 @pytest.fixture

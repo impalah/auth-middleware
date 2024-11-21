@@ -4,7 +4,7 @@ from fastapi import HTTPException, Request
 
 from auth_middleware.logging import logger
 from auth_middleware.settings import settings
-from auth_middleware.types import User
+from auth_middleware.user import User
 
 
 class GroupChecker:

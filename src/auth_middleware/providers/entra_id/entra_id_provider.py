@@ -4,19 +4,44 @@ from typing import Any, Dict, List
 import httpx
 from jose import JWTError, jwt
 
+from auth_middleware.jwt import JWKS, JWTAuthorizationCredentials
 from auth_middleware.jwt_auth_provider import JWTAuthProvider
 from auth_middleware.logging import logger
+from auth_middleware.providers.authz.groups_provider import GroupsProvider
+from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
 from auth_middleware.providers.entra_id.exceptions import AzureException
 from auth_middleware.providers.entra_id.settings import settings
-from auth_middleware.types import JWK, JWKS, JWTAuthorizationCredentials, User
+from auth_middleware.user import User
 
 
 class EntraIDProvider(JWTAuthProvider):
 
-    def __new__(cls):
+    # def __new__(cls):
+    #     if not hasattr(cls, "instance"):
+    #         cls.instance = super(EntraIDProvider, cls).__new__(cls)
+    #     return cls.instance
+
+    def __new__(
+        cls,
+        permissions_provider: PermissionsProvider = None,
+        groups_provider: GroupsProvider = None,
+    ):
         if not hasattr(cls, "instance"):
             cls.instance = super(EntraIDProvider, cls).__new__(cls)
         return cls.instance
+
+    def __init__(
+        self,
+        permissions_provider: PermissionsProvider = None,
+        groups_provider: GroupsProvider = None,
+    ) -> None:
+
+        if not hasattr(self, "_initialized"):  # Avoid reinitialization
+            super().__init__(
+                permissions_provider=permissions_provider,
+                groups_provider=groups_provider,
+            )
+            self._initialized = True
 
     # TODO: implement correct types
     async def get_keys(self, jwks_uri: str) -> Any:
@@ -126,7 +151,7 @@ class EntraIDProvider(JWTAuthProvider):
             logger.error("Error in JWTBearerManager: {}", str(e))
             raise AzureException("Error in JWTBearerManager")
 
-    def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
+    async def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
         """Initializes a domain User object with data recovered from a JWT TOKEN.
         Args:
         token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).
@@ -140,6 +165,16 @@ class EntraIDProvider(JWTAuthProvider):
             "username" if "username" in token.claims else "preferred_username"
         )
 
+        # groups=(
+        #     token.claims["groups"]
+        #     if "groups" in token.claims
+        #     else [str(token.claims["scope"]).split("/")[-1]]
+        # ),
+
+        groups: List[str] = (
+            self._groups_provider.fetch_groups(token) if self._groups_provider else []
+        )
+
         return User(
             id=token.claims["sub"],
             name=(
@@ -147,10 +182,6 @@ class EntraIDProvider(JWTAuthProvider):
                 if name_property in token.claims
                 else token.claims["sub"]
             ),
-            groups=(
-                token.claims["groups"]
-                if "groups" in token.claims
-                else [str(token.claims["scope"]).split("/")[-1]]
-            ),
+            groups=groups,
             email=token.claims["email"] if "email" in token.claims else None,
         )

@@ -7,10 +7,10 @@ from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
 from auth_middleware.exceptions import InvalidTokenException
+from auth_middleware.jwt import JWTAuthorizationCredentials
 from auth_middleware.jwt_auth_provider import JWTAuthProvider
 from auth_middleware.logging import logger
 from auth_middleware.settings import settings
-from auth_middleware.types import JWTAuthorizationCredentials
 
 
 class JWTBearerManager(HTTPBearer):

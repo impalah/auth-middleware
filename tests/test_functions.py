@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException, Request
 
 from auth_middleware.functions import get_current_user, require_groups, require_user
-from auth_middleware.types import User
+from auth_middleware.user import User
 
 
 @patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False)

@@ -18,7 +18,8 @@ from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
 from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.settings import settings
-from auth_middleware.types import JWTAuthorizationCredentials, User, UserCredentials
+from auth_middleware.user import User
+from auth_middleware.user_credentials import UserCredentials
 
 
 class BasicAuthMiddleware(BaseHTTPMiddleware):

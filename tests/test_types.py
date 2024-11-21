@@ -1,4 +1,5 @@
-from auth_middleware.types import JWKS, JWTAuthorizationCredentials, User
+from auth_middleware.jwt import JWKS, JWTAuthorizationCredentials
+from auth_middleware.user import User
 
 
 def test_jwks_model():

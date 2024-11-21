@@ -5,8 +5,11 @@ from typing import Optional
 from jose import jwk
 from jose.utils import base64url_decode
 
+from auth_middleware.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.logging import logger
-from auth_middleware.types import JWK, JWKS, JWTAuthorizationCredentials, User
+from auth_middleware.providers.authz.groups_provider import GroupsProvider
+from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+from auth_middleware.user import User
 
 
 class JWTAuthProvider(metaclass=ABCMeta):
@@ -15,6 +18,17 @@ class JWTAuthProvider(metaclass=ABCMeta):
     Args:
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
+
+    _permissions_provider: PermissionsProvider
+    _groups_provider: GroupsProvider
+
+    def __init__(
+        self,
+        permissions_provider: PermissionsProvider = None,
+        groups_provider: GroupsProvider = None,
+    ) -> None:
+        self._permissions_provider = permissions_provider
+        self._groups_provider = groups_provider
 
     async def _get_jwks(self) -> JWKS | None:
         """
@@ -68,7 +82,7 @@ class JWTAuthProvider(metaclass=ABCMeta):
     ) -> bool: ...
 
     @abstractmethod
-    def create_user_from_token(
+    async def create_user_from_token(
         self,
         token: JWTAuthorizationCredentials,
     ) -> User: ...

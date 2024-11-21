@@ -6,10 +6,11 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.responses import JSONResponse, Response
 
 from auth_middleware.exceptions import InvalidTokenException
+from auth_middleware.jwt import JWTAuthorizationCredentials
 from auth_middleware.jwt_auth_provider import JWTAuthProvider
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
-from auth_middleware.types import JWTAuthorizationCredentials, User
+from auth_middleware.user import User
 
 
 class JwtAuthMiddleware(BaseHTTPMiddleware):
@@ -77,7 +78,7 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
 
             # Create User object from token
             user: User = (
-                self._auth_provider.create_user_from_token(token=token)
+                await self._auth_provider.create_user_from_token(token=token)
                 if token
                 else self.__create_synthetic_user()
             )

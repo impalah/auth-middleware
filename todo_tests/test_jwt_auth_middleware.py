@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 from auth_middleware.exceptions import InvalidTokenException
 from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
-from auth_middleware.types import User
+from auth_middleware.user import User
 
 
 class MockJWTAuthProvider:

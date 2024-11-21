@@ -1,12 +1,9 @@
 from abc import ABCMeta, abstractmethod
-from time import time, time_ns
 from typing import Optional, List
 
-from jose import jwk
-from jose.utils import base64url_decode
 
+from auth_middleware.jwt import JWTAuthorizationCredentials
 from auth_middleware.logging import logger
-from auth_middleware.types import JWK, JWKS, JWTAuthorizationCredentials, User
 
 
 class PermissionsProvider(metaclass=ABCMeta):

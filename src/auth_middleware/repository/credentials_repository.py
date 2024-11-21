@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import List, Optional
 
-from auth_middleware.types import UserCredentials
+from auth_middleware.user_credentials import UserCredentials
 
 
 class CredentialsRepository(metaclass=ABCMeta):

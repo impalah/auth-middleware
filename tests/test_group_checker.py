@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from fastapi import HTTPException, Request
 
 from auth_middleware.group_checker import GroupChecker
-from auth_middleware.types import User
+from auth_middleware.user import User
 
 
 def test_group_checker_call_allowed_groups():
