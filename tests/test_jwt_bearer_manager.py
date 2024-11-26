@@ -8,7 +8,13 @@ from jose import jwt
 from starlette.requests import Request
 from starlette.types import Scope
 
-from auth_middleware.exceptions import InvalidTokenException
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
+from auth_middleware.exceptions.invalid_authorization_exception import (
+    InvalidAuthorizationException,
+)
+from auth_middleware.exceptions.invalid_credentials_exception import (
+    InvalidCredentialsException,
+)
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 
 

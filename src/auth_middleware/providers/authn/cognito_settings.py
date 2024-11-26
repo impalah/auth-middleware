@@ -7,8 +7,8 @@ from auth_middleware.settings import Settings
 config = Config()
 
 
-class ModuleSettings(Settings):
-    """Settings for the module"""
+class CognitoSettings(Settings):
+    """Settings for the cognito module"""
 
     AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID: Optional[str] = config(
         "AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID",
@@ -40,5 +40,11 @@ class ModuleSettings(Settings):
         default=None,
     )
 
+    AUTH_PROVIDER_AWS_COGNITO_TOKEN_VERIFICATION_DISABLED = config(
+        "AUTH_PROVIDER_AWS_COGNITO_TOKEN_VERIFICATION_DISABLED",
+        cast=bool,
+        default=False,
+    )
 
-settings = ModuleSettings()
+
+settings = CognitoSettings()

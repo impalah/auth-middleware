@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Optional, List
 
 
-from auth_middleware.jwt import JWTAuthorizationCredentials
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from auth_middleware.logging import logger
 
 

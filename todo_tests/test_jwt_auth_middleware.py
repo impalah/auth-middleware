@@ -3,13 +3,19 @@ from fastapi import Request, Response
 from starlette import status
 from starlette.responses import JSONResponse
 
-from auth_middleware.exceptions import InvalidTokenException
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
+from auth_middleware.exceptions.invalid_authorization_exception import (
+    InvalidAuthorizationException,
+)
+from auth_middleware.exceptions.invalid_credentials_exception import (
+    InvalidCredentialsException,
+)
 from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
-from auth_middleware.user import User
+from auth_middleware.types.user import User
 
 
-class MockJWTAuthProvider:
+class MockJWTProvider:
     def create_user_from_token(self, token):
         return User(
             id="user_id", name="John Doe", groups=["admin"], email="john@example.com"
@@ -28,7 +34,7 @@ class MockInvalidTokenJWTBearerManager:
 
 @pytest.mark.asyncio
 def test_dispatch_with_valid_token():
-    middleware = JwtAuthMiddleware(MockJWTAuthProvider())
+    middleware = JwtAuthMiddleware(MockJWTProvider())
     middleware._jwt_bearer_manager = MockJWTBearerManager()
 
     async def mock_call_next(request):
@@ -45,7 +51,7 @@ def test_dispatch_with_valid_token():
 
 
 def test_dispatch_with_invalid_token():
-    middleware = JwtAuthMiddleware(MockJWTAuthProvider())
+    middleware = JwtAuthMiddleware(MockJWTProvider())
     middleware._jwt_bearer_manager = MockInvalidTokenJWTBearerManager()
 
     async def mock_call_next(request):
@@ -60,7 +66,7 @@ def test_dispatch_with_invalid_token():
 
 
 def test_dispatch_with_server_error():
-    middleware = JwtAuthMiddleware(MockJWTAuthProvider())
+    middleware = JwtAuthMiddleware(MockJWTProvider())
 
     async def mock_call_next(request):
         raise Exception("Server error")
@@ -73,7 +79,7 @@ def test_dispatch_with_server_error():
 
 
 def test_get_current_user_with_valid_token():
-    middleware = JwtAuthMiddleware(MockJWTAuthProvider())
+    middleware = JwtAuthMiddleware(MockJWTProvider())
     middleware._jwt_bearer_manager = MockJWTBearerManager()
 
     request = Request({"Authorization": "Bearer valid_token"})
@@ -86,7 +92,7 @@ def test_get_current_user_with_valid_token():
 
 
 def test_get_current_user_with_invalid_token():
-    middleware = JwtAuthMiddleware(MockJWTAuthProvider())
+    middleware = JwtAuthMiddleware(MockJWTProvider())
     middleware._jwt_bearer_manager = MockInvalidTokenJWTBearerManager()
 
     request = Request({"Authorization": "Bearer invalid_token"})
@@ -96,7 +102,7 @@ def test_get_current_user_with_invalid_token():
 
 
 def test_get_current_user_with_no_credentials():
-    middleware = JwtAuthMiddleware(MockJWTAuthProvider())
+    middleware = JwtAuthMiddleware(MockJWTProvider())
 
     request = Request({})
     user = middleware.get_current_user(request)

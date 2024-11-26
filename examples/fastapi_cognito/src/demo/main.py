@@ -12,9 +12,10 @@ from uvicorn import run
 from pydantic import BaseModel, EmailStr, Field, PrivateAttr
 from typing import Any, Dict, List
 
+from auth_middleware.functions import require_permissions
+from auth_middleware.types.user import User
 from auth_middleware import (
     JwtAuthMiddleware,
-    User,
     get_current_user,
     require_groups,
     require_user,
@@ -26,10 +27,8 @@ from auth_middleware.providers.authz.sql_groups_provider import SqlGroupsProvide
 from auth_middleware.providers.authz.sql_permissions_provider import (
     SqlPermissionsProvider,
 )
-from auth_middleware.providers.cognito import (
+from auth_middleware.providers.authn.cognito_provider import (
     CognitoProvider,
-    get_login_url,
-    get_logout_url,
 )
 
 
@@ -120,18 +119,6 @@ async def index(
             "request": request,
             "title": "Testing FastAPI with Cognito",
             "message": "Testing FastAPI with Cognito",
-            "login_url": get_login_url(
-                cognito_domain,
-                cognito_client_id,
-                region,
-                "http://localhost:8000",
-            ),
-            "logout_url": get_logout_url(
-                cognito_domain,
-                cognito_client_id,
-                region,
-                "http://localhost:8000",
-            ),
             "cognito_domain": cognito_domain,
             "region": region,
             "cognito_client_id": cognito_client_id,
@@ -240,7 +227,7 @@ async def root(request: Request) -> JSONResponse:
     response_class=JSONResponse,
     status_code=status.HTTP_200_OK,
 )
-async def root(
+async def hello_user(
     request: Request, current_user: User = Depends(get_current_user())
 ) -> JSONResponse:
     """A simple call with user authorization required
@@ -262,14 +249,14 @@ async def root(
 
 
 @app.get(
-    "/hello/admin",
+    "/hello/groups/admin",
     dependencies=[
         Depends(require_groups(["administrator"])),
     ],
     response_class=JSONResponse,
     status_code=status.HTTP_200_OK,
 )
-async def root(request: Request) -> JSONResponse:
+async def require_admin(request: Request) -> JSONResponse:
     """A simple call with admin authorization required
 
     Args:
@@ -289,14 +276,14 @@ async def root(request: Request) -> JSONResponse:
 
 
 @app.get(
-    "/hello/customer",
+    "/hello/permissions/admin",
     dependencies=[
-        Depends(require_groups(["customer"])),
+        Depends(require_permissions(["hello.admin"])),
     ],
     response_class=JSONResponse,
     status_code=status.HTTP_200_OK,
 )
-async def root(request: Request) -> JSONResponse:
+async def require_customer(request: Request) -> JSONResponse:
     """A simple call with customer authorization required
 
     Args:
@@ -311,7 +298,7 @@ async def root(request: Request) -> JSONResponse:
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"message": f"Hello dear customer {request.state.current_user.name}"},
+        content={"message": f"Hello dear admin {request.state.current_user.name}"},
     )
 
 

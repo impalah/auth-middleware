@@ -7,13 +7,13 @@ from auth_middleware.settings import settings
 from auth_middleware.types.user import User
 
 
-class GroupChecker:
-    """Controls if user has the required group (user_type)"""
+class PermissionsChecker:
+    """Controls if user has the required permissions (user_type)"""
 
-    __allowed_groups: list = []
+    __allowed_permissions: list = []
 
-    def __init__(self, allowed_groups: List):
-        self.__allowed_groups = allowed_groups
+    def __init__(self, allowed_permissions: List):
+        self.__allowed_permissions = allowed_permissions
 
     async def __call__(self, request: Request):
 
@@ -24,10 +24,12 @@ class GroupChecker:
             raise HTTPException(status_code=401, detail="Authentication required")
 
         user: User = request.state.current_user
-        groups: List[str] = await user.groups
+        permissions: List[str] = await user.permissions
 
-        if groups is not None and not any(
-            group in self.__allowed_groups for group in groups
+        if permissions is not None and not any(
+            permissions in self.__allowed_permissions for permissions in permissions
         ):
-            logger.debug(f"User with groups {groups} not in {self.__allowed_groups}")
+            logger.debug(
+                f"User with permissions {permissions} not in {self.__allowed_permissions}"
+            )
             raise HTTPException(status_code=403, detail="Operation not allowed")

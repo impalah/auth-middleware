@@ -5,17 +5,17 @@ import httpx
 from jose import jwk
 from jose.utils import base64url_decode
 
-from auth_middleware.jwt import JWK, JWKS, JWTAuthorizationCredentials
-from auth_middleware.jwt_auth_provider import JWTAuthProvider
+from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.logging import logger
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
-from auth_middleware.providers.cognito.exceptions import AWSException
-from auth_middleware.providers.cognito.settings import settings
-from auth_middleware.user import User
+from auth_middleware.providers.exceptions.aws_exception import AWSException
+from auth_middleware.providers.authn.cognito_settings import settings
+from auth_middleware.types.user import User
 
 
-class CognitoProvider(JWTAuthProvider):
+class CognitoProvider(JWTProvider):
 
     def __new__(
         cls,
@@ -80,6 +80,11 @@ class CognitoProvider(JWTAuthProvider):
 
     async def verify_token(self, token: JWTAuthorizationCredentials) -> bool:
 
+        if settings.AUTH_PROVIDER_AWS_COGNITO_TOKEN_VERIFICATION_DISABLED:
+            return True
+
+        logger.debug("Verifying token through signature")
+
         hmac_key_candidate = await self._get_hmac_key(token)
 
         if not hmac_key_candidate:
@@ -98,25 +103,6 @@ class CognitoProvider(JWTAuthProvider):
 
         return False
 
-    def __get_groups_from_claims(self, claims: dict) -> List[str]:
-        """Extracts groups from claims.
-
-        Args:
-            claims (dict): JWT claims.
-
-        Returns:
-            List[str]: List of groups.
-        """
-
-        # cognito:groups is a list of groups
-        # scope is only ONE scope
-
-        return (
-            claims["cognito:groups"]
-            if "cognito:groups" in claims
-            else [str(claims["scope"]).split("/")[-1]]
-        )
-
     async def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
         """Initializes a domain User object with data recovered from a JWT TOKEN.
         Args:
@@ -130,21 +116,6 @@ class CognitoProvider(JWTAuthProvider):
         name_property: str = (
             "username" if "username" in token.claims else "cognito:username"
         )
-
-        # groups: List[str] = (
-        #     self.__get_groups_from_claims(token.claims)
-        #     if "cognito:groups" in token.claims or "scope" in token.claims
-        #     else []
-        # )
-
-        # if self._groups_provider:
-        #     groups: List[str] = await self._groups_provider.fetch_groups(token=token)
-        # else:
-        #     groups: List[str] = []
-
-        # groups: List[str] = (
-        #     self._groups_provider.fetch_groups(token) if self._groups_provider else []
-        # )
 
         return User(
             token=token,

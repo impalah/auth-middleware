@@ -5,7 +5,7 @@ from typing import Any, Optional, TypeVar
 from starlette.requests import Request
 
 from auth_middleware.logging import logger
-from auth_middleware.user import User
+from auth_middleware.types.user import User
 
 TCredentials = TypeVar("TCredentials")
 

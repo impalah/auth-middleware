@@ -159,13 +159,13 @@
             const clientId = document.getElementById("cognito-client-id").textContent;
 
             const body = {
-                        "AuthParameters": {
-                            "USERNAME": username,
-                            "PASSWORD": password
-                        },
-                        "AuthFlow": "USER_PASSWORD_AUTH",
-                        "ClientId": clientId
-                        };
+                "AuthParameters": {
+                    "USERNAME": username,
+                    "PASSWORD": password
+                },
+                "AuthFlow": "USER_PASSWORD_AUTH",
+                "ClientId": clientId
+            };
 
             console.log("Login body: " + JSON.stringify(body));
 
@@ -193,6 +193,7 @@
 
                         document.getElementById('connection-status').textContent = 'Logged in';
                         document.getElementById('logged-in-info').style.display = 'block';
+                        document.getElementById('tests-container').style.display = 'block';
                     } else {
                         console.log("Login failed: " + JSON.stringify(data));
                         alert('Login failed: ' + data.message);
@@ -216,8 +217,8 @@
 
             document.getElementById('connection-status').textContent = 'Disconnected';
             document.getElementById('logged-in-info').style.display = 'none';
+            document.getElementById('tests-container').style.display = 'none';
         }
-
 
         function copyToClipboard(elementId) {
             const text = document.getElementById(elementId).textContent;
@@ -230,22 +231,43 @@
 
         function getUserInfo() {
             const idToken = document.getElementById('id-token').textContent;
-            
+
             fetch('/gimme/user', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': tokenType + " " + token
-                    }
+                method: 'GET',
+                headers: {
+                    'Authorization': tokenType + " " + token
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // Muestra el resultado en la consola
+                    document.getElementById('user-info').textContent = JSON.stringify(data, null, 2);
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(data); // Muestra el resultado en la consola
-                        document.getElementById('user-info').textContent = JSON.stringify(data, null, 2);
-                    })
-                    .catch(error => console.error('Error:', error));
+                .catch(error => console.error('Error:', error));
 
         }
 
+        function callApi(url) {
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': tokenType + " " + token
+                }
+            })
+                .then(response => {
+                    document.getElementById('api-url').textContent = url;
+                    document.getElementById('api-status').textContent = response.status;
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('api-body').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('api-url').textContent = url;
+                    document.getElementById('api-status').textContent = 'Error';
+                    document.getElementById('api-body').textContent = error.toString();
+                });
+        }
 
         window.onload = function () {
             var fragment = location.hash.substring(1).split('&').reduce(function (initial, item) {
@@ -266,6 +288,7 @@
             if (fragment.access_token || fragment.id_token) {
                 document.getElementById('connection-status').textContent = 'Logged in';
                 document.getElementById('logged-in-info').style.display = 'block';
+                document.getElementById('tests-container').style.display = 'block';
 
                 fetch('/gimme/user', {
                     method: 'GET',
@@ -329,6 +352,31 @@
                 <button class="copy-btn" title="Get user info" onclick="getUserInfo()">&#128203;</button>
                 <span class="value-extended" id="user-info"></span>
             </div>
+        </div>
+    </div>
+
+    <div class="container" id="tests-container" style="display: none;">
+        <h2>Tests</h2>
+        <div class="row">
+            <div class="menu">
+                <button onclick="callApi('/gimme/user')">Get logged in user</button>
+                <button onclick="callApi('/hello/user')">Hello user</button>
+                <button onclick="callApi('/hello/groups/admin')">Check admin group</button>
+                <button onclick="callApi('/hello/permissions/admin')">Check admin permissions</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <span class="label">URL:</span>
+            <span class="value-extended" id="api-url"></span>
+        </div>
+        <div class="row">
+            <span class="label">Status:</span>
+            <span class="value-extended" id="api-status"></span>
+        </div>
+        <div class="row">
+            <span class="label">Response Body:</span>
+            <span class="value-extended" id="api-body"></span>
         </div>
     </div>
 

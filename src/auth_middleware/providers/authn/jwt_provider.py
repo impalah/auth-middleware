@@ -5,14 +5,14 @@ from typing import Optional
 from jose import jwk
 from jose.utils import base64url_decode
 
-from auth_middleware.jwt import JWK, JWKS, JWTAuthorizationCredentials
+from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.logging import logger
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
-from auth_middleware.user import User
+from auth_middleware.types.user import User
 
 
-class JWTAuthProvider(metaclass=ABCMeta):
+class JWTProvider(metaclass=ABCMeta):
     """Basic interface for a JWT authentication provider
 
     Args:

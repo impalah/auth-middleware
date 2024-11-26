@@ -3,7 +3,31 @@ from typing import List
 from fastapi import HTTPException, Request
 
 from auth_middleware.group_checker import GroupChecker
+from auth_middleware.permissions_checker import PermissionsChecker
 from auth_middleware.settings import settings
+
+
+def require_permissions(allowed_permissions: List[str]):
+    """Check if the user has the required permissions
+
+    Args:
+        allowed_permissions (List[str]): a list of required permissions
+    """
+
+    async def _permissions_checker(request: Request):
+        """Calls the GroupChecker class to check if
+        the user has the required permissions
+
+        Args:
+            request (Request): FastAPI request object
+
+        Returns:
+            GroupChecker: group checker object
+        """
+        checker = PermissionsChecker(allowed_permissions)
+        await checker(request)
+
+    return _permissions_checker
 
 
 def require_groups(allowed_groups: List[str]):
@@ -13,7 +37,7 @@ def require_groups(allowed_groups: List[str]):
         allowed_groups (List[str]): a list of required groups
     """
 
-    def _group_checker(request: Request):
+    async def _group_checker(request: Request):
         """Calls the GroupChecker class to check if
         the user has the required groups
 
@@ -23,7 +47,8 @@ def require_groups(allowed_groups: List[str]):
         Returns:
             GroupChecker: group checker object
         """
-        return GroupChecker(allowed_groups)(request)
+        checker = GroupChecker(allowed_groups)
+        await checker(request)
 
     return _group_checker
 

@@ -4,17 +4,17 @@ from typing import Any, Dict, List
 import httpx
 from jose import JWTError, jwt
 
-from auth_middleware.jwt import JWKS, JWTAuthorizationCredentials
-from auth_middleware.jwt_auth_provider import JWTAuthProvider
+from auth_middleware.types.jwt import JWKS, JWTAuthorizationCredentials
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.logging import logger
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
-from auth_middleware.providers.entra_id.exceptions import AzureException
+from auth_middleware.providers.exceptions.azure_exception import AzureException
 from auth_middleware.providers.entra_id.settings import settings
-from auth_middleware.user import User
+from auth_middleware.types.user import User
 
 
-class EntraIDProvider(JWTAuthProvider):
+class EntraIDProvider(JWTProvider):
 
     # def __new__(cls):
     #     if not hasattr(cls, "instance"):

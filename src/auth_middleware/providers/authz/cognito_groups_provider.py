@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 
-from auth_middleware.jwt import JWTAuthorizationCredentials
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from auth_middleware.logging import logger
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 

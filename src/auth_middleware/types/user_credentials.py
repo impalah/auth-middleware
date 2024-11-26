@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
-from auth_middleware.user import User
+from auth_middleware.types.user import User
 
 
 class UserCredentials(User):
