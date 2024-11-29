@@ -347,11 +347,6 @@
                 <span class="value-ellipsis" id="refresh-token"></span>
                 <button class="copy-btn" title="Copy to clipboard" onclick="copyToClipboard('refresh-token')">&#128203;</button>
             </div>
-            <div class="row">
-                <span class="label">Logged-in user:</span>
-                <button class="copy-btn" title="Get user info" onclick="getUserInfo()">&#128203;</button>
-                <span class="value-extended" id="user-info"></span>
-            </div>
         </div>
     </div>
 
@@ -363,6 +358,7 @@
                 <button onclick="callApi('/hello/user')">Hello user</button>
                 <button onclick="callApi('/hello/groups/admin')">Check admin group</button>
                 <button onclick="callApi('/hello/permissions/admin')">Check admin permissions</button>
+                <button onclick="callApi('/hello/has-permissions/admin')">Has admin permissions</button>
             </div>
         </div>
 

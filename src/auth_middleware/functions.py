@@ -30,6 +30,24 @@ def require_permissions(allowed_permissions: List[str]):
     return _permissions_checker
 
 
+async def has_permissions(request: Request, allowed_permissions: List[str]) -> bool:
+    """Check if the user has the required permissions asynchronously
+
+    Args:
+        request (Request): FastAPI request object
+        allowed_permissions (List[str]): a list of required permissions
+
+    Returns:
+        bool: True if the user has the required permissions, False otherwise
+    """
+    checker = PermissionsChecker(allowed_permissions)
+    try:
+        await checker(request)
+        return True
+    except HTTPException:
+        return False
+
+
 def require_groups(allowed_groups: List[str]):
     """Check if the user has the required groups
 
@@ -51,6 +69,24 @@ def require_groups(allowed_groups: List[str]):
         await checker(request)
 
     return _group_checker
+
+
+async def has_groups(request: Request, allowed_groups: List[str]) -> bool:
+    """Check if the user has the required groups asynchronously
+
+    Args:
+        request (Request): FastAPI request object
+        allowed_groups (List[str]): a list of required groups
+
+    Returns:
+        bool: True if the user has the required groups, False otherwise
+    """
+    checker = GroupChecker(allowed_groups=allowed_groups)
+    try:
+        await checker(request)
+        return True
+    except HTTPException:
+        return False
 
 
 def require_user():

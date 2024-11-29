@@ -12,7 +12,7 @@ from uvicorn import run
 from pydantic import BaseModel, EmailStr, Field, PrivateAttr
 from typing import Any, Dict, List
 
-from auth_middleware.functions import require_permissions
+from auth_middleware.functions import has_permissions, require_permissions
 from auth_middleware.types.user import User
 from auth_middleware import (
     JwtAuthMiddleware,
@@ -266,9 +266,6 @@ async def require_admin(request: Request) -> JSONResponse:
         JSONResponse: a message
     """
 
-    if request.state.current_user is None:
-        return get_stranger_message(request)
-
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": f"Hello dear admin {request.state.current_user.name}"},
@@ -283,8 +280,8 @@ async def require_admin(request: Request) -> JSONResponse:
     response_class=JSONResponse,
     status_code=status.HTTP_200_OK,
 )
-async def require_customer(request: Request) -> JSONResponse:
-    """A simple call with customer authorization required
+async def require_permission_admin(request: Request) -> JSONResponse:
+    """A simple call with admin permission required
 
     Args:
         request (Request): FastAPI request object
@@ -293,8 +290,34 @@ async def require_customer(request: Request) -> JSONResponse:
         JSONResponse: a message
     """
 
-    if request.state.current_user is None:
-        return get_stranger_message(request)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": f"Hello dear admin {request.state.current_user.name}"},
+    )
+
+
+@app.get(
+    "/hello/has-permissions/admin",
+    response_class=JSONResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def has_permission_admin(request: Request) -> JSONResponse:
+    """A simple call with admin permission required
+
+    Args:
+        request (Request): FastAPI request object
+
+    Returns:
+        JSONResponse: a message
+    """
+
+    if not await has_permissions(request, ["hello.admin"]):
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={
+                "message": f"Hello dear {request.state.current_user.name}, you do not have the required permissions"
+            },
+        )
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
