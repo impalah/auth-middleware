@@ -31,6 +31,37 @@ from auth_middleware.providers.authn.cognito_provider import (
     CognitoProvider,
 )
 
+from fastapi.openapi.utils import get_openapi
+
+
+def custom_openapi(app: FastAPI):
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="Auth Middleware Test API",
+        version="0.1.0",
+        description="API for testing authentication middleware",
+        routes=app.routes,
+    )
+
+    # Define security schema
+    openapi_schema["components"]["securitySchemes"] = {
+        "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
+
+    # Apply security schema globally
+    for path in openapi_schema["paths"].values():
+        for method in path.values():
+            method["security"] = [{"bearerAuth": []}]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
 
 # class UserResponse(BaseModel):
 #     """Application User
@@ -82,10 +113,12 @@ app: FastAPI = FastAPI()
 app.add_middleware(
     JwtAuthMiddleware,
     auth_provider=CognitoProvider(
-        groups_provider=CognitoGroupsProvider(),
-        permissions_provider=SqlPermissionsProvider(),
+        groups_provider=CognitoGroupsProvider,
+        permissions_provider=SqlPermissionsProvider,
     ),
 )
+
+app.openapi = lambda: custom_openapi(app)
 
 
 def get_stranger_message(request: Request) -> JSONResponse:

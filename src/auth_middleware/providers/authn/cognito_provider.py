@@ -1,5 +1,5 @@
 from time import time, time_ns
-from typing import List
+from typing import List, Type, Union
 
 import httpx
 from jose import jwk
@@ -19,25 +19,58 @@ class CognitoProvider(JWTProvider):
 
     def __new__(
         cls,
-        permissions_provider: PermissionsProvider = None,
-        groups_provider: GroupsProvider = None,
+        permissions_provider: Union[
+            Type[PermissionsProvider], PermissionsProvider
+        ] = None,
+        groups_provider: Union[Type[GroupsProvider], GroupsProvider] = None,
     ):
+        logger.debug("Creating CognitoProvider instance")
+
         if not hasattr(cls, "instance"):
             cls.instance = super(CognitoProvider, cls).__new__(cls)
         return cls.instance
 
     def __init__(
         self,
-        permissions_provider: PermissionsProvider = None,
-        groups_provider: GroupsProvider = None,
+        permissions_provider: Union[
+            Type[PermissionsProvider], PermissionsProvider
+        ] = None,
+        groups_provider: Union[Type[GroupsProvider], GroupsProvider] = None,
     ) -> None:
 
-        if not hasattr(self, "_initialized"):  # Avoid reinitialization
+        logger.debug("Initializing CognitoProvider instance")
+
+        if not getattr(self.__class__, "_initialized", False):  # Avoid reinitialization
+
+            # Lazy initialization for PermissionsProvider
+            if isinstance(permissions_provider, type) and issubclass(
+                permissions_provider, PermissionsProvider
+            ):
+                permissions_provider = permissions_provider()
+            elif isinstance(permissions_provider, PermissionsProvider):
+                permissions_provider = permissions_provider
+            else:
+                raise ValueError(
+                    "permissions_provider must be a PermissionsProvider or a subclass thereof"
+                )
+
+            # Lazy initialization for GroupsProvider
+            if isinstance(groups_provider, type) and issubclass(
+                groups_provider, GroupsProvider
+            ):
+                groups_provider = groups_provider()
+            elif isinstance(groups_provider, GroupsProvider):
+                groups_provider = groups_provider
+            else:
+                raise ValueError(
+                    "groups_provider must be a GroupsProvider or a subclass thereof"
+                )
+
             super().__init__(
                 permissions_provider=permissions_provider,
                 groups_provider=groups_provider,
             )
-            self._initialized = True
+            self.__class__._initialized = True
 
     async def get_keys(self) -> List[JWK]:
         """Get keys from AWS Cognito

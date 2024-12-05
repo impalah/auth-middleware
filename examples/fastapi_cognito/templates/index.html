@@ -48,6 +48,23 @@
             margin-bottom: 15px;
         }
 
+        .row button {
+            flex: 1;
+            padding: 10px 20px;
+            background-color: #3f51b5;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .row button:hover {
+            background-color: #303f9f;
+        }
+
         .value {
             flex-grow: 1;
             word-wrap: break-word;
@@ -137,12 +154,65 @@
         .modal-buttons button {
             margin-left: 10px;
         }
+
+        .equal-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .equal-buttons .copy-btn {
+            flex: 0 0 auto; /* Evita que los botones crezcan */
+            padding: 10px 20px;
+            background-color: #3f51b5;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .equal-buttons .copy-btn:hover {
+            background-color: #303f9f;
+        }        
+
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+
     </style>
 
     <script>
         let code = null;
         let token = null;
         let tokenType = null;
+
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = isError ? '#f44336' : '#4caf50'; // Red for error, green for success
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000); // Hide after 3 seconds
+        }
 
         function openLoginModal() {
             document.getElementById("loginModal").style.display = "flex";
@@ -196,12 +266,12 @@
                         document.getElementById('tests-container').style.display = 'block';
                     } else {
                         console.log("Login failed: " + JSON.stringify(data));
-                        alert('Login failed: ' + data.message);
+                        showNotification('Login failed: ' + data.message, true);
                     }
                 })
                 .catch(err => {
                     console.error('Login error:', err);
-                    alert('Login error: ' + err);
+                    showNotification('Login error: ' + err, true);
                 });
         }
 
@@ -213,19 +283,19 @@
             document.getElementById('access-token').textContent = "";
             document.getElementById('id-token').textContent = "";
             document.getElementById('refresh-token').textContent = "";
-            document.getElementById('user-info').textContent = "";
 
             document.getElementById('connection-status').textContent = 'Disconnected';
-            document.getElementById('logged-in-info').style.display = 'none';
             document.getElementById('tests-container').style.display = 'none';
+            document.getElementById('logged-in-info').style.display = 'none';
+
         }
 
         function copyToClipboard(elementId) {
             const text = document.getElementById(elementId).textContent;
             navigator.clipboard.writeText(text).then(() => {
-                alert('Copied to clipboard');
+                showNotification('Copied to clipboard');
             }).catch(err => {
-                alert('Failed to copy: ' + err);
+                showNotification('Failed to copy: ' + err, true);
             });
         }
 
@@ -261,11 +331,13 @@
                 })
                 .then(data => {
                     document.getElementById('api-body').textContent = JSON.stringify(data, null, 2);
+                    showNotification('API call successful');
                 })
                 .catch(error => {
                     document.getElementById('api-url').textContent = url;
                     document.getElementById('api-status').textContent = 'Error';
                     document.getElementById('api-body').textContent = error.toString();
+                    showNotification('API call failed', true);
                 });
         }
 
@@ -308,6 +380,7 @@
 </head>
 
 <body>
+    <div id="notification" class="notification"></div>
     <h1>{{ message }}</h1>
     <div class="container">
         <h2>Configuration</h2>
@@ -332,17 +405,17 @@
             <span class="value" id="connection-status">Disconnected</span>
         </div>
         <div id="logged-in-info" style="display: none;">
-            <div class="row">
+            <div class="row equal-buttons">
                 <span class="label">Access Token:</span>
                 <span class="value-ellipsis" id="access-token"></span>
                 <button class="copy-btn" title="Copy to clipboard" onclick="copyToClipboard('access-token')">&#128203;</button>
             </div>
-            <div class="row">
+            <div class="row equal-buttons">
                 <span class="label">ID Token:</span>
                 <span class="value-ellipsis" id="id-token"></span>
                 <button class="copy-btn" title="Copy to clipboard" onclick="copyToClipboard('id-token')">&#128203;</button>
             </div>
-            <div class="row">
+            <div class="row equal-buttons">
                 <span class="label">Refresh Token:</span>
                 <span class="value-ellipsis" id="refresh-token"></span>
                 <button class="copy-btn" title="Copy to clipboard" onclick="copyToClipboard('refresh-token')">&#128203;</button>
@@ -354,11 +427,15 @@
         <h2>Tests</h2>
         <div class="row">
             <div class="menu">
-                <button onclick="callApi('/gimme/user')">Get logged in user</button>
-                <button onclick="callApi('/hello/user')">Hello user</button>
-                <button onclick="callApi('/hello/groups/admin')">Check admin group</button>
-                <button onclick="callApi('/hello/permissions/admin')">Check admin permissions</button>
-                <button onclick="callApi('/hello/has-permissions/admin')">Has admin permissions</button>
+                <div class="row">
+                    <button onclick="callApi('/gimme/user')">Get logged in user</button>
+                    <button onclick="callApi('/hello/user')">Hello user</button>
+                    <button onclick="callApi('/hello/groups/admin')">Check admin group</button>
+                </div>
+                <div class="row">
+                    <button onclick="callApi('/hello/permissions/admin')">Check admin permissions</button>
+                    <button onclick="callApi('/hello/has-permissions/admin')">Has admin permissions</button>
+                </div>
             </div>
         </div>
 
@@ -371,7 +448,7 @@
             <span class="value-extended" id="api-status"></span>
         </div>
         <div class="row">
-            <span class="label">Response Body:</span>
+            <span class="label">Response:</span>
             <span class="value-extended" id="api-body"></span>
         </div>
     </div>
