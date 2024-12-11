@@ -50,9 +50,11 @@ class AsyncDatabase:
         return cls._instance
 
     def init_engine(self):
-        logger.debug("Initializing database engine")
+        logger.debug("*** Initializing database engine from settings")
         if self._engine is None:
-            logger.debug("Creating a new engine")
+            logger.debug(
+                f"*** Creating a new engine from settings. Database URI: {settings.AUTHZ_SQLALCHEMY_DATABASE_URI}"
+            )
             self._engine = create_async_engine(
                 settings.AUTHZ_SQLALCHEMY_DATABASE_URI,
                 pool_pre_ping=settings.AUTHZ_POOL_PRE_PING,

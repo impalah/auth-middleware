@@ -5,6 +5,7 @@ import httpx
 from jose import jwk
 from jose.utils import base64url_decode
 
+from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.logging import logger
@@ -19,6 +20,7 @@ class CognitoProvider(JWTProvider):
 
     def __new__(
         cls,
+        settings: JWTProviderSettings = None,
         permissions_provider: Union[
             Type[PermissionsProvider], PermissionsProvider
         ] = None,
@@ -32,6 +34,7 @@ class CognitoProvider(JWTProvider):
 
     def __init__(
         self,
+        settings: JWTProviderSettings = None,
         permissions_provider: Union[
             Type[PermissionsProvider], PermissionsProvider
         ] = None,
@@ -42,12 +45,17 @@ class CognitoProvider(JWTProvider):
 
         if not getattr(self.__class__, "_initialized", False):  # Avoid reinitialization
 
+            if not settings:
+                raise ValueError("Settings must be provided")
+
             # Lazy initialization for PermissionsProvider
             if isinstance(permissions_provider, type) and issubclass(
                 permissions_provider, PermissionsProvider
             ):
+                logger.debug("Initializing PermissionsProvider")
                 permissions_provider = permissions_provider()
             elif isinstance(permissions_provider, PermissionsProvider):
+                logger.debug("Setting PermissionsProvider")
                 permissions_provider = permissions_provider
             else:
                 raise ValueError(
@@ -58,8 +66,10 @@ class CognitoProvider(JWTProvider):
             if isinstance(groups_provider, type) and issubclass(
                 groups_provider, GroupsProvider
             ):
+                logger.debug("Initializing GroupsProvider")
                 groups_provider = groups_provider()
             elif isinstance(groups_provider, GroupsProvider):
+                logger.debug("Setting GroupsProvider")
                 groups_provider = groups_provider
             else:
                 raise ValueError(
@@ -67,6 +77,7 @@ class CognitoProvider(JWTProvider):
                 )
 
             super().__init__(
+                settings=settings,
                 permissions_provider=permissions_provider,
                 groups_provider=groups_provider,
             )
@@ -81,9 +92,9 @@ class CognitoProvider(JWTProvider):
         # TODO: Control errors
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                settings.AUTH_PROVIDER_AWS_COGNITO_JWKS_URL_TEMPLATE.format(
-                    settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_REGION,
-                    settings.AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID,
+                self._settings.jwks_url_template.format(
+                    self._settings.user_pool_region,
+                    self._settings.user_pool_id,
                 )
             )
             keys: List[JWK] = response.json()["keys"]
@@ -102,18 +113,17 @@ class CognitoProvider(JWTProvider):
         keys: List[JWK] = await self.get_keys()
 
         timestamp: int = (
-            time_ns()
-            + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
+            time_ns() + self._settings.jwks_cache_interval * 60 * 1000000000
         )
 
-        usage_counter: int = settings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES
+        usage_counter: int = self._settings.jwks_cache_usages
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
 
         return jks
 
     async def verify_token(self, token: JWTAuthorizationCredentials) -> bool:
 
-        if settings.AUTH_PROVIDER_AWS_COGNITO_TOKEN_VERIFICATION_DISABLED:
+        if self._settings.jwt_token_verification_disabled:
             return True
 
         logger.debug("Verifying token through signature")
@@ -121,6 +131,7 @@ class CognitoProvider(JWTProvider):
         hmac_key_candidate = await self._get_hmac_key(token)
 
         if not hmac_key_candidate:
+            # TODO: Custom exception
             logger.error(
                 "No public key found that matches the one present in the TOKEN!"
             )

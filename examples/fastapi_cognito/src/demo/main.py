@@ -13,6 +13,9 @@ from pydantic import BaseModel, EmailStr, Field, PrivateAttr
 from typing import Any, Dict, List
 
 from auth_middleware.functions import has_permissions, require_permissions
+from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+    CognitoAuthzProviderSettings,
+)
 from auth_middleware.types.user import User
 from auth_middleware import (
     JwtAuthMiddleware,
@@ -31,7 +34,26 @@ from auth_middleware.providers.authn.cognito_provider import (
     CognitoProvider,
 )
 
+from auth_middleware.providers.authz.async_database import AsyncDatabase
+
 from fastapi.openapi.utils import get_openapi
+
+from settings import settings
+
+
+def init_database():
+    """Initialize the database connection"""
+
+    # Get parameters manually
+    AsyncDatabase.initialize(
+        settings.SQLALCHEMY_DATABASE_URI,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=20,
+        pool_recycle=3600,
+        echo=True,
+        pool_timeout=30,
+    )
 
 
 def custom_openapi(app: FastAPI):
@@ -109,10 +131,22 @@ def custom_openapi(app: FastAPI):
 base_dir = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=base_dir.joinpath("..", "..", "templates"))
 
+# Initialize database manually
+init_database()
+
+# Initialize settings (read from .env file)
+provider_settings: CognitoAuthzProviderSettings = CognitoAuthzProviderSettings(
+    user_pool_id=settings.USER_POOL_ID,
+    user_pool_region=settings.AWS_REGION,
+    jwt_token_verification_disabled=settings.TOKEN_VERIFICATION_DISABLED,
+)
+
+
 app: FastAPI = FastAPI()
 app.add_middleware(
     JwtAuthMiddleware,
     auth_provider=CognitoProvider(
+        settings=provider_settings,
         groups_provider=CognitoGroupsProvider,
         permissions_provider=SqlPermissionsProvider,
     ),
@@ -141,20 +175,15 @@ async def index(
     request: Request, access_token: Optional[str] = None, id_token: Optional[str] = None
 ) -> HTMLResponse:
 
-    # Get variables from environment
-    cognito_domain: str = os.getenv("COGNITO_DOMAIN")
-    cognito_client_id: str = os.getenv("COGNITO_CLIENT_ID")
-    region: str = os.getenv("AWS_REGION")
-
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "title": "Testing FastAPI with Cognito",
             "message": "Testing FastAPI with Cognito",
-            "cognito_domain": cognito_domain,
-            "region": region,
-            "cognito_client_id": cognito_client_id,
+            "cognito_domain": settings.USER_POOL_DOMAIN,
+            "region": settings.AWS_REGION,
+            "cognito_client_id": settings.USER_POOL_CLIENT_ID,
             "access_token": access_token,
             "id_token": id_token,
         },

@@ -5,6 +5,7 @@ from typing import Optional
 from jose import jwk
 from jose.utils import base64url_decode
 
+from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.logging import logger
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
@@ -19,14 +20,17 @@ class JWTProvider(metaclass=ABCMeta):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
+    _settings: JWTProviderSettings
     _permissions_provider: PermissionsProvider
     _groups_provider: GroupsProvider
 
     def __init__(
         self,
+        settings: JWTProviderSettings = None,
         permissions_provider: PermissionsProvider = None,
         groups_provider: GroupsProvider = None,
     ) -> None:
+        self._settings = settings
         self._permissions_provider = permissions_provider
         self._groups_provider = groups_provider
 

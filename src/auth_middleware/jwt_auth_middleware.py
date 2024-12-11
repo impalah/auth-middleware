@@ -30,7 +30,12 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
     _auth_provider: JWTProvider
     _jwt_bearer_manager = JWTBearerManager
 
-    def __init__(self, auth_provider: JWTProvider, *args, **kwargs):
+    def __init__(
+        self,
+        auth_provider: JWTProvider,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self._auth_provider = auth_provider
         self._jwt_bearer_manager = JWTBearerManager(
@@ -94,6 +99,7 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
             logger.error("Invalid Token {}", str(ite))
             raise
         except Exception as e:
+            # TODO: Control "No public key found that matches the one present in the TOKEN!"
             logger.error("Not controlled exception {}", str(e))
             raise
 
