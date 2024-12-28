@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auth-middleware"
-version = "0.2.0"
+version = "0.2.1"
 description = "Async Auth Middleware for FastAPI/Starlette"
 authors = ["impalah <impalah@gmail.com>"]
 readme = "README.md"
