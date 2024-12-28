@@ -6,18 +6,18 @@ from jose import JWTError, jwt
 from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
-from auth_middleware.exceptions import InvalidTokenException
-from auth_middleware.jwt_auth_provider import JWTAuthProvider
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.logging import logger
 from auth_middleware.settings import settings
-from auth_middleware.types import JWTAuthorizationCredentials
 
 
 class JWTBearerManager(HTTPBearer):
 
     def __init__(
         self,
-        auth_provider: JWTAuthProvider,
+        auth_provider: JWTProvider,
         auto_error: bool = True,
     ):
         super().__init__(auto_error=auto_error)

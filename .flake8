@@ -1,0 +1,16 @@
+[flake8]
+# Activate bugbear
+select = B
+# Ignore specific rules (i.e E501: line too long, W503: line break before binary operator)
+ignore = E501, W503
+# Set the maximum line length to 88 characters
+max-line-length = 88
+# Exclude directories and files from linting
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    env,
+    alembic,
+    migrations,
+    docs

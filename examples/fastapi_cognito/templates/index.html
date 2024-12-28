@@ -1,134 +1,481 @@
-<html>
-    <head>
-        <title>{{ title }}</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f0f0f0;
-            }
-            h1, h2 {
-                color: #333;
-            }
-            p {
-                color: #666;
-            }
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-            }
-            .token {
-                word-wrap: break-word;
-                width: 90%; /* puedes ajustar este valor según tus necesidades */
-            }
-            .token-ellipsis {
-                display: inline-block;
-                max-width: 200px; /* Ajusta este valor según tus necesidades */
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
+<!DOCTYPE html>
+<html lang="en">
 
-            .button {
-                background-color: #008CBA;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                height: 40px;
-                width: 100px;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                margin: 4px 2px;
-                cursor: pointer;
-            }
-            a.button {
-                background-color: #008CBA;
-                border: none;
-                color: white;
-                text-align: center;
-                text-decoration: none;
-                display: inline-block;
-                font-size: 16px;
-                padding: 10px 20px;
-                margin: 4px 2px;
-                cursor: pointer;
-                width: 100px;
-                height: 25px;
-                line-height: 1.5;
-            }            
-            .field-container {
-                display: flex;
-                flex-direction: column;
-            }            
-        </style>
-        <script>
-            window.onload = function() {
-                var fragment = location.hash.substring(1).split('&').reduce(function (initial, item) {
-                    if (item) {
-                        var parts = item.split('=');
-                        initial[parts[0]] = decodeURIComponent(parts[1]);
-                    }
-                    return initial;
-                }, {});
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
 
-                if (fragment.access_token) {
-                    document.getElementById('access_token').textContent = fragment.access_token;
-                }
-                if (fragment.id_token) {
-                    document.getElementById('id_token').textContent = fragment.id_token;
-                }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
 
+        h1 {
+            text-align: center;
+            font-weight: 400;
+            color: #3f51b5;
+        }
+
+        h2 {
+            border-bottom: 2px solid #3f51b5;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #3f51b5;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-right: 10px;
+            width: 150px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .row button {
+            flex: 1;
+            padding: 10px 20px;
+            background-color: #3f51b5;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .row button:hover {
+            background-color: #303f9f;
+        }
+
+        .value {
+            flex-grow: 1;
+            word-wrap: break-word;
+            max-width: 20ch;
+            padding-left: 20px;
+        }
+
+        .value-extended {
+            flex-grow: 1;
+            word-wrap: break-word;
+            padding-left: 20px;
+        }
+
+        .value-ellipsis {
+            flex-grow: 1;
+            word-wrap: break-word;
+            max-width: 20ch;
+            padding-left: 20px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 10ch;
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            color: #3f51b5;
+            margin-left: 10px;
+        }
+
+        .menu {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .menu button {
+            background-color: #3f51b5;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .menu button:hover {
+            background-color: #303f9f;
+        }
+
+        /* Popup Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+            width: 300px;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            margin-left: 10px;
+        }
+
+        .equal-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .equal-buttons .copy-btn {
+            flex: 0 0 auto; /* Evita que los botones crezcan */
+            padding: 10px 20px;
+            background-color: #3f51b5;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .equal-buttons .copy-btn:hover {
+            background-color: #303f9f;
+        }        
+
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+
+    </style>
+
+    <script>
+        let code = null;
+        let token = null;
+        let tokenType = null;
+
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = isError ? '#f44336' : '#4caf50'; // Red for error, green for success
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000); // Hide after 3 seconds
+        }
+
+        function openLoginModal() {
+            document.getElementById("loginModal").style.display = "flex";
+        }
+
+        function closeLoginModal() {
+            document.getElementById("loginModal").style.display = "none";
+        }
+
+        function handleLogin() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const region = document.getElementById("aws-region").textContent;
+            const clientId = document.getElementById("cognito-client-id").textContent;
+
+            const body = {
+                "AuthParameters": {
+                    "USERNAME": username,
+                    "PASSWORD": password
+                },
+                "AuthFlow": "USER_PASSWORD_AUTH",
+                "ClientId": clientId
             };
-        </script>
-    </head>
-    <body>
-        <div class="container">
-            <h1>{{ message }}</h1>
-            <h2>Configuration</h2>
-            <p><b>Cognito domain:</b> {{ cognito_domain }}</p>
-            <p><b>Region:</b> {{ region }}</p>
-            <p><b>Client id:</b> {{ cognito_client_id }}</p>
 
-            <h2>Session</h2>
-            <div class="field-container">
-                <p><b>access_token:</b> <span id="access_token" class="token"></span></p>
-                <button id="copyAccess" class="button">Copy</button>
-            </div>
-            <div class="field-container">
-                <p><b>id_token:</b> <span id="id_token" class="token"></span></p>
-                <button id="copyId" class="button">Copy</button>
-            </div>
+            console.log("Login body: " + JSON.stringify(body));
 
-            <h2>Actions</h2>
-            <p><a href="{{ login_url }}" class="button">Login</a></p>
-            <p><a href="{{ logout_url }}" class="button">Logout</a></p>
+            // Simulate a login process (replace with actual request)
+            fetch('https://cognito-idp.' + region + '.amazonaws.com/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-amz-json-1.1',
+                    'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+                },
+                body: JSON.stringify(body)
+
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.AuthenticationResult) {
+
+                        token = data.AuthenticationResult.AccessToken;
+                        tokenType = data.AuthenticationResult.TokenType;
+                        console.log("Token: " + token);
+                        closeLoginModal();
+                        document.getElementById('access-token').textContent = token;
+                        document.getElementById('id-token').textContent = data.AuthenticationResult.IdToken;
+                        document.getElementById('refresh-token').textContent = data.AuthenticationResult.RefreshToken;
+
+                        document.getElementById('connection-status').textContent = 'Logged in';
+                        document.getElementById('logged-in-info').style.display = 'block';
+                        document.getElementById('tests-container').style.display = 'block';
+                    } else {
+                        console.log("Login failed: " + JSON.stringify(data));
+                        showNotification('Login failed: ' + data.message, true);
+                    }
+                })
+                .catch(err => {
+                    console.error('Login error:', err);
+                    showNotification('Login error: ' + err, true);
+                });
+        }
+
+        function logout() {
+
+            token = null;
+            tokenType = null;
+
+            document.getElementById('access-token').textContent = "";
+            document.getElementById('id-token').textContent = "";
+            document.getElementById('refresh-token').textContent = "";
+
+            document.getElementById('connection-status').textContent = 'Disconnected';
+            document.getElementById('tests-container').style.display = 'none';
+            document.getElementById('logged-in-info').style.display = 'none';
+
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Copied to clipboard');
+            }).catch(err => {
+                showNotification('Failed to copy: ' + err, true);
+            });
+        }
+
+        function getUserInfo() {
+            const idToken = document.getElementById('id-token').textContent;
+
+            fetch('/gimme/user', {
+                method: 'GET',
+                headers: {
+                    'Authorization': tokenType + " " + token
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // Muestra el resultado en la consola
+                    document.getElementById('user-info').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => console.error('Error:', error));
+
+        }
+
+        function callApi(url) {
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': tokenType + " " + token
+                }
+            })
+                .then(response => {
+                    document.getElementById('api-url').textContent = url;
+                    document.getElementById('api-status').textContent = response.status;
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('api-body').textContent = JSON.stringify(data, null, 2);
+                    showNotification('API call successful');
+                })
+                .catch(error => {
+                    document.getElementById('api-url').textContent = url;
+                    document.getElementById('api-status').textContent = 'Error';
+                    document.getElementById('api-body').textContent = error.toString();
+                    showNotification('API call failed', true);
+                });
+        }
+
+        window.onload = function () {
+            var fragment = location.hash.substring(1).split('&').reduce(function (initial, item) {
+                if (item) {
+                    var parts = item.split('=');
+                    initial[parts[0]] = decodeURIComponent(parts[1]);
+                }
+                return initial;
+            }, {});
+
+            if (fragment.access_token) {
+                document.getElementById('access-token').textContent = fragment.access_token;
+            }
+            if (fragment.id_token) {
+                document.getElementById('id-token').textContent = fragment.id_token;
+            }
+
+            if (fragment.access_token || fragment.id_token) {
+                document.getElementById('connection-status').textContent = 'Logged in';
+                document.getElementById('logged-in-info').style.display = 'block';
+                document.getElementById('tests-container').style.display = 'block';
+
+                fetch('/gimme/user', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + fragment.id_token
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data); // Muestra el resultado en la consola
+                        document.getElementById('user-info').textContent = JSON.stringify(data, null, 2);
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        };
+    </script>
+</head>
+
+<body>
+    <div id="notification" class="notification"></div>
+    <h1>{{ message }}</h1>
+    <div class="container">
+        <h2>Configuration</h2>
+        <div class="row">
+            <span class="label">Domain:</span>
+            <span class="value" id="cognito-domain">{{ cognito_domain }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Region:</span>
+            <span class="value" id="aws-region">{{ region }}</span>
+        </div>
+        <div class="row">
+            <span class="label">Client Id:</span>
+            <span class="value" id="cognito-client-id">{{ cognito_client_id }}</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Status</h2>
+        <div class="row">
+            <span class="label">Connection Status:</span>
+            <span class="value" id="connection-status">Disconnected</span>
+        </div>
+        <div id="logged-in-info" style="display: none;">
+            <div class="row equal-buttons">
+                <span class="label">Access Token:</span>
+                <span class="value-ellipsis" id="access-token"></span>
+                <button class="copy-btn" title="Copy to clipboard" onclick="copyToClipboard('access-token')">&#128203;</button>
+            </div>
+            <div class="row equal-buttons">
+                <span class="label">ID Token:</span>
+                <span class="value-ellipsis" id="id-token"></span>
+                <button class="copy-btn" title="Copy to clipboard" onclick="copyToClipboard('id-token')">&#128203;</button>
+            </div>
+            <div class="row equal-buttons">
+                <span class="label">Refresh Token:</span>
+                <span class="value-ellipsis" id="refresh-token"></span>
+                <button class="copy-btn" title="Copy to clipboard" onclick="copyToClipboard('refresh-token')">&#128203;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="tests-container" style="display: none;">
+        <h2>Tests</h2>
+        <div class="row">
+            <div class="menu">
+                <div class="row">
+                    <button onclick="callApi('/gimme/user')">Get logged in user</button>
+                    <button onclick="callApi('/hello/user')">Hello user</button>
+                    <button onclick="callApi('/hello/groups/admin')">Check admin group</button>
+                </div>
+                <div class="row">
+                    <button onclick="callApi('/hello/permissions/admin')">Check admin permissions</button>
+                    <button onclick="callApi('/hello/has-permissions/admin')">Has admin permissions</button>
+                </div>
+            </div>
         </div>
 
-        <script>
-            document.getElementById('copyAccess').addEventListener('click', function() {
-                var range = document.createRange();
-                range.selectNode(document.getElementById('access_token'));
-                window.getSelection().removeAllRanges(); // clear current selection
-                window.getSelection().addRange(range); // to select text
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges(); // to deselect
-            });
-            document.getElementById('copyId').addEventListener('click', function() {
-                var range = document.createRange();
-                range.selectNode(document.getElementById('id_token'));
-                window.getSelection().removeAllRanges(); // clear current selection
-                window.getSelection().addRange(range); // to select text
-                document.execCommand('copy');
-                window.getSelection().removeAllRanges(); // to deselect
-            });
+        <div class="row">
+            <span class="label">URL:</span>
+            <span class="value-extended" id="api-url"></span>
+        </div>
+        <div class="row">
+            <span class="label">Status:</span>
+            <span class="value-extended" id="api-status"></span>
+        </div>
+        <div class="row">
+            <span class="label">Response:</span>
+            <span class="value-extended" id="api-body"></span>
+        </div>
+    </div>
 
-        </script>        
+    <div class="menu">
+        <button onclick="openLoginModal()">Login</button>
+        <button onclick="logout()">Logout</button>
+    </div>
 
+    <!-- Modal for Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h3>Login</h3>
+            <div class="row">
+                <label for="username" class="label">Username:</label>
+                <input type="text" id="username" />
+            </div>
+            <div class="row">
+                <label for="password" class="label">Password:</label>
+                <input type="password" id="password" />
+            </div>
+            <div class="modal-buttons">
+                <button onclick="closeLoginModal()">Cancel</button>
+                <button onclick="handleLogin()">Login</button>
+            </div>
+        </div>
+    </div>
+</body>
 
-    
-    </body>
 </html>

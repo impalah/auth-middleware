@@ -8,17 +8,20 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.responses import JSONResponse, Response
 
 from auth_middleware.auth_provider import AuthProvider
-from auth_middleware.exceptions import (
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
+from auth_middleware.exceptions.invalid_authorization_exception import (
     InvalidAuthorizationException,
-    InvalidCredentialsException,
-    InvalidTokenException,
 )
-from auth_middleware.jwt_auth_provider import JWTAuthProvider
+from auth_middleware.exceptions.invalid_credentials_exception import (
+    InvalidCredentialsException,
+)
+
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
 from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.settings import settings
-from auth_middleware.types import JWTAuthorizationCredentials, User, UserCredentials
+from auth_middleware.types.user import User
+from auth_middleware.types.user_credentials import UserCredentials
 
 
 class BasicAuthMiddleware(BaseHTTPMiddleware):

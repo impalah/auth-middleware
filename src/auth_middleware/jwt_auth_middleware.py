@@ -5,11 +5,18 @@ from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
 
-from auth_middleware.exceptions import InvalidTokenException
-from auth_middleware.jwt_auth_provider import JWTAuthProvider
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
+from auth_middleware.exceptions.invalid_authorization_exception import (
+    InvalidAuthorizationException,
+)
+from auth_middleware.exceptions.invalid_credentials_exception import (
+    InvalidCredentialsException,
+)
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
-from auth_middleware.types import JWTAuthorizationCredentials, User
+from auth_middleware.types.user import User
 
 
 class JwtAuthMiddleware(BaseHTTPMiddleware):
@@ -20,10 +27,15 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
         BaseHTTPMiddleware (_type_): _description_
     """
 
-    _auth_provider: JWTAuthProvider
+    _auth_provider: JWTProvider
     _jwt_bearer_manager = JWTBearerManager
 
-    def __init__(self, auth_provider: JWTAuthProvider, *args, **kwargs):
+    def __init__(
+        self,
+        auth_provider: JWTProvider,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self._auth_provider = auth_provider
         self._jwt_bearer_manager = JWTBearerManager(
@@ -77,7 +89,7 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
 
             # Create User object from token
             user: User = (
-                self._auth_provider.create_user_from_token(token=token)
+                await self._auth_provider.create_user_from_token(token=token)
                 if token
                 else self.__create_synthetic_user()
             )
@@ -87,6 +99,7 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
             logger.error("Invalid Token {}", str(ite))
             raise
         except Exception as e:
+            # TODO: Control "No public key found that matches the one present in the TOKEN!"
             logger.error("Not controlled exception {}", str(e))
             raise
 

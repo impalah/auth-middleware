@@ -1,0 +1,40 @@
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+  db-postgresql:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test123
+      - POSTGRES_DB=mytestdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+  db-mysql:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=test123
+      - MYSQL_DATABASE=mytestdb
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test123
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+
+volumes:
+  postgres-data:
+    driver: local
+    # external: true
+  redis-data:
+    driver: local
+    # external: true
+  mysql-data:
+    driver: local
+    # external: true

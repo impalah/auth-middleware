@@ -1,0 +1,35 @@
+meta {
+  name: Login
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://cognito-idp.eu-west-1.amazonaws.com/
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/x-amz-json-1.1
+  X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth
+}
+
+body:json {
+  {
+    "AuthParameters": {
+      "USERNAME": "{{aws_cognito_user}}",
+      "PASSWORD": "{{aws_cognito_password}}"
+    },
+    "AuthFlow": "USER_PASSWORD_AUTH",
+    "ClientId": "{{aws_cognito_client_id}}"
+  }
+}
+
+body:form-urlencoded {
+  grant_type: password
+  client_id: {{aws_cognito_client_id}}
+  username: {{aws_cognito_user}}
+  password: {{aws_cognito_password}}
+  scope: aws.cognito.signin.user.admin+openid+profile
+}

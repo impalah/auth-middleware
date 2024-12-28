@@ -9,11 +9,17 @@ from fastapi import status
 from starlette.requests import Request
 
 from auth_middleware.auth_provider import AuthProvider, TCredentials
-from auth_middleware.exceptions import InvalidTokenException
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
+from auth_middleware.exceptions.invalid_authorization_exception import (
+    InvalidAuthorizationException,
+)
+from auth_middleware.exceptions.invalid_credentials_exception import (
+    InvalidCredentialsException,
+)
 from auth_middleware.logging import logger
 from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.repository.settings import settings
-from auth_middleware.types import UserCredentials
+from auth_middleware.user_credentials import UserCredentials
 
 
 class JsonCredentialsRepository(CredentialsRepository):

@@ -24,22 +24,5 @@ class Settings:
         "AUTH_MIDDLEWARE_DISABLED", cast=bool, default=False
     )
 
-    AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES: int = config(
-        "AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES",
-        cast=int,
-        default=20,
-    )
-    AUTH_MIDDLEWARE_JWKS_CACHE_USAGES: int = config(
-        "AUTH_MIDDLEWARE_JWKS_CACHE_USAGES",
-        cast=int,
-        default=1000,
-    )
-
-    AUTH_MIDDLEWARE_JSON_REPOSITORY_PATH: str = config(
-        "AUTH_MIDDLEWARE_JSON_REPOSITORY_PATH",
-        cast=str,
-        default=None,
-    )
-
 
 settings = Settings()
