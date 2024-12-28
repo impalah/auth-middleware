@@ -1,28 +1,29 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, status
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel, EmailStr, Field, PrivateAttr
+from settings import settings
 from starlette.requests import Request
 from starlette.responses import Response
 from uvicorn import run
 
-from pydantic import BaseModel, EmailStr, Field, PrivateAttr
-from typing import Any, Dict, List
-
-from auth_middleware.functions import has_permissions, require_permissions
-from auth_middleware.providers.authn.cognito_authz_provider_settings import (
-    CognitoAuthzProviderSettings,
-)
-from auth_middleware.types.user import User
 from auth_middleware import (
     JwtAuthMiddleware,
     get_current_user,
     require_groups,
     require_user,
 )
+from auth_middleware.functions import has_permissions, require_permissions
+from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+    CognitoAuthzProviderSettings,
+)
+from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+from auth_middleware.providers.authz.async_database import AsyncDatabase
 from auth_middleware.providers.authz.cognito_groups_provider import (
     CognitoGroupsProvider,
 )
@@ -30,15 +31,7 @@ from auth_middleware.providers.authz.sql_groups_provider import SqlGroupsProvide
 from auth_middleware.providers.authz.sql_permissions_provider import (
     SqlPermissionsProvider,
 )
-from auth_middleware.providers.authn.cognito_provider import (
-    CognitoProvider,
-)
-
-from auth_middleware.providers.authz.async_database import AsyncDatabase
-
-from fastapi.openapi.utils import get_openapi
-
-from settings import settings
+from auth_middleware.types.user import User
 
 
 def init_database():
@@ -148,7 +141,7 @@ app.add_middleware(
     auth_provider=CognitoProvider(
         settings=provider_settings,
         groups_provider=CognitoGroupsProvider,
-        permissions_provider=SqlPermissionsProvider,
+        # permissions_provider=SqlPermissionsProvider,
     ),
 )
 

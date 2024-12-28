@@ -5,14 +5,14 @@ import httpx
 from jose import jwk
 from jose.utils import base64url_decode
 
-from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
-from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
-from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.logging import logger
+from auth_middleware.providers.authn.cognito_settings import settings
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
+from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
 from auth_middleware.providers.exceptions.aws_exception import AWSException
-from auth_middleware.providers.authn.cognito_settings import settings
+from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
 
@@ -48,33 +48,37 @@ class CognitoProvider(JWTProvider):
             if not settings:
                 raise ValueError("Settings must be provided")
 
+            # TODO: Refactor this
             # Lazy initialization for PermissionsProvider
-            if isinstance(permissions_provider, type) and issubclass(
-                permissions_provider, PermissionsProvider
-            ):
-                logger.debug("Initializing PermissionsProvider")
-                permissions_provider = permissions_provider()
-            elif isinstance(permissions_provider, PermissionsProvider):
-                logger.debug("Setting PermissionsProvider")
-                permissions_provider = permissions_provider
-            else:
-                raise ValueError(
-                    "permissions_provider must be a PermissionsProvider or a subclass thereof"
-                )
+            if permissions_provider:
+                if isinstance(permissions_provider, type) and issubclass(
+                    permissions_provider, PermissionsProvider
+                ):
+                    logger.debug("Initializing PermissionsProvider")
+                    permissions_provider = permissions_provider()
+                elif isinstance(permissions_provider, PermissionsProvider):
+                    logger.debug("Setting PermissionsProvider")
+                    permissions_provider = permissions_provider
+                else:
+                    raise ValueError(
+                        "permissions_provider must be a PermissionsProvider or a subclass thereof"
+                    )
 
+            # TODO: Refactor this
             # Lazy initialization for GroupsProvider
-            if isinstance(groups_provider, type) and issubclass(
-                groups_provider, GroupsProvider
-            ):
-                logger.debug("Initializing GroupsProvider")
-                groups_provider = groups_provider()
-            elif isinstance(groups_provider, GroupsProvider):
-                logger.debug("Setting GroupsProvider")
-                groups_provider = groups_provider
-            else:
-                raise ValueError(
-                    "groups_provider must be a GroupsProvider or a subclass thereof"
-                )
+            if groups_provider:
+                if isinstance(groups_provider, type) and issubclass(
+                    groups_provider, GroupsProvider
+                ):
+                    logger.debug("Initializing GroupsProvider")
+                    groups_provider = groups_provider()
+                elif isinstance(groups_provider, GroupsProvider):
+                    logger.debug("Setting GroupsProvider")
+                    groups_provider = groups_provider
+                else:
+                    raise ValueError(
+                        "groups_provider must be a GroupsProvider or a subclass thereof"
+                    )
 
             super().__init__(
                 settings=settings,
