@@ -4,18 +4,19 @@ from fastapi import Request, status
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.exceptions.invalid_authorization_exception import (
     InvalidAuthorizationException,
 )
 from auth_middleware.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
 )
-from auth_middleware.types.jwt import JWTAuthorizationCredentials
-from auth_middleware.providers.authn.jwt_provider import JWTProvider
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
 
@@ -32,11 +33,12 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
+        app: ASGIApp,
         auth_provider: JWTProvider,
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(app, *args, **kwargs)
         self._auth_provider = auth_provider
         self._jwt_bearer_manager = JWTBearerManager(
             auth_provider=self._auth_provider,
