@@ -1,7 +1,7 @@
 meta {
-  name: Get Token (client credentials)
+  name: (No) Get Id Token
   type: http
-  seq: 3
+  seq: 2
 }
 
 post {
@@ -11,10 +11,9 @@ post {
 }
 
 body:form-urlencoded {
-  client_id: {{client_id}}
-  grant_type: client_credentials
-  client_secret: {{client_secret}}
-  redirect_uri: http://localhost:4200
+  client_id: {{login_client_id}}
+  grant_type: refresh_token
+  refresh_token: {{refresh_token}}
 }
 
 script:post-response {
