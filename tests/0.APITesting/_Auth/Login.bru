@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: https://cognito-idp.eu-west-1.amazonaws.com/
+  url: https://cognito-idp.{{aws_region}}.amazonaws.com/
   body: json
   auth: none
 }
@@ -18,11 +18,11 @@ headers {
 body:json {
   {
     "AuthParameters": {
-      "USERNAME": "{{aws_cognito_user}}",
-      "PASSWORD": "{{aws_cognito_password}}"
+      "USERNAME": "{{login_username}}",
+      "PASSWORD": "{{login_password}}"
     },
     "AuthFlow": "USER_PASSWORD_AUTH",
-    "ClientId": "{{aws_cognito_client_id}}"
+    "ClientId": "{{login_client_id}}"
   }
 }
 
@@ -32,4 +32,17 @@ body:form-urlencoded {
   username: {{aws_cognito_user}}
   password: {{aws_cognito_password}}
   scope: aws.cognito.signin.user.admin+openid+profile
+}
+
+script:post-response {
+  // Extract the access_token from the response
+  let access_token = res.body.AccessToken;
+  let id_token = res.body.IdToken;
+  let refresh_token = res.body.RefreshToken;
+  
+  // Store the access_token in a variable
+  bru.setEnvVar("access_token", access_token);
+  bru.setEnvVar("id_token", id_token);
+  bru.setEnvVar("refresh_token", refresh_token);
+  
 }
