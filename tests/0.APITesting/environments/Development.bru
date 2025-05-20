@@ -1,16 +1,10 @@
 vars {
-  aws_cognito_domain: {{process.env.AWS_COGNITO_DOMAIN}}
+  login_username: {{process.env.LOGIN_USERNAME}}
+  login_password: {{process.env.LOGIN_PASSWORD}}
+  login_client_id: {{process.env.LOGIN_CLIENT_ID}}
   aws_region: {{process.env.AWS_REGION}}
-  aws_cognito_client_id: {{process.env.AWS_COGNITO_CLIENT_ID}}
-  aws_cognito_user: {{process.env.AWS_COGNITO_USER}}
-  aws_cognito_password: {{process.env.AWS_COGNITO_PASSWORD}}
-  host: {{process.env.HOST}}
-  api_host: {{process.env.API_HOST}}
-  id_provider_domain: {{process.env.ID_PROVIDER_DOMAIN}}
   client_id: {{process.env.CLIENT_ID}}
   client_secret: {{process.env.CLIENT_SECRET}}
-  client_id_auth_code: {{process.env.CLIENT_ID_AUTH_CODE}}
-  bearer_token: {{process.env.BEARER_TOKEN}}
-  hosted_ui_url: {{process.env.HOSTED_UI_URL}}
-  hosted_ui_client_id: {{process.env.HOSTED_UI_CLIENT_ID}}
+  aws_cognito_domain: {{process.env.AWS_COGNITO_DOMAIN}}
+  
 }
