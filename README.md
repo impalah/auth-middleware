@@ -35,11 +35,30 @@ from auth_middleware.functions import require_groups, require_user
 from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
 # Step 3: import the auth provider
 from auth_middleware.providers.cognito import CognitoProvider
+# Implement group provider (if any)
+from auth_middleware.providers.authz.cognito_groups_provider import (
+    CognitoGroupsProvider,
+)
+
 
 app: FastAPI = FastAPI()
 
 # Step 4: Add Middleware with a Cognito auth Provider
-app.add_middleware(JwtAuthMiddleware, auth_provider=CognitoProvider())
+auth_provider_settings: CognitoAuthzProviderSettings = CognitoAuthzProviderSettings(
+    user_pool_id="My Pool Id",
+    user_pool_region="AWS_REGION",
+    jwt_token_verification_disabled=true,
+)
+
+app.add_middleware(
+    JwtAuthMiddleware,
+    auth_provider=CognitoProvider(
+        settings=auth_provider_settings,
+        groups_provider=CognitoGroupsProvider,
+        # permissions_provider=SqlPermissionsProvider,
+    ),
+)
+
 
 @app.get("/",
     dependencies=[
@@ -50,14 +69,6 @@ app.add_middleware(JwtAuthMiddleware, auth_provider=CognitoProvider())
 async def root(request: Request):
     # Step 6: user information will be available in the request.state.current_user object
     return {"message": f"Hello {request.state.current_user.name}"}
-
-```
-
-Then set the environment variables (or your .env file)
-
-```bash
-AWS_COGNITO_USER_POOL_ID=your_cognito_user_pool_id
-AWS_COGNITO_USER_POOL_REGION=your_cognito_user_pool_region
 
 ```
 
