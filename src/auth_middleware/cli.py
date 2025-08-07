@@ -29,6 +29,7 @@ def get_permissions(username):
 
 
 # cli.add_command(get_permissions)
+cli.add_command(get_permissions)
 
 if __name__ == "__main__":
     cli()

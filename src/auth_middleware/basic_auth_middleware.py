@@ -152,7 +152,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         user: User = User(
             id=user_credentials.id,
             name=user_credentials.name,
-            groups=user_credentials.groups,
+            groups=await user_credentials.groups,
             email=user_credentials.email,
         )
 

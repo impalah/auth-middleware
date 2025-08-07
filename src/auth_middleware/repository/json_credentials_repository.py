@@ -4,7 +4,7 @@ import os
 from auth_middleware.logging import logger
 from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.repository.settings import settings
-from auth_middleware.user_credentials import UserCredentials
+from auth_middleware.types.user_credentials import UserCredentials
 
 
 class JsonCredentialsRepository(CredentialsRepository):
