@@ -1,41 +1,39 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>jwt_auth_middleware &mdash; auth-middleware 0.1.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>jwt_auth_middleware &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="canonical" href="/auth-middleware/jwt_auth_middleware.html" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a58bc63e"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="jwt_auth_provider" href="jwt_auth_provider.html" />
-    <link rel="prev" title="API" href="api.html" /> 
+    <link rel="next" title="Authentication Functions" href="functions.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="index.html" class="icon icon-home">
-            auth-middleware
+            Auth Middleware
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -45,39 +43,63 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="api.html">API</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">jwt_auth_middleware</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware"><code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user"><code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware.get_current_user()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="api.html#core-components">Core Components</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">jwt_auth_middleware</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware"><code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html">jwt_auth_provider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="types.html">types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functions.html">functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html">cognito_provider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html">entra_id_provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#authentication-providers">Authentication Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#utilities">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#usage-patterns">Usage Patterns</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
 </ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">auth-middleware</a>
+          <a href="index.html">Auth Middleware</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -85,7 +107,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="api.html">API Reference</a></li>
       <li class="breadcrumb-item active">jwt_auth_middleware</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/jwt_auth_middleware.rst.txt" rel="nofollow"> View page source</a>
@@ -100,21 +122,38 @@
 <span id="jwt-auth-middleware"></span><h1>jwt_auth_middleware<a class="headerlink" href="#module-auth_middleware.jwt_auth_middleware" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.jwt_auth_middleware.JwtAuthMiddleware">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.jwt_auth_middleware.</span></span><span class="sig-name descname"><span class="pre">JwtAuthMiddleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">auth_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.jwt_auth_provider.JWTAuthProvider" title="auth_middleware.jwt_auth_provider.JWTAuthProvider"><span class="pre">JWTAuthProvider</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware" title="Link to this definition"></a></dt>
-<dd><p>JWT Authorization middleware for FastAPI
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.jwt_auth_middleware.</span></span><span class="sig-name descname"><span class="pre">JwtAuthMiddleware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.13)"><span class="pre">MutableMapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.13)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.13)"><span class="pre">MutableMapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.13)"><span class="pre">MutableMapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.13)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.13)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider" title="auth_middleware.providers.authn.jwt_provider.JWTProvider"><span class="pre">JWTProvider</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/jwt_auth_middleware.html#JwtAuthMiddleware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHTTPMiddleware</span></code></p>
+<p>JWT Authorization middleware for FastAPI
 Adds the current user to the request state.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>BaseHTTPMiddleware (_type_): _description_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>BaseHTTPMiddleware</strong> (<em>_type_</em>) – _description_</p>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.13)"><span class="pre">MutableMapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.13)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.13)"><span class="pre">MutableMapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.13)"><span class="pre">MutableMapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.13)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.13)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider" title="auth_middleware.providers.authn.jwt_provider.JWTProvider"><span class="pre">JWTProvider</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/jwt_auth_middleware.html#JwtAuthMiddleware.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.dispatch">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://fastapi.tiangolo.com/reference/request/#fastapi.Request" title="(in FastAPI v0.0.0)"><span class="pre">Request</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_next</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.13)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://fastapi.tiangolo.com/reference/request/#fastapi.Request" title="(in FastAPI v0.0.0)"><span class="pre">Request</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Awaitable" title="(in Python v3.13)"><span class="pre">Awaitable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://fastapi.tiangolo.com/reference/response/#fastapi.Response" title="(in FastAPI v0.0.0)"><span class="pre">Response</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://fastapi.tiangolo.com/reference/response/#fastapi.Response" title="(in FastAPI v0.0.0)"><span class="pre">Response</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://fastapi.tiangolo.com/reference/responses/#fastapi.responses.JSONResponse" title="(in FastAPI v0.0.0)"><span class="pre">JSONResponse</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/jwt_auth_middleware.html#JwtAuthMiddleware.dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.dispatch" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_current_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Request</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.User" title="auth_middleware.types.User"><span class="pre">User</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_current_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://fastapi.tiangolo.com/reference/request/#fastapi.Request" title="(in FastAPI v0.0.0)"><span class="pre">Request</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">User</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/jwt_auth_middleware.html#JwtAuthMiddleware.get_current_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user" title="Link to this definition"></a></dt>
 <dd><p>Get current logged in and active user</p>
-<dl class="simple">
-<dt>Raises:</dt><dd><p>HTTPException: _description_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>HTTPException</strong> – _description_</p>
 </dd>
-<dt>Returns:</dt><dd><p>User: Domain object.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Domain object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>User</p>
 </dd>
 </dl>
 </dd></dl>
@@ -127,14 +166,14 @@ Adds the current user to the request state.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api.html" class="btn btn-neutral float-left" title="API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="jwt_auth_provider.html" class="btn btn-neutral float-right" title="jwt_auth_provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="functions.html" class="btn btn-neutral float-right" title="Authentication Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, impalah.</p>
+    <p>&#169; Copyright 2025, impalah.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

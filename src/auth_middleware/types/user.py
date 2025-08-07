@@ -1,10 +1,10 @@
-from typing import Any, Dict, List, Optional
+import asyncio
+from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field, PrivateAttr
 
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
-import asyncio
 
 
 class User(BaseModel):
@@ -17,14 +17,14 @@ class User(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    _permissions_provider: Optional[PermissionsProvider] = PrivateAttr()
-    _groups_provider: Optional[GroupsProvider] = PrivateAttr()
-    _token: Optional[str] = PrivateAttr()
+    _permissions_provider: PermissionsProvider | None = PrivateAttr()
+    _groups_provider: GroupsProvider | None = PrivateAttr()
+    _token: str | None = PrivateAttr()
 
-    _groups: Optional[List[str]] = None
-    _groups_task: Optional[asyncio.Task] = None
-    _permissions: Optional[List[str]] = None
-    _permissions_task: Optional[asyncio.Task] = None
+    _groups: list[str] | None = None
+    _groups_task: asyncio.Task | None = None
+    _permissions: list[str] | None = None
+    _permissions_task: asyncio.Task | None = None
 
     def __init__(
         self,
@@ -33,7 +33,6 @@ class User(BaseModel):
         groups_provider: PermissionsProvider = None,
         **data: Any,
     ):
-
         super().__init__(**data)
 
         # Store the token
@@ -45,6 +44,10 @@ class User(BaseModel):
         # Store the groups provider (e.g., SQL, DynamoDB, etc.)
         self._groups_provider = groups_provider
 
+        # Handle groups passed directly in constructor
+        if "groups" in data:
+            self._groups = data["groups"]
+
     id: str = Field(
         ...,
         max_length=500,
@@ -54,7 +57,7 @@ class User(BaseModel):
         },
     )
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None,
         max_length=500,
         json_schema_extra={
@@ -63,7 +66,7 @@ class User(BaseModel):
         },
     )
 
-    email: Optional[EmailStr] = Field(
+    email: EmailStr | None = Field(
         default=None,
         max_length=500,
         json_schema_extra={
@@ -71,6 +74,14 @@ class User(BaseModel):
             "example": "useradmin@user.com",
         },
     )
+
+    # groups: Optional[List[str]] = Field(
+    #     default=None,
+    #     json_schema_extra={
+    #         "description": "List of user groups",
+    #         "example": '["admin", "user"]',
+    #     },
+    # )
 
     # groups: Optional[List[str]] = Field(
     #     default=[],
@@ -98,7 +109,7 @@ class User(BaseModel):
     #     return groups
 
     @property
-    async def groups(self) -> List[str]:
+    async def groups(self) -> list[str]:
         """Async property to get the groups of the user.
 
         Returns:
@@ -114,12 +125,16 @@ class User(BaseModel):
 
         return self._groups
 
-    async def _load_groups(self) -> List[str]:
+    async def _load_groups(self) -> list[str]:
         """Load the groups of the user.
 
         Returns:
             List[str]: _description_
         """
+        # If groups were set directly in constructor, return them
+        if self._groups is not None:
+            return self._groups
+
         if not self._groups_provider or not self._token:
             return []
 
@@ -127,7 +142,7 @@ class User(BaseModel):
         return groups
 
     @property
-    async def permissions(self) -> List[str]:
+    async def permissions(self) -> list[str]:
         """Async property to get the permissions of the user.
 
         Returns:
@@ -143,7 +158,7 @@ class User(BaseModel):
 
         return self._permissions
 
-    async def _load_permissions(self) -> List[str]:
+    async def _load_permissions(self) -> list[str]:
         """Load the permissions of the user.
 
         Returns:

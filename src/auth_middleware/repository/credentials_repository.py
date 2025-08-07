@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional
 
 from auth_middleware.types.user_credentials import UserCredentials
 
@@ -13,7 +12,7 @@ class CredentialsRepository(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    async def get_by_id(self, *, id: str) -> Optional[UserCredentials]:
+    async def get_by_id(self, *, id: str) -> UserCredentials | None:
         raise NotImplementedError()
 
     # @abstractmethod

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
@@ -7,14 +5,13 @@ from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
-from auth_middleware.types.jwt import JWTAuthorizationCredentials
-from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.logging import logger
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.settings import settings
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 
 class JWTBearerManager(HTTPBearer):
-
     def __init__(
         self,
         auth_provider: JWTProvider,
@@ -25,13 +22,13 @@ class JWTBearerManager(HTTPBearer):
 
     async def get_credentials(
         self, request: Request
-    ) -> Optional[JWTAuthorizationCredentials]:
+    ) -> JWTAuthorizationCredentials | None:
         if settings.AUTH_MIDDLEWARE_DISABLED:
             return None
 
         try:
-            credentials: Optional[HTTPAuthorizationCredentials] = (
-                await super().__call__(request)
+            credentials: HTTPAuthorizationCredentials | None = await super().__call__(
+                request
             )
         except HTTPException as e:
             logger.error("Error in JWTBearerManager: {}", str(e))
@@ -41,7 +38,7 @@ class JWTBearerManager(HTTPBearer):
             raise InvalidTokenException(
                 status_code=HTTP_403_FORBIDDEN,
                 detail="JWK-invalid",
-            )
+            ) from e
 
         if credentials:
             # TODO: use a constant for the string "Bearer"
@@ -54,7 +51,8 @@ class JWTBearerManager(HTTPBearer):
 
             jwt_token = credentials.credentials
 
-            # TODO: control exceptions if token is not a valid JWT (does not have a . in it)
+            # TODO: control exceptions if token is not a valid JWT
+            # (does not have a . in it)
             message, signature = jwt_token.rsplit(".", 1)
 
             try:
@@ -66,12 +64,12 @@ class JWTBearerManager(HTTPBearer):
                     message=message,
                 )
 
-            except JWTError:
+            except JWTError as jwt_err:
                 logger.error("Error in JWTBearerManager: JWTError")
                 raise InvalidTokenException(
                     status_code=HTTP_403_FORBIDDEN,
                     detail="JWK-invalid",
-                )
+                ) from jwt_err
 
             if not await self.auth_provider.verify_token(jwt_credentials):
                 logger.error("Error in JWTBearerManager: token not verified")

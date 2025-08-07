@@ -1,21 +1,20 @@
 """Initial migration
 
 Revision ID: de961fac6f27
-Revises: 
+Revises:
 Create Date: 2024-11-22 10:59:30.889117
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = 'de961fac6f27'
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -26,7 +25,12 @@ def upgrade() -> None:
     sa.Column('permission', sa.String(length=100), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_authz_permissions_id'), 'authz_permissions', ['id'], unique=False)
+    op.create_index(
+        op.f('ix_authz_permissions_id'),
+        'authz_permissions',
+        ['id'],
+        unique=False
+    )
     # ### end Alembic commands ###
 
 

@@ -1,40 +1,39 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>entra_id_provider &mdash; auth-middleware 0.1.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>Azure Entra ID Authentication Provider &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="canonical" href="/auth-middleware/entra_id_provider.html" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a58bc63e"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="cognito_provider" href="cognito_provider.html" /> 
+    <link rel="next" title="JWT Authentication Provider" href="jwt_auth_provider.html" />
+    <link rel="prev" title="AWS Cognito Provider" href="cognito_provider.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="index.html" class="icon icon-home">
-            auth-middleware
+            Auth Middleware
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -44,43 +43,130 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Azure Entra ID Authentication Provider</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-configuration">Basic Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-tenant-configuration">Multi-tenant Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment Variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#required-environment-variables">Required Environment Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#environment-based-configuration">Environment-based Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#token-structure">Token Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#expected-entra-id-claims">Expected Entra ID Claims</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#user-information-mapping">User Information Mapping</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#azure-ad-app-registration">Azure AD App Registration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#application-setup">Application Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app-registration-configuration">App Registration Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-examples">Integration Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#single-tenant-application">Single-tenant Application</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-tenant-saas-application">Multi-tenant SaaS Application</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#token-acquisition">Token Acquisition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#client-side-token-acquisition">Client-side Token Acquisition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#server-side-token-acquisition">Server-side Token Acquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#entra-id-specific-errors">Entra ID Specific Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#security-recommendations">Security Recommendations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#performance-optimization">Performance Optimization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api-reference">API Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="api.html">API</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_middleware.html">jwt_auth_middleware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html">jwt_auth_provider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="types.html">types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functions.html">functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html">cognito_provider</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">entra_id_provider</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider"><code class="docutils literal notranslate"><span class="pre">EntraIDProvider</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.create_user_from_token"><code class="docutils literal notranslate"><span class="pre">EntraIDProvider.create_user_from_token()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_keys"><code class="docutils literal notranslate"><span class="pre">EntraIDProvider.get_keys()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_openid_config"><code class="docutils literal notranslate"><span class="pre">EntraIDProvider.get_openid_config()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.load_jwks"><code class="docutils literal notranslate"><span class="pre">EntraIDProvider.load_jwks()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.verify_token"><code class="docutils literal notranslate"><span class="pre">EntraIDProvider.verify_token()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
 </ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
 </ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">auth-middleware</a>
+          <a href="index.html">Auth Middleware</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -88,8 +174,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="api.html">API</a></li>
-      <li class="breadcrumb-item active">entra_id_provider</li>
+      <li class="breadcrumb-item active">Azure Entra ID Authentication Provider</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/entra_id_provider.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -99,82 +184,370 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-auth_middleware.providers.entra_id.entra_id_provider">
-<span id="entra-id-provider"></span><h1>entra_id_provider<a class="headerlink" href="#module-auth_middleware.providers.entra_id.entra_id_provider" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.entra_id.entra_id_provider.</span></span><span class="sig-name descname"><span class="pre">EntraIDProvider</span></span><a class="headerlink" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider" title="Link to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.create_user_from_token">
-<span class="sig-name descname"><span class="pre">create_user_from_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#auth_middleware.types.JWTAuthorizationCredentials" title="auth_middleware.types.JWTAuthorizationCredentials"><span class="pre">JWTAuthorizationCredentials</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.User" title="auth_middleware.types.User"><span class="pre">User</span></a></span></span><a class="headerlink" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.create_user_from_token" title="Link to this definition"></a></dt>
-<dd><p>Initializes a domain User object with data recovered from a JWT TOKEN.
-Args:
-token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
+  <section id="azure-entra-id-authentication-provider">
+<h1>Azure Entra ID Authentication Provider<a class="headerlink" href="#azure-entra-id-authentication-provider" title="Link to this heading"></a></h1>
+<p>The Azure Entra ID (formerly Azure Active Directory) Authentication Provider enables JWT token validation against Microsoft’s identity platform. This provider automatically handles token validation using Azure’s public keys and supports both single-tenant and multi-tenant applications.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The Entra ID provider supports:</p>
+<ul class="simple">
+<li><p><strong>Automatic Key Rotation</strong>: Fetches public keys from Microsoft’s JWKS endpoint</p></li>
+<li><p><strong>Multi-tenant Support</strong>: Validates tokens from any Azure AD tenant</p></li>
+<li><p><strong>Claims Mapping</strong>: Maps Azure AD claims to user information</p></li>
+<li><p><strong>Group Integration</strong>: Supports Azure AD security groups and roles</p></li>
+<li><p><strong>Token Validation</strong>: Full JWT validation including signature, expiration, and issuer</p></li>
+</ul>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<section id="basic-configuration">
+<h3>Basic Configuration<a class="headerlink" href="#basic-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.entra_id_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntraIdProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.entra_id_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntraIdProviderSettings</span>
+
+<span class="c1"># Configure Entra ID settings</span>
+<span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdProviderSettings</span><span class="p">(</span>
+    <span class="n">tenant_id</span><span class="o">=</span><span class="s2">&quot;your-tenant-id&quot;</span><span class="p">,</span>
+    <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://sts.windows.net/your-tenant-id/&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Create Entra ID provider</span>
+<span class="n">entra_provider</span> <span class="o">=</span> <span class="n">EntraIdProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">entra_settings</span><span class="p">)</span>
+
+<span class="c1"># Add to FastAPI application</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">auth_provider</span><span class="o">=</span><span class="n">entra_provider</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="multi-tenant-configuration">
+<h3>Multi-tenant Configuration<a class="headerlink" href="#multi-tenant-configuration" title="Link to this heading"></a></h3>
+<p>For applications that need to accept users from any Azure AD tenant:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdProviderSettings</span><span class="p">(</span>
+    <span class="n">tenant_id</span><span class="o">=</span><span class="s2">&quot;common&quot;</span><span class="p">,</span>  <span class="c1"># Accept from any tenant</span>
+    <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://sts.windows.net/&quot;</span><span class="p">,</span>  <span class="c1"># Generic issuer for multi-tenant</span>
+    <span class="n">validate_tenant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Skip tenant validation</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="environment-variables">
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading"></a></h2>
+<section id="required-environment-variables">
+<h3>Required Environment Variables<a class="headerlink" href="#required-environment-variables" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Required</span>
+<span class="nv">ENTRA_TENANT_ID</span><span class="o">=</span>your-tenant-id-or-common
+<span class="nv">ENTRA_CLIENT_ID</span><span class="o">=</span>your-application-client-id
+
+<span class="c1"># Optional</span>
+<span class="nv">ENTRA_ISSUER</span><span class="o">=</span>https://sts.windows.net/your-tenant-id/
+<span class="nv">ENTRA_AUDIENCE</span><span class="o">=</span>your-application-id-uri
+<span class="nv">ENTRA_VALIDATE_TENANT</span><span class="o">=</span><span class="nb">true</span>
+</pre></div>
+</div>
+</section>
+<section id="environment-based-configuration">
+<h3>Environment-based Configuration<a class="headerlink" href="#environment-based-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.entra_id_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntraIdProviderSettings</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_entra_settings</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">EntraIdProviderSettings</span><span class="p">(</span>
+        <span class="n">tenant_id</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENTRA_TENANT_ID&quot;</span><span class="p">),</span>
+        <span class="n">client_id</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENTRA_CLIENT_ID&quot;</span><span class="p">),</span>
+        <span class="n">issuer</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENTRA_ISSUER&quot;</span><span class="p">),</span>
+        <span class="n">audience</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENTRA_AUDIENCE&quot;</span><span class="p">),</span>
+        <span class="n">validate_tenant</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENTRA_VALIDATE_TENANT&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="token-structure">
+<h2>Token Structure<a class="headerlink" href="#token-structure" title="Link to this heading"></a></h2>
+<section id="expected-entra-id-claims">
+<h3>Expected Entra ID Claims<a class="headerlink" href="#expected-entra-id-claims" title="Link to this heading"></a></h3>
+<p>Azure Entra ID tokens contain the following claims:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sts.windows.net/tenant-id/&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1640908800</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1640995200</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AAAAAAAAAAAAAAAAAAAAAMLkj3QiQZ-KiFQjQ&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;preferred_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;john@company.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;john@company.com&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tenant-id&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;oid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object-id&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;group-id-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;group-id-2&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Role.Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Role.User&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;scp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User.Read Profile.Read&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="user-information-mapping">
+<h3>User Information Mapping<a class="headerlink" href="#user-information-mapping" title="Link to this heading"></a></h3>
+<p>The provider maps Entra ID claims to user information:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">EntraIdUser</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>              <span class="c1"># From &#39;oid&#39; claim</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>            <span class="c1"># From &#39;name&#39; claim</span>
+    <span class="n">email</span><span class="p">:</span> <span class="nb">str</span>           <span class="c1"># From &#39;email&#39; or &#39;preferred_username&#39;</span>
+    <span class="n">tenant_id</span><span class="p">:</span> <span class="nb">str</span>       <span class="c1"># From &#39;tid&#39; claim</span>
+    <span class="n">groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>    <span class="c1"># From &#39;groups&#39; claim</span>
+    <span class="n">roles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>     <span class="c1"># From &#39;roles&#39; claim</span>
+    <span class="n">scopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>    <span class="c1"># From &#39;scp&#39; claim (space-separated)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="azure-ad-app-registration">
+<h2>Azure AD App Registration<a class="headerlink" href="#azure-ad-app-registration" title="Link to this heading"></a></h2>
+<section id="application-setup">
+<h3>Application Setup<a class="headerlink" href="#application-setup" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Register Application</strong>: Go to Azure Portal &gt; App registrations &gt; New registration</p></li>
+<li><p><strong>Configure Authentication</strong>: Set redirect URIs and supported account types</p></li>
+<li><p><strong>API Permissions</strong>: Add required Microsoft Graph permissions</p></li>
+<li><p><strong>Expose API</strong>: Configure application ID URI and scopes</p></li>
+</ol>
+</section>
+<section id="app-registration-configuration">
+<h3>App Registration Configuration<a class="headerlink" href="#app-registration-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Your API Application&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;signInAudience&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AzureADMyOrg&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Single tenant</span>
+<span class="w">  </span><span class="nt">&quot;identifierUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;api://your-application-id&quot;</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;requiredResourceAccess&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;resourceAppId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00000003-0000-0000-c000-000000000000&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Microsoft Graph</span>
+<span class="w">      </span><span class="nt">&quot;resourceAccess&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e1fe6dd8-ba31-4d61-89e7-88639da4683d&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// User.Read</span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Scope&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="integration-examples">
+<h2>Integration Examples<a class="headerlink" href="#integration-examples" title="Link to this heading"></a></h2>
+<section id="single-tenant-application">
+<h3>Single-tenant Application<a class="headerlink" href="#single-tenant-application" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">require_user</span><span class="p">,</span> <span class="n">require_groups</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.entra_id_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntraIdProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.entra_id_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntraIdProviderSettings</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Enterprise API&quot;</span><span class="p">)</span>
+
+<span class="c1"># Single-tenant configuration</span>
+<span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdProviderSettings</span><span class="p">(</span>
+    <span class="n">tenant_id</span><span class="o">=</span><span class="s2">&quot;12345678-1234-1234-1234-123456789012&quot;</span><span class="p">,</span>
+    <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;87654321-4321-4321-4321-210987654321&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://sts.windows.net/12345678-1234-1234-1234-123456789012/&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">EntraIdProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">entra_settings</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/user/profile&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_profile</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+        <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">,</span>
+        <span class="s2">&quot;roles&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">roles</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/admin/users&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">([</span><span class="s2">&quot;Administrators&quot;</span><span class="p">]))])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># Only users in the &quot;Administrators&quot; group can access this endpoint</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin access granted&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="multi-tenant-saas-application">
+<h3>Multi-tenant SaaS Application<a class="headerlink" href="#multi-tenant-saas-application" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Multi-tenant configuration</span>
+<span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdProviderSettings</span><span class="p">(</span>
+    <span class="n">tenant_id</span><span class="o">=</span><span class="s2">&quot;common&quot;</span><span class="p">,</span>
+    <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;your-saas-app-id&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://sts.windows.net/&quot;</span><span class="p">,</span>
+    <span class="n">validate_tenant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">EntraIdProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">entra_settings</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/tenant/info&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_tenant_info</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;tenant_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">,</span>
+        <span class="s2">&quot;user_count&quot;</span><span class="p">:</span> <span class="k">await</span> <span class="n">get_tenant_user_count</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">),</span>
+        <span class="s2">&quot;subscription&quot;</span><span class="p">:</span> <span class="k">await</span> <span class="n">get_tenant_subscription</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">),</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="token-acquisition">
+<h2>Token Acquisition<a class="headerlink" href="#token-acquisition" title="Link to this heading"></a></h2>
+<section id="client-side-token-acquisition">
+<h3>Client-side Token Acquisition<a class="headerlink" href="#client-side-token-acquisition" title="Link to this heading"></a></h3>
+<p>JavaScript/TypeScript example for acquiring tokens:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">PublicClientApplication</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@azure/msal-browser&quot;</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">msalConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">auth</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">clientId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">authority</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://login.microsoftonline.com/your-tenant-id&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">redirectUri</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:3000&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">msalInstance</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">PublicClientApplication</span><span class="p">(</span><span class="nx">msalConfig</span><span class="p">);</span>
+
+<span class="c1">// Acquire token</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">tokenRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">scopes</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;api://your-application-id/access_as_user&quot;</span><span class="p">],</span>
+<span class="p">};</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">msalInstance</span><span class="p">.</span><span class="nx">acquireTokenSilent</span><span class="p">(</span><span class="nx">tokenRequest</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">accessToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">accessToken</span><span class="p">;</span>
+
+<span class="c1">// Use token in API calls</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">apiResponse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;/api/protected&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;Authorization&quot;</span><span class="o">:</span><span class="w"> </span><span class="sb">`Bearer </span><span class="si">${</span><span class="nx">accessToken</span><span class="si">}</span><span class="sb">`</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</section>
+<section id="server-side-token-acquisition">
+<h3>Server-side Token Acquisition<a class="headerlink" href="#server-side-token-acquisition" title="Link to this heading"></a></h3>
+<p>Python example using MSAL:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">msal</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfidentialClientApplication</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">ConfidentialClientApplication</span><span class="p">(</span>
+    <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
+    <span class="n">client_credential</span><span class="o">=</span><span class="s2">&quot;your-client-secret&quot;</span><span class="p">,</span>
+    <span class="n">authority</span><span class="o">=</span><span class="s2">&quot;https://login.microsoftonline.com/your-tenant-id&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Acquire token for API access</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">acquire_token_for_client</span><span class="p">(</span>
+    <span class="n">scopes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://graph.microsoft.com/.default&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="s2">&quot;access_token&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">access_token</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;access_token&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
+<section id="entra-id-specific-errors">
+<h3>Entra ID Specific Errors<a class="headerlink" href="#entra-id-specific-errors" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthenticationError</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">entra_auth_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+    <span class="n">error_details</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;authentication_failed&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;error_description&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
+        <span class="s2">&quot;tenant_hint&quot;</span><span class="p">:</span> <span class="s2">&quot;Use your organization account&quot;</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="s2">&quot;tenant&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="n">error_details</span><span class="p">[</span><span class="s2">&quot;error_uri&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;https://docs.microsoft.com/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant&quot;</span>
+
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="n">error_details</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h2>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h2>
+<section id="security-recommendations">
+<h3>Security Recommendations<a class="headerlink" href="#security-recommendations" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Validate Tenant</strong>: Always validate the tenant ID in single-tenant applications</p></li>
+<li><p><strong>Scope Validation</strong>: Validate that tokens contain required scopes</p></li>
+<li><p><strong>Group Membership</strong>: Use Azure AD groups for authorization</p></li>
+<li><p><strong>Token Caching</strong>: Implement proper token caching on the client side</p></li>
+<li><p><strong>Certificate Authentication</strong>: Use certificates instead of client secrets for production</p></li>
+</ol>
+</section>
+<section id="performance-optimization">
+<h3>Performance Optimization<a class="headerlink" href="#performance-optimization" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Key Caching</strong>: The provider automatically caches Azure’s public keys</p></li>
+<li><p><strong>Connection Pooling</strong>: Use HTTP connection pooling for JWKS endpoints</p></li>
+<li><p><strong>Token Validation</strong>: Validate tokens locally to reduce Azure AD calls</p></li>
+</ol>
+</section>
+</section>
+<section id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h2>
+<section id="common-issues">
+<h3>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h3>
 <dl class="simple">
-<dt>Returns:</dt><dd><p>User: Domain object.</p>
+<dt><strong>Invalid Issuer</strong></dt><dd><p>Ensure the issuer in your configuration matches the token’s ‘iss’ claim</p>
+</dd>
+<dt><strong>Audience Mismatch</strong></dt><dd><p>Verify that the client_id matches the token’s ‘aud’ claim</p>
+</dd>
+<dt><strong>Tenant Validation Failed</strong></dt><dd><p>Check that the tenant_id matches the token’s ‘tid’ claim</p>
+</dd>
+<dt><strong>Groups Not Available</strong></dt><dd><p>Ensure the application has the required Graph API permissions for group claims</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_keys">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jwks_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_keys" title="Link to this definition"></a></dt>
-<dd><p>Get keys</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>TODO: List[JWK]: a list of JWK</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_openid_config">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_openid_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_openid_config" title="Link to this definition"></a></dt>
-<dd><p>Get openid config from entradid</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>List[JWK]: a list of JWK</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.load_jwks">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_jwks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.JWKS" title="auth_middleware.types.JWKS"><span class="pre">JWKS</span></a></span></span><a class="headerlink" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.load_jwks" title="Link to this definition"></a></dt>
-<dd><p>Load JWKS credentials from remote Identity Provider</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>JWKS: _description_</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.verify_token">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verify_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#auth_middleware.types.JWTAuthorizationCredentials" title="auth_middleware.types.JWTAuthorizationCredentials"><span class="pre">JWTAuthorizationCredentials</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.verify_token" title="Link to this definition"></a></dt>
-<dd><p>Verifiy token signature</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>token (JWTAuthorizationCredentials): _description_</p>
-</dd>
-<dt>Raises:</dt><dd><p>AzureException: _description_</p>
-</dd>
-<dt>Returns:</dt><dd><p>bool: _description_</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+</section>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h2>
+<p>For more information about other authentication providers, see:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a> - AWS Cognito integration</p></li>
+<li><p><a class="reference internal" href="jwt_auth_provider.html"><span class="doc">JWT Authentication Provider</span></a> - Generic JWT provider</p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cognito_provider.html" class="btn btn-neutral float-left" title="cognito_provider" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cognito_provider.html" class="btn btn-neutral float-left" title="AWS Cognito Provider" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jwt_auth_provider.html" class="btn btn-neutral float-right" title="JWT Authentication Provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, impalah.</p>
+    <p>&#169; Copyright 2025, impalah.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

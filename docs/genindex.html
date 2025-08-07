@@ -1,23 +1,21 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; auth-middleware 0.1.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>Index &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="canonical" href="/auth-middleware/genindex.html" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a58bc63e"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -27,12 +25,12 @@
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="index.html" class="icon icon-home">
-            auth-middleware
+            Auth Middleware
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -42,23 +40,83 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
 </ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">auth-middleware</a>
+          <a href="index.html">Auth Middleware</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -79,19 +137,39 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#A"><strong>A</strong></a>
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
  | <a href="#C"><strong>C</strong></a>
- | <a href="#E"><strong>E</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
- | <a href="#I"><strong>I</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  
 </div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.__init__">__init__() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
+
+      <ul>
+        <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager.__init__">(auth_middleware.jwt_bearer_manager.JWTBearerManager method)</a>
+</li>
+        <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.__init__">(auth_middleware.providers.authn.cognito_provider.CognitoProvider method)</a>
+</li>
+        <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider.__init__">(auth_middleware.providers.authn.jwt_provider.JWTProvider method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -117,15 +195,6 @@
 </li>
       </ul></li>
       <li>
-    auth_middleware.jwt_auth_provider
-
-      <ul>
-        <li><a href="jwt_auth_provider.html#module-auth_middleware.jwt_auth_provider">module</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
     auth_middleware.jwt_bearer_manager
 
       <ul>
@@ -133,17 +202,40 @@
 </li>
       </ul></li>
       <li>
-    auth_middleware.providers.cognito.cognito_provider
+    auth_middleware.providers.authn.cognito_authz_provider_settings
 
       <ul>
-        <li><a href="cognito_provider.html#module-auth_middleware.providers.cognito.cognito_provider">module</a>
+        <li><a href="cognito_provider.html#module-auth_middleware.providers.authn.cognito_authz_provider_settings">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    auth_middleware.providers.authn.cognito_provider
+
+      <ul>
+        <li><a href="cognito_provider.html#module-auth_middleware.providers.authn.cognito_provider">module</a>
 </li>
       </ul></li>
       <li>
-    auth_middleware.providers.entra_id.entra_id_provider
+    auth_middleware.providers.authn.jwt_provider
 
       <ul>
-        <li><a href="entra_id_provider.html#module-auth_middleware.providers.entra_id.entra_id_provider">module</a>
+        <li><a href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.providers.authn.jwt_provider_settings
+
+      <ul>
+        <li><a href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider_settings">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.providers.authz.cognito_groups_provider
+
+      <ul>
+        <li><a href="cognito_provider.html#module-auth_middleware.providers.authz.cognito_groups_provider">module</a>
 </li>
       </ul></li>
       <li>
@@ -159,30 +251,58 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cognito_provider.html#auth_middleware.providers.cognito.cognito_provider.CognitoProvider">CognitoProvider (class in auth_middleware.providers.cognito.cognito_provider)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings">CognitoAuthzProviderSettings (class in auth_middleware.providers.authn.cognito_authz_provider_settings)</a>
+</li>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider">CognitoGroupsProvider (class in auth_middleware.providers.authz.cognito_groups_provider)</a>, <a href="groups-provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider">[1]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cognito_provider.html#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.create_user_from_token">create_user_from_token() (auth_middleware.providers.cognito.cognito_provider.CognitoProvider method)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider">CognitoProvider (class in auth_middleware.providers.authn.cognito_provider)</a>
+</li>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.create_user_from_token">create_user_from_token() (auth_middleware.providers.authn.cognito_provider.CognitoProvider method)</a>
 
       <ul>
-        <li><a href="entra_id_provider.html#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.create_user_from_token">(auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider method)</a>
+        <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider.create_user_from_token">(auth_middleware.providers.authn.jwt_provider.JWTProvider method)</a>
 </li>
       </ul></li>
   </ul></td>
 </tr></table>
 
-<h2 id="E">E</h2>
+<h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="entra_id_provider.html#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider">EntraIDProvider (class in auth_middleware.providers.entra_id.entra_id_provider)</a>
+      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.dispatch">dispatch() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
 </li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider.fetch_groups">fetch_groups() (auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider method)</a>, <a href="groups-provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider.fetch_groups">[1]</a>
+
+      <ul>
+        <li><a href="groups-provider.html#auth_middleware.providers.authz.groups_provider.GroupsProvider.fetch_groups">(auth_middleware.providers.authz.groups_provider.GroupsProvider method)</a>
+</li>
+        <li><a href="groups-provider.html#auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider.fetch_groups">(auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="permissions-provider.html#auth_middleware.providers.authz.permissions_provider.PermissionsProvider.fetch_permissions">fetch_permissions() (auth_middleware.providers.authz.permissions_provider.PermissionsProvider method)</a>
+
+      <ul>
+        <li><a href="permissions-provider.html#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions">(auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager.get_credentials">get_credentials() (auth_middleware.jwt_bearer_manager.JWTBearerManager method)</a>
+</li>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user">get_current_user() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
 
       <ul>
@@ -191,27 +311,25 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cognito_provider.html#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.get_keys">get_keys() (auth_middleware.providers.cognito.cognito_provider.CognitoProvider method)</a>
-
-      <ul>
-        <li><a href="entra_id_provider.html#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_keys">(auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider method)</a>
+      <li><a href="groups-provider.html#auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider.get_groups_from_db">get_groups_from_db() (auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider method)</a>
 </li>
-      </ul></li>
-      <li><a href="entra_id_provider.html#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.get_openid_config">get_openid_config() (auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider method)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.get_keys">get_keys() (auth_middleware.providers.authn.cognito_provider.CognitoProvider method)</a>
+</li>
+      <li><a href="permissions-provider.html#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db">get_permissions_from_db() (auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider method)</a>
+</li>
+      <li><a href="groups-provider.html#auth_middleware.providers.authz.groups_provider.GroupsProvider">GroupsProvider (class in auth_middleware.providers.authz.groups_provider)</a>
 </li>
   </ul></td>
 </tr></table>
 
-<h2 id="I">I</h2>
+<h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidAuthorizationException">InvalidAuthorizationException</a>
+      <li><a href="functions.html#auth_middleware.functions.has_groups">has_groups() (in module auth_middleware.functions)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidCredentialsException">InvalidCredentialsException</a>
-</li>
-      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidTokenException">InvalidTokenException</a>
+      <li><a href="functions.html#auth_middleware.functions.has_permissions">has_permissions() (in module auth_middleware.functions)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -219,17 +337,27 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="types.html#auth_middleware.types.JWKS">JWKS (class in auth_middleware.types)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_interval">jwks_cache_interval (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
-      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware">JwtAuthMiddleware (class in auth_middleware.jwt_auth_middleware)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_usages">jwks_cache_usages (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+</li>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_url_template">jwks_url_template (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+</li>
+      <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings.jwt_algorithm">jwt_algorithm (auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings attribute)</a>
+</li>
+      <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings.jwt_secret_key">jwt_secret_key (auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials">JWTAuthorizationCredentials (class in auth_middleware.types)</a>
+      <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings.jwt_token_verification_disabled">jwt_token_verification_disabled (auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings attribute)</a>
 </li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.jwt_auth_provider.JWTAuthProvider">JWTAuthProvider (class in auth_middleware.jwt_auth_provider)</a>
+      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware">JwtAuthMiddleware (class in auth_middleware.jwt_auth_middleware)</a>
 </li>
       <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager">JWTBearerManager (class in auth_middleware.jwt_bearer_manager)</a>
+</li>
+      <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider">JWTProvider (class in auth_middleware.providers.authn.jwt_provider)</a>
+</li>
+      <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings">JWTProviderSettings (class in auth_middleware.providers.authn.jwt_provider_settings)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -237,10 +365,10 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cognito_provider.html#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.load_jwks">load_jwks() (auth_middleware.providers.cognito.cognito_provider.CognitoProvider method)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.load_jwks">load_jwks() (auth_middleware.providers.authn.cognito_provider.CognitoProvider method)</a>
 
       <ul>
-        <li><a href="entra_id_provider.html#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.load_jwks">(auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider method)</a>
+        <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider.load_jwks">(auth_middleware.providers.authn.jwt_provider.JWTProvider method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -249,38 +377,12 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="types.html#auth_middleware.types.JWKS.model_computed_fields">model_computed_fields (auth_middleware.types.JWKS attribute)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.model_config">model_config (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 
       <ul>
-        <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials.model_computed_fields">(auth_middleware.types.JWTAuthorizationCredentials attribute)</a>
-</li>
-        <li><a href="types.html#auth_middleware.types.User.model_computed_fields">(auth_middleware.types.User attribute)</a>
-</li>
-        <li><a href="types.html#auth_middleware.types.UserCredentials.model_computed_fields">(auth_middleware.types.UserCredentials attribute)</a>
+        <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings.model_config">(auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings attribute)</a>
 </li>
       </ul></li>
-      <li><a href="types.html#auth_middleware.types.JWKS.model_config">model_config (auth_middleware.types.JWKS attribute)</a>
-
-      <ul>
-        <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials.model_config">(auth_middleware.types.JWTAuthorizationCredentials attribute)</a>
-</li>
-        <li><a href="types.html#auth_middleware.types.User.model_config">(auth_middleware.types.User attribute)</a>
-</li>
-        <li><a href="types.html#auth_middleware.types.UserCredentials.model_config">(auth_middleware.types.UserCredentials attribute)</a>
-</li>
-      </ul></li>
-      <li><a href="types.html#auth_middleware.types.JWKS.model_fields">model_fields (auth_middleware.types.JWKS attribute)</a>
-
-      <ul>
-        <li><a href="types.html#auth_middleware.types.JWTAuthorizationCredentials.model_fields">(auth_middleware.types.JWTAuthorizationCredentials attribute)</a>
-</li>
-        <li><a href="types.html#auth_middleware.types.User.model_fields">(auth_middleware.types.User attribute)</a>
-</li>
-        <li><a href="types.html#auth_middleware.types.UserCredentials.model_fields">(auth_middleware.types.UserCredentials attribute)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
@@ -291,17 +393,29 @@
 </li>
         <li><a href="jwt_auth_middleware.html#module-auth_middleware.jwt_auth_middleware">auth_middleware.jwt_auth_middleware</a>
 </li>
-        <li><a href="jwt_auth_provider.html#module-auth_middleware.jwt_auth_provider">auth_middleware.jwt_auth_provider</a>
-</li>
         <li><a href="jwt_bearer_manager.html#module-auth_middleware.jwt_bearer_manager">auth_middleware.jwt_bearer_manager</a>
 </li>
-        <li><a href="cognito_provider.html#module-auth_middleware.providers.cognito.cognito_provider">auth_middleware.providers.cognito.cognito_provider</a>
+        <li><a href="cognito_provider.html#module-auth_middleware.providers.authn.cognito_authz_provider_settings">auth_middleware.providers.authn.cognito_authz_provider_settings</a>
 </li>
-        <li><a href="entra_id_provider.html#module-auth_middleware.providers.entra_id.entra_id_provider">auth_middleware.providers.entra_id.entra_id_provider</a>
+        <li><a href="cognito_provider.html#module-auth_middleware.providers.authn.cognito_provider">auth_middleware.providers.authn.cognito_provider</a>
+</li>
+        <li><a href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider">auth_middleware.providers.authn.jwt_provider</a>
+</li>
+        <li><a href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider_settings">auth_middleware.providers.authn.jwt_provider_settings</a>
+</li>
+        <li><a href="cognito_provider.html#module-auth_middleware.providers.authz.cognito_groups_provider">auth_middleware.providers.authz.cognito_groups_provider</a>
 </li>
         <li><a href="types.html#module-auth_middleware.types">auth_middleware.types</a>
 </li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="permissions-provider.html#auth_middleware.providers.authz.permissions_provider.PermissionsProvider">PermissionsProvider (class in auth_middleware.providers.authz.permissions_provider)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -312,7 +426,21 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functions.html#auth_middleware.functions.require_permissions">require_permissions() (in module auth_middleware.functions)</a>
+</li>
       <li><a href="functions.html#auth_middleware.functions.require_user">require_user() (in module auth_middleware.functions)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="groups-provider.html#auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider">SqlGroupsProvider (class in auth_middleware.providers.authz.sql_groups_provider)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="permissions-provider.html#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider">SqlPermissionsProvider (class in auth_middleware.providers.authz.sql_permissions_provider)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -320,11 +448,15 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="types.html#auth_middleware.types.User">User (class in auth_middleware.types)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_id">user_pool_client_id (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+</li>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_secret">user_pool_client_secret (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="types.html#auth_middleware.types.UserCredentials">UserCredentials (class in auth_middleware.types)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_id">user_pool_id (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+</li>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_region">user_pool_region (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -332,8 +464,12 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="entra_id_provider.html#auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider.verify_token">verify_token() (auth_middleware.providers.entra_id.entra_id_provider.EntraIDProvider method)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.verify_token">verify_token() (auth_middleware.providers.authn.cognito_provider.CognitoProvider method)</a>
+
+      <ul>
+        <li><a href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider.verify_token">(auth_middleware.providers.authn.jwt_provider.JWTProvider method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -346,7 +482,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, impalah.</p>
+    <p>&#169; Copyright 2025, impalah.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -1,15 +1,14 @@
 import contextvars
 import sys
-from typing import Any, Dict
+from typing import Any
 
 from loguru import logger
-
 
 # Create a context variable to store the trace_id
 trace_id_context = contextvars.ContextVar("trace_id", default=None)
 
 
-def add_trace_id(record: Dict[str, Any]) -> bool:
+def add_trace_id(record: dict[str, Any]) -> bool:
     """Add the trace_id to the log record
 
     Args:
@@ -23,7 +22,7 @@ def add_trace_id(record: Dict[str, Any]) -> bool:
     return True  # Return True to indicate the filter passed
 
 
-def configure_logger(settings: Dict[str, Any]) -> None:
+def configure_logger(settings: dict[str, Any]) -> None:
     """Configure the logger"""
 
     logger.remove()  # Remove the default logger

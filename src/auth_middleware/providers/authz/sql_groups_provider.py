@@ -1,21 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Optional, List
+from ksuid import Ksuid
+from sqlalchemy import String, select
+from sqlalchemy.orm import Mapped, mapped_column
 
-
-from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from auth_middleware.logging import logger
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
-
-from ksuid import Ksuid
-
-from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import select
-
-from .sql_base_model import Base, BaseModel
 from .async_database import AsyncDatabase
+from .sql_base_model import Base
 
 
 class GroupsModel(Base):
@@ -46,7 +40,7 @@ class SqlGroupsProvider(GroupsProvider):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    async def fetch_groups(self, token: JWTAuthorizationCredentials) -> List[str]:
+    async def fetch_groups(self, token: JWTAuthorizationCredentials) -> list[str]:
         """Get groups using the token provided
 
         Args:
@@ -65,7 +59,7 @@ class SqlGroupsProvider(GroupsProvider):
         # 2. Check if groups are in the cache
 
         # 3. If not in cache, fetch from the database
-        groups: List[str] = await self.get_groups_from_db(username=username)
+        groups: list[str] = await self.get_groups_from_db(username=username)
 
         # 4. Return the groups
         return groups
@@ -74,7 +68,7 @@ class SqlGroupsProvider(GroupsProvider):
         self,
         *,
         username: str,
-    ) -> List[str]:
+    ) -> list[str]:
         """Gets groups from the database
 
         Args:
@@ -90,13 +84,12 @@ class SqlGroupsProvider(GroupsProvider):
 
         async with AsyncDatabase.get_session() as session:
             try:
-
                 query = select(GroupsModel).filter(GroupsModel.username == username)
 
                 result = await session.execute(query)
 
                 scalars = result.scalars()
-                items: List[GroupsModel] = scalars.all()
+                items: list[GroupsModel] = scalars.all()
                 return [item.group for item in items]
 
             except Exception as ex:

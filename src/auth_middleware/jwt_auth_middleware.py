@@ -1,17 +1,9 @@
-from typing import Optional
-
 from fastapi import Request, status
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
-from starlette.types import ASGIApp, Message, Receive, Scope, Send
+from starlette.types import ASGIApp
 
-from auth_middleware.exceptions.invalid_authorization_exception import (
-    InvalidAuthorizationException,
-)
-from auth_middleware.exceptions.invalid_credentials_exception import (
-    InvalidCredentialsException,
-)
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
@@ -80,14 +72,13 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
         logger.debug("Get Current Active User ...")
 
         try:
-
             if not self.__validate_credentials(request=request):
                 logger.debug("There are no credentials in the request")
                 return None
 
-            token: Optional[JWTAuthorizationCredentials] = (
-                await self._jwt_bearer_manager.get_credentials(request=request)
-            )
+            token: (
+                JWTAuthorizationCredentials | None
+            ) = await self._jwt_bearer_manager.get_credentials(request=request)
 
             # Create User object from token
             user: User = (
@@ -101,7 +92,8 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
             logger.error("Invalid Token {}", str(ite))
             raise
         except Exception as e:
-            # TODO: Control "No public key found that matches the one present in the TOKEN!"
+            # TODO: Control "No public key found that matches the one present
+            # in the TOKEN!"
             logger.error("Not controlled exception {}", str(e))
             raise
 

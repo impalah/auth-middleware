@@ -1,41 +1,39 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cognito_provider &mdash; auth-middleware 0.1.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>AWS Cognito Provider &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="canonical" href="/auth-middleware/cognito_provider.html" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a58bc63e"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="entra_id_provider" href="entra_id_provider.html" />
-    <link rel="prev" title="exceptions" href="exceptions.html" /> 
+    <link rel="next" title="Azure Entra ID Authentication Provider" href="entra_id_provider.html" />
+    <link rel="prev" title="Google Identity Infrastructure Setup" href="infrastructure/google-setup.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="index.html" class="icon icon-home">
-            auth-middleware
+            Auth Middleware
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -45,41 +43,82 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">AWS Cognito Provider</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-configuration">Basic Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#environment-variables">Environment Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#example-application">Example Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-auth_middleware.providers.authn.cognito_provider">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider"><code class="docutils literal notranslate"><span class="pre">CognitoProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.__init__"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.create_user_from_token"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.create_user_from_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.get_keys"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.get_keys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.load_jwks"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.load_jwks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.verify_token"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.verify_token()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_interval"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.jwks_cache_interval</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_usages"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.jwks_cache_usages</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_url_template"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.jwks_url_template</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.model_config"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.model_config</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_id"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.user_pool_client_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_secret"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.user_pool_client_secret</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_id"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.user_pool_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_region"><code class="docutils literal notranslate"><span class="pre">CognitoAuthzProviderSettings.user_pool_region</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider"><code class="docutils literal notranslate"><span class="pre">CognitoGroupsProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider.fetch_groups"><code class="docutils literal notranslate"><span class="pre">CognitoGroupsProvider.fetch_groups()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="api.html">API</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_middleware.html">jwt_auth_middleware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html">jwt_auth_provider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="types.html">types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functions.html">functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">cognito_provider</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider"><code class="docutils literal notranslate"><span class="pre">CognitoProvider</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.create_user_from_token"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.create_user_from_token()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.get_keys"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.get_keys()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.load_jwks"><code class="docutils literal notranslate"><span class="pre">CognitoProvider.load_jwks()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
 </ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html">entra_id_provider</a></li>
-</ul>
-</li>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
 </ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">auth-middleware</a>
+          <a href="index.html">Auth Middleware</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -87,8 +126,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="api.html">API</a></li>
-      <li class="breadcrumb-item active">cognito_provider</li>
+      <li class="breadcrumb-item active">AWS Cognito Provider</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/cognito_provider.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,39 +136,256 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-auth_middleware.providers.cognito.cognito_provider">
-<span id="cognito-provider"></span><h1>cognito_provider<a class="headerlink" href="#module-auth_middleware.providers.cognito.cognito_provider" title="Link to this heading"></a></h1>
+  <section id="aws-cognito-provider">
+<h1>AWS Cognito Provider<a class="headerlink" href="#aws-cognito-provider" title="Link to this heading"></a></h1>
+<p>The AWS Cognito provider enables authentication and authorization using Amazon Cognito User Pools. This provider validates JWT tokens issued by Cognito and extracts user information and group memberships.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>AWS Cognito is a managed identity service that provides:</p>
+<ul class="simple">
+<li><p><strong>User Authentication</strong>: Sign-up, sign-in, and user management</p></li>
+<li><p><strong>JWT Token Issuance</strong>: Secure ID tokens for API access</p></li>
+<li><p><strong>Group Management</strong>: Organize users into groups for authorization</p></li>
+<li><p><strong>Integration</strong>: Seamless integration with AWS services</p></li>
+</ul>
+<p>The Cognito provider in auth-middleware handles:</p>
+<ul class="simple">
+<li><p>JWT token validation and signature verification</p></li>
+<li><p>User information extraction from tokens</p></li>
+<li><p>Group membership resolution</p></li>
+<li><p>Token expiration checking</p></li>
+</ul>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<section id="basic-configuration">
+<h3>Basic Configuration<a class="headerlink" href="#basic-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.cognito_groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoGroupsProvider</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Configure Cognito settings</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_abcdef123&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Create Cognito provider</span>
+<span class="n">cognito_provider</span> <span class="o">=</span> <span class="n">CognitoProvider</span><span class="p">(</span>
+    <span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">,</span>
+    <span class="n">groups_provider</span><span class="o">=</span><span class="n">CognitoGroupsProvider</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Add to FastAPI application</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">auth_provider</span><span class="o">=</span><span class="n">cognito_provider</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="environment-variables">
+<h3>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading"></a></h3>
+<p>Set these environment variables for your application:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Required</span>
+<span class="nv">AWS_COGNITO_USER_POOL_ID</span><span class="o">=</span>us-east-1_abcdef123
+<span class="nv">AWS_COGNITO_USER_POOL_REGION</span><span class="o">=</span>us-east-1
+
+<span class="c1"># Optional</span>
+<span class="nv">TOKEN_VERIFICATION_DISABLED</span><span class="o">=</span><span class="nb">false</span><span class="w">  </span><span class="c1"># Set to true only for development</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="example-application">
+<h2>Example Application<a class="headerlink" href="#example-application" title="Link to this heading"></a></h2>
+<p>Complete example with Cognito integration:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.requests</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">require_user</span><span class="p">,</span> <span class="n">require_groups</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.cognito_groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoGroupsProvider</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Cognito Example API&quot;</span><span class="p">)</span>
+
+<span class="c1"># Configuration</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_abcdef123&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Setup middleware</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">CognitoProvider</span><span class="p">(</span>
+        <span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">,</span>
+        <span class="n">groups_provider</span><span class="o">=</span><span class="n">CognitoGroupsProvider</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+
+<span class="c1"># User endpoints</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/profile&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_profile</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">}</span>
+
+<span class="c1"># Admin endpoints</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/admin&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">(</span><span class="s2">&quot;admin&quot;</span><span class="p">))])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">admin_only</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin access granted&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="module-auth_middleware.providers.authn.cognito_provider">
+<span id="api-reference"></span><h2>API Reference<a class="headerlink" href="#module-auth_middleware.providers.authn.cognito_provider" title="Link to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.cognito.cognito_provider.</span></span><span class="sig-name descname"><span class="pre">CognitoProvider</span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider" title="Link to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider.create_user_from_token">
-<span class="sig-name descname"><span class="pre">create_user_from_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="types.html#auth_middleware.types.JWTAuthorizationCredentials" title="auth_middleware.types.JWTAuthorizationCredentials"><span class="pre">JWTAuthorizationCredentials</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.User" title="auth_middleware.types.User"><span class="pre">User</span></a></span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.create_user_from_token" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_provider.CognitoProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.authn.cognito_provider.</span></span><span class="sig-name descname"><span class="pre">CognitoProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings" title="auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings"><span class="pre">JWTProviderSettings</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">PermissionsProvider</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PermissionsProvider</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">GroupsProvider</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GroupsProvider</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/authn/cognito_provider.html#CognitoProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider" title="auth_middleware.providers.authn.jwt_provider.JWTProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">JWTProvider</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_provider.CognitoProvider.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings" title="auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings"><span class="pre">JWTProviderSettings</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">PermissionsProvider</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PermissionsProvider</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><span class="pre">GroupsProvider</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GroupsProvider</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authn/cognito_provider.html#CognitoProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_provider.CognitoProvider.create_user_from_token">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_user_from_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">User</span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authn/cognito_provider.html#CognitoProvider.create_user_from_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.create_user_from_token" title="Link to this definition"></a></dt>
 <dd><p>Initializes a domain User object with data recovered from a JWT TOKEN.
 Args:
 token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>User: Domain object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Domain object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>User</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider.get_keys">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.get_keys" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_provider.CognitoProvider.get_keys">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authn/cognito_provider.html#CognitoProvider.get_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.get_keys" title="Link to this definition"></a></dt>
 <dd><p>Get keys from AWS Cognito</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>List[JWK]: a list of JWK keys</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a list of JWK keys</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[JWK]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.cognito.cognito_provider.CognitoProvider.load_jwks">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_jwks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="types.html#auth_middleware.types.JWKS" title="auth_middleware.types.JWKS"><span class="pre">JWKS</span></a></span></span><a class="headerlink" href="#auth_middleware.providers.cognito.cognito_provider.CognitoProvider.load_jwks" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_provider.CognitoProvider.load_jwks">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_jwks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">JWKS</span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authn/cognito_provider.html#CognitoProvider.load_jwks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.load_jwks" title="Link to this definition"></a></dt>
 <dd><p>Load JWKS credentials from remote Identity Provider</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>JWKS: _description_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>JWKS</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_provider.CognitoProvider.verify_token">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">verify_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authn/cognito_provider.html#CognitoProvider.verify_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authn.cognito_provider.CognitoProvider.verify_token" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-auth_middleware.providers.authn.cognito_authz_provider_settings">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.authn.cognito_authz_provider_settings.</span></span><span class="sig-name descname"><span class="pre">CognitoAuthzProviderSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_case_sensitive</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_nested_model_default_partial_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DotenvType</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WindowsPath('.')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_file_encoding</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_ignore_empty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_nested_delimiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_nested_max_split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_parse_none_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_env_parse_enums</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_prog_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_parse_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_settings_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CliSettingsSource</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_parse_none_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_hide_none_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_avoid_json</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_enforce_required</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_use_class_docs_for_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_exit_on_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_flag_prefix_char</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_implicit_flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_ignore_unknown_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_kebab_case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_cli_shortcuts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_secrets_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PathType</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwt_secret_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwt_algorithm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HS256'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwt_token_verification_disabled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_pool_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_pool_region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_pool_client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_pool_client_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwks_url_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'https://cognito-idp.{}.amazonaws.com/{}/.well-known/jwks.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwks_cache_interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jwks_cache_usages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/authn/cognito_authz_provider_settings.html#CognitoAuthzProviderSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings" title="auth_middleware.providers.authn.jwt_provider_settings.JWTProviderSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">JWTProviderSettings</span></code></a></p>
+<p>Settings for Cognito provider</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>BaseModel</strong> (<em>_type_</em>) – _description_</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_interval">
+<span class="sig-name descname"><span class="pre">jwks_cache_interval</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_interval" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_usages">
+<span class="sig-name descname"><span class="pre">jwks_cache_usages</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_usages" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_url_template">
+<span class="sig-name descname"><span class="pre">jwks_url_template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_url_template" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">SettingsConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'arbitrary_types_allowed':</span> <span class="pre">True,</span> <span class="pre">'case_sensitive':</span> <span class="pre">False,</span> <span class="pre">'cli_avoid_json':</span> <span class="pre">False,</span> <span class="pre">'cli_enforce_required':</span> <span class="pre">False,</span> <span class="pre">'cli_exit_on_error':</span> <span class="pre">True,</span> <span class="pre">'cli_flag_prefix_char':</span> <span class="pre">'-',</span> <span class="pre">'cli_hide_none_type':</span> <span class="pre">False,</span> <span class="pre">'cli_ignore_unknown_args':</span> <span class="pre">False,</span> <span class="pre">'cli_implicit_flags':</span> <span class="pre">False,</span> <span class="pre">'cli_kebab_case':</span> <span class="pre">False,</span> <span class="pre">'cli_parse_args':</span> <span class="pre">None,</span> <span class="pre">'cli_parse_none_str':</span> <span class="pre">None,</span> <span class="pre">'cli_prefix':</span> <span class="pre">'',</span> <span class="pre">'cli_prog_name':</span> <span class="pre">None,</span> <span class="pre">'cli_shortcuts':</span> <span class="pre">None,</span> <span class="pre">'cli_use_class_docs_for_groups':</span> <span class="pre">False,</span> <span class="pre">'enable_decoding':</span> <span class="pre">True,</span> <span class="pre">'env_file':</span> <span class="pre">'.env',</span> <span class="pre">'env_file_encoding':</span> <span class="pre">'utf-8',</span> <span class="pre">'env_ignore_empty':</span> <span class="pre">False,</span> <span class="pre">'env_nested_delimiter':</span> <span class="pre">None,</span> <span class="pre">'env_nested_max_split':</span> <span class="pre">None,</span> <span class="pre">'env_parse_enums':</span> <span class="pre">None,</span> <span class="pre">'env_parse_none_str':</span> <span class="pre">None,</span> <span class="pre">'env_prefix':</span> <span class="pre">'',</span> <span class="pre">'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'json_file':</span> <span class="pre">None,</span> <span class="pre">'json_file_encoding':</span> <span class="pre">None,</span> <span class="pre">'nested_model_default_partial_update':</span> <span class="pre">False,</span> <span class="pre">'protected_namespaces':</span> <span class="pre">('model_validate',</span> <span class="pre">'model_dump',</span> <span class="pre">'settings_customise_sources'),</span> <span class="pre">'secrets_dir':</span> <span class="pre">None,</span> <span class="pre">'toml_file':</span> <span class="pre">None,</span> <span class="pre">'validate_default':</span> <span class="pre">True,</span> <span class="pre">'yaml_config_section':</span> <span class="pre">None,</span> <span class="pre">'yaml_file':</span> <span class="pre">None,</span> <span class="pre">'yaml_file_encoding':</span> <span class="pre">None}</span></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_id">
+<span class="sig-name descname"><span class="pre">user_pool_client_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_secret">
+<span class="sig-name descname"><span class="pre">user_pool_client_secret</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_secret" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_id">
+<span class="sig-name descname"><span class="pre">user_pool_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_region">
+<span class="sig-name descname"><span class="pre">user_pool_region</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_region" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-auth_middleware.providers.authz.cognito_groups_provider">
+<dt class="sig sig-object py" id="auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.authz.cognito_groups_provider.</span></span><span class="sig-name descname"><span class="pre">CognitoGroupsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/providers/authz/cognito_groups_provider.html#CognitoGroupsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">GroupsProvider</span></code></p>
+<p>Recovers groups from AWS Cognito using the token provided</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>metaclass</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to ABCMeta.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider.fetch_groups">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fetch_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authz/cognito_groups_provider.html#CognitoGroupsProvider.fetch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider.fetch_groups" title="Link to this definition"></a></dt>
+<dd><p>Get groups using the token provided</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em>) – _description_</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.13)"><strong>NotImplementedError</strong></a> – _description_</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_description_</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -138,19 +393,20 @@ token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
 </dd></dl>
 
 </section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="exceptions.html" class="btn btn-neutral float-left" title="exceptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="entra_id_provider.html" class="btn btn-neutral float-right" title="entra_id_provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="infrastructure/google-setup.html" class="btn btn-neutral float-left" title="Google Identity Infrastructure Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="entra_id_provider.html" class="btn btn-neutral float-right" title="Azure Entra ID Authentication Provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, impalah.</p>
+    <p>&#169; Copyright 2025, impalah.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

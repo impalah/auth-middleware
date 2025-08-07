@@ -1,11 +1,9 @@
 from contextlib import asynccontextmanager
-from typing import Dict, Optional
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from auth_middleware.logging import logger
-from .sql_base_model import metadata
 
 from .async_database_settings import settings
 
@@ -46,14 +44,15 @@ class AsyncDatabase:
         logger.debug("Creating a new instance of AsyncDatabase")
         if cls._instance is None:
             logger.debug("No instance. Creating a new instance of AsyncDatabase")
-            cls._instance = super(AsyncDatabase, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
         return cls._instance
 
     def init_engine(self):
         logger.debug("*** Initializing database engine from settings")
         if self._engine is None:
             logger.debug(
-                f"*** Creating a new engine from settings. Database URI: {settings.AUTHZ_SQLALCHEMY_DATABASE_URI}"
+                f"*** Creating a new engine from settings. Database URI: "
+                f"{settings.AUTHZ_SQLALCHEMY_DATABASE_URI}"
             )
             self._engine = create_async_engine(
                 settings.AUTHZ_SQLALCHEMY_DATABASE_URI,
@@ -95,6 +94,7 @@ class AsyncDatabase:
         """
 
         logger.debug("Getting session")
-        # Async session returns a sessión factory (sessionmaker) and it needs () to create a session
+        # Async session returns a sessión factory (sessionmaker) and it needs
+        # () to create a session
         async with AsyncDatabase().async_session()() as session:
             yield session

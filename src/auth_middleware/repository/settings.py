@@ -1,5 +1,3 @@
-from typing import Optional
-
 from starlette.config import Config
 
 from auth_middleware.settings import Settings

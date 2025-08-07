@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import HTTPException, Request
 
 from auth_middleware.logging import logger
@@ -12,11 +10,10 @@ class GroupChecker:
 
     __allowed_groups: list = []
 
-    def __init__(self, allowed_groups: List):
+    def __init__(self, allowed_groups: list):
         self.__allowed_groups = allowed_groups
 
     async def __call__(self, request: Request):
-
         if settings.AUTH_MIDDLEWARE_DISABLED:
             return
 
@@ -24,7 +21,7 @@ class GroupChecker:
             raise HTTPException(status_code=401, detail="Authentication required")
 
         user: User = request.state.current_user
-        groups: List[str] = await user.groups
+        groups: list[str] = await user.groups
 
         if groups is not None and not any(
             group in self.__allowed_groups for group in groups

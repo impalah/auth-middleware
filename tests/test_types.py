@@ -1,3 +1,5 @@
+import pytest
+
 from auth_middleware.types.jwt import JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
@@ -36,7 +38,8 @@ def test_jwt_authorization_credentials_model():
     assert credentials.message == message
 
 
-def test_user_model():
+@pytest.mark.asyncio
+async def test_user_model():
     user_id = "0ujsswThIGTUYm2K8FjOOfXtY1K"
     name = "test_user"
     email = "useradmin@user.com"
@@ -47,4 +50,4 @@ def test_user_model():
     assert user.id == user_id
     assert user.name == name
     assert user.email == email
-    assert user.groups == groups
+    assert await user.groups == groups

@@ -1,24 +1,22 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to Auth-Middleware’s documentation! &mdash; auth-middleware 0.1.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>Auth Middleware Documentation &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="canonical" href="/auth-middleware/index.html" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a58bc63e"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -29,12 +27,12 @@
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="#" class="icon icon-home">
-            auth-middleware
+            Auth Middleware
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -44,23 +42,83 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
 </ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">auth-middleware</a>
+          <a href="#">Auth Middleware</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -68,7 +126,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to Auth-Middleware’s documentation!</li>
+      <li class="breadcrumb-item active">Auth Middleware Documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -78,25 +136,288 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-auth-middleware-s-documentation">
-<h1>Welcome to Auth-Middleware’s documentation!<a class="headerlink" href="#welcome-to-auth-middleware-s-documentation" title="Link to this heading"></a></h1>
+  <section id="auth-middleware-documentation">
+<h1>Auth Middleware Documentation<a class="headerlink" href="#auth-middleware-documentation" title="Link to this heading"></a></h1>
+<p><strong>Auth Middleware</strong> is a modern, high-performance authentication and authorization middleware for FastAPI and Starlette applications. It provides seamless integration with popular identity providers like AWS Cognito, Azure Entra ID, and Google, while supporting custom authentication providers.</p>
+<a class="reference external image-reference" href="https://pypi.org/project/auth-middleware/"><img alt="PyPI Version" src="https://img.shields.io/pypi/v/auth-middleware.svg" />
+</a>
+<a class="reference external image-reference" href="https://pypi.org/project/auth-middleware/"><img alt="Python Version" src="https://img.shields.io/pypi/pyversions/auth-middleware.svg" />
+</a>
+<a class="reference external image-reference" href="https://github.com/impalah/auth-middleware/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg" />
+</a>
+</section>
+<section id="key-features">
+<h1>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>🔐 <strong>JWT Authentication</strong>: Secure JWT token validation and processing</p></li>
+<li><p>🏢 <strong>Multiple Providers</strong>: AWS Cognito, Azure Entra ID, Google, and custom providers</p></li>
+<li><p>👥 <strong>Group-based Authorization</strong>: Fine-grained access control with user groups</p></li>
+<li><p>🛡️ <strong>Permission System</strong>: Flexible permission-based authorization</p></li>
+<li><p>⚡ <strong>High Performance</strong>: Async-first design for maximum throughput</p></li>
+<li><p>🔧 <strong>Easy Integration</strong>: Simple middleware setup with minimal configuration</p></li>
+<li><p>📊 <strong>OpenAPI Support</strong>: Automatic API documentation with security schemas</p></li>
+<li><p>🎯 <strong>Type Safety</strong>: Full TypeScript-style type hints for better development experience</p></li>
+</ul>
+</section>
+<section id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h1>
+<p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">auth</span><span class="o">-</span><span class="n">middleware</span>
+</pre></div>
+</div>
+<p>Basic usage with AWS Cognito:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">require_user</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Secure API&quot;</span><span class="p">)</span>
+
+<span class="c1"># Configure Cognito authentication</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;your_user_pool_id&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;your_aws_region&quot;</span><span class="p">,</span>
+    <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Add authentication middleware</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">CognitoProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/protected&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">protected_endpoint</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Hello </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="documentation-contents">
+<h1>Documentation Contents<a class="headerlink" href="#documentation-contents" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#package-installation">Package Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#provider-specific-dependencies">Provider-Specific Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#development-installation">Development Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#verification">Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#docker-installation">Docker Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#basic-setup">Basic Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#aws-cognito-example">AWS Cognito Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#environment-configuration">Environment Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#openapi-integration">OpenAPI Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#making-requests">Making Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#accessing-user-information">Accessing User Information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#development-tips">Development Tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="user-guide.html#next-steps">Next Steps</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#basic-middleware-setup">Basic Middleware Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#middleware-parameters">Middleware Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#path-configuration">Path Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#environment-variables">Environment Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#custom-authentication-providers">Custom Authentication Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#performance-configuration">Performance Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#logging-configuration">Logging Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#error-handling-configuration">Error Handling Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#development-configuration">Development Configuration</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html">AWS Cognito Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#step-1-create-a-user-pool">Step 1: Create a User Pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#step-2-create-app-clients">Step 2: Create App Clients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#step-3-create-user-groups">Step 3: Create User Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#step-4-create-users">Step 4: Create Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#step-5-assign-users-to-groups">Step 5: Assign Users to Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#step-6-configure-user-pool-settings">Step 6: Configure User Pool Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#step-7-testing-your-setup">Step 7: Testing Your Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/entra-id-setup.html">Azure Entra ID Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/entra-id-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/entra-id-setup.html#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/google-setup.html">Google Identity Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/google-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/google-setup.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#example-application">Example Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#module-auth_middleware.providers.authn.cognito_provider">API Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#environment-variables">Environment Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#token-structure">Token Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#azure-ad-app-registration">Azure AD App Registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#integration-examples">Integration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#token-acquisition">Token Acquisition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#api-reference">API Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#token-structure">Token Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#integration-examples">Integration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider">API Reference</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#cognitogroupsprovider">CognitoGroupsProvider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#sqlgroupsprovider">SqlGroupsProvider</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.authz.groups_provider.GroupsProvider"><code class="docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider"><code class="docutils literal notranslate"><span class="pre">CognitoGroupsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider"><code class="docutils literal notranslate"><span class="pre">SqlGroupsProvider</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="permissions-provider.html#sqlpermissionsprovider">SqlPermissionsProvider</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="permissions-provider.html#auth_middleware.providers.authz.permissions_provider.PermissionsProvider"><code class="docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="permissions-provider.html#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#external-database-integration">External Database Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#microservices-integration">Microservices Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#cloud-services-integration">Cloud Services Integration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#multi-source-provider">Multi-Source Provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#hierarchical-permissions-provider">Hierarchical Permissions Provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#context-aware-provider">Context-Aware Provider</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#advanced-caching-provider">Advanced Caching Provider</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#circuit-breaker-provider">Circuit Breaker Provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending-authz-providers.html#retry-provider">Retry Provider</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_middleware.html">jwt_auth_middleware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html">jwt_auth_provider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
-<li class="toctree-l2"><a class="reference internal" href="types.html">types</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functions.html">functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="exceptions.html">exceptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html">cognito_provider</a></li>
-<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html">entra_id_provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager"><code class="docutils literal notranslate"><span class="pre">JWTBearerManager</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-hierarchy">Exception Hierarchy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-types">Exception Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-handling-patterns">Exception Handling Patterns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#module-auth_middleware.exceptions">API Reference</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#core-components">Core Components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#authentication-providers">Authentication Providers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#utilities">Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#quick-reference">Quick Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#usage-patterns">Usage Patterns</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="types.html#core-types">Core Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#token-types">Token Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#authentication-context">Authentication Context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#exception-types">Exception Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#provider-specific-types">Provider-Specific Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#validation-types">Validation Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#usage-examples">Usage Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#module-auth_middleware.types">API Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#authentication-decorators">Authentication Decorators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#advanced-usage-examples">Advanced Usage Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#error-handling">Error Handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-auth_middleware.functions">API Reference</a></li>
 </ul>
 </li>
 </ul>
@@ -121,7 +442,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, impalah.</p>
+    <p>&#169; Copyright 2025, impalah.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

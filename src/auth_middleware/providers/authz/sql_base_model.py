@@ -1,8 +1,4 @@
-from datetime import datetime
-from typing import Optional, cast
-
-from sqlalchemy import Column, DateTime, String
-from sqlalchemy.orm import Mapped, declarative_base, mapped_column
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 metadata = Base.metadata

@@ -1,12 +1,14 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
+import pytest
 from fastapi import HTTPException, Request
 
 from auth_middleware.group_checker import GroupChecker
 from auth_middleware.types.user import User
 
 
-def test_group_checker_call_allowed_groups():
+@pytest.mark.asyncio
+async def test_group_checker_call_allowed_groups():
     allowed_groups = ["admin", "user"]
 
     scope = {"type": "http"}
@@ -15,18 +17,22 @@ def test_group_checker_call_allowed_groups():
     request.state.current_user = User(
         id="user_id",
         name="John Doe",
-        groups=["admin"],
         email="mail@mail.com",
     )
+    # Set groups directly for testing
+    request.state.current_user._groups = ["admin"]
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.group_checker.settings.AUTH_MIDDLEWARE_DISABLED", False
+    ):
+        checker = GroupChecker(allowed_groups)
+        result = await checker(request)
+        assert result is None
 
-        checker = GroupChecker(allowed_groups)(request)
-        assert checker == None
 
-
-def test_group_checker_call_not_allowed_groups():
+@pytest.mark.asyncio
+async def test_group_checker_call_not_allowed_groups():
     allowed_groups = ["admin", "user"]
 
     scope = {"type": "http"}
@@ -35,42 +41,46 @@ def test_group_checker_call_not_allowed_groups():
     request.state.current_user = User(
         id="user_id",
         name="John Doe",
-        groups=["guest"],
         email="mail@mail.com",
     )
+    # Set groups directly for testing
+    request.state.current_user._groups = ["guest"]
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.group_checker.settings.AUTH_MIDDLEWARE_DISABLED", False
+    ):
+        checker = GroupChecker(allowed_groups)
 
-        try:
-            checker = GroupChecker(allowed_groups)(request)
-        except HTTPException as e:
-            assert e.status_code == 403
-            assert e.detail == "Operation not allowed"
-        else:
-            assert False, "Expected HTTPException to be raised"
+        with pytest.raises(HTTPException) as exc_info:
+            await checker(request)
+
+        assert exc_info.value.status_code == 403
+        assert exc_info.value.detail == "Operation not allowed"
 
 
-def test_group_checker_call_no_current_user():
-
+@pytest.mark.asyncio
+async def test_group_checker_call_no_current_user():
     allowed_groups = ["admin", "user"]
 
     scope = {"type": "http"}
     request: Request = Request(scope=scope)
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.group_checker.settings.AUTH_MIDDLEWARE_DISABLED", False
+    ):
+        checker = GroupChecker(allowed_groups)
 
-        try:
-            checker = GroupChecker(allowed_groups)(request)
-        except HTTPException as e:
-            assert e.status_code == 401
-            assert e.detail == "Authentication required"
-        else:
-            assert False, "Expected HTTPException to be raised"
+        with pytest.raises(HTTPException) as exc_info:
+            await checker(request)
+
+        assert exc_info.value.status_code == 401
+        assert exc_info.value.detail == "Authentication required"
 
 
-def test_group_checker_call_middleware_disabled():
+@pytest.mark.asyncio
+async def test_group_checker_call_middleware_disabled():
     allowed_groups = ["admin", "user"]
 
     scope = {"type": "http"}
@@ -79,12 +89,13 @@ def test_group_checker_call_middleware_disabled():
     request.state.current_user = User(
         id="user_id",
         name="John Doe",
-        groups=["guest"],
         email="mail@mail.com",
     )
+    # Set groups directly for testing
+    request.state.current_user._groups = ["guest"]
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", True):
-
-        checker = GroupChecker(allowed_groups)(request)
-        assert checker == None
+    with patch("auth_middleware.group_checker.settings.AUTH_MIDDLEWARE_DISABLED", True):
+        checker = GroupChecker(allowed_groups)
+        result = await checker(request)
+        assert result is None

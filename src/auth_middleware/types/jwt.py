@@ -1,19 +1,19 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel
 
-JWK = Dict[str, str]
+JWK = dict[str, Any]
 
 
 class JWKS(BaseModel):
-    keys: Optional[List[JWK]] = []
-    timestamp: Optional[int] = None
-    usage_counter: Optional[int] = 0
+    keys: list[JWK] | None = []
+    timestamp: int | None = None
+    usage_counter: int | None = 0
 
 
 class JWTAuthorizationCredentials(BaseModel):
     jwt_token: str
-    header: Dict[str, str]
-    claims: Dict[str, Any]
+    header: dict[str, str]
+    claims: dict[str, Any]
     signature: str
     message: str

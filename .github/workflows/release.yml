@@ -1,0 +1,83 @@
+name: package-release
+
+on:
+  push:
+    branches:
+      - main
+
+  # release:
+  #   types: [created]
+
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Manual launch"
+
+jobs:
+  TestBuildAndPublish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Print release information
+        run: |
+          echo "Release tag: ${{ github.event.release.tag_name }}"
+          echo "Release description: ${{ github.event.release.body }}"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Update version
+        run: |
+          echo "Bumping version ..."
+          v=$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)
+          echo "🔧 Current version: $v"
+          part="patch"
+          uvx --from bump2version bumpversion --allow-dirty --current-version "$v" "$part" pyproject.toml
+          BASE_VERSION=$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)
+          echo "✅ Bumped version to $BASE_VERSION"
+          
+      - name: Sync version across files
+        run: |
+          uv run python scripts/update_version.py
+          echo "✅ Synchronized version across all project files"
+
+      - name: Commit and push version update
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add pyproject.toml src/auth_middleware/__init__.py docs_source/conf.py
+          git commit -m "Update version across all files" || echo "No changes to commit"
+          git push origin HEAD
+
+      - name: Install the project
+        run: uv sync --all-extras --group dev --group docs
+
+      - name: Run tests
+        run: uv run pytest tests/ --cov=src/ --cov-report=term --cov-fail-under=80 -v
+
+      - name: Build documentation
+        run: |
+          uv run sphinx-build docs_source docs
+
+      - name: Commit and push documentation
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add docs/*
+          git commit -m "Update documentation" || echo "No changes to commit"
+          git push origin HEAD
+
+      - name: Build
+        run: |
+          uv build
+
+      - name: Publish on pypi
+        run: |
+          uv publish --token ${{ secrets.PYPI_TOKEN }}

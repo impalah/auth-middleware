@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import HTTPException, Request
 
 from auth_middleware.group_checker import GroupChecker
@@ -7,7 +5,7 @@ from auth_middleware.permissions_checker import PermissionsChecker
 from auth_middleware.settings import settings
 
 
-def require_permissions(allowed_permissions: List[str]):
+def require_permissions(allowed_permissions: list[str]):
     """Check if the user has the required permissions
 
     Args:
@@ -30,7 +28,7 @@ def require_permissions(allowed_permissions: List[str]):
     return _permissions_checker
 
 
-async def has_permissions(request: Request, allowed_permissions: List[str]) -> bool:
+async def has_permissions(request: Request, allowed_permissions: list[str]) -> bool:
     """Check if the user has the required permissions asynchronously
 
     Args:
@@ -48,7 +46,7 @@ async def has_permissions(request: Request, allowed_permissions: List[str]) -> b
         return False
 
 
-def require_groups(allowed_groups: List[str]):
+def require_groups(allowed_groups: list[str]):
     """Check if the user has the required groups
 
     Args:
@@ -71,7 +69,7 @@ def require_groups(allowed_groups: List[str]):
     return _group_checker
 
 
-async def has_groups(request: Request, allowed_groups: List[str]) -> bool:
+async def has_groups(request: Request, allowed_groups: list[str]) -> bool:
     """Check if the user has the required groups asynchronously
 
     Args:
@@ -93,7 +91,6 @@ def require_user():
     """Check if the user is authenticated"""
 
     def _user_checker(request: Request):
-
         if settings.AUTH_MIDDLEWARE_DISABLED:
             return
 
@@ -107,10 +104,9 @@ def get_current_user():
     """Returns the current user object if it exists"""
 
     def _get_user(request: Request):
-
         return (
             request.state.current_user
-            if hasattr(request.state, "current_user")
+            if hasattr(request, "state") and hasattr(request.state, "current_user")
             else None
         )
 

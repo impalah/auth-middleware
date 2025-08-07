@@ -1,6 +1,4 @@
-from typing import Any, Dict, List, Optional
-
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import Field
 
 from auth_middleware.types.user import User
 

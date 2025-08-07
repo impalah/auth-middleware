@@ -1,20 +1,15 @@
 import os
 import sys
-
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "../src")
 )  # Add src to path to have access to the models
 
 from auth_middleware.providers.authz.sql_base_model import metadata
-from auth_middleware.providers.authz.sql_permissions_provider import PermissionsModel
-from auth_middleware.providers.authz.sql_groups_provider import GroupsModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

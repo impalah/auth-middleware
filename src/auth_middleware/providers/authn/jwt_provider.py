@@ -1,15 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from time import time, time_ns
-from typing import Optional
+from time import time_ns
 
-from jose import jwk
-from jose.utils import base64url_decode
-
-from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
-from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.logging import logger
+from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
 
@@ -36,7 +32,8 @@ class JWTProvider(metaclass=ABCMeta):
 
     async def _get_jwks(self) -> JWKS | None:
         """
-        Returns a structure that caches the public keys used by the auth provider to sign its JWT tokens.
+        Returns a structure that caches the public keys used by the auth
+        provider to sign its JWT tokens.
         Cache is refreshed after a settable time or number of reads (usages)
         """
         reload_cache = False
@@ -57,17 +54,18 @@ class JWTProvider(metaclass=ABCMeta):
             if reload_cache:
                 self.jks: JWKS = await self.load_jwks()
                 logger.debug("JWKS loaded")
-            else:
-                if self.jks.usage_counter is not None:
-                    self.jks.usage_counter -= 1
+
+            # Always decrement usage counter after accessing JWKS
+            if hasattr(self, "jks") and self.jks.usage_counter is not None:
+                self.jks.usage_counter -= 1
 
         except KeyError:
             return None
 
         return self.jks
 
-    async def _get_hmac_key(self, token: JWTAuthorizationCredentials) -> Optional[JWK]:
-        jwks: Optional[JWKS] = await self._get_jwks()
+    async def _get_hmac_key(self, token: JWTAuthorizationCredentials) -> JWK | None:
+        jwks: JWKS | None = await self._get_jwks()
         if jwks is not None and jwks.keys is not None:
             for key in jwks.keys:
                 if key["kid"] == token.header["kid"]:

@@ -1,10 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from time import time, time_ns
-from typing import Any, Optional, TypeVar
+from typing import TypeVar
 
-from starlette.requests import Request
-
-from auth_middleware.logging import logger
 from auth_middleware.types.user import User
 
 TCredentials = TypeVar("TCredentials")

@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import HTTPException, Request
 
 from auth_middleware.logging import logger
@@ -12,11 +10,10 @@ class PermissionsChecker:
 
     __allowed_permissions: list = []
 
-    def __init__(self, allowed_permissions: List):
+    def __init__(self, allowed_permissions: list):
         self.__allowed_permissions = allowed_permissions
 
     async def __call__(self, request: Request):
-
         if settings.AUTH_MIDDLEWARE_DISABLED:
             return
 
@@ -24,12 +21,13 @@ class PermissionsChecker:
             raise HTTPException(status_code=401, detail="Authentication required")
 
         user: User = request.state.current_user
-        permissions: List[str] = await user.permissions
+        permissions: list[str] = await user.permissions
 
         if permissions is not None and not any(
             permissions in self.__allowed_permissions for permissions in permissions
         ):
             logger.debug(
-                f"User with permissions {permissions} not in {self.__allowed_permissions}"
+                f"User with permissions {permissions} not in "
+                f"{self.__allowed_permissions}"
             )
             raise HTTPException(status_code=403, detail="Operation not allowed")
