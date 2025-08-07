@@ -1,22 +1,17 @@
 import base64
 import hashlib
-from typing import List, Optional, Tuple
 
 from fastapi import Request, status
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
 
-from auth_middleware.auth_provider import AuthProvider
-from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.exceptions.invalid_authorization_exception import (
     InvalidAuthorizationException,
 )
 from auth_middleware.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
 )
-
-from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
 from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.settings import settings
@@ -60,7 +55,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         return response
 
-    async def get_credentials(self, request: Request) -> Tuple[str, str] | None:
+    async def get_credentials(self, request: Request) -> tuple[str, str] | None:
         """Get credentials from the request
 
         Args:
@@ -76,7 +71,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         if settings.AUTH_MIDDLEWARE_DISABLED:
             return None
 
-        credentials: Tuple[str, str] | None = None
+        credentials: tuple[str, str] | None = None
 
         # Try to decode the base64 encoded credentials
         try:
@@ -87,7 +82,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             raise InvalidAuthorizationException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid authorization header",
-            )
+            ) from e
 
         if not credentials:
             logger.error("Error in get_credentials: No credentials in the request")
@@ -113,7 +108,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             raise InvalidCredentialsException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid authentication credentials",
-            )
+            ) from e
 
     async def get_current_user(self, request: Request) -> User | None:
         """Get current logged in and active user
@@ -129,7 +124,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         logger.debug("Get Current Active User ...")
 
         # Recover credentials from the request
-        credentials: Tuple[str, str] = await self.get_credentials(request=request)
+        credentials: tuple[str, str] = await self.get_credentials(request=request)
         logger.debug("Credentials: {}", credentials)
 
         # Get user credentials from the repository

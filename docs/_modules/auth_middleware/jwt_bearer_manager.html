@@ -1,0 +1,223 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>auth_middleware.jwt_bearer_manager &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/jwt_bearer_manager.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">auth_middleware.jwt_bearer_manager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for auth_middleware.jwt_bearer_manager</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.security</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPAuthorizationCredentials</span><span class="p">,</span> <span class="n">HTTPBearer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jose</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTError</span><span class="p">,</span> <span class="n">jwt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.requests</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.status</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP_403_FORBIDDEN</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.invalid_token_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
+
+
+<div class="viewcode-block" id="JWTBearerManager">
+<a class="viewcode-back" href="../../jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JWTBearerManager</span><span class="p">(</span><span class="n">HTTPBearer</span><span class="p">):</span>
+<div class="viewcode-block" id="JWTBearerManager.__init__">
+<a class="viewcode-back" href="../../jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">auth_provider</span><span class="p">:</span> <span class="n">JWTProvider</span><span class="p">,</span>
+        <span class="n">auto_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">auto_error</span><span class="o">=</span><span class="n">auto_error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth_provider</span> <span class="o">=</span> <span class="n">auth_provider</span></div>
+
+
+<div class="viewcode-block" id="JWTBearerManager.get_credentials">
+<a class="viewcode-back" href="../../jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager.get_credentials">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_credentials</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWTAuthorizationCredentials</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_MIDDLEWARE_DISABLED</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">credentials</span><span class="p">:</span> <span class="n">HTTPAuthorizationCredentials</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span>
+                <span class="n">request</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">HTTPException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in JWTBearerManager: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in JWTBearerManager: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_403_FORBIDDEN</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;JWK-invalid&quot;</span><span class="p">,</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+        <span class="k">if</span> <span class="n">credentials</span><span class="p">:</span>
+            <span class="c1"># TODO: use a constant for the string &quot;Bearer&quot;</span>
+            <span class="k">if</span> <span class="n">credentials</span><span class="o">.</span><span class="n">scheme</span> <span class="o">!=</span> <span class="s2">&quot;Bearer&quot;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in JWTBearerManager: Wrong authentication method&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
+                    <span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_403_FORBIDDEN</span><span class="p">,</span>
+                    <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Wrong authentication method&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="n">jwt_token</span> <span class="o">=</span> <span class="n">credentials</span><span class="o">.</span><span class="n">credentials</span>
+
+            <span class="c1"># TODO: control exceptions if token is not a valid JWT</span>
+            <span class="c1"># (does not have a . in it)</span>
+            <span class="n">message</span><span class="p">,</span> <span class="n">signature</span> <span class="o">=</span> <span class="n">jwt_token</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">jwt_credentials</span> <span class="o">=</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">(</span>
+                    <span class="n">jwt_token</span><span class="o">=</span><span class="n">jwt_token</span><span class="p">,</span>
+                    <span class="n">header</span><span class="o">=</span><span class="n">jwt</span><span class="o">.</span><span class="n">get_unverified_header</span><span class="p">(</span><span class="n">jwt_token</span><span class="p">),</span>
+                    <span class="n">claims</span><span class="o">=</span><span class="n">jwt</span><span class="o">.</span><span class="n">get_unverified_claims</span><span class="p">(</span><span class="n">jwt_token</span><span class="p">),</span>
+                    <span class="n">signature</span><span class="o">=</span><span class="n">signature</span><span class="p">,</span>
+                    <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">except</span> <span class="n">JWTError</span> <span class="k">as</span> <span class="n">jwt_err</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in JWTBearerManager: JWTError&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
+                    <span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_403_FORBIDDEN</span><span class="p">,</span>
+                    <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;JWK-invalid&quot;</span><span class="p">,</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">jwt_err</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">auth_provider</span><span class="o">.</span><span class="n">verify_token</span><span class="p">(</span><span class="n">jwt_credentials</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in JWTBearerManager: token not verified&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
+                    <span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_403_FORBIDDEN</span><span class="p">,</span>
+                    <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;JWK_invalid&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">jwt_credentials</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

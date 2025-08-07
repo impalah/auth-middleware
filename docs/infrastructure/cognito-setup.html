@@ -1,0 +1,685 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Cognito Infrastructure Setup &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+    <link rel="canonical" href="/auth-middleware/infrastructure/cognito-setup.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Azure Entra ID Infrastructure Setup" href="entra-id-setup.html" />
+    <link rel="prev" title="Infrastructure Setup" href="../infrastructure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">AWS Cognito Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-create-a-user-pool">Step 1: Create a User Pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-create-app-clients">Step 2: Create App Clients</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#app-client-1-client-credentials-flow">App Client 1: Client Credentials Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#app-client-2-user-password-flow">App Client 2: User Password Flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-create-user-groups">Step 3: Create User Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-create-users">Step 4: Create Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-5-assign-users-to-groups">Step 5: Assign Users to Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-6-configure-user-pool-settings">Step 6: Configure User Pool Settings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#advanced-configuration">Advanced Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#step-7-testing-your-setup">Step 7: Testing Your Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-bruno-api-testing">Using Bruno/API Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-issues">Common Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html">Azure Entra ID Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html">Google Identity Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../infrastructure.html">Infrastructure Setup</a></li>
+      <li class="breadcrumb-item active">AWS Cognito Infrastructure Setup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/infrastructure/cognito-setup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aws-cognito-infrastructure-setup">
+<span id="cognito-infrastructure-setup"></span><h1>AWS Cognito Infrastructure Setup<a class="headerlink" href="#aws-cognito-infrastructure-setup" title="Link to this heading"></a></h1>
+<p>This guide walks you through setting up AWS Cognito infrastructure manually using the AWS Console. You’ll create a User Pool, configure App Clients for different authentication flows, create users, and set up user groups.</p>
+</section>
+<section id="prerequisites">
+<h1>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h1>
+<p>Before starting, ensure you have:</p>
+<ul class="simple">
+<li><p>An active AWS account</p></li>
+<li><p>Appropriate IAM permissions to create and manage Cognito resources</p></li>
+<li><p>Access to the AWS Management Console</p></li>
+</ul>
+</section>
+<section id="step-1-create-a-user-pool">
+<h1>Step 1: Create a User Pool<a class="headerlink" href="#step-1-create-a-user-pool" title="Link to this heading"></a></h1>
+<ol class="arabic">
+<li><p><strong>Navigate to Amazon Cognito</strong></p>
+<ul class="simple">
+<li><p>Open the AWS Management Console</p></li>
+<li><p>Search for “Cognito” and select “Amazon Cognito”</p></li>
+<li><p>Click “Create user pool”</p></li>
+</ul>
+</li>
+<li><p><strong>Configure Sign-in Experience</strong></p>
+<ul class="simple">
+<li><p><strong>Authentication providers</strong>: Select “Cognito user pool”</p></li>
+<li><p><strong>Cognito user pool sign-in options</strong>: Choose your preferred options:
+- ✅ <strong>Email</strong> (recommended for most applications)
+- ✅ <strong>Username</strong> (optional, based on your needs)
+- ⚠️ <strong>Phone number</strong> (optional, requires SMS configuration)</p></li>
+<li><p>Click “Next”</p></li>
+</ul>
+</li>
+<li><p><strong>Configure Security Requirements</strong></p>
+<ul>
+<li><p><strong>Password policy</strong>: Choose between “Cognito defaults” or “Custom”</p>
+<p>For custom policy, recommended settings:
+- Minimum length: 8 characters
+- ✅ Require numbers
+- ✅ Require special characters
+- ✅ Require uppercase letters
+- ✅ Require lowercase letters</p>
+</li>
+<li><p><strong>Multi-factor authentication</strong>:
+- <strong>Optional</strong> (recommended for production)
+- <strong>Required</strong> (for high-security applications)</p></li>
+<li><p><strong>User account recovery</strong>: Select preferred options:
+- ✅ <strong>Email only</strong> (most common)
+- <strong>SMS and email</strong> (if phone numbers are collected)</p></li>
+<li><p>Click “Next”</p></li>
+</ul>
+</li>
+<li><p><strong>Configure Sign-up Experience</strong></p>
+<ul class="simple">
+<li><p><strong>Self-service sign-up</strong>: Enable if you want users to self-register</p></li>
+<li><p><strong>Cognito-assisted verification</strong>: Choose verification methods:
+- ✅ <strong>Send email verification</strong> (recommended)
+- <strong>Send SMS verification</strong> (if using phone numbers)</p></li>
+<li><p><strong>Required attributes</strong>: Select attributes to collect during sign-up:
+- ✅ <strong>email</strong> (strongly recommended)
+- <strong>given_name</strong> (optional)
+- <strong>family_name</strong> (optional)
+- <strong>preferred_username</strong> (optional)</p></li>
+<li><p><strong>Custom attributes</strong>: Add any application-specific attributes</p></li>
+<li><p>Click “Next”</p></li>
+</ul>
+</li>
+<li><p><strong>Configure Message Delivery</strong></p>
+<ul class="simple">
+<li><p><strong>Email provider</strong>:
+- <strong>Send email with Cognito</strong> (for testing/development)
+- <strong>Send email with Amazon SES</strong> (recommended for production)</p></li>
+<li><p><strong>SMS</strong>: Configure if using SMS verification</p></li>
+<li><p>Click “Next”</p></li>
+</ul>
+</li>
+<li><p><strong>Integrate Your App</strong></p>
+<ul class="simple">
+<li><p><strong>User pool name</strong>: Enter a descriptive name (e.g., “MyApp-UserPool”)</p></li>
+<li><p><strong>Hosted authentication pages</strong>:
+- Check “Use the Cognito Hosted UI” if you want AWS-hosted login pages
+- Leave unchecked if you’re building custom authentication UI</p></li>
+<li><p><strong>Initial app client</strong>: We’ll configure this in the next step
+- <strong>App client name</strong>: Enter a temporary name (we’ll create proper clients later)
+- <strong>Client secret</strong>: Select “Don’t generate a client secret” for now</p></li>
+<li><p>Click “Next”</p></li>
+</ul>
+</li>
+<li><p><strong>Review and Create</strong></p>
+<ul class="simple">
+<li><p>Review all settings</p></li>
+<li><p>Click “Create user pool”</p></li>
+<li><p><strong>Save the User Pool ID</strong> - you’ll need this for configuration</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-2-create-app-clients">
+<h1>Step 2: Create App Clients<a class="headerlink" href="#step-2-create-app-clients" title="Link to this heading"></a></h1>
+<p>You’ll need two different app clients for different authentication flows:</p>
+<section id="app-client-1-client-credentials-flow">
+<h2>App Client 1: Client Credentials Flow<a class="headerlink" href="#app-client-1-client-credentials-flow" title="Link to this heading"></a></h2>
+<p>This client is used for server-to-server authentication.</p>
+<ol class="arabic simple">
+<li><p><strong>Navigate to App Integration</strong></p>
+<ul class="simple">
+<li><p>In your User Pool, go to the “App integration” tab</p></li>
+<li><p>Click “Create app client”</p></li>
+</ul>
+</li>
+<li><p><strong>Configure App Client</strong></p>
+<ul class="simple">
+<li><p><strong>App type</strong>: Select “Confidential client”</p></li>
+<li><p><strong>App client name</strong>: “MyApp-ClientCredentials”</p></li>
+<li><p><strong>Client secret</strong>: ✅ “Generate a client secret”</p></li>
+<li><p><strong>Allowed callback URLs</strong>: Not needed for client credentials</p></li>
+<li><p><strong>Allowed sign-out URLs</strong>: Not needed for client credentials</p></li>
+</ul>
+</li>
+<li><p><strong>Authentication Flows</strong></p>
+<ul class="simple">
+<li><p>❌ Uncheck “ALLOW_USER_SRP_AUTH”</p></li>
+<li><p>❌ Uncheck “ALLOW_USER_PASSWORD_AUTH”</p></li>
+<li><p>❌ Uncheck “ALLOW_REFRESH_TOKEN_AUTH”</p></li>
+<li><p>✅ Check “ALLOW_ADMIN_USER_PASSWORD_AUTH” (for admin operations)</p></li>
+<li><p>✅ Check “ALLOW_CUSTOM_AUTH” (optional)</p></li>
+</ul>
+</li>
+<li><p><strong>OAuth 2.0 Settings</strong></p>
+<ul class="simple">
+<li><p><strong>Allowed OAuth flows</strong>:
+- ✅ <strong>Client credentials</strong></p></li>
+<li><p><strong>Allowed OAuth scopes</strong>: Select appropriate scopes for your API</p></li>
+<li><p><strong>Hosted UI settings</strong>: Not needed for client credentials</p></li>
+</ul>
+</li>
+<li><p><strong>Save the Configuration</strong></p>
+<ul class="simple">
+<li><p>Click “Create app client”</p></li>
+<li><p><strong>Save the Client ID and Client Secret</strong> - you’ll need these for configuration</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="app-client-2-user-password-flow">
+<h2>App Client 2: User Password Flow<a class="headerlink" href="#app-client-2-user-password-flow" title="Link to this heading"></a></h2>
+<p>This client is used for user authentication with username/password.</p>
+<ol class="arabic simple">
+<li><p><strong>Create Another App Client</strong></p>
+<ul class="simple">
+<li><p>Click “Create app client” again</p></li>
+</ul>
+</li>
+<li><p><strong>Configure App Client</strong></p>
+<ul class="simple">
+<li><p><strong>App type</strong>: Select “Public client” or “Confidential client” based on your needs</p></li>
+<li><p><strong>App client name</strong>: “MyApp-UserAuth”</p></li>
+<li><p><strong>Client secret</strong>:
+- ❌ Don’t generate for public clients (mobile/SPA)
+- ✅ Generate for confidential clients (server-side web apps)</p></li>
+</ul>
+</li>
+<li><p><strong>Authentication Flows</strong></p>
+<ul class="simple">
+<li><p>✅ Check “ALLOW_USER_PASSWORD_AUTH”</p></li>
+<li><p>✅ Check “ALLOW_REFRESH_TOKEN_AUTH”</p></li>
+<li><p>❌ Uncheck “ALLOW_USER_SRP_AUTH” (unless you need SRP)</p></li>
+<li><p>❌ Uncheck “ALLOW_ADMIN_USER_PASSWORD_AUTH”</p></li>
+</ul>
+</li>
+<li><p><strong>OAuth 2.0 Settings</strong></p>
+<ul class="simple">
+<li><p><strong>Allowed OAuth flows</strong>:
+- ✅ <strong>Authorization code grant</strong>
+- ✅ <strong>Implicit grant</strong> (only if needed for legacy apps)</p></li>
+<li><p><strong>Allowed OAuth scopes</strong>:
+- ✅ <strong>email</strong>
+- ✅ <strong>openid</strong>
+- ✅ <strong>profile</strong></p></li>
+<li><p><strong>Callback URLs</strong>: Add your application’s callback URLs</p></li>
+<li><p><strong>Sign-out URLs</strong>: Add your application’s sign-out URLs</p></li>
+</ul>
+</li>
+<li><p><strong>Advanced Settings</strong></p>
+<ul class="simple">
+<li><p><strong>Access token expiration</strong>: 60 minutes (default, adjust as needed)</p></li>
+<li><p><strong>ID token expiration</strong>: 60 minutes (default, adjust as needed)</p></li>
+<li><p><strong>Refresh token expiration</strong>: 30 days (default, adjust as needed)</p></li>
+</ul>
+</li>
+<li><p><strong>Save the Configuration</strong></p>
+<ul class="simple">
+<li><p>Click “Create app client”</p></li>
+<li><p><strong>Save the Client ID (and Client Secret if generated)</strong></p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+<section id="step-3-create-user-groups">
+<h1>Step 3: Create User Groups<a class="headerlink" href="#step-3-create-user-groups" title="Link to this heading"></a></h1>
+<p>User groups are essential for authorization and role-based access control.</p>
+<ol class="arabic">
+<li><p><strong>Navigate to Users and Groups</strong></p>
+<ul class="simple">
+<li><p>In your User Pool, go to “Users and groups”</p></li>
+<li><p>Click on the “Groups” tab</p></li>
+<li><p>Click “Create group”</p></li>
+</ul>
+</li>
+<li><p><strong>Create Admin Group</strong></p>
+<ul class="simple">
+<li><p><strong>Group name</strong>: “admin”</p></li>
+<li><p><strong>Description</strong>: “Administrator group with full access”</p></li>
+<li><p><strong>IAM role</strong>: Leave blank unless you need AWS resource access</p></li>
+<li><p><strong>Precedence</strong>: 1 (lower numbers have higher precedence)</p></li>
+<li><p>Click “Create group”</p></li>
+</ul>
+</li>
+<li><p><strong>Create User Group</strong></p>
+<ul class="simple">
+<li><p>Click “Create group” again</p></li>
+<li><p><strong>Group name</strong>: “user”</p></li>
+<li><p><strong>Description</strong>: “Standard user group”</p></li>
+<li><p><strong>IAM role</strong>: Leave blank</p></li>
+<li><p><strong>Precedence</strong>: 10</p></li>
+<li><p>Click “Create group”</p></li>
+</ul>
+</li>
+<li><p><strong>Create Additional Groups</strong> (Optional)</p>
+<p>Create any additional groups your application needs:
+- “moderator” (precedence: 5)
+- “readonly” (precedence: 15)
+- “premium” (precedence: 8)</p>
+</li>
+</ol>
+</section>
+<section id="step-4-create-users">
+<h1>Step 4: Create Users<a class="headerlink" href="#step-4-create-users" title="Link to this heading"></a></h1>
+<p>Create test users to verify your setup.</p>
+<ol class="arabic simple">
+<li><p><strong>Create Admin User</strong></p>
+<ul class="simple">
+<li><p>Go to “Users and groups” → “Users” tab</p></li>
+<li><p>Click “Create user”</p></li>
+<li><p><strong>Username</strong>: “<a class="reference external" href="mailto:admin&#37;&#52;&#48;example&#46;com">admin<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
+<li><p><strong>Email</strong>: “<a class="reference external" href="mailto:admin&#37;&#52;&#48;example&#46;com">admin<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
+<li><p><strong>Temporary password</strong>: Generate a secure password</p></li>
+<li><p>✅ Check “Send an invitation to this new user?”</p></li>
+<li><p>✅ Check “Mark phone number as verified” (if applicable)</p></li>
+<li><p>✅ Check “Mark email as verified”</p></li>
+<li><p>Click “Create user”</p></li>
+</ul>
+</li>
+<li><p><strong>Create Regular User</strong></p>
+<ul class="simple">
+<li><p>Click “Create user” again</p></li>
+<li><p><strong>Username</strong>: “<a class="reference external" href="mailto:user&#37;&#52;&#48;example&#46;com">user<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
+<li><p><strong>Email</strong>: “<a class="reference external" href="mailto:user&#37;&#52;&#48;example&#46;com">user<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
+<li><p><strong>Temporary password</strong>: Generate a secure password</p></li>
+<li><p>✅ Check “Send an invitation to this new user?”</p></li>
+<li><p>✅ Check “Mark email as verified”</p></li>
+<li><p>Click “Create user”</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-5-assign-users-to-groups">
+<h1>Step 5: Assign Users to Groups<a class="headerlink" href="#step-5-assign-users-to-groups" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p><strong>Assign Admin User to Admin Group</strong></p>
+<ul class="simple">
+<li><p>Go to “Users and groups” → “Users” tab</p></li>
+<li><p>Click on the admin user</p></li>
+<li><p>Click “Add to group”</p></li>
+<li><p>Select “admin” group</p></li>
+<li><p>Click “Add to group”</p></li>
+</ul>
+</li>
+<li><p><strong>Assign Regular User to User Group</strong></p>
+<ul class="simple">
+<li><p>Click on the regular user</p></li>
+<li><p>Click “Add to group”</p></li>
+<li><p>Select “user” group</p></li>
+<li><p>Click “Add to group”</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-6-configure-user-pool-settings">
+<h1>Step 6: Configure User Pool Settings<a class="headerlink" href="#step-6-configure-user-pool-settings" title="Link to this heading"></a></h1>
+<section id="advanced-configuration">
+<h2>Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>App Client Settings</strong> (if using Hosted UI)</p>
+<ul class="simple">
+<li><p>Go to “App integration” → “App client settings”</p></li>
+<li><p>Configure each app client:
+- <strong>Enabled Identity Providers</strong>: ✅ Cognito User Pool
+- <strong>Callback URL(s)</strong>: Your application’s callback URLs
+- <strong>Sign out URL(s)</strong>: Your application’s logout URLs
+- <strong>Allowed OAuth Flows</strong>: Based on your app client type
+- <strong>Allowed OAuth Scopes</strong>: email, openid, profile</p></li>
+</ul>
+</li>
+<li><p><strong>Domain Name</strong> (if using Hosted UI)</p>
+<ul class="simple">
+<li><p>Go to “App integration” → “Domain name”</p></li>
+<li><p>Choose either:
+- <strong>Amazon Cognito domain</strong>: Use cognito subdomain
+- <strong>Your own domain</strong>: Use custom domain (requires SSL certificate)</p></li>
+</ul>
+</li>
+<li><p><strong>Triggers</strong> (Optional)</p>
+<ul class="simple">
+<li><p>Go to “General settings” → “Triggers”</p></li>
+<li><p>Configure Lambda triggers for:
+- Pre sign-up validation
+- Post confirmation actions
+- Pre authentication validation
+- Post authentication actions
+- User migration</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+<section id="step-7-testing-your-setup">
+<h1>Step 7: Testing Your Setup<a class="headerlink" href="#step-7-testing-your-setup" title="Link to this heading"></a></h1>
+<section id="using-bruno-api-testing">
+<h2>Using Bruno/API Testing<a class="headerlink" href="#using-bruno-api-testing" title="Link to this heading"></a></h2>
+<p>You can test your Cognito setup using the Bruno API client (as shown in your test files):</p>
+<ol class="arabic">
+<li><p><strong>Test User Authentication</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">ps</span><span class="p">:</span><span class="c1">//cognito-idp.{region}.amazonaws.com/</span>
+<span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/x</span><span class="mi">-</span><span class="err">amz</span><span class="mi">-</span><span class="err">jso</span><span class="kc">n</span><span class="mf">-1.1</span>
+<span class="err">X</span><span class="mi">-</span><span class="err">Amz</span><span class="mi">-</span><span class="err">Targe</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="err">AWSCog</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">oIde</span><span class="kc">nt</span><span class="err">i</span><span class="kc">t</span><span class="err">yProviderService.I</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">ia</span><span class="kc">te</span><span class="err">Au</span><span class="kc">t</span><span class="err">h</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;AuthParameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;USERNAME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user@example.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;PASSWORD&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user_password&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;AuthFlow&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;USER_PASSWORD_AUTH&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;ClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{your_user_auth_client_id}&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Test Client Credentials</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="err">POST</span><span class="w"> </span><span class="err">h</span><span class="kc">tt</span><span class="err">ps</span><span class="p">:</span><span class="c1">//cognito-idp.{region}.amazonaws.com/</span>
+<span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/x</span><span class="mi">-</span><span class="err">amz</span><span class="mi">-</span><span class="err">jso</span><span class="kc">n</span><span class="mf">-1.1</span>
+<span class="err">X</span><span class="mi">-</span><span class="err">Amz</span><span class="mi">-</span><span class="err">Targe</span><span class="kc">t</span><span class="p">:</span><span class="w"> </span><span class="err">AWSCog</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">oIde</span><span class="kc">nt</span><span class="err">i</span><span class="kc">t</span><span class="err">yProviderService.I</span><span class="kc">n</span><span class="err">i</span><span class="kc">t</span><span class="err">ia</span><span class="kc">te</span><span class="err">Au</span><span class="kc">t</span><span class="err">h</span>
+
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;AuthParameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;SECRET_HASH&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{calculated_secret_hash}&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;AuthFlow&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CLIENT_CREDENTIALS&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;ClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{your_client_credentials_client_id}&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="configuration-summary">
+<h1>Configuration Summary<a class="headerlink" href="#configuration-summary" title="Link to this heading"></a></h1>
+<p>After completing these steps, you’ll have:</p>
+<p><strong>User Pool Information</strong>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">User Pool ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1_XXXXXXXXX</span>
+<span class="nt">User Pool Region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
+<span class="nt">User Pool Domain</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-domain.auth.us-east-1.amazoncognito.com</span>
+</pre></div>
+</div>
+<p><strong>App Clients</strong>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Client Credentials App</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">Client ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">xxxxxxxxxxxxxxxxxxxx</span>
+<span class="w">  </span><span class="nt">Client Secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>
+<span class="w">  </span><span class="nt">Allowed Flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALLOW_ADMIN_USER_PASSWORD_AUTH</span>
+
+<span class="nt">User Authentication App</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">Client ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yyyyyyyyyyyyyyyyyyyy</span>
+<span class="w">  </span><span class="nt">Client Secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy</span>
+<span class="w">  </span><span class="nt">Allowed Flows</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ALLOW_USER_PASSWORD_AUTH, ALLOW_REFRESH_TOKEN_AUTH</span>
+</pre></div>
+</div>
+<p><strong>Groups Created</strong>:</p>
+<ul class="simple">
+<li><p>admin (precedence: 1)</p></li>
+<li><p>user (precedence: 10)</p></li>
+</ul>
+<p><strong>Test Users</strong>:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="mailto:admin&#37;&#52;&#48;example&#46;com">admin<span>&#64;</span>example<span>&#46;</span>com</a> (member of admin group)</p></li>
+<li><p><a class="reference external" href="mailto:user&#37;&#52;&#48;example&#46;com">user<span>&#64;</span>example<span>&#46;</span>com</a> (member of user group)</p></li>
+</ul>
+<p>Use these values to configure your auth-middleware as described in the <a class="reference internal" href="../cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a> documentation.</p>
+</section>
+<section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h1>
+<section id="common-issues">
+<h2>Common Issues<a class="headerlink" href="#common-issues" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Authentication Fails</strong></p>
+<ul class="simple">
+<li><p>Verify the User Pool ID and region are correct</p></li>
+<li><p>Check that the app client has the correct authentication flows enabled</p></li>
+<li><p>Ensure users are confirmed (check email verification)</p></li>
+</ul>
+</li>
+<li><p><strong>Group Information Not Available</strong></p>
+<ul class="simple">
+<li><p>Verify users are assigned to groups</p></li>
+<li><p>Check that the groups were created successfully</p></li>
+<li><p>Ensure your JWT tokens include group information</p></li>
+</ul>
+</li>
+<li><p><strong>Client Secret Issues</strong></p>
+<ul class="simple">
+<li><p>For public clients (mobile/SPA), don’t use client secrets</p></li>
+<li><p>For confidential clients, ensure the secret is correctly configured</p></li>
+<li><p>Verify the secret hasn’t been regenerated</p></li>
+</ul>
+</li>
+<li><p><strong>Token Expiration Issues</strong></p>
+<ul class="simple">
+<li><p>Check token expiration settings in app client configuration</p></li>
+<li><p>Implement proper token refresh logic in your application</p></li>
+<li><p>Consider adjusting token lifetimes based on security requirements</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
+<section id="security-best-practices">
+<h1>Security Best Practices<a class="headerlink" href="#security-best-practices" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p><strong>Production Considerations</strong></p>
+<ul class="simple">
+<li><p>Use custom domains for Hosted UI</p></li>
+<li><p>Enable MFA for all users</p></li>
+<li><p>Implement proper token refresh mechanisms</p></li>
+<li><p>Use short-lived access tokens (15-60 minutes)</p></li>
+<li><p>Configure appropriate CORS settings</p></li>
+</ul>
+</li>
+<li><p><strong>Monitoring and Logging</strong></p>
+<ul class="simple">
+<li><p>Enable CloudTrail for Cognito API calls</p></li>
+<li><p>Set up CloudWatch alarms for failed authentication attempts</p></li>
+<li><p>Monitor user pool metrics</p></li>
+<li><p>Implement application-level audit logging</p></li>
+</ul>
+</li>
+<li><p><strong>Backup and Recovery</strong></p>
+<ul class="simple">
+<li><p>Export user data regularly</p></li>
+<li><p>Document your configuration</p></li>
+<li><p>Test user pool recovery procedures</p></li>
+<li><p>Keep app client secrets secure</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="next-steps">
+<h1>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h1>
+<p>Now that your Cognito infrastructure is set up:</p>
+<ol class="arabic simple">
+<li><p>Configure the auth-middleware with your Cognito settings</p></li>
+<li><p>Implement the authentication flow in your application</p></li>
+<li><p>Set up authorization rules based on user groups</p></li>
+<li><p>Test the complete authentication and authorization flow</p></li>
+<li><p>Deploy to production with appropriate security settings</p></li>
+</ol>
+<p>For implementation details, see the <a class="reference internal" href="../cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a> documentation.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../infrastructure.html" class="btn btn-neutral float-left" title="Infrastructure Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="entra-id-setup.html" class="btn btn-neutral float-right" title="Azure Entra ID Infrastructure Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

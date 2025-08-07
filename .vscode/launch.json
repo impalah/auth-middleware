@@ -30,12 +30,14 @@
       "args": ["--ignore-missing-imports", "src/"]
     },
     {
-      "name": "Example - Auth Middleware",
+      "name": "Examples - Auth Middleware",
       "type": "debugpy",
       "request": "launch",
-      "module": "uvicorn",
-      "cwd": "${workspaceRoot}/examples/fastapi_cognito/src/demo",
-      "args": ["main:app", "--reload", "--port", "8000"]
+      "program": "${workspaceRoot}/examples/auth_examples.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceRoot}/examples",
+      "justMyCode": true,
+      "python": "${workspaceRoot}/.venv/Scripts/python.exe"
     }
   ]
 }

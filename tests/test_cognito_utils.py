@@ -11,7 +11,8 @@ def test_cognito_get_login_url():
 
     assert get_login_url(domain, client_id, region, redirect_uri) == expected_url
 
-    # Test case 2: Check if the login URL is generated correctly with special characters in the redirect URI
+    # Test case 2: Check if the login URL is generated correctly
+    # with special characters in the redirect URI
     domain = "example"
     client_id = "1234567890"
     region = "us-west-2"
@@ -31,7 +32,8 @@ def test_cognito_get_logout_url():
 
     assert get_logout_url(domain, client_id, region, redirect_uri) == expected_url
 
-    # Test case 2: Check if the logout URL is generated correctly with special characters in the redirect URI
+    # Test case 2: Check if the logout URL is generated correctly
+    # with special characters in the redirect URI
     domain = "example"
     client_id = "1234567890"
     region = "us-west-2"

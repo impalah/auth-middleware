@@ -1,14 +1,12 @@
-[tool.poetry]
+[project]
 name = "auth-middleware"
 version = "0.2.9"
 description = "Async Auth Middleware for FastAPI/Starlette"
-authors = ["impalah <impalah@gmail.com>"]
+authors = [
+    {name = "impalah", email = "impalah@gmail.com"}
+]
 readme = "README.md"
-packages = [{include = "auth_middleware", from = "src"}]
-license = "MIT"
-homepage = "https://impalah.github.io/auth-middleware/"
-repository = "https://github.com/impalah/auth-middleware"
-documentation = "https://impalah.github.io/auth-middleware/"
+license = {text = "MIT"}
 keywords = ["auth", "middleware", "fastapi", "starlette"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -19,49 +17,86 @@ classifiers = [
     "Topic :: System :: Systems Administration :: Authentication/Directory",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.6",
+    "python-dotenv>=1.0.1",
+    "svix-ksuid>=0.6.2",
+    "httpx>=0.28.1",
+    "asyncpg>=0.30.0",
+    "aiomysql>=0.2.0",
+    "click>=8.1.8",
+    "loguru>=0.7.3",
+    "python-jose[cryptography]>=3.3.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "pydantic[email]>=2.10.4",
+    "pydantic-settings>=2.10.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-fastapi = ">=0.115.6"
-python-dotenv = ">=1.0.1"
-svix-ksuid = ">=0.6.2"
-httpx = ">=0.28.1"
-asyncpg = ">=0.30.0"
-aiomysql = ">=0.2.0"
-click = ">=8.1.8"
-loguru = ">=0.7.3"
-python-jose = {extras = ["cryptography"], version = ">=3.3.0"}
-sqlalchemy = {extras = ["asyncio"], version = ">=2.0.36"}
-pydantic = {extras = ["email"], version = ">=2.10.4"}
+[project.urls]
+Homepage = "https://impalah.github.io/auth-middleware/"
+Documentation = "https://impalah.github.io/auth-middleware/"
+Repository = "https://github.com/impalah/auth-middleware"
+Source = "https://github.com/impalah/auth-middleware"
 
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.4"
-pytest-mock = "^3.14.0"
-pytest-asyncio = "^0.25.0"
-mock = "^5.1.0"
-pytest-cov = "^6.0.0"
-black = "^24.10.0"
-pytest-env = "^1.1.5"
-mypy = "^1.14.1"
-sphinx = "^8.1.3"
-sphinx-rtd-theme = "^3.0.2"
-flake8 = "^7.1.1"
-flake8-bugbear = "^24.12.12"
-flake8-annotations = "^3.1.1"
-autoflake = "^2.3.1"
-alembic = "^1.14.0"
-psycopg2 = "^2.9.10"
-mysqlclient = "^2.2.6"
+[project.scripts]
+authcli = "auth_middleware.cli:cli"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.urls]
-"Documentation" = "https://impalah.github.io/auth-middleware/"
-"Source" = "https://github.com/impalah/auth-middleware"
+[dependency-groups]
+dev = [
+    "bandit>=1.8.3",
+    "debugpy>=1.8.13",
+    "httpx>=0.28.1",
+    "ipykernel>=6.29.5",
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.11.0",
+    "mock>=5.1.0",
+    "pytest-env>=1.1.5",
+    "alembic>=1.14.0",
+    "psycopg2>=2.9.10",
+    "mysqlclient>=2.2.6",
+    "uvicorn>=0.35.0",
+]
+docs = [
+    "sphinx>=7.1.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-autodoc-typehints>=1.24.0",
+    "myst-parser>=2.0.0",
+    "sphinx-copybutton>=0.5.2",
+    "furo>=2023.9.10",
+]
 
-[tool.poetry.scripts]
-authcli = "auth_middleware.cli:cli"
+[tool.ruff]
+line-length = 88
+src = ["src"]  # First, add the source code folder
+target-version = "py312"  # We are using Python 3.12
+
+[tool.ruff.lint]
+# Activate additional rules to imitate flake8 and isort
+select = [
+  "E", "F", "I", "UP", "B", "W", "C90"
+]
+# Exclude files and folders that are not part of the source code
+exclude = ["tests/data", ".venv"]
+
+# Activate autofix for common problems
+fixable = ["ALL"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
+pretty = true
+
+
+
+
 

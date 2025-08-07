@@ -1,9 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, List
-
 
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
-from auth_middleware.logging import logger
 
 
 class PermissionsProvider(metaclass=ABCMeta):
@@ -14,7 +11,7 @@ class PermissionsProvider(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    async def fetch_permissions(self, token: JWTAuthorizationCredentials) -> List[str]:
+    async def fetch_permissions(self, token: JWTAuthorizationCredentials) -> list[str]:
         """Get permissions using the token provided
 
         Args:

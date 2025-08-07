@@ -3,24 +3,16 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from fastapi import HTTPException
 from jose import jwt
 from starlette.requests import Request
 from starlette.types import Scope
 
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
-from auth_middleware.exceptions.invalid_authorization_exception import (
-    InvalidAuthorizationException,
-)
-from auth_middleware.exceptions.invalid_credentials_exception import (
-    InvalidCredentialsException,
-)
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 
 
 @pytest.mark.asyncio
 async def test_get_credentials_disabled_middleware():
-
     manager = JWTBearerManager(auth_provider=MagicMock())
 
     scope = {"type": "http"}
@@ -28,7 +20,6 @@ async def test_get_credentials_disabled_middleware():
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
     with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", True):
-
         credentials = await manager.get_credentials(request)
 
         assert credentials is None
@@ -36,7 +27,6 @@ async def test_get_credentials_disabled_middleware():
 
 @pytest.mark.asyncio
 async def test_get_credentials_valid_token():
-
     mock_auth_provider = AsyncMock()
     mock_auth_provider.verify_token.return_value = True
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
@@ -45,7 +35,7 @@ async def test_get_credentials_valid_token():
     secret = "my_secret_key"
 
     # Define the payload. This is the data that will be included in the token.
-    # In a real application, this might include information about the user who is logged in.
+    # In a real application, this might include info about the user.
 
     # TODO: send to utilities file
     payload = {
@@ -75,7 +65,6 @@ async def test_get_credentials_valid_token():
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
     with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
-
         credentials = await manager.get_credentials(request)
 
     assert credentials is not None
@@ -88,7 +77,6 @@ async def test_get_credentials_valid_token():
 
 @pytest.mark.asyncio
 async def test_get_credentials_invalid_token():
-
     mock_auth_provider = AsyncMock()
     mock_auth_provider.verify_token.return_value = False
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
@@ -97,7 +85,7 @@ async def test_get_credentials_invalid_token():
     secret = "my_secret_key"
 
     # Define the payload. This is the data that will be included in the token.
-    # In a real application, this might include information about the user who is logged in.
+    # In a real application, this might include info about the user.
 
     # TODO: send to utilities file
     payload = {
@@ -127,9 +115,8 @@ async def test_get_credentials_invalid_token():
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
     with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
-
         with pytest.raises(InvalidTokenException) as exc_info:
-            credentials = await manager.get_credentials(request)
+            await manager.get_credentials(request)
 
         # Assert that the exception has the correct status code and detail
         assert exc_info.value.status_code == 403

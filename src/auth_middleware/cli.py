@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-import click
 import asyncio
+
+import click
+
 from auth_middleware.providers.authz.sql_permissions_provider import (
     SqlPermissionsProvider,
 )

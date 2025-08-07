@@ -1,8 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, List
 
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
-from auth_middleware.logging import logger
 
 
 class GroupsProvider(metaclass=ABCMeta):
@@ -13,7 +11,7 @@ class GroupsProvider(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    async def fetch_groups(self, token: JWTAuthorizationCredentials) -> List[str]:
+    async def fetch_groups(self, token: JWTAuthorizationCredentials) -> list[str]:
         """Get groups using the token provided
 
         Args:

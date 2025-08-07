@@ -1,12 +1,10 @@
 from time import time, time_ns
-from typing import List, Type, Union
 
 import httpx
 from jose import jwk
 from jose.utils import base64url_decode
 
 from auth_middleware.logging import logger
-from auth_middleware.providers.authn.cognito_settings import settings
 from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
@@ -17,34 +15,27 @@ from auth_middleware.types.user import User
 
 
 class CognitoProvider(JWTProvider):
-
     def __new__(
         cls,
         settings: JWTProviderSettings = None,
-        permissions_provider: Union[
-            Type[PermissionsProvider], PermissionsProvider
-        ] = None,
-        groups_provider: Union[Type[GroupsProvider], GroupsProvider] = None,
+        permissions_provider: type[PermissionsProvider] | PermissionsProvider = None,
+        groups_provider: type[GroupsProvider] | GroupsProvider = None,
     ):
         logger.debug("Creating CognitoProvider instance")
 
         if not hasattr(cls, "instance"):
-            cls.instance = super(CognitoProvider, cls).__new__(cls)
+            cls.instance = super().__new__(cls)
         return cls.instance
 
     def __init__(
         self,
         settings: JWTProviderSettings = None,
-        permissions_provider: Union[
-            Type[PermissionsProvider], PermissionsProvider
-        ] = None,
-        groups_provider: Union[Type[GroupsProvider], GroupsProvider] = None,
+        permissions_provider: type[PermissionsProvider] | PermissionsProvider = None,
+        groups_provider: type[GroupsProvider] | GroupsProvider = None,
     ) -> None:
-
         logger.debug("Initializing CognitoProvider instance")
 
         if not getattr(self.__class__, "_initialized", False):  # Avoid reinitialization
-
             if not settings:
                 raise ValueError("Settings must be provided")
 
@@ -61,7 +52,8 @@ class CognitoProvider(JWTProvider):
                     permissions_provider = permissions_provider
                 else:
                     raise ValueError(
-                        "permissions_provider must be a PermissionsProvider or a subclass thereof"
+                        "permissions_provider must be a PermissionsProvider "
+                        "or a subclass thereof"
                     )
 
             # TODO: Refactor this
@@ -87,7 +79,7 @@ class CognitoProvider(JWTProvider):
             )
             self.__class__._initialized = True
 
-    async def get_keys(self) -> List[JWK]:
+    async def get_keys(self) -> list[JWK]:
         """Get keys from AWS Cognito
 
         Returns:
@@ -101,7 +93,7 @@ class CognitoProvider(JWTProvider):
                     self._settings.user_pool_id,
                 )
             )
-            keys: List[JWK] = response.json()["keys"]
+            keys: list[JWK] = response.json()["keys"]
         return keys
 
     async def load_jwks(
@@ -114,7 +106,7 @@ class CognitoProvider(JWTProvider):
         """
 
         # TODO: Control errors
-        keys: List[JWK] = await self.get_keys()
+        keys: list[JWK] = await self.get_keys()
 
         timestamp: int = (
             time_ns() + self._settings.jwks_cache_interval * 60 * 1000000000
@@ -126,7 +118,6 @@ class CognitoProvider(JWTProvider):
         return jks
 
     async def verify_token(self, token: JWTAuthorizationCredentials) -> bool:
-
         if self._settings.jwt_token_verification_disabled:
             return True
 

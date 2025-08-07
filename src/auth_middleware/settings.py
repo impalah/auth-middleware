@@ -12,7 +12,12 @@ class Settings:
     AUTH_MIDDLEWARE_LOG_FORMAT: str = config(
         "AUTH_MIDDLEWARE_LOG_FORMAT",
         cast=str,
-        default="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+        default=(
+            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+            "<level>{level: <8}</level> | "
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+            "<level>{message}</level>"
+        ),
     )
 
     # AUTH_MIDDLEWARE_LOGGER_NAME: str = config(

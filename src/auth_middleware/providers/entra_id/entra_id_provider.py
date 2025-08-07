@@ -1,21 +1,20 @@
-from time import time, time_ns
-from typing import Any, Dict, List
+from time import time_ns
+from typing import Any
 
 import httpx
 from jose import JWTError, jwt
 
-from auth_middleware.types.jwt import JWKS, JWTAuthorizationCredentials
-from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.logging import logger
+from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
-from auth_middleware.providers.exceptions.azure_exception import AzureException
 from auth_middleware.providers.entra_id.settings import settings
+from auth_middleware.providers.exceptions.azure_exception import AzureException
+from auth_middleware.types.jwt import JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
 
 class EntraIDProvider(JWTProvider):
-
     # def __new__(cls):
     #     if not hasattr(cls, "instance"):
     #         cls.instance = super(EntraIDProvider, cls).__new__(cls)
@@ -27,7 +26,7 @@ class EntraIDProvider(JWTProvider):
         groups_provider: GroupsProvider = None,
     ):
         if not hasattr(cls, "instance"):
-            cls.instance = super(EntraIDProvider, cls).__new__(cls)
+            cls.instance = super().__new__(cls)
         return cls.instance
 
     def __init__(
@@ -35,7 +34,6 @@ class EntraIDProvider(JWTProvider):
         permissions_provider: PermissionsProvider = None,
         groups_provider: GroupsProvider = None,
     ) -> None:
-
         if not hasattr(self, "_initialized"):  # Avoid reinitialization
             super().__init__(
                 permissions_provider=permissions_provider,
@@ -53,10 +51,10 @@ class EntraIDProvider(JWTProvider):
         # TODO: Control errors
         async with httpx.AsyncClient() as client:
             response = await client.get(jwks_uri)
-            response: Dict[str, str] = response.json()["keys"]
+            response: dict[str, str] = response.json()["keys"]
         return response
 
-    async def get_openid_config(self) -> Dict[str, str]:
+    async def get_openid_config(self) -> dict[str, str]:
         """Get openid config from entradid
 
         Returns:
@@ -70,7 +68,7 @@ class EntraIDProvider(JWTProvider):
                         settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
                     )
                 )
-                response: Dict[str, str] = response.json()
+                response: dict[str, str] = response.json()
             except Exception as e:
                 logger.error("Error in get_openid_config: {}", str(e))
         return response
@@ -149,7 +147,7 @@ class EntraIDProvider(JWTProvider):
             return False
         except Exception as e:
             logger.error("Error in JWTBearerManager: {}", str(e))
-            raise AzureException("Error in JWTBearerManager")
+            raise AzureException("Error in JWTBearerManager") from e
 
     async def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
         """Initializes a domain User object with data recovered from a JWT TOKEN.
@@ -171,7 +169,7 @@ class EntraIDProvider(JWTProvider):
         #     else [str(token.claims["scope"]).split("/")[-1]]
         # ),
 
-        groups: List[str] = (
+        groups: list[str] = (
             self._groups_provider.fetch_groups(token) if self._groups_provider else []
         )
 

@@ -2,7 +2,6 @@ from starlette.config import Config
 
 from auth_middleware.settings import Settings
 
-
 config = Config()
 
 

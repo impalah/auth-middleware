@@ -1,23 +1,16 @@
 # Activate annotations for Python 3.7+ and from __future__ import annotations
 from __future__ import annotations
 
-from typing import Any, Optional, List
+from ksuid import Ksuid
+from sqlalchemy import String, select
+from sqlalchemy.orm import Mapped, mapped_column
 
-
-from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from auth_middleware.logging import logger
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
-
-from ksuid import Ksuid
-
-
-from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import select
-
-from .sql_base_model import Base, BaseModel
 from .async_database import AsyncDatabase
+from .sql_base_model import Base
 
 
 class PermissionsModel(Base):
@@ -48,7 +41,7 @@ class SqlPermissionsProvider(PermissionsProvider):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    async def fetch_permissions(self, token: JWTAuthorizationCredentials) -> List[str]:
+    async def fetch_permissions(self, token: JWTAuthorizationCredentials) -> list[str]:
         """Get groups using the token provided
 
         Args:
@@ -67,7 +60,7 @@ class SqlPermissionsProvider(PermissionsProvider):
         # 2. Check if permissions are in the cache
 
         # 3. If not in cache, fetch from the database
-        permissions: List[str] = await self.get_permissions_from_db(username=username)
+        permissions: list[str] = await self.get_permissions_from_db(username=username)
 
         # 4. Return the permissions
         return permissions
@@ -76,7 +69,7 @@ class SqlPermissionsProvider(PermissionsProvider):
         self,
         *,
         username: str,
-    ) -> List[str]:
+    ) -> list[str]:
         """Gets permissions from the database
 
         Args:
@@ -92,7 +85,6 @@ class SqlPermissionsProvider(PermissionsProvider):
 
         async with AsyncDatabase.get_session() as session:
             try:
-
                 query = select(PermissionsModel).filter(
                     PermissionsModel.username == username
                 )
@@ -100,7 +92,7 @@ class SqlPermissionsProvider(PermissionsProvider):
                 result = await session.execute(query)
 
                 scalars = result.scalars()
-                items: List[PermissionsModel] = scalars.all()
+                items: list[PermissionsModel] = scalars.all()
                 return [item.permission for item in items]
 
             except Exception as ex:

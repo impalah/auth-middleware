@@ -1,5 +1,3 @@
-from typing import Optional
-
 from starlette.config import Config
 
 from auth_middleware.settings import Settings
@@ -10,13 +8,13 @@ config = Config()
 class CognitoSettings(Settings):
     """Settings for the cognito module"""
 
-    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID: Optional[str] = config(
+    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID: str | None = config(
         "AUTH_PROVIDER_AWS_COGNITO_USER_POOL_ID",
         cast=str,
         default=None,
     )
 
-    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_REGION: Optional[str] = config(
+    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_REGION: str | None = config(
         "AUTH_PROVIDER_AWS_COGNITO_USER_POOL_REGION",
         cast=str,
         default=None,
@@ -28,13 +26,13 @@ class CognitoSettings(Settings):
         default="https://cognito-idp.{}.amazonaws.com/{}/.well-known/jwks.json",
     )
 
-    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_CLIENT_ID: Optional[str] = config(
+    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_CLIENT_ID: str | None = config(
         "AUTH_PROVIDER_AWS_COGNITO_USER_POOL_CLIENT_ID",
         cast=str,
         default=None,
     )
 
-    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_CLIENT_SECRET: Optional[str] = config(
+    AUTH_PROVIDER_AWS_COGNITO_USER_POOL_CLIENT_SECRET: str | None = config(
         "AUTH_PROVIDER_AWS_COGNITO_USER_POOL_CLIENT_SECRET",
         cast=str,
         default=None,

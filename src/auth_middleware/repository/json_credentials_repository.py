@@ -1,21 +1,6 @@
-import hashlib
 import json
 import os
-from abc import ABCMeta, abstractmethod
-from time import time, time_ns
-from typing import Any, List, Optional
 
-from fastapi import status
-from starlette.requests import Request
-
-from auth_middleware.auth_provider import AuthProvider, TCredentials
-from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
-from auth_middleware.exceptions.invalid_authorization_exception import (
-    InvalidAuthorizationException,
-)
-from auth_middleware.exceptions.invalid_credentials_exception import (
-    InvalidCredentialsException,
-)
 from auth_middleware.logging import logger
 from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.repository.settings import settings
@@ -41,10 +26,10 @@ class JsonCredentialsRepository(CredentialsRepository):
         logger.debug("Opening credentials file: {}", file_path)
 
         # TODO: Control exceptions
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             self._database = json.load(f)
 
-    async def get_by_id(self, *, id: str) -> Optional[UserCredentials]:
+    async def get_by_id(self, *, id: str) -> UserCredentials | None:
         """Get user by id from the database
 
         Args:

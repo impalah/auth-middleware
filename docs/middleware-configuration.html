@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Middleware Configuration &mdash; auth-middleware 0.1.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+  <title>Middleware Configuration &mdash; Auth Middleware 0.1.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
     <link rel="canonical" href="/auth-middleware/middleware-configuration.html" />
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=a58bc63e"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=6e0256f3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="The User Property" href="user-property.html" />
+    <link rel="next" title="AWS Cognito Provider" href="cognito_provider.html" />
     <link rel="prev" title="User Guide" href="user-guide.html" /> 
 </head>
 
@@ -30,12 +28,12 @@
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
 
           
           
           <a href="index.html" class="icon icon-home">
-            auth-middleware
+            Auth Middleware
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -45,23 +43,84 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Middleware Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Middleware Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-middleware-setup">Basic Middleware Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#middleware-parameters">Middleware Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#path-configuration">Path Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#excluding-paths-from-authentication">Excluding Paths from Authentication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#including-specific-paths-only">Including Specific Paths Only</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pattern-matching">Pattern Matching</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment Variables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#core-configuration">Core Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#provider-specific-variables">Provider-Specific Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#custom-authentication-providers">Custom Authentication Providers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-custom-provider">Creating a Custom Provider</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-custom-provider">Example Custom Provider</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#performance-configuration">Performance Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#connection-pooling">Connection Pooling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#caching-configuration">Caching Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#logging-configuration">Logging Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#detailed-logging">Detailed Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#environment-based-logging">Environment-based Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#security-best-practices">Security Best Practices</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#token-security">Token Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuration-security">Configuration Security</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling-configuration">Error Handling Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#custom-error-handlers">Custom Error Handlers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#development-configuration">Development Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development-mode">Development Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hot-reloading">Hot Reloading</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-configuration">Testing Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
 </ul>
 
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">auth-middleware</a>
+          <a href="index.html">Auth Middleware</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -81,49 +140,469 @@
              
   <section id="middleware-configuration">
 <h1>Middleware Configuration<a class="headerlink" href="#middleware-configuration" title="Link to this heading"></a></h1>
-<p>The middleware configuration is done by environment variables (or using and .env file if your project uses python-dotenv).</p>
-<p>The main variables are shown in the table below:</p>
+<p>This section covers advanced configuration options for Auth Middleware, including environment variables, custom providers, and performance tuning.</p>
+<section id="basic-middleware-setup">
+<h2>Basic Middleware Setup<a class="headerlink" href="#basic-middleware-setup" title="Link to this heading"></a></h2>
+<p>The Auth Middleware is added to your FastAPI or Starlette application using the standard middleware protocol:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="c1"># Add authentication middleware</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">your_auth_provider</span><span class="p">,</span>
+    <span class="c1"># Additional configuration options...</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="middleware-parameters">
+<h2>Middleware Parameters<a class="headerlink" href="#middleware-parameters" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware</span></code> accepts the following parameters:</p>
 <table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
+</colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p>Name</p></th>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Description</p></th>
-<th class="head"><p>Values</p></th>
+<th class="head"><p>Type</p></th>
 <th class="head"><p>Default</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p>AUTH_MIDDLEWARE_LOG_LEVEL</p></td>
-<td><p>Log level for the application</p></td>
-<td><p>DEBUG, INFO, WARNING, ERROR, CRITICAL</p></td>
-<td><p>INFO</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">auth_provider</span></code></p></td>
+<td><p>The authentication provider instance</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">AuthProvider</span></code></p></td>
+<td><p>Required</p></td>
 </tr>
-<tr class="row-odd"><td><p>AUTH_MIDDLEWARE_LOG_FORMAT</p></td>
-<td><p>Log format</p></td>
-<td><p>See python logger documentation</p></td>
-<td><p>%(log_color)s%(levelname)-9s%(reset)s %(asctime)s %(name)s %(message)s</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exclude_paths</span></code></p></td>
+<td><p>Paths to exclude from authentication</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[]</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>AUTH_MIDDLEWARE_LOGGER_NAME</p></td>
-<td><p>Auth middleware logger name</p></td>
-<td><p>A string</p></td>
-<td><p>auth_middleware</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">include_paths</span></code></p></td>
+<td><p>Paths to include in authentication</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[&quot;/*&quot;]</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>AUTH_MIDDLEWARE_DISABLED</p></td>
-<td><p>Auth middleware enabled/disabled</p></td>
-<td><p>false, true</p></td>
-<td><p>false</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">auth_header_name</span></code></p></td>
+<td><p>HTTP header for authentication token</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;Authorization&quot;</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES</p></td>
-<td><p>JWKS keys file refreshing interval</p></td>
-<td><p>An integer value</p></td>
-<td><p>20</p></td>
-</tr>
-<tr class="row-odd"><td><p>AUTH_MIDDLEWARE_JWKS_CACHE_USAGES</p></td>
-<td><p>JWKS keys refreshing interval (counter)</p></td>
-<td><p>An integer value</p></td>
-<td><p>1000</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">auth_scheme</span></code></p></td>
+<td><p>Authentication scheme</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;Bearer&quot;</span></code></p></td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="path-configuration">
+<h2>Path Configuration<a class="headerlink" href="#path-configuration" title="Link to this heading"></a></h2>
+<section id="excluding-paths-from-authentication">
+<h3>Excluding Paths from Authentication<a class="headerlink" href="#excluding-paths-from-authentication" title="Link to this heading"></a></h3>
+<p>You can exclude specific paths from authentication requirements:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">cognito_provider</span><span class="p">,</span>
+    <span class="n">exclude_paths</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;/&quot;</span><span class="p">,</span>                    <span class="c1"># Public homepage</span>
+        <span class="s2">&quot;/health&quot;</span><span class="p">,</span>              <span class="c1"># Health check endpoint</span>
+        <span class="s2">&quot;/docs&quot;</span><span class="p">,</span>                <span class="c1"># OpenAPI documentation</span>
+        <span class="s2">&quot;/openapi.json&quot;</span><span class="p">,</span>        <span class="c1"># OpenAPI schema</span>
+        <span class="s2">&quot;/metrics&quot;</span><span class="p">,</span>             <span class="c1"># Prometheus metrics</span>
+        <span class="s2">&quot;/static/*&quot;</span><span class="p">,</span>            <span class="c1"># Static files</span>
+        <span class="s2">&quot;/public/*&quot;</span><span class="p">,</span>            <span class="c1"># Public assets</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="including-specific-paths-only">
+<h3>Including Specific Paths Only<a class="headerlink" href="#including-specific-paths-only" title="Link to this heading"></a></h3>
+<p>Alternatively, you can specify only the paths that require authentication:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">cognito_provider</span><span class="p">,</span>
+    <span class="n">include_paths</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;/api/*&quot;</span><span class="p">,</span>               <span class="c1"># All API endpoints</span>
+        <span class="s2">&quot;/admin/*&quot;</span><span class="p">,</span>             <span class="c1"># Admin interface</span>
+        <span class="s2">&quot;/user/*&quot;</span><span class="p">,</span>              <span class="c1"># User-specific endpoints</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pattern-matching">
+<h3>Pattern Matching<a class="headerlink" href="#pattern-matching" title="Link to this heading"></a></h3>
+<p>The middleware supports glob-style pattern matching:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> matches any characters within a single path segment</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">**</span></code> matches any characters across multiple path segments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">?</span></code> matches any single character</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">exclude_paths</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;/api/v*/public/*&quot;</span><span class="p">,</span>     <span class="c1"># Version-specific public endpoints</span>
+    <span class="s2">&quot;/health*&quot;</span><span class="p">,</span>             <span class="c1"># All health-related endpoints</span>
+    <span class="s2">&quot;/static/**&quot;</span><span class="p">,</span>           <span class="c1"># All static files recursively</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="environment-variables">
+<h2>Environment Variables<a class="headerlink" href="#environment-variables" title="Link to this heading"></a></h2>
+<section id="core-configuration">
+<h3>Core Configuration<a class="headerlink" href="#core-configuration" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Environment Variable</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Default</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_MIDDLEWARE_DISABLED</span></code></p></td>
+<td><p>Disable all authentication</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_MIDDLEWARE_LOG_LEVEL</span></code></p></td>
+<td><p>Logging level</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">INFO</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_MIDDLEWARE_LOGGER_NAME</span></code></p></td>
+<td><p>Logger name</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">auth_middleware</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="provider-specific-variables">
+<h3>Provider-Specific Variables<a class="headerlink" href="#provider-specific-variables" title="Link to this heading"></a></h3>
+<p><strong>AWS Cognito</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">AWS_COGNITO_USER_POOL_ID</span><span class="o">=</span>us-east-1_abcdef123
+<span class="nv">AWS_COGNITO_USER_POOL_REGION</span><span class="o">=</span>us-east-1
+<span class="nv">TOKEN_VERIFICATION_DISABLED</span><span class="o">=</span><span class="nb">false</span>
+</pre></div>
+</div>
+<p><strong>Azure Entra ID</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">AZURE_TENANT_ID</span><span class="o">=</span>your-tenant-id
+<span class="nv">AZURE_CLIENT_ID</span><span class="o">=</span>your-client-id
+<span class="nv">AZURE_CLIENT_SECRET</span><span class="o">=</span>your-client-secret
+</pre></div>
+</div>
+<p><strong>JWT Provider</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">JWT_SECRET_KEY</span><span class="o">=</span>your-secret-key
+<span class="nv">JWT_ALGORITHM</span><span class="o">=</span>HS256
+<span class="nv">JWT_ISSUER</span><span class="o">=</span>your-issuer
+</pre></div>
+</div>
+</section>
+</section>
+<section id="custom-authentication-providers">
+<h2>Custom Authentication Providers<a class="headerlink" href="#custom-authentication-providers" title="Link to this heading"></a></h2>
+<section id="creating-a-custom-provider">
+<h3>Creating a Custom Provider<a class="headerlink" href="#creating-a-custom-provider" title="Link to this heading"></a></h3>
+<p>You can create custom authentication providers by implementing the <code class="docutils literal notranslate"><span class="pre">AuthProvider</span></code> interface:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomAuthProvider</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">User</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate token and return user information.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get user group memberships.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</section>
+<section id="example-custom-provider">
+<h3>Example Custom Provider<a class="headerlink" href="#example-custom-provider" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jwt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationError</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ApiKeyProvider</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valid_api_keys</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid_api_keys</span> <span class="o">=</span> <span class="n">valid_api_keys</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">User</span><span class="p">]:</span>
+        <span class="c1"># Remove &#39;Bearer &#39; prefix if present</span>
+        <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Bearer &#39;</span><span class="p">):</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="mi">7</span><span class="p">:]</span>
+
+        <span class="c1"># Look up API key</span>
+        <span class="n">user_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_api_keys</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_info</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AuthenticationError</span><span class="p">(</span><span class="s2">&quot;Invalid API key&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span>
+            <span class="n">groups</span><span class="o">=</span><span class="n">user_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="n">raw_token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span>
+
+<span class="c1"># Usage</span>
+<span class="n">api_keys</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;api_key_123&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;user1&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;john@example.com&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;admin&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">ApiKeyProvider</span><span class="p">(</span><span class="n">api_keys</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="performance-configuration">
+<h2>Performance Configuration<a class="headerlink" href="#performance-configuration" title="Link to this heading"></a></h2>
+<section id="connection-pooling">
+<h3>Connection Pooling<a class="headerlink" href="#connection-pooling" title="Link to this heading"></a></h3>
+<p>For providers that make HTTP requests (like Cognito), configure connection pooling:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+
+<span class="c1"># Custom HTTP client with connection pooling</span>
+<span class="n">http_client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+    <span class="n">limits</span><span class="o">=</span><span class="n">httpx</span><span class="o">.</span><span class="n">Limits</span><span class="p">(</span>
+        <span class="n">max_keepalive_connections</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_connections</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Note: This is conceptual - actual implementation may vary</span>
+<span class="n">cognito_provider</span> <span class="o">=</span> <span class="n">CognitoProvider</span><span class="p">(</span>
+    <span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">,</span>
+    <span class="n">http_client</span><span class="o">=</span><span class="n">http_client</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="caching-configuration">
+<h3>Caching Configuration<a class="headerlink" href="#caching-configuration" title="Link to this heading"></a></h3>
+<p>Token validation results can be cached to improve performance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is conceptual - check actual provider documentation</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_abcdef123&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">cache_jwks</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>              <span class="c1"># Cache JSON Web Key Sets</span>
+    <span class="n">cache_ttl</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>               <span class="c1"># Cache TTL in seconds</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="logging-configuration">
+<h2>Logging Configuration<a class="headerlink" href="#logging-configuration" title="Link to this heading"></a></h2>
+<section id="detailed-logging">
+<h3>Detailed Logging<a class="headerlink" href="#detailed-logging" title="Link to this heading"></a></h3>
+<p>Enable detailed logging for debugging:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Configure auth middleware logging</span>
+<span class="n">auth_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;auth_middleware&quot;</span><span class="p">)</span>
+<span class="n">auth_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="c1"># Add handler</span>
+<span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+<span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+    <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+<span class="p">)</span>
+<span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+<span class="n">auth_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="environment-based-logging">
+<h3>Environment-based Logging<a class="headerlink" href="#environment-based-logging" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set log level via environment</span>
+<span class="nv">AUTH_MIDDLEWARE_LOG_LEVEL</span><span class="o">=</span>DEBUG
+<span class="nv">AUTH_MIDDLEWARE_LOG_FORMAT</span><span class="o">=</span><span class="s2">&quot;%(asctime)s %(name)s %(levelname)s %(message)s&quot;</span>
+<span class="nv">AUTH_MIDDLEWARE_LOGGER_NAME</span><span class="o">=</span><span class="s2">&quot;my_auth&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="security-best-practices">
+<h2>Security Best Practices<a class="headerlink" href="#security-best-practices" title="Link to this heading"></a></h2>
+<section id="token-security">
+<h3>Token Security<a class="headerlink" href="#token-security" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Use HTTPS</strong>: Always use HTTPS in production to protect tokens in transit</p></li>
+<li><p><strong>Token Expiration</strong>: Ensure tokens have reasonable expiration times</p></li>
+<li><p><strong>Secure Storage</strong>: Never log or store JWT tokens in plain text</p></li>
+<li><p><strong>Rotation</strong>: Implement token rotation strategies</p></li>
+</ol>
+</section>
+<section id="configuration-security">
+<h3>Configuration Security<a class="headerlink" href="#configuration-security" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Environment Variables</strong>: Store sensitive configuration in environment variables</p></li>
+<li><p><strong>Secrets Management</strong>: Use proper secrets management systems in production</p></li>
+<li><p><strong>Least Privilege</strong>: Configure minimal required permissions</p></li>
+<li><p><strong>Monitoring</strong>: Monitor authentication failures and suspicious activity</p></li>
+</ol>
+</section>
+</section>
+<section id="error-handling-configuration">
+<h2>Error Handling Configuration<a class="headerlink" href="#error-handling-configuration" title="Link to this heading"></a></h2>
+<section id="custom-error-handlers">
+<h3>Custom Error Handlers<a class="headerlink" href="#custom-error-handlers" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AuthenticationError</span><span class="p">,</span>
+    <span class="n">AuthorizationError</span><span class="p">,</span>
+    <span class="n">TokenExpiredError</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthenticationError</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authentication_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Authentication Failed&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Please provide a valid authentication token&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;authentication_error&quot;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthorizationError</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authorization_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Access Denied&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;You don&#39;t have permission to access this resource&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;authorization_error&quot;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">TokenExpiredError</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">token_expired_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Token Expired&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Your authentication token has expired. Please login again&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;token_expired&quot;</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="development-configuration">
+<h2>Development Configuration<a class="headerlink" href="#development-configuration" title="Link to this heading"></a></h2>
+<section id="development-mode">
+<h3>Development Mode<a class="headerlink" href="#development-mode" title="Link to this heading"></a></h3>
+<p>For development and testing environments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="c1"># Development-friendly configuration</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AWS_COGNITO_USER_POOL_ID&quot;</span><span class="p">),</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AWS_COGNITO_USER_POOL_REGION&quot;</span><span class="p">),</span>
+    <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;development&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="hot-reloading">
+<h3>Hot Reloading<a class="headerlink" href="#hot-reloading" title="Link to this heading"></a></h3>
+<p>Auth Middleware works with FastAPI’s hot reloading in development:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Development server with hot reloading</span>
+uvicorn<span class="w"> </span>main:app<span class="w"> </span>--reload<span class="w"> </span>--host<span class="w"> </span><span class="m">0</span>.0.0.0<span class="w"> </span>--port<span class="w"> </span><span class="m">8000</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-configuration">
+<h3>Testing Configuration<a class="headerlink" href="#testing-configuration" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.testclient</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestClient</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_app</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+    <span class="c1"># Use mock auth provider for testing</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+        <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+        <span class="n">auth_provider</span><span class="o">=</span><span class="n">MockAuthProvider</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">app</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_protected_endpoint</span><span class="p">(</span><span class="n">test_app</span><span class="p">):</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">TestClient</span><span class="p">(</span><span class="n">test_app</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s2">&quot;/protected&quot;</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer test_token&quot;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
+</pre></div>
+</div>
+<p>For more specific provider configurations, see the individual provider documentation:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a></p></li>
+<li><p><a class="reference internal" href="entra_id_provider.html"><span class="doc">Azure Entra ID Authentication Provider</span></a></p></li>
+<li><dl class="simple">
+<dt><a class="reference internal" href="jwt_auth_provider.html"><span class="doc">JWT Authentication Provider</span></a></dt><dd><ul>
+<li><ul>
+<li><p>AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES</p></li>
+<li><p>JWKS keys file refreshing interval</p></li>
+<li><p>An integer value</p></li>
+<li><p>20</p></li>
+</ul>
+</li>
+<li><ul>
+<li><p>AUTH_MIDDLEWARE_JWKS_CACHE_USAGES</p></li>
+<li><p>JWKS keys refreshing interval (counter)</p></li>
+<li><p>An integer value</p></li>
+<li><p>1000</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
 </section>
 
 
@@ -131,13 +610,13 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="user-guide.html" class="btn btn-neutral float-left" title="User Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="user-property.html" class="btn btn-neutral float-right" title="The User Property" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cognito_provider.html" class="btn btn-neutral float-right" title="AWS Cognito Provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, impalah.</p>
+    <p>&#169; Copyright 2025, impalah.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
