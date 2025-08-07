@@ -15,7 +15,7 @@ project = 'Auth Middleware'
 copyright = '2025, impalah'
 author = 'impalah'
 # Version information - managed automatically by bump2version
-release = version = '0.2.10'
+release = version = '0.2.11'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
