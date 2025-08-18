@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authz.sql_permissions_provider &mdash; Auth Middleware 0.2.12 documentation</title>
+  <title>auth_middleware.providers.authz.sql_permissions_provider &mdash; Auth Middleware 0.2.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authz/sql_permissions_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=1e30946d"></script>
+      <script src="../../../../_static/documentation_options.js?v=ba481074"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -137,6 +137,7 @@
   <h1>Source code for auth_middleware.providers.authz.sql_permissions_provider</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Activate annotations for Python 3.7+ and from __future__ import annotations</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ksuid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ksuid</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span><span class="p">,</span> <span class="n">select</span>
@@ -150,7 +151,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.sql_base_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Base</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">PermissionsModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PermissionsModel</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>  <span class="c1"># type: ignore[misc]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Repository permissions model</span>
 
 <span class="sd">    Args:</span>
@@ -182,7 +183,7 @@
 
 <div class="viewcode-block" id="SqlPermissionsProvider.fetch_permissions">
 <a class="viewcode-back" href="../../../../permissions-provider.html#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get groups using the token provided</span>
 
 <span class="sd">        Args:</span>
@@ -196,7 +197,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># 1. Get the username from the token</span>
-        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">]</span>
+        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="k">else</span> <span class="n">token</span>
 
         <span class="c1"># 2. Check if permissions are in the cache</span>
 
@@ -236,7 +237,7 @@
                 <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
 
                 <span class="n">scalars</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">scalars</span><span class="p">()</span>
-                <span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PermissionsModel</span><span class="p">]</span> <span class="o">=</span> <span class="n">scalars</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+                <span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PermissionsModel</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scalars</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
                 <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">permission</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
 
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>

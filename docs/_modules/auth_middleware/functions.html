@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.functions &mdash; Auth Middleware 0.2.12 documentation</title>
+  <title>auth_middleware.functions &mdash; Auth Middleware 0.2.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/functions.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1e30946d"></script>
+      <script src="../../_static/documentation_options.js?v=ba481074"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -142,16 +142,24 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
 
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">Request</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.group_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupChecker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.permissions_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsChecker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+
+
 <div class="viewcode-block" id="require_permissions">
 <a class="viewcode-back" href="../../functions.html#auth_middleware.functions.require_permissions">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">require_permissions</span><span class="p">(</span><span class="n">allowed_permissions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_permissions</span><span class="p">(</span><span class="n">allowed_permissions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required permissions</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        allowed_permissions (List[str]): a list of required permissions</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_permissions_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_permissions_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calls the GroupChecker class to check if</span>
 <span class="sd">        the user has the required permissions</span>
 
@@ -191,14 +199,14 @@
 
 <div class="viewcode-block" id="require_groups">
 <a class="viewcode-back" href="../../functions.html#auth_middleware.functions.require_groups">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">require_groups</span><span class="p">(</span><span class="n">allowed_groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_groups</span><span class="p">(</span><span class="n">allowed_groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required groups</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        allowed_groups (List[str]): a list of required groups</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_group_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_group_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calls the GroupChecker class to check if</span>
 <span class="sd">        the user has the required groups</span>
 
@@ -238,15 +246,18 @@
 
 <div class="viewcode-block" id="require_user">
 <a class="viewcode-back" href="../../functions.html#auth_middleware.functions.require_user">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">require_user</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_user</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user is authenticated&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_user_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_user_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_MIDDLEWARE_DISABLED</span><span class="p">:</span>
-            <span class="k">return</span>
+            <span class="c1"># Return a dummy user or raise an exception based on your needs</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Authentication required&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;current_user&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Authentication required&quot;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>  <span class="c1"># type: ignore[no-any-return]</span>
 
     <span class="k">return</span> <span class="n">_user_checker</span></div>
 
@@ -254,10 +265,10 @@
 
 <div class="viewcode-block" id="get_current_user">
 <a class="viewcode-back" href="../../functions.html#auth_middleware.functions.get_current_user">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_current_user</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_current_user</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the current user object if it exists&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_user</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_user</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;current_user&quot;</span><span class="p">)</span>

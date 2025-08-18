@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authn.jwt_provider &mdash; Auth Middleware 0.2.12 documentation</title>
+  <title>auth_middleware.providers.authn.jwt_provider &mdash; Auth Middleware 0.2.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authn/jwt_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=1e30946d"></script>
+      <script src="../../../../_static/documentation_options.js?v=ba481074"></script>
       <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -137,13 +137,16 @@
   <h1>Source code for auth_middleware.providers.authn.jwt_provider</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_ns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProviderSettings</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWK</span><span class="p">,</span> <span class="n">JWKS</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProviderSettings</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 
 
 <div class="viewcode-block" id="JWTProvider">
@@ -155,17 +158,17 @@
 <span class="sd">        metaclass (_type_, optional): _description_. Defaults to ABCMeta.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_settings</span><span class="p">:</span> <span class="n">JWTProviderSettings</span>
-    <span class="n">_permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span>
-    <span class="n">_groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span>
+    <span class="n">_settings</span><span class="p">:</span> <span class="s2">&quot;JWTProviderSettings | None&quot;</span>
+    <span class="n">_permissions_provider</span><span class="p">:</span> <span class="s2">&quot;PermissionsProvider | None&quot;</span>
+    <span class="n">_groups_provider</span><span class="p">:</span> <span class="s2">&quot;GroupsProvider | None&quot;</span>
 
 <div class="viewcode-block" id="JWTProvider.__init__">
 <a class="viewcode-back" href="../../../../jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">settings</span><span class="p">:</span> <span class="n">JWTProviderSettings</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="s2">&quot;JWTProviderSettings | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">permissions_provider</span><span class="p">:</span> <span class="s2">&quot;PermissionsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">groups_provider</span><span class="p">:</span> <span class="s2">&quot;GroupsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span> <span class="o">=</span> <span class="n">permissions_provider</span>
