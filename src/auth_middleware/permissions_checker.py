@@ -8,12 +8,12 @@ from auth_middleware.types.user import User
 class PermissionsChecker:
     """Controls if user has the required permissions (user_type)"""
 
-    __allowed_permissions: list = []
+    __allowed_permissions: list[str] = []
 
-    def __init__(self, allowed_permissions: list):
+    def __init__(self, allowed_permissions: list[str]) -> None:
         self.__allowed_permissions = allowed_permissions
 
-    async def __call__(self, request: Request):
+    async def __call__(self, request: Request) -> None:
         if settings.AUTH_MIDDLEWARE_DISABLED:
             return
 

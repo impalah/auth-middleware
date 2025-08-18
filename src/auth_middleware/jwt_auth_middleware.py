@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import Request, status
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -21,15 +23,15 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
     """
 
     _auth_provider: JWTProvider
-    _jwt_bearer_manager = JWTBearerManager
+    _jwt_bearer_manager: JWTBearerManager
 
     def __init__(
         self,
         app: ASGIApp,
         auth_provider: JWTProvider,
-        *args,
-        **kwargs,
-    ):
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(app, *args, **kwargs)
         self._auth_provider = auth_provider
         self._jwt_bearer_manager = JWTBearerManager(

@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock, PropertyMock
 from fastapi import HTTPException, Request
 
 from auth_middleware.permissions_checker import PermissionsChecker
@@ -24,11 +24,15 @@ class TestPermissionsChecker:
     @pytest.fixture
     def mock_user(self):
         """Create a mock user."""
-        user = Mock(spec=User)
-        # Mock the async permissions property correctly
-        async def get_permissions():
-            return ["admin"]
-        user.permissions = get_permissions()
+        # Create a real User instance instead of a Mock
+        user = User(
+            id="test-id",
+            name="testuser",
+            email="test@example.com"
+        )
+        # Mock the internal permissions
+        user._permissions = ["admin"]
+        user._permissions_task = None
         return user
 
     def test_permissions_checker_init(self):
@@ -83,9 +87,8 @@ class TestPermissionsChecker:
             mock_settings.AUTH_MIDDLEWARE_DISABLED = False
             mock_request.state.current_user = mock_user
             
-            async def get_permissions():
-                return ["admin"]
-            mock_user.permissions = get_permissions()
+            # Set permissions directly on the real User instance
+            mock_user._permissions = ["admin"]
             
             # Should pass without raising an exception
             result = await permissions_checker(mock_request)
@@ -98,9 +101,8 @@ class TestPermissionsChecker:
             mock_settings.AUTH_MIDDLEWARE_DISABLED = False
             mock_request.state.current_user = mock_user
             
-            async def get_permissions():
-                return ["guest"]
-            mock_user.permissions = get_permissions()
+            # Set permissions directly on the real User instance
+            mock_user._permissions = ["guest"]
             
             with pytest.raises(HTTPException) as exc_info:
                 await permissions_checker(mock_request)
@@ -115,9 +117,8 @@ class TestPermissionsChecker:
             mock_settings.AUTH_MIDDLEWARE_DISABLED = False
             mock_request.state.current_user = mock_user
             
-            async def get_permissions():
-                return ["guest", "manager", "other"]
-            mock_user.permissions = get_permissions()
+            # Set permissions directly on the real User instance
+            mock_user._permissions = ["guest", "manager", "other"]
             
             # Should pass because "manager" is in allowed permissions
             result = await permissions_checker(mock_request)
@@ -130,13 +131,15 @@ class TestPermissionsChecker:
             mock_settings.AUTH_MIDDLEWARE_DISABLED = False
             mock_request.state.current_user = mock_user
             
-            async def get_permissions():
-                return None
-            mock_user.permissions = get_permissions()
-            
-            # Should pass when permissions is None (the logic in the actual code)
-            result = await permissions_checker(mock_request)
-            assert result is None
+            # Mock the _load_permissions method to return None instead of []
+            with patch.object(mock_user, '_load_permissions', return_value=None) as mock_load:
+                # Reset permissions to None to force reload
+                mock_user._permissions = None
+                mock_user._permissions_task = None
+                
+                # Should pass when permissions is None (the logic in the actual code)
+                result = await permissions_checker(mock_request)
+                assert result is None
 
     @pytest.mark.asyncio
     async def test_permissions_checker_empty_permissions(self, permissions_checker, mock_request, mock_user):
@@ -145,9 +148,8 @@ class TestPermissionsChecker:
             mock_settings.AUTH_MIDDLEWARE_DISABLED = False
             mock_request.state.current_user = mock_user
             
-            async def get_permissions():
-                return []
-            mock_user.permissions = get_permissions()
+            # Set permissions directly on the real User instance
+            mock_user._permissions = []
             
             with pytest.raises(HTTPException) as exc_info:
                 await permissions_checker(mock_request)
@@ -163,9 +165,8 @@ class TestPermissionsChecker:
                 mock_settings.AUTH_MIDDLEWARE_DISABLED = False
                 mock_request.state.current_user = mock_user
                 
-                async def get_permissions():
-                    return ["unauthorized"]
-                mock_user.permissions = get_permissions()
+                # Set permissions directly on the real User instance
+                mock_user._permissions = ["unauthorized"]
                 
                 with pytest.raises(HTTPException):
                     await permissions_checker(mock_request)

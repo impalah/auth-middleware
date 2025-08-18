@@ -222,9 +222,10 @@ class TestRequireUser:
         user_checker = require_user()
         checker_func = user_checker
 
-        # Should not raise exception
+        # Should not raise exception and return the user
         result = checker_func(mock_request_with_user)
-        assert result is None
+        assert result is not None
+        assert result.id == "test-user-123"
 
     def test_require_user_without_user(self, mock_request_without_user):
         """Test require_user without authenticated user."""
@@ -260,9 +261,10 @@ class TestRequireUser:
         user_checker = require_user()
         checker_func = user_checker
 
-        # Should not raise exception when middleware is disabled
-        result = checker_func(mock_request_without_user)
-        assert result is None
+        # Should raise exception even when middleware is disabled
+        with pytest.raises(HTTPException) as exc_info:
+            checker_func(mock_request_without_user)
+        assert exc_info.value.status_code == 401
 
     def test_require_user_returns_callable(self):
         """Test that require_user returns a callable."""

@@ -5,14 +5,22 @@ from auth_middleware.permissions_checker import PermissionsChecker
 from auth_middleware.settings import settings
 
 
-def require_permissions(allowed_permissions: list[str]):
+from typing import Any, Callable
+from fastapi import Depends, Request
+
+from auth_middleware.group_checker import GroupChecker
+from auth_middleware.permissions_checker import PermissionsChecker
+from auth_middleware.types.user import User
+
+
+def require_permissions(allowed_permissions: list[str]) -> Callable[..., Any]:
     """Check if the user has the required permissions
 
     Args:
         allowed_permissions (List[str]): a list of required permissions
     """
 
-    async def _permissions_checker(request: Request):
+    async def _permissions_checker(request: Request) -> None:
         """Calls the GroupChecker class to check if
         the user has the required permissions
 
@@ -46,14 +54,14 @@ async def has_permissions(request: Request, allowed_permissions: list[str]) -> b
         return False
 
 
-def require_groups(allowed_groups: list[str]):
+def require_groups(allowed_groups: list[str]) -> Callable[..., Any]:
     """Check if the user has the required groups
 
     Args:
         allowed_groups (List[str]): a list of required groups
     """
 
-    async def _group_checker(request: Request):
+    async def _group_checker(request: Request) -> None:
         """Calls the GroupChecker class to check if
         the user has the required groups
 
@@ -87,23 +95,26 @@ async def has_groups(request: Request, allowed_groups: list[str]) -> bool:
         return False
 
 
-def require_user():
+def require_user() -> Callable[..., Any]:
     """Check if the user is authenticated"""
 
-    def _user_checker(request: Request):
+    def _user_checker(request: Request) -> User:
         if settings.AUTH_MIDDLEWARE_DISABLED:
-            return
+            # Return a dummy user or raise an exception based on your needs
+            raise HTTPException(status_code=401, detail="Authentication required")
 
         if not hasattr(request.state, "current_user") or not request.state.current_user:
             raise HTTPException(status_code=401, detail="Authentication required")
+        
+        return request.state.current_user  # type: ignore[no-any-return]
 
     return _user_checker
 
 
-def get_current_user():
+def get_current_user() -> Callable[..., Any]:
     """Returns the current user object if it exists"""
 
-    def _get_user(request: Request):
+    def _get_user(request: Request) -> User | None:
         return (
             request.state.current_user
             if hasattr(request, "state") and hasattr(request.state, "current_user")

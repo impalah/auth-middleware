@@ -5,8 +5,8 @@ def get_login_url(
     tenant_id: str,
     client_id: str,
     redirect_uri: str,
-    state: str = None,
-    nonce: str = None,
+    state: str | None = None,
+    nonce: str | None = None,
 ) -> str:
     """Returns the Entra ID login URL
 

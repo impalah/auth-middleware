@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Union
 
 from ksuid import Ksuid
 from sqlalchemy import String, select
@@ -12,7 +13,7 @@ from .async_database import AsyncDatabase
 from .sql_base_model import Base
 
 
-class GroupsModel(Base):
+class GroupsModel(Base):  # type: ignore[misc]
     """Repository groups model
 
     Args:
@@ -40,7 +41,7 @@ class SqlGroupsProvider(GroupsProvider):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    async def fetch_groups(self, token: JWTAuthorizationCredentials) -> list[str]:
+    async def fetch_groups(self, token: Union[str, JWTAuthorizationCredentials]) -> list[str]:
         """Get groups using the token provided
 
         Args:
@@ -54,7 +55,7 @@ class SqlGroupsProvider(GroupsProvider):
         """
 
         # 1. Get the username from the token
-        username: str = token.claims["username"]
+        username: str = token.claims["username"] if isinstance(token, JWTAuthorizationCredentials) else token
 
         # 2. Check if groups are in the cache
 
@@ -89,7 +90,7 @@ class SqlGroupsProvider(GroupsProvider):
                 result = await session.execute(query)
 
                 scalars = result.scalars()
-                items: list[GroupsModel] = scalars.all()
+                items: list[GroupsModel] = list(scalars.all())
                 return [item.group for item in items]
 
             except Exception as ex:

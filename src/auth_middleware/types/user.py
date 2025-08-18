@@ -1,10 +1,11 @@
 import asyncio
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from pydantic import BaseModel, EmailStr, Field, PrivateAttr
+from pydantic import BaseModel, EmailStr, Field, PrivateAttr, ConfigDict
 
-from auth_middleware.providers.authz.groups_provider import GroupsProvider
-from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+if TYPE_CHECKING:
+    from auth_middleware.providers.authz.groups_provider import GroupsProvider
+    from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
 
 
 class User(BaseModel):
@@ -14,23 +15,22 @@ class User(BaseModel):
         BaseModel (BaseModel): Inherited properties
     """
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    _permissions_provider: PermissionsProvider | None = PrivateAttr()
-    _groups_provider: GroupsProvider | None = PrivateAttr()
-    _token: str | None = PrivateAttr()
+    _permissions_provider: "PermissionsProvider | None" = PrivateAttr(default=None)
+    _groups_provider: "GroupsProvider | None" = PrivateAttr(default=None)
+    _token: str | None = PrivateAttr(default=None)
 
     _groups: list[str] | None = None
-    _groups_task: asyncio.Task | None = None
+    _groups_task: asyncio.Task[list[str]] | None = None
     _permissions: list[str] | None = None
-    _permissions_task: asyncio.Task | None = None
+    _permissions_task: asyncio.Task[list[str]] | None = None
 
     def __init__(
         self,
-        token: str = None,
-        permissions_provider: GroupsProvider = None,
-        groups_provider: PermissionsProvider = None,
+        token: str | None = None,
+        permissions_provider: "PermissionsProvider | None" = None,
+        groups_provider: "GroupsProvider | None" = None,
         **data: Any,
     ):
         super().__init__(**data)

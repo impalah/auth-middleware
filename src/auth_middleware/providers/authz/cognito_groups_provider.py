@@ -1,3 +1,5 @@
+from typing import Any, Union
+
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
@@ -9,7 +11,7 @@ class CognitoGroupsProvider(GroupsProvider):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    async def fetch_groups(self, token: JWTAuthorizationCredentials) -> list[str]:
+    async def fetch_groups(self, token: Union[str, JWTAuthorizationCredentials]) -> list[str]:
         """Get groups using the token provided
 
         Args:
@@ -24,13 +26,13 @@ class CognitoGroupsProvider(GroupsProvider):
 
         groups: list[str] = (
             self.__get_groups_from_claims(token.claims)
-            if "cognito:groups" in token.claims or "scope" in token.claims
+            if isinstance(token, JWTAuthorizationCredentials) and ("cognito:groups" in token.claims or "scope" in token.claims)
             else []
         )
 
         return groups
 
-    def __get_groups_from_claims(self, claims: dict) -> list[str]:
+    def __get_groups_from_claims(self, claims: dict[str, Any]) -> list[str]:
         """Extracts groups from claims.
 
         Args:

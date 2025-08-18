@@ -1,12 +1,15 @@
 from abc import ABCMeta, abstractmethod
 from time import time_ns
+from typing import TYPE_CHECKING
 
 from auth_middleware.logging import logger
-from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
-from auth_middleware.providers.authz.groups_provider import GroupsProvider
-from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
+
+if TYPE_CHECKING:
+    from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
+    from auth_middleware.providers.authz.groups_provider import GroupsProvider
+    from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
 
 
 class JWTProvider(metaclass=ABCMeta):
@@ -16,15 +19,15 @@ class JWTProvider(metaclass=ABCMeta):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    _settings: JWTProviderSettings
-    _permissions_provider: PermissionsProvider
-    _groups_provider: GroupsProvider
+    _settings: "JWTProviderSettings | None"
+    _permissions_provider: "PermissionsProvider | None"
+    _groups_provider: "GroupsProvider | None"
 
     def __init__(
         self,
-        settings: JWTProviderSettings = None,
-        permissions_provider: PermissionsProvider = None,
-        groups_provider: GroupsProvider = None,
+        settings: "JWTProviderSettings | None" = None,
+        permissions_provider: "PermissionsProvider | None" = None,
+        groups_provider: "GroupsProvider | None" = None,
     ) -> None:
         self._settings = settings
         self._permissions_provider = permissions_provider

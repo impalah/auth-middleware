@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from auth_middleware.providers.authz.async_database import AsyncDatabase
 
@@ -24,13 +24,13 @@ class TestAsyncDatabase:
         assert AsyncDatabase._instance is not None
 
     @patch('auth_middleware.providers.authz.async_database.create_async_engine')
-    @patch('auth_middleware.providers.authz.async_database.sessionmaker')
-    def test_initialize_class_method(self, mock_sessionmaker, mock_create_engine):
+    @patch('auth_middleware.providers.authz.async_database.async_sessionmaker')
+    def test_initialize_class_method(self, mock_async_sessionmaker, mock_create_engine):
         """Test the initialize class method."""
         mock_engine = Mock(spec=AsyncEngine)
         mock_create_engine.return_value = mock_engine
         mock_session_factory = Mock()
-        mock_sessionmaker.return_value = mock_session_factory
+        mock_async_sessionmaker.return_value = mock_session_factory
         
         database_url = "postgresql+asyncpg://user:pass@localhost/db"
         kwargs = {"echo": True, "pool_size": 10}
@@ -38,7 +38,7 @@ class TestAsyncDatabase:
         AsyncDatabase.initialize(database_url, **kwargs)
         
         mock_create_engine.assert_called_once_with(database_url, **kwargs)
-        mock_sessionmaker.assert_called_once_with(
+        mock_async_sessionmaker.assert_called_once_with(
             autocommit=False,
             autoflush=False,
             bind=mock_engine,
@@ -48,8 +48,8 @@ class TestAsyncDatabase:
         assert AsyncDatabase._async_session is mock_session_factory
 
     @patch('auth_middleware.providers.authz.async_database.create_async_engine')
-    @patch('auth_middleware.providers.authz.async_database.sessionmaker')
-    def test_initialize_only_once(self, mock_sessionmaker, mock_create_engine):
+    @patch('auth_middleware.providers.authz.async_database.async_sessionmaker')
+    def test_initialize_only_once(self, mock_async_sessionmaker, mock_create_engine):
         """Test that initialize only creates engine once."""
         mock_engine = Mock(spec=AsyncEngine)
         mock_create_engine.return_value = mock_engine
@@ -65,8 +65,8 @@ class TestAsyncDatabase:
 
     @patch('auth_middleware.providers.authz.async_database.settings')
     @patch('auth_middleware.providers.authz.async_database.create_async_engine')
-    @patch('auth_middleware.providers.authz.async_database.sessionmaker')
-    def test_init_engine(self, mock_sessionmaker, mock_create_engine, mock_settings):
+    @patch('auth_middleware.providers.authz.async_database.async_sessionmaker')
+    def test_init_engine(self, mock_async_sessionmaker, mock_create_engine, mock_settings):
         """Test the init_engine method."""
         mock_settings.AUTHZ_SQLALCHEMY_DATABASE_URI = "postgresql+asyncpg://test"
         mock_settings.AUTHZ_POOL_PRE_PING = True
@@ -80,7 +80,7 @@ class TestAsyncDatabase:
         mock_engine = Mock(spec=AsyncEngine)
         mock_create_engine.return_value = mock_engine
         mock_session_factory = Mock()
-        mock_sessionmaker.return_value = mock_session_factory
+        mock_async_sessionmaker.return_value = mock_session_factory
         
         db = AsyncDatabase()
         db.init_engine()
@@ -96,7 +96,7 @@ class TestAsyncDatabase:
             pool_reset_on_return="commit",
             pool_timeout=30
         )
-        mock_sessionmaker.assert_called_once_with(
+        mock_async_sessionmaker.assert_called_once_with(
             mock_engine,
             class_=AsyncSession,
             expire_on_commit=False

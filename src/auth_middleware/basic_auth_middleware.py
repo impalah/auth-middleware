@@ -1,5 +1,6 @@
 import base64
 import hashlib
+from typing import Any
 
 from fastapi import Request, status
 from fastapi.security.utils import get_authorization_scheme_param
@@ -29,7 +30,12 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
 
     _credentials_repository: CredentialsRepository
 
-    def __init__(self, credentials_repository: CredentialsRepository, *args, **kwargs):
+    def __init__(
+        self,
+        credentials_repository: CredentialsRepository,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self._credentials_repository = credentials_repository
 
@@ -124,13 +130,23 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         logger.debug("Get Current Active User ...")
 
         # Recover credentials from the request
-        credentials: tuple[str, str] = await self.get_credentials(request=request)
+        credentials: tuple[str, str] | None = await self.get_credentials(request=request)
+        if not credentials:
+            raise InvalidAuthorizationException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="No credentials provided",
+            )
         logger.debug("Credentials: {}", credentials)
 
         # Get user credentials from the repository
-        user_credentials: UserCredentials = (
+        user_credentials: UserCredentials | None = (
             await self._credentials_repository.get_by_id(id=credentials[0])
         )
+        if not user_credentials:
+            raise InvalidAuthorizationException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+            )
 
         if not user_credentials:
             logger.error("User not found")

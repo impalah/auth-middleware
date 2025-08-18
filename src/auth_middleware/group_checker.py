@@ -8,12 +8,12 @@ from auth_middleware.types.user import User
 class GroupChecker:
     """Controls if user has the required group (user_type)"""
 
-    __allowed_groups: list = []
+    __allowed_groups: list[str] = []
 
-    def __init__(self, allowed_groups: list):
+    def __init__(self, allowed_groups: list[str]) -> None:
         self.__allowed_groups = allowed_groups
 
-    async def __call__(self, request: Request):
+    async def __call__(self, request: Request) -> None:
         if settings.AUTH_MIDDLEWARE_DISABLED:
             return
 

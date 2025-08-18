@@ -28,7 +28,7 @@ def configure_logger(settings: dict[str, Any]) -> None:
     logger.remove()  # Remove the default logger
     print("Configuring logger with settings:", settings)
 
-    logger.add(
+    logger.add(  # type: ignore[misc]
         sink=sys.stderr,
         level=settings["LOG_LEVEL"] if "LOG_LEVEL" in settings else "INFO",
         format=(
@@ -41,7 +41,7 @@ def configure_logger(settings: dict[str, Any]) -> None:
                 "<cyan>{line}</cyan> - <level>{message}</level>"
             )
         ),
-        filter=add_trace_id,
+        filter=add_trace_id,  # type: ignore[arg-type]
         colorize=settings["LOG_COLORIZE"] if "LOG_COLORIZE" in settings else False,
         serialize=False,
         backtrace=True,

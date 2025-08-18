@@ -1,5 +1,6 @@
 # Activate annotations for Python 3.7+ and from __future__ import annotations
 from __future__ import annotations
+from typing import Union
 
 from ksuid import Ksuid
 from sqlalchemy import String, select
@@ -13,7 +14,7 @@ from .async_database import AsyncDatabase
 from .sql_base_model import Base
 
 
-class PermissionsModel(Base):
+class PermissionsModel(Base):  # type: ignore[misc]
     """Repository permissions model
 
     Args:
@@ -41,7 +42,7 @@ class SqlPermissionsProvider(PermissionsProvider):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    async def fetch_permissions(self, token: JWTAuthorizationCredentials) -> list[str]:
+    async def fetch_permissions(self, token: Union[str, JWTAuthorizationCredentials]) -> list[str]:
         """Get groups using the token provided
 
         Args:
@@ -55,7 +56,7 @@ class SqlPermissionsProvider(PermissionsProvider):
         """
 
         # 1. Get the username from the token
-        username: str = token.claims["username"]
+        username: str = token.claims["username"] if isinstance(token, JWTAuthorizationCredentials) else token
 
         # 2. Check if permissions are in the cache
 
@@ -92,7 +93,7 @@ class SqlPermissionsProvider(PermissionsProvider):
                 result = await session.execute(query)
 
                 scalars = result.scalars()
-                items: list[PermissionsModel] = scalars.all()
+                items: list[PermissionsModel] = list(scalars.all())
                 return [item.permission for item in items]
 
             except Exception as ex:

@@ -200,30 +200,26 @@ class TestCLI:
         assert "get-permissions" in cli.commands
 
     @patch('auth_middleware.cli.SqlPermissionsProvider')
-    def test_get_permissions_timeout_handling(self, mock_provider_class):
-        """Test get_permissions command with async timeout."""
+    def test_get_permissions_async_execution_success(self, mock_provider_class):
+        """Test get_permissions command executes async operation successfully."""
         mock_provider = AsyncMock()
         
-        # Simulate a long-running async operation
-        async def slow_operation(username):
-            await asyncio.sleep(0.1)  # Small delay to simulate work
-            return ["slow_permission"]
-        
-        mock_provider.get_permissions_from_db.side_effect = slow_operation
+        # Mock the async method properly
+        mock_provider.get_permissions_from_db = AsyncMock(return_value=["test_permission"])
         mock_provider_class.return_value = mock_provider
         
         runner = CliRunner()
-        result = runner.invoke(get_permissions, ['slowuser'])
+        result = runner.invoke(get_permissions, ['testuser'])
         
         assert result.exit_code == 0
-        assert "slow_permission" in result.output
+        assert "test_permission" in result.output
 
     def test_click_echo_usage(self):
         """Test that click.echo is used for output."""
         with patch('auth_middleware.cli.SqlPermissionsProvider') as mock_provider_class:
             with patch('click.echo') as mock_echo:
                 mock_provider = AsyncMock()
-                mock_provider.get_permissions_from_db.return_value = ["test"]
+                mock_provider.get_permissions_from_db = AsyncMock(return_value=["test"])
                 mock_provider_class.return_value = mock_provider
                 
                 runner = CliRunner()

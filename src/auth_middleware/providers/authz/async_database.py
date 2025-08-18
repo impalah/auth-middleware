@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Any
 
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine, async_sessionmaker
 
 from auth_middleware.logging import logger
 
@@ -19,11 +19,11 @@ class AsyncDatabase:
     """
 
     _instance = None
-    _engine: AsyncEngine = None
-    _async_session: AsyncSession = None
+    _engine: AsyncEngine | None = None
+    _async_session: async_sessionmaker[AsyncSession] | None = None
 
     @classmethod
-    def initialize(cls, database_url: str, **kwargs):
+    def initialize(cls, database_url: str, **kwargs: Any) -> None:
         """Initializes the database connection
 
         Args:
@@ -36,18 +36,18 @@ class AsyncDatabase:
             logger.debug("Creating a new engine")
             cls._engine = create_async_engine(database_url, **kwargs)
 
-            cls._async_session = sessionmaker(
+            cls._async_session = async_sessionmaker(
                 autocommit=False, autoflush=False, bind=cls._engine, class_=AsyncSession
             )
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args: Any, **kwargs: Any) -> "AsyncDatabase":
         logger.debug("Creating a new instance of AsyncDatabase")
         if cls._instance is None:
             logger.debug("No instance. Creating a new instance of AsyncDatabase")
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def init_engine(self):
+    def init_engine(self) -> None:
         logger.debug("*** Initializing database engine from settings")
         if self._engine is None:
             logger.debug(
@@ -65,28 +65,28 @@ class AsyncDatabase:
                 pool_reset_on_return=settings.AUTHZ_POOL_RESET_ON_RETURN,
                 pool_timeout=settings.AUTHZ_POOL_TIMEOUT_IN_SECONDS,
             )
-            self._async_session = sessionmaker(
+            self._async_session = async_sessionmaker(
                 self._engine, class_=AsyncSession, expire_on_commit=False
             )
 
-    def async_session(self):
+    def async_session(self) -> async_sessionmaker[AsyncSession]:
         logger.debug("Getting async session")
         if not self._async_session:
             logger.debug("Creating a new async session")
             self.init_engine()
-        return self._async_session
+        return self._async_session  # type: ignore
 
     @property
-    def engine(self):
+    def engine(self) -> AsyncEngine:
         logger.debug("Getting engine")
         if not self._engine:
             logger.debug("Creating a new engine")
             self.init_engine()
-        return self._engine
+        return self._engine  # type: ignore
 
     @staticmethod
     @asynccontextmanager
-    async def get_session():
+    async def get_session() -> AsyncGenerator[AsyncSession, None]:
         """Gets a session from database
 
         Yields:

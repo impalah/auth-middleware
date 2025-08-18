@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Any
 
 from auth_middleware.logging import logger
 from auth_middleware.repository.credentials_repository import CredentialsRepository
@@ -14,13 +15,13 @@ class JsonCredentialsRepository(CredentialsRepository):
         AuthRepository (_type_): _description_
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Repository initialization"""
 
         # Open the credentials file
         current_path = os.getcwd()
         file_path = os.path.join(
-            current_path, settings.AUTH_MIDDLEWARE_JSON_REPOSITORY_PATH
+            current_path, settings.AUTH_MIDDLEWARE_JSON_REPOSITORY_PATH or ""
         )
 
         logger.debug("Opening credentials file: {}", file_path)
@@ -48,6 +49,6 @@ class JsonCredentialsRepository(CredentialsRepository):
             id=id,
             name=user_data["name"],
             hashed_password=user_data["hashed_pwd"],
-            groups=user_data["groups"] if "groups" in user_data else [],
+            _groups=user_data["groups"] if "groups" in user_data else [],
             email=user_data["email"] if "email" in user_data else None,
         )

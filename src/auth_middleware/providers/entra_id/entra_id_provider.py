@@ -22,17 +22,17 @@ class EntraIDProvider(JWTProvider):
 
     def __new__(
         cls,
-        permissions_provider: PermissionsProvider = None,
-        groups_provider: GroupsProvider = None,
-    ):
+        permissions_provider: "PermissionsProvider | None" = None,
+        groups_provider: "GroupsProvider | None" = None,
+    ) -> "EntraIDProvider":
         if not hasattr(cls, "instance"):
             cls.instance = super().__new__(cls)
         return cls.instance
 
     def __init__(
         self,
-        permissions_provider: PermissionsProvider = None,
-        groups_provider: GroupsProvider = None,
+        permissions_provider: "PermissionsProvider | None" = None,
+        groups_provider: "GroupsProvider | None" = None,
     ) -> None:
         if not hasattr(self, "_initialized"):  # Avoid reinitialization
             super().__init__(
@@ -51,8 +51,8 @@ class EntraIDProvider(JWTProvider):
         # TODO: Control errors
         async with httpx.AsyncClient() as client:
             response = await client.get(jwks_uri)
-            response: dict[str, str] = response.json()["keys"]
-        return response
+            keys_data: dict[str, str] = response.json()["keys"]
+        return keys_data
 
     async def get_openid_config(self) -> dict[str, str]:
         """Get openid config from entradid
@@ -68,10 +68,11 @@ class EntraIDProvider(JWTProvider):
                         settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
                     )
                 )
-                response: dict[str, str] = response.json()
+                config_data: dict[str, str] = response.json()
             except Exception as e:
                 logger.error("Error in get_openid_config: {}", str(e))
-        return response
+                return {}
+        return config_data
 
     async def load_jwks(
         self,
@@ -97,9 +98,9 @@ class EntraIDProvider(JWTProvider):
 
         timestamp: int = (
             time_ns()
-            + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1000000000
+            + getattr(settings, 'AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES', 20) * 60 * 1000000000
         )
-        usage_counter: int = settings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES
+        usage_counter: int = getattr(settings, 'AUTH_MIDDLEWARE_JWKS_CACHE_USAGES', 1000)
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
         return jks
 
@@ -170,7 +171,7 @@ class EntraIDProvider(JWTProvider):
         # ),
 
         groups: list[str] = (
-            self._groups_provider.fetch_groups(token) if self._groups_provider else []
+            await self._groups_provider.fetch_groups(token) if self._groups_provider else []
         )
 
         return User(
