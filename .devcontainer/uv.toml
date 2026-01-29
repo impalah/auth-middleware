@@ -1,0 +1,22 @@
+# Configuración de uv para el proyecto
+# Este archivo define configuraciones específicas para uv
+
+[tool.uv]
+# Usar Python 3.12
+python-version = "3.12"
+
+# Crear entornos virtuales en .venv
+project-environment = ".venv"
+
+# Estrategia de resolución de dependencias
+resolution = "highest"
+
+# Compilar paquetes con extensiones C
+compile-bytecode = false
+
+[tool.uv.pip]
+# Usar índice de PyPI
+index-url = "https://pypi.org/simple"
+
+# Permitir instalación de pre-releases si es necesario
+# prerelease = "allow"

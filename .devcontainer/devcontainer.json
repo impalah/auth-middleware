@@ -1,0 +1,74 @@
+{
+  "name": "Apuntador Backend (Python 3.14 + uv)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "postCreateCommand": "uv sync --all-extras && cat .devcontainer/.bashrc >> ~/.bashrc && echo ' Dev container ready! Type: verify'",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": ".venv/bin/python",
+        "python.terminal.activateEnvironment": false,
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestArgs": ["tests"],
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit"
+          }
+        },
+        "ruff.enable": true,
+        "ruff.organizeImports": true,
+        "ruff.fixAll": true,
+        "mypy-type-checker.importStrategy": "fromEnvironment",
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true,
+          "**/.pytest_cache": true,
+          "**/.mypy_cache": true,
+          "**/.ruff_cache": true
+        }
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+        "tamasfe.even-better-toml",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "hashicorp.terraform",
+        "usernamehw.errorlens",
+        "gruntfuggly.todo-tree"
+      ]
+    }
+  },
+  "remoteUser": "vscode",
+  "initializeCommand": "mkdir -p ${localWorkspaceFolder}/.venv ~/.aws ~/.ssh && touch ~/.gitconfig",
+  "mounts": [
+    "source=${localWorkspaceFolder}/.venv,target=/workspace/.venv,type=bind,consistency=cached",
+    "source=${env:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached",
+    "source=${env:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached",
+    "source=${env:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  ],
+  "remoteEnv": {
+    "AWS_PROFILE": "default",
+    "AWS_REGION": "eu-west-1",
+    "GIT_AUTHOR_NAME": "impalah",
+    "GIT_AUTHOR_EMAIL": "impalah@gmail.com",
+    "GIT_COMMITTER_NAME": "impalah",
+    "GIT_COMMITTER_EMAIL": "impalah@gmail.com"
+  },
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "FastAPI Backend",
+      "onAutoForward": "notify"
+    }
+  }
+}
