@@ -1,7 +1,7 @@
-# 🔐 Auth Middleware
+# Auth Middleware
 
 [![PyPI version](https://badge.fury.io/py/auth-middleware.svg)](https://badge.fury.io/py/auth-middleware)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Coverage](https://img.shields.io/badge/coverage-83%25-green.svg)](https://github.com/impalah/auth-middleware)
 
@@ -9,16 +9,16 @@
 
 Auth Middleware is a comprehensive, production-ready authentication and authorization solution for FastAPI and Starlette applications. It provides a pluggable architecture that supports multiple identity providers and authorization backends with async-first design principles.
 
-## ✨ Features
+## Features
 
-### 🔑 **Authentication Providers**
+### **Authentication Providers**
 
 - **AWS Cognito** - Full integration with Amazon Cognito User Pools
 - **Azure Entra ID** - Microsoft Azure Active Directory authentication
 - **Generic JWT** - Support for any JWT-based identity provider
 - **Custom Providers** - Extensible architecture for custom authentication
 
-### 🛡️ **Authorization & Access Control**
+### **Authorization & Access Control**
 
 - **Group-based Authorization** - Role-based access control with user groups
 - **Permission-based Authorization** - Fine-grained permission system
@@ -26,7 +26,7 @@ Auth Middleware is a comprehensive, production-ready authentication and authoriz
 - **Cognito Groups Integration** - Direct integration with AWS Cognito groups
 - **Custom Authorization Providers** - Build your own authorization logic
 
-### ⚡ **Performance & Reliability**
+### **Performance & Reliability**
 
 - **Async-First Design** - Built for high-performance async applications
 - **JWKS Caching** - Intelligent caching of JSON Web Key Sets
@@ -34,7 +34,7 @@ Auth Middleware is a comprehensive, production-ready authentication and authoriz
 - **Lazy Loading** - User groups and permissions loaded on-demand
 - **Error Resilience** - Graceful degradation on provider failures
 
-### 🔧 **Developer Experience**
+### **Developer Experience**
 
 - **Type-Safe** - Full TypeScript-style type hints throughout
 - **FastAPI Integration** - Native dependency injection support
@@ -42,7 +42,7 @@ Auth Middleware is a comprehensive, production-ready authentication and authoriz
 - **Environment Configuration** - 12-factor app configuration support
 - **Comprehensive Documentation** - Detailed guides and API reference
 
-## 📦 Installation
+## Installation
 
 ### Using pip
 
@@ -62,7 +62,7 @@ poetry add auth-middleware
 uv add auth-middleware
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Basic FastAPI Setup
 
@@ -147,7 +147,7 @@ app.add_middleware(
 )
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -202,7 +202,7 @@ async def create_user(request: Request):
     return {"message": "User creation allowed", "permissions": permissions}
 ```
 
-## 🎯 Usage Examples
+## Usage Examples
 
 ### Making Authenticated Requests
 
@@ -247,7 +247,7 @@ async def delete_post(post_id: str, request: Request, _: None = Depends(require_
     return {"message": "Post deleted successfully"}
 ```
 
-## 📚 Documentation
+## Documentation
 
 ### Core Components
 
@@ -279,7 +279,7 @@ The authenticated user is available in `request.state.current_user`:
 | `require_groups(groups)`           | Requires user to be in specified groups     |
 | `require_permissions(permissions)` | Requires user to have specified permissions |
 
-## 🏗️ Architecture
+## Architecture
 
 ```mermaid
 graph TD
@@ -294,7 +294,7 @@ graph TD
     H --> I
 ```
 
-## 🛠️ Development
+## Development
 
 ### Setup Development Environment
 
@@ -342,7 +342,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
@@ -353,10 +353,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Source Code**: [https://github.com/impalah/auth-middleware](https://github.com/impalah/auth-middleware)
 - **Bug Reports**: [GitHub Issues](https://github.com/impalah/auth-middleware/issues)
 
-## 💫 Credits
+## Credits
 
-Created with ❤️ by [impalah](https://github.com/impalah)
+Created by [impalah](https://github.com/impalah)
 
 ---
 
-**Made for modern Python async applications** 🐍⚡
+**Made for modern Python async applications**

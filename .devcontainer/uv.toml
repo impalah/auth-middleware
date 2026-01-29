@@ -2,8 +2,8 @@
 # Este archivo define configuraciones específicas para uv
 
 [tool.uv]
-# Usar Python 3.12
-python-version = "3.12"
+# Usar Python 3.14
+python-version = "3.14"
 
 # Crear entornos virtuales en .venv
 project-environment = ".venv"

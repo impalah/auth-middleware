@@ -21,7 +21,7 @@ RUN ARCH=$(uname -m) && \
     elif [ "$ARCH" = "aarch64" ]; then \
         AWS_CLI_URL="https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip"; \
     else \
-        echo "❌ Unsupported architecture: $ARCH" && exit 1; \
+        echo "[ERROR] Unsupported architecture: $ARCH" && exit 1; \
     fi && \
     curl "$AWS_CLI_URL" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
@@ -36,7 +36,7 @@ RUN ARCH=$(uname -m) && \
     elif [ "$ARCH" = "aarch64" ]; then \
         TERRAFORM_ARCH="arm64"; \
     else \
-        echo "❌ Unsupported architecture: $ARCH" && exit 1; \
+        echo "[ERROR] Unsupported architecture: $ARCH" && exit 1; \
     fi && \
     curl -LO "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${TERRAFORM_ARCH}.zip" && \
     unzip "terraform_${TERRAFORM_VERSION}_linux_${TERRAFORM_ARCH}.zip" && \

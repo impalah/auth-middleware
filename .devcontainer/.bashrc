@@ -34,16 +34,16 @@ alias logs='tail -f *.log'
 # Verificación
 alias verify='bash .devcontainer/verify-setup.sh'
 
-echo "🚀 Apuntador Backend Dev Container"
-echo "   Python $(uv run python --version 2>/dev/null | cut -d' ' -f2 || echo '3.12')"
+echo "Apuntador Backend Dev Container"
+echo "   Python $(uv run python --version 2>/dev/null | cut -d' ' -f2 || echo '3.13')"
 echo "   uv $(uv --version | cut -d' ' -f2)"
 echo ""
-echo "📝 Comandos útiles (usa 'uv run' automáticamente):"
+echo "Comandos útiles (usa 'uv run' automáticamente):"
 echo "   dev       - Inicia servidor de desarrollo"
 echo "   test      - Ejecuta tests"
 echo "   verify    - Verifica configuración"
 echo "   py        - Python REPL (uv run python)"
 echo "   make help - Ver todos los comandos disponibles"
 echo ""
-echo "💡 Tip: No necesitas activar .venv, usa 'uv run <comando>'"
+echo "Tip: No necesitas activar .venv, usa 'uv run <comando>'"
 echo ""

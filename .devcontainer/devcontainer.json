@@ -1,5 +1,5 @@
 {
-  "name": "Apuntador Backend (Python 3.14 + uv)",
+  "name": "Auth middleware (Python 3.14 + uv)",
   "build": {
     "dockerfile": "Dockerfile",
     "context": ".."
@@ -49,7 +49,7 @@
     }
   },
   "remoteUser": "vscode",
-  "initializeCommand": "mkdir -p ${localWorkspaceFolder}/.venv ~/.aws ~/.ssh && touch ~/.gitconfig",
+  "initializeCommand": "bash -c 'mkdir -p ${localWorkspaceFolder}/.venv && mkdir -p ~/.aws 2>/dev/null || true && mkdir -p ~/.ssh 2>/dev/null || true && touch ~/.gitconfig 2>/dev/null || true'",
   "mounts": [
     "source=${localWorkspaceFolder}/.venv,target=/workspace/.venv,type=bind,consistency=cached",
     "source=${env:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached",

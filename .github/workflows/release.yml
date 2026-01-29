@@ -37,16 +37,16 @@ jobs:
         run: |
           echo "Bumping version ..."
           v=$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)
-          echo "🔧 Current version: $v"
+          echo "Current version: $v"
           part="patch"
           uvx --from bump2version bumpversion --allow-dirty --current-version "$v" "$part" pyproject.toml
           BASE_VERSION=$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)
-          echo "✅ Bumped version to $BASE_VERSION"
+          echo "Bumped version to $BASE_VERSION"
           
       - name: Sync version across files
         run: |
           uv run python scripts/update_version.py
-          echo "✅ Synchronized version across all project files"
+          echo "Synchronized version across all project files"
 
       - name: Commit and push version update
         run: |

@@ -6,8 +6,8 @@ Auth Middleware can be installed using various Python package managers. Choose t
 Requirements
 ------------
 
-* **Python**: 3.10 or higher
-* **FastAPI**: 0.115.6 or higher (for FastAPI applications)
+* **Python**: 3.14 or higher
+* **FastAPI**: 0.128.0 or higher (for FastAPI applications)
 * **Starlette**: Compatible with Starlette-based applications
 
 Package Installation
@@ -102,14 +102,14 @@ For containerized applications, add auth-middleware to your requirements:
 .. code-block:: text
 
    auth-middleware>=0.2.0
-   fastapi>=0.115.6
-   uvicorn>=0.35.0
+   fastapi>=0.128.0
+   uvicorn>=0.40.0
 
 **Dockerfile example**:
 
 .. code-block:: dockerfile
 
-   FROM python:3.12-slim
+   FROM python:3.14-slim
 
    WORKDIR /app
 

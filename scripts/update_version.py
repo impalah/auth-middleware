@@ -40,7 +40,7 @@ def get_version_from_pyproject() -> str | None:
             print("Error: version not found in pyproject.toml")
             return None
 
-        print(f"📦 Found version in pyproject.toml: {version}")
+        print(f"Found version in pyproject.toml: {version}")
         return version
 
     except Exception as e:
@@ -57,18 +57,18 @@ def update_init_version(version: str) -> bool:
         return False
 
     try:
-        content = init_path.read_text(encoding='utf-8')
+        content = init_path.read_text(encoding="utf-8")
 
         # Pattern to match __version__ = "x.y.z"
         pattern = r'__version__\s*=\s*["\']([^"\']+)["\']'
         new_content = re.sub(pattern, f'__version__ = "{version}"', content)
 
         if content != new_content:
-            init_path.write_text(new_content, encoding='utf-8')
-            print(f"✅ Updated __version__ in {init_path}")
+            init_path.write_text(new_content, encoding="utf-8")
+            print(f"Updated __version__ in {init_path}")
             return True
         else:
-            print(f"ℹ️  No changes needed in {init_path}")
+            print(f"No changes needed in {init_path}")
             return True
 
     except Exception as e:
@@ -85,7 +85,7 @@ def update_sphinx_conf(version: str) -> bool:
         return False
 
     try:
-        content = conf_path.read_text(encoding='utf-8')
+        content = conf_path.read_text(encoding="utf-8")
         original_content = content
 
         # Update release = 'x.y.z'
@@ -97,11 +97,11 @@ def update_sphinx_conf(version: str) -> bool:
         content = re.sub(version_pattern, f"version = '{version}'", content)
 
         if content != original_content:
-            conf_path.write_text(content, encoding='utf-8')
-            print(f"✅ Updated version and release in {conf_path}")
+            conf_path.write_text(content, encoding="utf-8")
+            print(f"Updated version and release in {conf_path}")
             return True
         else:
-            print(f"ℹ️  No changes needed in {conf_path}")
+            print(f"No changes needed in {conf_path}")
             return True
 
     except Exception as e:
@@ -111,7 +111,7 @@ def update_sphinx_conf(version: str) -> bool:
 
 def main():
     """Main function to update all version references"""
-    print("🔄 Synchronizing version across project files...")
+    print("Synchronizing version across project files...")
 
     # Get version from pyproject.toml
     version = get_version_from_pyproject()
@@ -129,9 +129,9 @@ def main():
         success = False
 
     if success:
-        print(f"✅ Successfully synchronized version {version} across all files")
+        print(f"Successfully synchronized version {version} across all files")
     else:
-        print("❌ Some files could not be updated")
+        print("Some files could not be updated")
         sys.exit(1)
 
 

@@ -4,7 +4,7 @@
 
 set -e
 
-echo "🔍 Verificando configuración del entorno de desarrollo..."
+echo "Verificando configuración del entorno de desarrollo..."
 echo ""
 
 # Colores para output
@@ -46,7 +46,7 @@ check_venv() {
             echo "  → $VENV_PYTHON"
         fi
     else
-        echo -e "${YELLOW}⚠${NC} Entorno virtual (.venv) no existe"
+        echo -e "${YELLOW}[WARN]${NC} Entorno virtual (.venv) no existe"
         echo "  → Ejecuta: uv sync"
         return 1
     fi
@@ -56,7 +56,7 @@ check_dependencies() {
     if [ -f "uv.lock" ]; then
         echo -e "${GREEN}✓${NC} uv.lock existe"
     else
-        echo -e "${YELLOW}⚠${NC} uv.lock no existe"
+        echo -e "${YELLOW}[WARN]${NC} uv.lock no existe"
         echo "  → Ejecuta: uv sync"
         return 1
     fi
@@ -64,7 +64,7 @@ check_dependencies() {
     if [ -f ".venv/bin/pytest" ]; then
         echo -e "${GREEN}✓${NC} Dependencias de desarrollo instaladas"
     else
-        echo -e "${YELLOW}⚠${NC} Dependencias no completamente instaladas"
+        echo -e "${YELLOW}[WARN]${NC} Dependencias no completamente instaladas"
         echo "  → Ejecuta: uv sync --all-extras"
         return 1
     fi
@@ -74,13 +74,13 @@ check_env_file() {
     if [ -f ".env" ]; then
         echo -e "${GREEN}✓${NC} Archivo .env existe"
     else
-        echo -e "${YELLOW}⚠${NC} Archivo .env no existe"
+        echo -e "${YELLOW}[WARN]${NC} Archivo .env no existe"
         echo "  → Copia .env.example: cp .env.example .env"
         return 1
     fi
 }
 
-echo "1️⃣  Verificando herramientas del sistema..."
+echo "[1] Verificando herramientas del sistema..."
 check_command "python" "version"
 check_python_version
 check_command "uv" "version"
@@ -90,12 +90,12 @@ check_command "terraform" "version"
 check_command "jq" "version"
 echo ""
 
-echo "2️⃣  Verificando entorno Python..."
+echo "[2] Verificando entorno Python..."
 check_venv
 check_dependencies
 echo ""
 
-echo "3️⃣  Verificando configuración del proyecto..."
+echo "[3] Verificando configuración del proyecto..."
 check_env_file
 if [ -f "pyproject.toml" ]; then
     echo -e "${GREEN}✓${NC} pyproject.toml existe"
@@ -105,19 +105,19 @@ if [ -f "Makefile" ]; then
 fi
 echo ""
 
-echo "4️⃣  Verificando acceso a AWS (si configurado)..."
+echo "[4] Verificando acceso a AWS (si configurado)..."
 if aws sts get-caller-identity &> /dev/null; then
     echo -e "${GREEN}✓${NC} Credenciales AWS configuradas correctamente"
     aws sts get-caller-identity --query '[Account,Arn]' --output text | while read -r line; do
         echo "  → $line"
     done
 else
-    echo -e "${YELLOW}⚠${NC} Credenciales AWS no configuradas o inválidas"
+    echo -e "${YELLOW}[WARN]${NC} Credenciales AWS no configuradas o inválidas"
     echo "  → Configura con: aws configure"
 fi
 echo ""
 
-echo "5️⃣  Comandos disponibles..."
+echo "[5] Comandos disponibles..."
 echo "  make dev          - Inicia el servidor de desarrollo"
 echo "  make test         - Ejecuta los tests"
 echo "  make lint         - Ejecuta el linter"
@@ -125,7 +125,7 @@ echo "  make format       - Formatea el código"
 echo "  make type-check   - Verifica tipos con mypy"
 echo ""
 
-echo -e "${GREEN}✅ Verificación completada!${NC}"
+echo -e "${GREEN}[OK] Verificación completada!${NC}"
 echo ""
 echo "Para activar el entorno virtual manualmente:"
 echo "  source .venv/bin/activate"

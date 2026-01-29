@@ -22,7 +22,7 @@ This directory contains the configuration for VS Code Dev Containers, allowing y
 - [VS Code](https://code.visualstudio.com/)
 - [Dev Containers Extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
->  **Nota**: Los directorios `~/.aws`, `~/.ssh` y el archivo `~/.gitconfig` se crean automáticamente si no existen. No necesitas configurar AWS antes de iniciar el contenedor.
+> **Nota**: Los directorios `~/.aws`, `~/.ssh` y el archivo `~/.gitconfig` se crean automáticamente si no existen. No necesitas configurar AWS antes de iniciar el contenedor.
 
 ## Quick Start
 
@@ -56,7 +56,7 @@ dev
 uv run uvicorn apuntador.main:app --reload
 ```
 
->  **Nota importante**: Este proyecto usa `uv run` para ejecutar comandos.
+> **Nota importante**: Este proyecto usa `uv run` para ejecutar comandos.
 > No necesitas activar el entorno virtual manualmente. El directorio `.venv`
 > está mapeado a tu disco local, por lo que las dependencias persisten
 > entre rebuilds del contenedor.
@@ -167,12 +167,12 @@ bash .devcontainer/verify-setup.sh
 ```
 
 Este script verifica:
--  Python 3.12+ instalado
--  uv instalado y funcionando
--  Entorno virtual creado
--  Dependencias instaladas
--  Archivo .env configurado
--  Credenciales AWS (opcional)
+- Python 3.14+ instalado
+- uv instalado y funcionando
+- Entorno virtual creado
+- Dependencias instaladas
+- Archivo .env configurado
+- Credenciales AWS (opcional)
 
 ## Actualización de Dependencias
 
@@ -218,7 +218,7 @@ Si el entorno virtual usa una versión incorrecta de Python:
 ```bash
 # Remove and recreate with correct Python
 rm -rf .venv
-uv venv --python 3.12
+uv venv --python 3.14
 uv sync
 ```
 

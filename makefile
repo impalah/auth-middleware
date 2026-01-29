@@ -11,17 +11,17 @@ PART ?= patch  # can be overwritten with: make bump-version PART=minor
 # Delete the virtual environment and force a sync
 venv:
 	rm -rf .venv && \
-	echo "✅ Deleted virtual environment" && \
+	echo "Deleted virtual environment" && \
 	uv sync && \
-	echo "✅ Created virtual environment" && \
+	echo "Created virtual environment" && \
 	uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version
 
 # Bump patch/minor/major version
 bump-version:
 	@v=$$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version) && \
-	echo "🔧 Current version: $$v" && \
+	echo "Current version: $$v" && \
 	uvx --from bump2version bumpversion --allow-dirty --current-version "$$v" $(PART) pyproject.toml && \
-	echo "✅ Version bumped to new $(PART)"
+	echo "Version bumped to new $(PART)"
 
 # Build python package
 build: bump-version
@@ -30,7 +30,7 @@ build: bump-version
 # Clean build artifacts
 clean:
 	rm -rf dist *.egg-info build && \
-	echo "✅ Cleaned build artifacts"
+	echo "Cleaned build artifacts"
 
 # Publish package on PyPI (use UV_PYPI_TOKEN or .pypirc for authentication)
 publish: build
@@ -43,27 +43,27 @@ publish-test: build
 # Build docker image
 docker-build: bump-version
 	@BASE_VERSION=$$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version) && \
-	echo "✅ Bumped version to $$BASE_VERSION" && \
+	echo "Bumped version to $$BASE_VERSION" && \
 	if docker buildx inspect $(BUILDER_NAME) >/dev/null 2>&1; then \
-		echo "✅ Builder '$(BUILDER_NAME)' exists. Activating..."; \
+		echo "Builder '$(BUILDER_NAME)' exists. Activating..."; \
 		docker buildx use $(BUILDER_NAME); \
 	else \
-		echo "🔧 Creating new builder '$(BUILDER_NAME)'..."; \
+		echo "Creating new builder '$(BUILDER_NAME)'..."; \
 		docker buildx create --name $(BUILDER_NAME) --use; \
 	fi && \
-	echo "🐳 Building Docker image with buildx..." && \
+	echo "Building Docker image with buildx..." && \
 	docker buildx build \
 		--platform $(PLATFORM) \
 		--push \
 		-t $(REGISTRY_URI)/$(DOMAIN)/$(REPOSITORY_NAME):$$BASE_VERSION \
 		-t $(REGISTRY_URI)/$(DOMAIN)/$(REPOSITORY_NAME):latest \
 		. && \
-	echo "✅ Docker image built and pushed successfully"
+	echo "Docker image built and pushed successfully"
 
 # Release to docker registry with version tags
 docker-release: docker-build
 	@BASE_VERSION=$$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version) && \
-	echo "✅ Released Docker image: $(REGISTRY_URI)/$(DOMAIN)/$(REPOSITORY_NAME):$$BASE_VERSION"
+	echo "Released Docker image: $(REGISTRY_URI)/$(DOMAIN)/$(REPOSITORY_NAME):$$BASE_VERSION"
 
 # Run linting with ruff
 lint:
@@ -83,7 +83,7 @@ security-check:
 
 # Run all quality checks
 check: lint format type-check security-check
-	echo "✅ All checks completed"
+	echo "All checks completed"
 
 # Run tests with pytest
 test:
@@ -107,10 +107,10 @@ shell:
 
 # Show project info
 info:
-	@echo "📦 Project: auth-middleware"
-	@echo "🔢 Version: $$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)"
-	@echo "🐍 Python: $$(uv run python --version)"
-	@echo "📁 Virtual env: $$(if [ -d .venv ]; then echo ".venv exists"; else echo ".venv not found"; fi)"
+	@echo "Project: auth-middleware"
+	@echo "Version: $$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)"
+	@echo "Python: $$(uv run python --version)"
+	@echo "Virtual env: $$(if [ -d .venv ]; then echo ".venv exists"; else echo ".venv not found"; fi)"
 
 # Build documentation
 docs:

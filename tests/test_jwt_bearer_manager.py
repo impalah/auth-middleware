@@ -140,7 +140,7 @@ async def test_get_credentials_no_authorization_header():
         # Should raise HTTPException when no credentials
         with pytest.raises(HTTPException) as exc_info:
             await manager.get_credentials(request)
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -161,11 +161,11 @@ async def test_get_credentials_wrong_scheme():
         # HTTPBearer will raise HTTPException for wrong scheme
         with pytest.raises(HTTPException) as exc_info:
             await manager.get_credentials(request)
-        
-        assert exc_info.value.status_code == 403
+
+        assert exc_info.value.status_code == 401
 
 
-@pytest.mark.asyncio 
+@pytest.mark.asyncio
 async def test_get_credentials_malformed_jwt():
     """Test get_credentials with malformed JWT token."""
     mock_auth_provider = AsyncMock()
@@ -205,7 +205,7 @@ async def test_get_credentials_jwt_decode_error():
     with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
         with pytest.raises(InvalidTokenException) as exc_info:
             await manager.get_credentials(request)
-        
+
         assert exc_info.value.status_code == 403
         assert "JWK-invalid" in str(exc_info.value.detail)
 
@@ -256,19 +256,19 @@ async def test_get_credentials_empty_bearer_token():
         # HTTPBearer should raise HTTPException for empty token
         with pytest.raises(HTTPException) as exc_info:
             await manager.get_credentials(request)
-        assert exc_info.value.status_code == 403
+        assert exc_info.value.status_code == 401
 
 
 @pytest.mark.asyncio
 async def test_manager_initialization():
     """Test JWTBearerManager initialization."""
     mock_auth_provider = AsyncMock()
-    
+
     # Test with default auto_error
     manager1 = JWTBearerManager(auth_provider=mock_auth_provider)
     assert manager1.auth_provider is mock_auth_provider
     assert manager1.auto_error is True
-    
+
     # Test with auto_error=False
     manager2 = JWTBearerManager(auth_provider=mock_auth_provider, auto_error=False)
     assert manager2.auth_provider is mock_auth_provider
@@ -289,14 +289,11 @@ async def test_get_credentials_with_complex_jwt():
         "email": "test@example.com",
         "roles": ["admin", "user"],
         "permissions": ["read", "write", "delete"],
-        "metadata": {
-            "last_login": "2023-01-01T00:00:00Z",
-            "login_count": 42
-        },
+        "metadata": {"last_login": "2023-01-01T00:00:00Z", "login_count": 42},
         "exp": int(time.time()) + 3600,
         "iat": int(time.time()),
         "iss": "https://example.com",
-        "aud": "my-app"
+        "aud": "my-app",
     }
 
     token = jwt.encode(payload, secret, algorithm="HS256")
@@ -325,21 +322,23 @@ async def test_get_credentials_case_sensitive_bearer():
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
 
     token = "header.payload.signature"
-    
+
     # Test different cases - all should fail except exact "Bearer"
     test_cases = ["bearer", "BEARER", "bEaReR"]
-    
+
     for scheme in test_cases:
         authorization = f"{scheme} {token}".encode()
-        
+
         scope: Scope = {
             "type": "http",
             "headers": [(b"authorization", authorization)],
         }
         request: Request = Request(scope=scope)
 
-        with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+        with patch(
+            "auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False
+        ):
             with pytest.raises(InvalidTokenException) as exc_info:
                 await manager.get_credentials(request)
-            
+
             assert "Wrong authentication method" in str(exc_info.value.detail)

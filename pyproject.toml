@@ -17,20 +17,20 @@ classifiers = [
     "Topic :: System :: Systems Administration :: Authentication/Directory",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 dependencies = [
-    "fastapi>=0.115.6",
-    "python-dotenv>=1.0.1",
+    "fastapi>=0.128.0",
+    "python-dotenv>=1.2.1",
     "svix-ksuid>=0.6.2",
     "httpx>=0.28.1",
-    "asyncpg>=0.30.0",
-    "aiomysql>=0.2.0",
-    "click>=8.1.8",
+    "asyncpg>=0.31.0",
+    "aiomysql>=0.3.2",
+    "click>=8.3.1",
     "loguru>=0.7.3",
-    "python-jose[cryptography]>=3.3.0",
-    "sqlalchemy[asyncio]>=2.0.36",
-    "pydantic[email]>=2.10.4",
-    "pydantic-settings>=2.10.1",
+    "python-jose[cryptography]>=3.5.0",
+    "sqlalchemy[asyncio]>=2.0.46",
+    "pydantic[email]>=2.12.5",
+    "pydantic-settings>=2.12.0",
 ]
 
 [project.urls]
@@ -48,36 +48,36 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "bandit>=1.8.3",
-    "debugpy>=1.8.13",
+    "bandit>=1.9.3",
+    "debugpy>=1.8.19",
     "httpx>=0.28.1",
-    "ipykernel>=6.29.5",
-    "mypy>=1.15.0",
-    "pytest>=8.3.5",
-    "pytest-asyncio>=0.26.0",
-    "pytest-cov>=6.0.0",
-    "pytest-mock>=3.14.0",
-    "ruff>=0.11.0",
-    "mock>=5.1.0",
-    "pytest-env>=1.1.5",
-    "alembic>=1.14.0",
-    "psycopg2>=2.9.10",
-    "mysqlclient>=2.2.6",
-    "uvicorn>=0.35.0",
+    "ipykernel>=7.1.0",
+    "mypy>=1.19.1",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.14.14",
+    "mock>=5.2.0",
+    "pytest-env>=1.2.0",
+    "alembic>=1.18.2",
+    "psycopg2>=2.9.11",
+    "mysqlclient>=2.2.7",
+    "uvicorn>=0.40.0",
 ]
 docs = [
-    "sphinx>=7.1.0",
-    "sphinx-rtd-theme>=2.0.0",
-    "sphinx-autodoc-typehints>=1.24.0",
-    "myst-parser>=2.0.0",
+    "sphinx>=9.1.0",
+    "sphinx-rtd-theme>=3.1.0",
+    "sphinx-autodoc-typehints>=3.6.2",
+    "myst-parser>=5.0.0",
     "sphinx-copybutton>=0.5.2",
-    "furo>=2023.9.10",
+    "furo>=2025.12.19",
 ]
 
 [tool.ruff]
 line-length = 88
 src = ["src"]  # First, add the source code folder
-target-version = "py312"  # We are using Python 3.12
+target-version = "py314"  # We are using Python 3.14
 
 [tool.ruff.lint]
 # Activate additional rules to imitate flake8 and isort
@@ -91,7 +91,7 @@ exclude = ["tests/data", ".venv"]
 fixable = ["ALL"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.14"
 strict = true
 ignore_missing_imports = true
 pretty = true

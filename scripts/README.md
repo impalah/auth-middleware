@@ -43,11 +43,11 @@ uv run python scripts/update_version.py
 ### Example Output
 
 ```
-🔄 Synchronizing version across project files...
-📦 Found version in pyproject.toml: 0.1.5
-✅ Updated __version__ in src/auth_middleware/__init__.py
-✅ Updated version and release in docs_source/conf.py
-✅ Successfully synchronized version 0.1.5 across all files
+Synchronizing version across project files...
+Found version in pyproject.toml: 0.1.5
+Updated __version__ in src/auth_middleware/__init__.py
+Updated version and release in docs_source/conf.py
+Successfully synchronized version 0.1.5 across all files
 ```
 
 ### Error Handling
@@ -69,5 +69,5 @@ This approach provides maximum reliability and easy debugging.
 
 ### Dependencies
 
-- Python 3.11+ (uses built-in `tomllib`)
-- Python 3.10 and below: requires `tomli` package (included in project dependencies)
+- Python 3.14+ (uses built-in `tomllib`)
+- Python 3.12 and below: requires `tomli` package (included in project dependencies)
