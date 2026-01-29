@@ -1,0 +1,657 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JWKS Cache Strategies &mdash; Auth Middleware 0.2.15 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/jwks-cache.html" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d5b904a0"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="jwt_bearer_manager" href="jwt_bearer_manager.html" />
+    <link rel="prev" title="Services Module" href="services.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#see-also">See Also</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">JWKS Cache Strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#cache-strategies">Cache Strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#time-based-strategy">Time-Based Strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-based-strategy">Usage-Based Strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#combined-strategy-recommended">Combined Strategy (Recommended)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#background-refresh">Background Refresh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#benefits">Benefits</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#configuration-examples">Configuration Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#high-traffic-application">High-Traffic Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#low-traffic-high-security-application">Low-Traffic / High-Security Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#development-testing">Development / Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#monitoring-cache-performance">Monitoring Cache Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#custom-metrics">Custom Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cache-not-refreshing">Cache Not Refreshing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#high-latency-spikes">High Latency Spikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#frequent-refreshes">Frequent Refreshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-background-refresh-failed">Error: “Background refresh failed”</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#see-also">See Also</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-code">Example Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">JWKS Cache Strategies</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/jwks-cache.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jwks-cache-strategies">
+<span id="jwks-cache"></span><h1>JWKS Cache Strategies<a class="headerlink" href="#jwks-cache-strategies" title="Link to this heading"></a></h1>
+<p>The JWKS (JSON Web Key Set) cache system has been improved with multiple caching strategies and background refresh capabilities for better performance and reliability.</p>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview" id="id1">Overview</a></p></li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>JWKS caching is critical for JWT validation performance. Instead of fetching public keys from the identity provider for every token validation, the middleware caches them locally with configurable refresh strategies.</p>
+<p><strong>Benefits:</strong></p>
+<ul class="simple">
+<li><p>Reduced latency for token validation</p></li>
+<li><p>Lower load on identity provider endpoints</p></li>
+<li><p>Better resilience to identity provider outages</p></li>
+<li><p>Configurable refresh strategies for different use cases</p></li>
+</ul>
+</section>
+</section>
+<section id="cache-strategies">
+<h1>Cache Strategies<a class="headerlink" href="#cache-strategies" title="Link to this heading"></a></h1>
+<p>The middleware supports three caching strategies that can be configured based on your application’s needs.</p>
+<section id="time-based-strategy">
+<h2>Time-Based Strategy<a class="headerlink" href="#time-based-strategy" title="Link to this heading"></a></h2>
+<p>Refresh cache after a specified time interval.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoAuthzProviderSettings</span>
+<span class="p">)</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_example&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>  <span class="c1"># Refresh every 20 minutes</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Pros:</strong></p>
+<ul class="simple">
+<li><p>Predictable refresh schedule</p></li>
+<li><p>Simple to reason about</p></li>
+<li><p>Consistent behavior regardless of traffic</p></li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul class="simple">
+<li><p>May refresh unnecessarily during low traffic</p></li>
+<li><p>May not refresh quickly enough during high traffic</p></li>
+</ul>
+<p><strong>Use Case:</strong> Applications with consistent, predictable traffic patterns.</p>
+</section>
+<section id="usage-based-strategy">
+<h2>Usage-Based Strategy<a class="headerlink" href="#usage-based-strategy" title="Link to this heading"></a></h2>
+<p>Refresh cache after a specified number of token validations.</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_example&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;usage&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_usages</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>  <span class="c1"># Refresh after 1000 validations</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Pros:</strong></p>
+<ul class="simple">
+<li><p>Adapts to traffic volume</p></li>
+<li><p>No unnecessary refreshes during idle periods</p></li>
+<li><p>Cache stays fresh under high load</p></li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul class="simple">
+<li><p>Unpredictable refresh timing</p></li>
+<li><p>May go long periods without refresh during low traffic</p></li>
+</ul>
+<p><strong>Use Case:</strong> Applications with highly variable traffic patterns.</p>
+</section>
+<section id="combined-strategy-recommended">
+<h2>Combined Strategy (Recommended)<a class="headerlink" href="#combined-strategy-recommended" title="Link to this heading"></a></h2>
+<p>Refresh cache when either time OR usage threshold is reached (whichever comes first).</p>
+<p><strong>Configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_example&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>  <span class="c1"># Default</span>
+    <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>      <span class="c1"># 20 minutes OR</span>
+    <span class="n">jwks_cache_usages</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>      <span class="c1"># 1000 validations</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Pros:</strong></p>
+<ul class="simple">
+<li><p>Combines benefits of both strategies</p></li>
+<li><p>Ensures timely refresh in all scenarios</p></li>
+<li><p>Recommended for most applications</p></li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul class="simple">
+<li><p>Slightly more complex configuration</p></li>
+</ul>
+<p><strong>Use Case:</strong> Recommended for most production applications.</p>
+</section>
+</section>
+<section id="background-refresh">
+<h1>Background Refresh<a class="headerlink" href="#background-refresh" title="Link to this heading"></a></h1>
+<p>Background refresh proactively refreshes the JWKS cache before it expires, preventing cache expiry delays.</p>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>When cache is loaded, a background task is scheduled</p></li>
+<li><p>Task waits until <code class="docutils literal notranslate"><span class="pre">threshold</span></code> of cache lifetime has elapsed</p></li>
+<li><p>Cache is refreshed silently in the background</p></li>
+<li><p>New requests continue using cached keys without delay</p></li>
+</ol>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_example&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">jwks_background_refresh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>          <span class="c1"># Enable background refresh</span>
+    <span class="n">jwks_background_refresh_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="c1"># Refresh at 80% of lifetime</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Threshold Examples:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0.8</span></code> (default): Refresh at 80% of cache interval</p>
+<ul>
+<li><p>With 20min interval: refresh happens at 16min</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0.9</span></code>: Aggressive refresh at 90%</p>
+<ul>
+<li><p>With 20min interval: refresh happens at 18min</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code>: Conservative refresh at 50%</p>
+<ul>
+<li><p>With 20min interval: refresh happens at 10min</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="benefits">
+<h2>Benefits<a class="headerlink" href="#benefits" title="Link to this heading"></a></h2>
+<p><strong>Prevents Latency Spikes:</strong></p>
+<p>Without background refresh:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Request 1: Cache valid → Fast (10ms)
+Request 2: Cache valid → Fast (10ms)
+...
+Request N: Cache expired → Slow (200ms - fetch new keys)
+Request N+1: Cache valid → Fast (10ms)
+</pre></div>
+</div>
+<p>With background refresh:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Request 1: Cache valid → Fast (10ms)
+Request 2: Cache valid → Fast (10ms)
+[Background: Cache refreshed at 80% lifetime]
+...
+Request N: Cache valid → Fast (10ms)
+Request N+1: Cache valid → Fast (10ms)
+</pre></div>
+</div>
+<p><strong>Always Enabled:</strong> Recommended for all production deployments.</p>
+</section>
+</section>
+<section id="configuration-examples">
+<h1>Configuration Examples<a class="headerlink" href="#configuration-examples" title="Link to this heading"></a></h1>
+<section id="high-traffic-application">
+<h2>High-Traffic Application<a class="headerlink" href="#high-traffic-application" title="Link to this heading"></a></h2>
+<p>For applications with thousands of requests per minute:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_example&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Use both strategies for reliability</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Longer cache time for stability</span>
+    <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>  <span class="c1"># 30 minutes</span>
+
+    <span class="c1"># High usage threshold</span>
+    <span class="n">jwks_cache_usages</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>  <span class="c1"># 10,000 validations</span>
+
+    <span class="c1"># Aggressive background refresh</span>
+    <span class="n">jwks_background_refresh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">jwks_background_refresh_threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>  <span class="c1"># Refresh at 90%</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="low-traffic-high-security-application">
+<h2>Low-Traffic / High-Security Application<a class="headerlink" href="#low-traffic-high-security-application" title="Link to this heading"></a></h2>
+<p>For applications requiring frequent key rotation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_example&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Time-based only for predictability</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Short cache interval</span>
+    <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>  <span class="c1"># 5 minutes</span>
+
+    <span class="c1"># Early background refresh</span>
+    <span class="n">jwks_background_refresh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">jwks_background_refresh_threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>  <span class="c1"># Refresh at 50%</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="development-testing">
+<h2>Development / Testing<a class="headerlink" href="#development-testing" title="Link to this heading"></a></h2>
+<p>For local development and testing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_example&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Usage-based for variable dev traffic</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;usage&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_usages</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Low threshold for testing</span>
+
+    <span class="c1"># Optional: disable background refresh for simpler debugging</span>
+    <span class="n">jwks_background_refresh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="monitoring-cache-performance">
+<h1>Monitoring Cache Performance<a class="headerlink" href="#monitoring-cache-performance" title="Link to this heading"></a></h1>
+<section id="custom-metrics">
+<h2>Custom Metrics<a class="headerlink" href="#custom-metrics" title="Link to this heading"></a></h2>
+<p>Track cache effectiveness:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricsCollector</span>
+
+<span class="n">provider</span> <span class="o">=</span> <span class="n">CognitoProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">MetricsCollector</span><span class="p">()</span>
+
+<span class="c1"># Track JWKS refresh events</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MonitoredProvider</span><span class="p">(</span><span class="n">CognitoProvider</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load_jwks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">jwks</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">load_jwks</span><span class="p">()</span>
+            <span class="n">duration_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_success</span><span class="p">(</span><span class="n">duration_ms</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JWKS refreshed in </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">ms&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">jwks</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">duration_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="s2">&quot;jwks_load_error&quot;</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
+            <span class="k">raise</span>
+</pre></div>
+</div>
+</section>
+<section id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Link to this heading"></a></h2>
+<p>Enable debug logging to monitor cache behavior:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Enable debug logging for JWT provider</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;auth_middleware.providers.authn.jwt_provider&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Example Output:</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2026-01-29 10:00:00 DEBUG JWKS loaded
+2026-01-29 10:00:00 DEBUG Background JWKS refresh task scheduled
+2026-01-29 10:16:00 DEBUG Background refresh will wait 4.00 seconds
+2026-01-29 10:16:04 INFO Performing background JWKS refresh
+2026-01-29 10:16:04 INFO Background JWKS refresh completed
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h1>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h1>
+<ol class="arabic">
+<li><p><strong>Always Enable Background Refresh</strong></p>
+<p>Background refresh prevents latency spikes and is recommended for all production deployments:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jwks_background_refresh</span><span class="o">=</span><span class="kc">True</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use Combined Strategy</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">&quot;both&quot;</span></code> strategy provides the best balance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Adjust Based on Traffic Patterns</strong></p>
+<ul class="simple">
+<li><p><strong>High traffic:</strong> Longer intervals, higher usage thresholds</p></li>
+<li><p><strong>Low traffic:</strong> Shorter intervals, lower usage thresholds</p></li>
+<li><p><strong>Irregular traffic:</strong> Use <code class="docutils literal notranslate"><span class="pre">&quot;both&quot;</span></code> strategy</p></li>
+</ul>
+</li>
+<li><p><strong>Set Appropriate Thresholds</strong></p>
+<ul class="simple">
+<li><p><strong>Conservative (0.5-0.7):</strong> More frequent refreshes, higher load on IdP</p></li>
+<li><p><strong>Balanced (0.8):</strong> Recommended default</p></li>
+<li><p><strong>Aggressive (0.9):</strong> Fewer refreshes, risking cache expiry</p></li>
+</ul>
+</li>
+<li><p><strong>Monitor Refresh Failures</strong></p>
+<p>Implement logging and alerting for JWKS refresh failures:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">jwks</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">load_jwks</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JWKS refresh failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Alert monitoring system</span>
+    <span class="n">send_alert</span><span class="p">(</span><span class="s2">&quot;JWKS refresh failure&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Test Configuration Changes</strong></p>
+<p>Before deploying new cache settings:</p>
+<ul class="simple">
+<li><p>Test under realistic load</p></li>
+<li><p>Monitor cache hit rates</p></li>
+<li><p>Verify background refresh behavior</p></li>
+<li><p>Check for latency spikes</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h1>
+<section id="cache-not-refreshing">
+<h2>Cache Not Refreshing<a class="headerlink" href="#cache-not-refreshing" title="Link to this heading"></a></h2>
+<p><strong>Symptoms:</strong></p>
+<ul class="simple">
+<li><p>Tokens failing validation</p></li>
+<li><p>“Key not found” errors</p></li>
+<li><p>Old keys being used</p></li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic simple">
+<li><p>Check cache strategy configuration</p></li>
+<li><p>Verify background refresh is enabled</p></li>
+<li><p>Check logs for refresh errors</p></li>
+<li><p>Ensure network connectivity to identity provider</p></li>
+</ol>
+</section>
+<section id="high-latency-spikes">
+<h2>High Latency Spikes<a class="headerlink" href="#high-latency-spikes" title="Link to this heading"></a></h2>
+<p><strong>Symptoms:</strong></p>
+<ul class="simple">
+<li><p>Periodic slow responses</p></li>
+<li><p>Regular latency spikes at intervals</p></li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic simple">
+<li><p>Enable background refresh</p></li>
+<li><p>Lower refresh threshold (e.g., 0.7 instead of 0.9)</p></li>
+<li><p>Increase cache interval if refreshing too frequently</p></li>
+</ol>
+</section>
+<section id="frequent-refreshes">
+<h2>Frequent Refreshes<a class="headerlink" href="#frequent-refreshes" title="Link to this heading"></a></h2>
+<p><strong>Symptoms:</strong></p>
+<ul class="simple">
+<li><p>Excessive load on identity provider</p></li>
+<li><p>High network traffic</p></li>
+<li><p>Logs showing constant JWKS loads</p></li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic simple">
+<li><p>Increase cache interval</p></li>
+<li><p>Increase usage threshold</p></li>
+<li><p>Consider if traffic justifies current settings</p></li>
+</ol>
+</section>
+<section id="error-background-refresh-failed">
+<h2>Error: “Background refresh failed”<a class="headerlink" href="#error-background-refresh-failed" title="Link to this heading"></a></h2>
+<p><strong>Symptoms:</strong></p>
+<ul class="simple">
+<li><p>Warning logs about background refresh failures</p></li>
+<li><p>Cache functioning but not refreshing proactively</p></li>
+</ul>
+<p><strong>Solutions:</strong></p>
+<ol class="arabic simple">
+<li><p>Check network connectivity</p></li>
+<li><p>Verify identity provider availability</p></li>
+<li><p>Review identity provider rate limits</p></li>
+<li><p>Implement retry logic</p></li>
+</ol>
+</section>
+</section>
+<section id="performance-comparison">
+<h1>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Link to this heading"></a></h1>
+<p><strong>Without JWKS Caching:</strong></p>
+<ul class="simple">
+<li><p>Every token validation fetches public keys</p></li>
+<li><p>Average latency: 150-300ms per validation</p></li>
+<li><p>High load on identity provider</p></li>
+</ul>
+<p><strong>With Time-Based Caching (20min):</strong></p>
+<ul class="simple">
+<li><p>Keys fetched every 20 minutes</p></li>
+<li><p>Average latency: 10-15ms per validation</p></li>
+<li><p>Occasional 200ms spike every 20 minutes</p></li>
+</ul>
+<p><strong>With Combined Strategy + Background Refresh:</strong></p>
+<ul class="simple">
+<li><p>Keys fetched proactively before expiry</p></li>
+<li><p>Consistent latency: 10-15ms per validation</p></li>
+<li><p>No latency spikes</p></li>
+<li><p><strong>Recommended configuration</strong></p></li>
+</ul>
+</section>
+<section id="see-also">
+<h1>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="jwt_auth_provider.html"><span class="doc">JWT Authentication Provider</span></a> - JWT provider documentation</p></li>
+<li><p><a class="reference internal" href="cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a> - Cognito provider specifics</p></li>
+<li><p><a class="reference internal" href="services.html"><span class="doc">Services Module</span></a> - Metrics collection for monitoring</p></li>
+</ul>
+<section id="example-code">
+<h2>Example Code<a class="headerlink" href="#example-code" title="Link to this heading"></a></h2>
+<p>Complete configuration examples can be found in the repository:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">examples/jwks_cache_example.py</span></code> - JWKS cache configuration examples</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="services.html" class="btn btn-neutral float-left" title="Services Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jwt_bearer_manager.html" class="btn btn-neutral float-right" title="jwt_bearer_manager" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

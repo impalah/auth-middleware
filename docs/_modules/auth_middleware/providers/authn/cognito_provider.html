@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authn.cognito_provider &mdash; Auth Middleware 0.2.16 documentation</title>
+  <title>auth_middleware.providers.authn.cognito_provider &mdash; Auth Middleware 0.2.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authn/cognito_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=e2418eca"></script>
+      <script src="../../../../_static/documentation_options.js?v=d5b904a0"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -100,6 +100,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
 </ul>
@@ -142,11 +158,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">jose.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">base64url_decode</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoAuthzProviderSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.exceptions.aws_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">AWSException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services.m2m_detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">M2MTokenDetector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWK</span><span class="p">,</span> <span class="n">JWKS</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
 
@@ -154,25 +173,31 @@
 <div class="viewcode-block" id="CognitoProvider">
 <a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CognitoProvider</span><span class="p">(</span><span class="n">JWTProvider</span><span class="p">):</span>
+    <span class="n">_instances</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Dict to store separate instances per class</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">settings</span><span class="p">:</span> <span class="s2">&quot;CognitoAuthzProviderSettings | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">permissions_provider</span><span class="p">:</span> <span class="s2">&quot;type[PermissionsProvider] | PermissionsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">groups_provider</span><span class="p">:</span> <span class="s2">&quot;type[GroupsProvider] | GroupsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CognitoProvider&quot;</span><span class="p">:</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="n">CognitoAuthzProviderSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">permissions_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">PermissionsProvider</span><span class="p">]</span>
+        <span class="o">|</span> <span class="n">PermissionsProvider</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">groups_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CognitoProvider</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating CognitoProvider instance&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;instance&quot;</span><span class="p">):</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">instance</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instances</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instances</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instances</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
 
 <div class="viewcode-block" id="CognitoProvider.__init__">
 <a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">settings</span><span class="p">:</span> <span class="s2">&quot;CognitoAuthzProviderSettings | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">permissions_provider</span><span class="p">:</span> <span class="s2">&quot;type[PermissionsProvider] | PermissionsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">groups_provider</span><span class="p">:</span> <span class="s2">&quot;type[GroupsProvider] | GroupsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="n">CognitoAuthzProviderSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">permissions_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">PermissionsProvider</span><span class="p">]</span>
+        <span class="o">|</span> <span class="n">PermissionsProvider</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">groups_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing CognitoProvider instance&quot;</span><span class="p">)</span>
 
@@ -182,7 +207,7 @@
 
             <span class="c1"># TODO: Refactor this</span>
             <span class="c1"># Lazy initialization for PermissionsProvider</span>
-            <span class="n">final_permissions_provider</span><span class="p">:</span> <span class="s2">&quot;PermissionsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">final_permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">permissions_provider</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">permissions_provider</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span>
                     <span class="n">permissions_provider</span><span class="p">,</span> <span class="n">PermissionsProvider</span>
@@ -200,7 +225,7 @@
 
             <span class="c1"># TODO: Refactor this</span>
             <span class="c1"># Lazy initialization for GroupsProvider</span>
-            <span class="n">final_groups_provider</span><span class="p">:</span> <span class="s2">&quot;GroupsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">final_groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">groups_provider</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">groups_provider</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span>
                     <span class="n">groups_provider</span><span class="p">,</span> <span class="n">GroupsProvider</span>
@@ -234,9 +259,13 @@
         <span class="c1"># TODO: Control errors</span>
         <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CognitoProvider requires CognitoAuthzProviderSettings&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;CognitoProvider requires CognitoAuthzProviderSettings&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_url_template</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;jwks_url_template is required in CognitoAuthzProviderSettings&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;jwks_url_template is required in CognitoAuthzProviderSettings&quot;</span>
+                <span class="p">)</span>
             <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_url_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">user_pool_region</span><span class="p">,</span>
@@ -263,7 +292,7 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CognitoProvider requires CognitoAuthzProviderSettings&quot;</span><span class="p">)</span>
-        
+
         <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">time_ns</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_cache_interval</span> <span class="ow">or</span> <span class="mi">20</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000000000</span>
         <span class="p">)</span>
@@ -277,7 +306,11 @@
 <div class="viewcode-block" id="CognitoProvider.verify_token">
 <a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.verify_token">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">verify_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="s1">&#39;jwt_token_verification_disabled&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_token_verification_disabled</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span>
+            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="s2">&quot;jwt_token_verification_disabled&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_token_verification_disabled</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Verifying token through signature&quot;</span><span class="p">)</span>
@@ -313,6 +346,9 @@
 <span class="sd">            User: Domain object.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Detect if this is an M2M token</span>
+        <span class="n">is_m2m</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">is_m2m_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">client_id</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">get_client_id</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_m2m</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="n">name_property</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s2">&quot;username&quot;</span> <span class="k">if</span> <span class="s2">&quot;username&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="s2">&quot;cognito:username&quot;</span>
@@ -320,11 +356,13 @@
 
         <span class="c1"># Get groups directly using the groups provider</span>
         <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
+            <span class="c1"># M2M tokens typically don&#39;t have groups</span>
             <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
             <span class="n">token</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">token</span><span class="p">),</span>
+            <span class="n">jwt_credentials</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
             <span class="n">groups_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="p">,</span>
             <span class="n">permissions_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">],</span>
@@ -335,6 +373,8 @@
             <span class="p">),</span>
             <span class="n">email</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;email&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
+            <span class="n">is_m2m</span><span class="o">=</span><span class="n">is_m2m</span><span class="p">,</span>
+            <span class="n">client_id</span><span class="o">=</span><span class="n">client_id</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 

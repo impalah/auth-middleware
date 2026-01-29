@@ -26,6 +26,17 @@ The library supports multiple authentication providers for different identity sy
    entra_id_provider
    jwt_auth_provider
 
+Services
+--------
+
+Additional services for cross-cutting concerns like M2M detection, rate limiting, audit logging, and metrics:
+
+.. toctree::
+   :maxdepth: 2
+
+   services
+   jwks-cache
+
 Utilities
 ---------
 

@@ -1,11 +1,12 @@
 import asyncio
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from pydantic import BaseModel, EmailStr, Field, PrivateAttr, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, PrivateAttr
 
 if TYPE_CHECKING:
     from auth_middleware.providers.authz.groups_provider import GroupsProvider
     from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 
 class User(BaseModel):
@@ -17,9 +18,10 @@ class User(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    _permissions_provider: "PermissionsProvider | None" = PrivateAttr(default=None)
-    _groups_provider: "GroupsProvider | None" = PrivateAttr(default=None)
+    _permissions_provider: PermissionsProvider | None = PrivateAttr(default=None)
+    _groups_provider: GroupsProvider | None = PrivateAttr(default=None)
     _token: str | None = PrivateAttr(default=None)
+    _jwt_credentials: JWTAuthorizationCredentials | None = PrivateAttr(default=None)
 
     _groups: list[str] | None = None
     _groups_task: asyncio.Task[list[str]] | None = None
@@ -29,14 +31,18 @@ class User(BaseModel):
     def __init__(
         self,
         token: str | None = None,
-        permissions_provider: "PermissionsProvider | None" = None,
-        groups_provider: "GroupsProvider | None" = None,
+        jwt_credentials: JWTAuthorizationCredentials | None = None,
+        permissions_provider: PermissionsProvider | None = None,
+        groups_provider: GroupsProvider | None = None,
         **data: Any,
     ):
         super().__init__(**data)
 
         # Store the token
         self._token = token
+
+        # Store JWT credentials for M2M detection
+        self._jwt_credentials = jwt_credentials
 
         # Store the permissions provider (e.g., SQL, DynamoDB, etc.)
         self._permissions_provider = permissions_provider
@@ -72,6 +78,23 @@ class User(BaseModel):
         json_schema_extra={
             "description": "User's email address (Optional)",
             "example": "useradmin@user.com",
+        },
+    )
+
+    is_m2m: bool = Field(
+        default=False,
+        json_schema_extra={
+            "description": "Whether this is a Machine-to-Machine (M2M) authentication",
+            "example": False,
+        },
+    )
+
+    client_id: str | None = Field(
+        default=None,
+        max_length=500,
+        json_schema_extra={
+            "description": "Client ID for M2M authentication (None for user tokens)",
+            "example": "7a8b9c0d1e2f3g4h5i6j",
         },
     )
 

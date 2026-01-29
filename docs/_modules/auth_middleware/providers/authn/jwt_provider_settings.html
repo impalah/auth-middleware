@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authn.jwt_provider_settings &mdash; Auth Middleware 0.2.16 documentation</title>
+  <title>auth_middleware.providers.authn.jwt_provider_settings &mdash; Auth Middleware 0.2.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authn/jwt_provider_settings.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=e2418eca"></script>
+      <script src="../../../../_static/documentation_options.js?v=d5b904a0"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -100,6 +100,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
 </ul>
@@ -135,7 +151,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for auth_middleware.providers.authn.jwt_provider_settings</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSettings</span><span class="p">,</span> <span class="n">SettingsConfigDict</span>
 
 
@@ -160,6 +178,24 @@
     <span class="n">jwt_token_verification_disabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Disabled JWT verification Token&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># JWKS cache strategy settings</span>
+    <span class="n">jwks_cache_strategy</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;usage&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;JWKS cache refresh strategy: time-based, usage-based, or both&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">jwks_background_refresh</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Enable background refresh of JWKS before cache expires&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">jwks_background_refresh_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Threshold (0.0-1.0) of cache lifetime to trigger background refresh&quot;</span><span class="p">,</span>
+        <span class="n">ge</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">le</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

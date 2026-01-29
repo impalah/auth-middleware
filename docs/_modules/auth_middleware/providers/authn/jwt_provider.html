@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authn.jwt_provider &mdash; Auth Middleware 0.2.16 documentation</title>
+  <title>auth_middleware.providers.authn.jwt_provider &mdash; Auth Middleware 0.2.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authn/jwt_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=e2418eca"></script>
+      <script src="../../../../_static/documentation_options.js?v=d5b904a0"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -100,6 +100,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
 </ul>
@@ -135,7 +151,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for auth_middleware.providers.authn.jwt_provider</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_ns</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -144,7 +161,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProviderSettings</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">JWTProviderSettings</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 
@@ -158,21 +177,23 @@
 <span class="sd">        metaclass (_type_, optional): _description_. Defaults to ABCMeta.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_settings</span><span class="p">:</span> <span class="s2">&quot;JWTProviderSettings | None&quot;</span>
-    <span class="n">_permissions_provider</span><span class="p">:</span> <span class="s2">&quot;PermissionsProvider | None&quot;</span>
-    <span class="n">_groups_provider</span><span class="p">:</span> <span class="s2">&quot;GroupsProvider | None&quot;</span>
+    <span class="n">_settings</span><span class="p">:</span> <span class="n">JWTProviderSettings</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">_permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">_groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">_background_refresh_task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span> <span class="o">|</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="JWTProvider.__init__">
 <a class="viewcode-back" href="../../../../jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">settings</span><span class="p">:</span> <span class="s2">&quot;JWTProviderSettings | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">permissions_provider</span><span class="p">:</span> <span class="s2">&quot;PermissionsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">groups_provider</span><span class="p">:</span> <span class="s2">&quot;GroupsProvider | None&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="n">JWTProviderSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span> <span class="o">=</span> <span class="n">permissions_provider</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="o">=</span> <span class="n">groups_provider</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="o">=</span> <span class="n">groups_provider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_background_refresh_task</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_jwks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWKS</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -180,17 +201,19 @@
 <span class="sd">        Returns a structure that caches the public keys used by the auth</span>
 <span class="sd">        provider to sign its JWT tokens.</span>
 <span class="sd">        Cache is refreshed after a settable time or number of reads (usages)</span>
+<span class="sd">        based on the configured strategy.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">reload_cache</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;jks&quot;</span><span class="p">)</span>
                 <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">time_ns</span><span class="p">()</span>
                 <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="o">&lt;=</span> <span class="mi">0</span>
             <span class="p">):</span>
                 <span class="n">reload_cache</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use new strategy-based refresh logic</span>
+                <span class="n">reload_cache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_needs_jwks_refresh</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="c1"># the first time after application startup, self.jks is NOT defined</span>
             <span class="n">reload_cache</span> <span class="o">=</span> <span class="kc">True</span>
@@ -200,6 +223,12 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="p">:</span> <span class="n">JWKS</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_jwks</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;JWKS loaded&quot;</span><span class="p">)</span>
 
+                <span class="c1"># Schedule background refresh if enabled</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="s2">&quot;jwks_background_refresh&quot;</span><span class="p">,</span> <span class="kc">False</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_schedule_background_refresh</span><span class="p">()</span>
+
             <span class="c1"># Always decrement usage counter after accessing JWKS</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;jks&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="o">-=</span> <span class="mi">1</span>
@@ -208,6 +237,89 @@
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_needs_jwks_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines if JWKS cache needs refresh based on configured strategy.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if cache should be refreshed, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;jks&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">:</span>
+            <span class="c1"># Fallback to original behavior (both time and usage)</span>
+            <span class="n">time_expired</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">time_ns</span><span class="p">()</span>
+            <span class="n">usage_exhausted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">time_expired</span> <span class="ow">or</span> <span class="n">usage_exhausted</span>
+
+        <span class="n">strategy</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="s2">&quot;jwks_cache_strategy&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check time-based refresh</span>
+        <span class="k">if</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">time_ns</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Check usage-based refresh</span>
+        <span class="k">if</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;usage&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_schedule_background_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Schedules JWKS refresh in background before cache expires.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background_refresh_task</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background_refresh_task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Background refresh task already running&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;jks&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_background_refresh_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_background_refresh</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Background JWKS refresh task scheduled&quot;</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_background_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Refreshes JWKS in background before cache expires.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;jks&quot;</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Calculate wait time based on threshold</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="s2">&quot;jwks_background_refresh_threshold&quot;</span><span class="p">,</span> <span class="mf">0.8</span>
+            <span class="p">)</span>
+            <span class="n">cache_interval_minutes</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="s2">&quot;jwks_cache_interval&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="n">interval_ns</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">cache_interval_minutes</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1_000_000_000</span>
+            <span class="p">)</span>  <span class="c1"># Convert to nanoseconds</span>
+            <span class="n">current_time</span> <span class="o">=</span> <span class="n">time_ns</span><span class="p">()</span>
+
+            <span class="c1"># Calculate when cache will expire</span>
+            <span class="n">cache_expiry</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">timestamp</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="p">,</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">current_time</span> <span class="o">+</span> <span class="n">interval_ns</span>
+            <span class="p">)</span>
+            <span class="n">time_until_expiry</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">cache_expiry</span> <span class="o">-</span> <span class="n">current_time</span>
+            <span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>  <span class="c1"># Convert to seconds</span>
+
+            <span class="c1"># Wait until threshold is reached</span>
+            <span class="n">wait_seconds</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">time_until_expiry</span> <span class="o">*</span> <span class="n">threshold</span><span class="p">)</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Background refresh will wait </span><span class="si">{</span><span class="n">wait_seconds</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">wait_seconds</span><span class="p">)</span>
+
+            <span class="c1"># Refresh JWKS silently</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Performing background JWKS refresh&quot;</span><span class="p">)</span>
+            <span class="n">new_jwks</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_jwks</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jks</span> <span class="o">=</span> <span class="n">new_jwks</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Background JWKS refresh completed&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Background JWKS refresh failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_hmac_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWK</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">jwks</span><span class="p">:</span> <span class="n">JWKS</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_jwks</span><span class="p">()</span>

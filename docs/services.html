@@ -1,0 +1,978 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Services Module &mdash; Auth Middleware 0.2.15 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/services.html" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d5b904a0"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="JWKS Cache Strategies" href="jwks-cache.html" />
+    <link rel="prev" title="Control Authentication and Authorization" href="auth-authn.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#m2m-token-detection">M2M Token Detection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#m2mtokendetector-class">M2MTokenDetector Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.services.M2MTokenDetector"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.M2MTokenDetector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.M2MTokenDetector.is_m2m_token"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.M2MTokenDetector.is_m2m_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.M2MTokenDetector.get_client_id"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.M2MTokenDetector.get_client_id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.M2MTokenDetector.get_token_metadata"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.M2MTokenDetector.get_token_metadata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.M2MTokenDetector.requires_user_context"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.M2MTokenDetector.requires_user_context()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-with-user-model">Usage with User Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#rate-limiting">Rate Limiting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ratelimiter-class">RateLimiter Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.services.RateLimiter"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.RateLimiter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.RateLimiter.__init__"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.RateLimiter.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#rate-limit-decorator">rate_limit Decorator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.services.rate_limit"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.rate_limit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-rate-limiting">Manual Rate Limiting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#audit-logging">Audit Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#auditevent-class">AuditEvent Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.services.AuditEvent"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.timestamp"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.timestamp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.event_type"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.event_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.user_id"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.user_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.client_id"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.client_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.is_m2m"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.is_m2m</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.path"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.method"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.method</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.status_code"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.status_code</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.ip_address"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.ip_address</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.user_agent"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.user_agent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.metadata"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.metadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.to_dict"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditEvent.to_json"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditEvent.to_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#auditlogger-class">AuditLogger Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.services.AuditLogger"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditLogger</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditLogger.__init__"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditLogger.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditLogger.log"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditLogger.log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditLogger.log_auth_success"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditLogger.log_auth_success()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditLogger.log_auth_failure"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditLogger.log_auth_failure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.AuditLogger.log_access_denied"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditLogger.log_access_denied()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#auditmiddleware-class">AuditMiddleware Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.services.AuditMiddleware"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.AuditMiddleware</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-audit-logging">Manual Audit Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#metrics-collection">Metrics Collection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#metricscollector-class">MetricsCollector Class</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.services.MetricsCollector"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.MetricsCollector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.services.MetricsCollector.__init__"><code class="docutils literal notranslate"><span class="pre">auth_middleware.services.MetricsCollector.__init__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#best-practices">Best Practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">M2M Token Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Rate Limiting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">Audit Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">Metrics Collection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#see-also">See Also</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-code">Example Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Services Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/services.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="services-module">
+<span id="services"></span><h1>Services Module<a class="headerlink" href="#services-module" title="Link to this heading"></a></h1>
+<p>The services module provides cross-cutting functionality for authentication and authorization including M2M token detection, rate limiting, audit logging, and metrics collection.</p>
+</section>
+<section id="m2m-token-detection">
+<h1>M2M Token Detection<a class="headerlink" href="#m2m-token-detection" title="Link to this heading"></a></h1>
+<p>The M2M (Machine-to-Machine) Token Detector helps identify service account tokens versus human user tokens.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>M2M authentication is commonly used for:</p>
+<ul class="simple">
+<li><p>Service-to-service communication</p></li>
+<li><p>API integrations</p></li>
+<li><p>Background jobs and automated processes</p></li>
+<li><p>Microservice authentication</p></li>
+</ul>
+<p>The detector analyzes JWT claims to determine if a token represents a service account or a human user.</p>
+</section>
+<section id="m2mtokendetector-class">
+<h2>M2MTokenDetector Class<a class="headerlink" href="#m2mtokendetector-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">M2MTokenDetector</span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector" title="Link to this definition"></a></dt>
+<dd><p>Static utility class for detecting M2M tokens.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.is_m2m_token">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_m2m_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.is_m2m_token" title="Link to this definition"></a></dt>
+<dd><p>Determines if JWT token represents M2M authentication.</p>
+<p><strong>Detection Criteria:</strong></p>
+<ul class="simple">
+<li><p>Missing <code class="docutils literal notranslate"><span class="pre">cognito:username</span></code> claim</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">token_use</span></code> is “access” (not “id”)</p></li>
+<li><p>Has <code class="docutils literal notranslate"><span class="pre">client_id</span></code> claim</p></li>
+<li><p>Missing typical user claims (email, name, etc.)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>claims</strong> – JWT token claims dictionary</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if token is M2M, False otherwise</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">M2MTokenDetector</span>
+
+<span class="n">claims</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;token_use&quot;</span><span class="p">:</span> <span class="s2">&quot;access&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="s2">&quot;service-account-123&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;api/read api/write&quot;</span>
+<span class="p">}</span>
+
+<span class="n">is_m2m</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">is_m2m_token</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
+<span class="c1"># Returns: True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.get_client_id">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_client_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.get_client_id" title="Link to this definition"></a></dt>
+<dd><p>Extracts client ID from token claims.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>claims</strong> – JWT token claims dictionary</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Client ID or None if not found</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">client_id</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">get_client_id</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
+<span class="c1"># Returns: &quot;service-account-123&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.get_token_metadata">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_token_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.get_token_metadata" title="Link to this definition"></a></dt>
+<dd><p>Extracts comprehensive metadata from token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary with token_use, client_id, scopes, and user context</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">get_token_metadata</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
+<span class="c1"># Returns: {</span>
+<span class="c1">#     &quot;token_use&quot;: &quot;access&quot;,</span>
+<span class="c1">#     &quot;client_id&quot;: &quot;service-account-123&quot;,</span>
+<span class="c1">#     &quot;scopes&quot;: [&quot;api/read&quot;, &quot;api/write&quot;],</span>
+<span class="c1">#     &quot;has_user_context&quot;: False</span>
+<span class="c1"># }</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.requires_user_context">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">requires_user_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.requires_user_context" title="Link to this definition"></a></dt>
+<dd><p>Checks if token has user context (for user operations).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>claims</strong> – JWT token claims dictionary</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if user context is present</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="usage-with-user-model">
+<h2>Usage with User Model<a class="headerlink" href="#usage-with-user-model" title="Link to this heading"></a></h2>
+<p>The User model includes M2M detection fields:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/data&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_data</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
+
+    <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_m2m</span><span class="p">:</span>
+        <span class="c1"># Service account access</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Service account authenticated&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span>
+            <span class="s2">&quot;service_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Human user access</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Hello </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+        <span class="p">}</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/human-only&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">human_only</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
+
+    <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_m2m</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;This endpoint requires human user authentication&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Human user access granted&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="rate-limiting">
+<h1>Rate Limiting<a class="headerlink" href="#rate-limiting" title="Link to this heading"></a></h1>
+<p>Built-in rate limiting helps protect endpoints from abuse and excessive usage.</p>
+<section id="ratelimiter-class">
+<h2>RateLimiter Class<a class="headerlink" href="#ratelimiter-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth_middleware.services.RateLimiter">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">RateLimiter</span></span><a class="headerlink" href="#auth_middleware.services.RateLimiter" title="Link to this definition"></a></dt>
+<dd><p>Sliding window rate limiter with async support.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.RateLimiter.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_requests</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.RateLimiter.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize rate limiter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_requests</strong> – Maximum requests allowed in window</p></li>
+<li><p><strong>window_seconds</strong> – Time window in seconds</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">RateLimiter</span>
+
+<span class="c1"># 100 requests per minute</span>
+<span class="n">limiter</span> <span class="o">=</span> <span class="n">RateLimiter</span><span class="p">(</span><span class="n">max_requests</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">window_seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">is_allowed(identifier:</span> <span class="pre">str)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></span></dt>
+<dd><p>Check if request is allowed for identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> – Unique identifier (user ID, IP, etc.)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if request is allowed</p>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">allowed</span> <span class="o">=</span> <span class="k">await</span> <span class="n">limiter</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">(</span><span class="s2">&quot;user-123&quot;</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">allowed</span><span class="p">:</span>
+    <span class="c1"># Rate limit exceeded</span>
+    <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">429</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">get_remaining(identifier:</span> <span class="pre">str)</span> <span class="pre">-&gt;</span> <span class="pre">int</span></span></dt>
+<dd><p>Get remaining requests allowed in current window.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> – Unique identifier</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of remaining requests</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">reset(identifier:</span> <span class="pre">str)</span></span></dt>
+<dd><p>Reset rate limit for specific identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>identifier</strong> – Unique identifier to reset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">clear_all()</span></span></dt>
+<dd><p>Clear all rate limit data.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="rate-limit-decorator">
+<h2>rate_limit Decorator<a class="headerlink" href="#rate-limit-decorator" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="auth_middleware.services.rate_limit">
+<span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">rate_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_requests</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.rate_limit" title="Link to this definition"></a></dt>
+<dd><p>Decorator for endpoint rate limiting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_requests</strong> – Maximum requests allowed</p></li>
+<li><p><strong>window_seconds</strong> – Time window in seconds</p></li>
+<li><p><strong>identifier</strong> – Optional function to extract identifier from request</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">rate_limit</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/data&quot;</span><span class="p">)</span>
+<span class="nd">@rate_limit</span><span class="p">(</span><span class="n">max_requests</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">window_seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_data</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}</span>
+
+<span class="c1"># Custom identifier</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/user-data&quot;</span><span class="p">)</span>
+<span class="nd">@rate_limit</span><span class="p">(</span>
+    <span class="n">max_requests</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">window_seconds</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
+    <span class="n">identifier</span><span class="o">=</span><span class="k">lambda</span> <span class="n">req</span><span class="p">:</span> <span class="n">req</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="o">.</span><span class="n">id</span>
+<span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_data</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;user specific&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="manual-rate-limiting">
+<h2>Manual Rate Limiting<a class="headerlink" href="#manual-rate-limiting" title="Link to this heading"></a></h2>
+<p>For fine-grained control:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">RateLimiter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Response</span>
+
+<span class="n">api_limiter</span> <span class="o">=</span> <span class="n">RateLimiter</span><span class="p">(</span><span class="n">max_requests</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">window_seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/custom&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">custom_endpoint</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
+    <span class="n">client_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">host</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">api_limiter</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">(</span><span class="n">client_id</span><span class="p">):</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api_limiter</span><span class="o">.</span><span class="n">get_remaining</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-RateLimit-Remaining&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">429</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Rate limit exceeded&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Add rate limit headers</span>
+    <span class="n">remaining</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api_limiter</span><span class="o">.</span><span class="n">get_remaining</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-RateLimit-Limit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-RateLimit-Remaining&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="audit-logging">
+<h1>Audit Logging<a class="headerlink" href="#audit-logging" title="Link to this heading"></a></h1>
+<p>Comprehensive audit logging for security and compliance requirements.</p>
+<section id="auditevent-class">
+<h2>AuditEvent Class<a class="headerlink" href="#auditevent-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">AuditEvent</span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent" title="Link to this definition"></a></dt>
+<dd><p>Represents a security audit event.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime</span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.timestamp" title="Link to this definition"></a></dt>
+<dd><p>Event timestamp (UTC)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.event_type">
+<span class="sig-name descname"><span class="pre">event_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.event_type" title="Link to this definition"></a></dt>
+<dd><p>Event type (auth_success, auth_failure, access_denied, etc.)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.user_id">
+<span class="sig-name descname"><span class="pre">user_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.user_id" title="Link to this definition"></a></dt>
+<dd><p>User or service account ID</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.client_id">
+<span class="sig-name descname"><span class="pre">client_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.client_id" title="Link to this definition"></a></dt>
+<dd><p>Client ID for M2M tokens</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.is_m2m">
+<span class="sig-name descname"><span class="pre">is_m2m</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.is_m2m" title="Link to this definition"></a></dt>
+<dd><p>Whether this is M2M authentication</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.path">
+<span class="sig-name descname"><span class="pre">path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.path" title="Link to this definition"></a></dt>
+<dd><p>Request path</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.method">
+<span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.method" title="Link to this definition"></a></dt>
+<dd><p>HTTP method</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.status_code">
+<span class="sig-name descname"><span class="pre">status_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.status_code" title="Link to this definition"></a></dt>
+<dd><p>Response status code</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.ip_address">
+<span class="sig-name descname"><span class="pre">ip_address</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.ip_address" title="Link to this definition"></a></dt>
+<dd><p>Client IP address</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.user_agent">
+<span class="sig-name descname"><span class="pre">user_agent</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.user_agent" title="Link to this definition"></a></dt>
+<dd><p>Client user agent</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.metadata" title="Link to this definition"></a></dt>
+<dd><p>Additional event-specific data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Convert event to dictionary for logging.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.to_json" title="Link to this definition"></a></dt>
+<dd><p>Convert event to JSON string.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="auditlogger-class">
+<h2>AuditLogger Class<a class="headerlink" href="#auditlogger-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditLogger">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">AuditLogger</span></span><a class="headerlink" href="#auth_middleware.services.AuditLogger" title="Link to this definition"></a></dt>
+<dd><p>Service for logging audit events.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_to_console</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize audit logger.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_to_console</strong> – Whether to log to console</p></li>
+<li><p><strong>log_callback</strong> – Optional callback function for custom logging</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLogger</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">send_to_cloudwatch</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+    <span class="c1"># Send to external logging service</span>
+    <span class="k">pass</span>
+
+<span class="n">audit</span> <span class="o">=</span> <span class="n">AuditLogger</span><span class="p">(</span>
+    <span class="n">log_to_console</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">log_callback</span><span class="o">=</span><span class="n">send_to_cloudwatch</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#auth_middleware.services.AuditEvent" title="auth_middleware.services.AuditEvent"><span class="pre">AuditEvent</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log" title="Link to this definition"></a></dt>
+<dd><p>Log an audit event.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.log_auth_success">
+<span class="sig-name descname"><span class="pre">log_auth_success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_m2m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_auth_success" title="Link to this definition"></a></dt>
+<dd><p>Log successful authentication.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.log_auth_failure">
+<span class="sig-name descname"><span class="pre">log_auth_failure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_auth_failure" title="Link to this definition"></a></dt>
+<dd><p>Log failed authentication.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.log_access_denied">
+<span class="sig-name descname"><span class="pre">log_access_denied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_access_denied" title="Link to this definition"></a></dt>
+<dd><p>Log access denial.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="auditmiddleware-class">
+<h2>AuditMiddleware Class<a class="headerlink" href="#auditmiddleware-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth_middleware.services.AuditMiddleware">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">AuditMiddleware</span></span><a class="headerlink" href="#auth_middleware.services.AuditMiddleware" title="Link to this definition"></a></dt>
+<dd><p>Middleware for automatic request auditing.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditMiddleware</span><span class="p">,</span> <span class="n">AuditLogger</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="c1"># Add audit middleware</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">AuditMiddleware</span><span class="p">,</span>
+    <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">audit_logger</span><span class="o">=</span><span class="n">AuditLogger</span><span class="p">(),</span>
+    <span class="n">exclude_paths</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;/health&quot;</span><span class="p">,</span> <span class="s2">&quot;/metrics&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="manual-audit-logging">
+<h2>Manual Audit Logging<a class="headerlink" href="#manual-audit-logging" title="Link to this heading"></a></h2>
+<p>For specific operations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuditLogger</span><span class="p">,</span> <span class="n">AuditEvent</span>
+
+<span class="n">audit_logger</span> <span class="o">=</span> <span class="n">AuditLogger</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/sensitive-operation&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sensitive_op</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
+
+    <span class="c1"># Log operation start</span>
+    <span class="n">event</span> <span class="o">=</span> <span class="n">AuditEvent</span><span class="p">(</span>
+        <span class="n">event_type</span><span class="o">=</span><span class="s2">&quot;sensitive_operation&quot;</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">is_m2m</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">is_m2m</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/sensitive-operation&quot;</span><span class="p">,</span>
+        <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;data_modification&quot;</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">audit_logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+
+    <span class="c1"># Perform operation</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">process_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Log success</span>
+    <span class="n">audit_logger</span><span class="o">.</span><span class="n">log_auth_success</span><span class="p">(</span>
+        <span class="n">user_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;data_modification&quot;</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="s2">&quot;success&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="metrics-collection">
+<h1>Metrics Collection<a class="headerlink" href="#metrics-collection" title="Link to this heading"></a></h1>
+<p>Monitor authentication performance and track success rates.</p>
+<section id="metricscollector-class">
+<h2>MetricsCollector Class<a class="headerlink" href="#metricscollector-class" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth_middleware.services.MetricsCollector">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">MetricsCollector</span></span><a class="headerlink" href="#auth_middleware.services.MetricsCollector" title="Link to this definition"></a></dt>
+<dd><p>Collector for authentication metrics.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.services.MetricsCollector.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.MetricsCollector.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initialize metrics collector.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricsCollector</span>
+
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">MetricsCollector</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">record_validation_success(duration_ms:</span> <span class="pre">float)</span></span></dt>
+<dd><p>Record successful token validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>duration_ms</strong> – Validation duration in milliseconds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">record_validation_failure(error_type:</span> <span class="pre">str,</span> <span class="pre">duration_ms:</span> <span class="pre">float)</span></span></dt>
+<dd><p>Record failed validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>error_type</strong> – Type/category of error</p></li>
+<li><p><strong>duration_ms</strong> – Validation duration in milliseconds</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">get_metrics()</span> <span class="pre">-&gt;</span> <span class="pre">dict</span></span></dt>
+<dd><p>Get current metrics snapshot.</p>
+<p><strong>Returns:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;uptime_seconds&quot;</span><span class="p">:</span> <span class="mf">3600.5</span><span class="p">,</span>
+    <span class="s2">&quot;tokens_validated&quot;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="s2">&quot;tokens_failed&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="s2">&quot;total_tokens&quot;</span><span class="p">:</span> <span class="mi">10150</span><span class="p">,</span>
+    <span class="s2">&quot;success_rate&quot;</span><span class="p">:</span> <span class="mf">98.52</span><span class="p">,</span>
+    <span class="s2">&quot;validation_time_avg_ms&quot;</span><span class="p">:</span> <span class="mf">25.3</span><span class="p">,</span>
+    <span class="s2">&quot;validation_time_p95_ms&quot;</span><span class="p">:</span> <span class="mf">45.7</span><span class="p">,</span>
+    <span class="s2">&quot;validation_time_p99_ms&quot;</span><span class="p">:</span> <span class="mf">89.2</span><span class="p">,</span>
+    <span class="s2">&quot;errors_by_type&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;expired_token&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="s2">&quot;invalid_signature&quot;</span><span class="p">:</span> <span class="mi">50</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">async</span> <span class="pre">reset()</span></span></dt>
+<dd><p>Reset all metrics to initial state.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="usage-example">
+<h2>Usage Example<a class="headerlink" href="#usage-example" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricsCollector</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">MetricsCollector</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">metrics_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">call_next</span><span class="p">):</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">call_next</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">duration_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;current_user&quot;</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_success</span><span class="p">(</span><span class="n">duration_ms</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">401</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">duration_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/metrics&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_metrics</span><span class="p">():</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/metrics/prometheus&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prometheus_metrics</span><span class="p">():</span>
+    <span class="n">snapshot</span> <span class="o">=</span> <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    # HELP auth_tokens_validated_total Total validated tokens</span>
+<span class="s2">    # TYPE auth_tokens_validated_total counter</span>
+<span class="s2">    auth_tokens_validated_total </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;tokens_validated&#39;</span><span class="p">]</span><span class="si">}</span>
+
+<span class="s2">    # HELP auth_success_rate Authentication success rate</span>
+<span class="s2">    # TYPE auth_success_rate gauge</span>
+<span class="s2">    auth_success_rate </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;success_rate&#39;</span><span class="p">]</span><span class="si">}</span>
+
+<span class="s2">    # HELP auth_validation_duration_avg_ms Average validation time</span>
+<span class="s2">    # TYPE auth_validation_duration_avg_ms gauge</span>
+<span class="s2">    auth_validation_duration_avg_ms </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;validation_time_avg_ms&#39;</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="best-practices">
+<h1>Best Practices<a class="headerlink" href="#best-practices" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2>M2M Token Detection<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Validate M2M tokens differently</strong> - Service accounts may not have email/name</p></li>
+<li><p><strong>Use client_id for identification</strong> - Don’t rely on user_id for M2M</p></li>
+<li><p><strong>Separate permissions</strong> - M2M tokens may need different scopes</p></li>
+<li><p><strong>Block M2M from user endpoints</strong> - Verify <code class="docutils literal notranslate"><span class="pre">is_m2m</span></code> flag for user-only operations</p></li>
+</ol>
+</section>
+<section id="id2">
+<h2>Rate Limiting<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Choose appropriate limits</strong> - Balance security and user experience</p></li>
+<li><p><strong>Use per-user limits</strong> - More accurate than IP-based</p></li>
+<li><p><strong>Return rate limit headers</strong> - Help clients manage their requests</p></li>
+<li><p><strong>Monitor limit hits</strong> - Adjust limits based on usage patterns</p></li>
+</ol>
+</section>
+<section id="id3">
+<h2>Audit Logging<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Log security-relevant events</strong> - Authentication, authorization, sensitive operations</p></li>
+<li><p><strong>Include context</strong> - User ID, IP, timestamp, action details</p></li>
+<li><p><strong>Protect audit logs</strong> - Ensure logs cannot be tampered with</p></li>
+<li><p><strong>Regular review</strong> - Monitor logs for suspicious activity</p></li>
+<li><p><strong>Compliance</strong> - Ensure logging meets regulatory requirements</p></li>
+</ol>
+</section>
+<section id="id4">
+<h2>Metrics Collection<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Track key metrics</strong> - Success rate, latency, error types</p></li>
+<li><p><strong>Set up alerts</strong> - Monitor for anomalies</p></li>
+<li><p><strong>Export to monitoring systems</strong> - Prometheus, CloudWatch, Datadog</p></li>
+<li><p><strong>Analyze trends</strong> - Identify performance issues early</p></li>
+<li><p><strong>Capacity planning</strong> - Use metrics to predict growth</p></li>
+</ol>
+</section>
+</section>
+<section id="see-also">
+<h1>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="jwt_auth_middleware.html"><span class="doc">jwt_auth_middleware</span></a> - Main middleware documentation</p></li>
+<li><p><a class="reference internal" href="functions.html"><span class="doc">Authentication Functions</span></a> - Authorization dependency functions</p></li>
+<li><p><a class="reference internal" href="user-property.html"><span class="doc">The User Property</span></a> - User model lazy loading</p></li>
+<li><p><a class="reference internal" href="jwks-cache.html"><span class="doc">JWKS Cache Strategies</span></a> - JWKS caching strategies</p></li>
+</ul>
+<section id="example-code">
+<h2>Example Code<a class="headerlink" href="#example-code" title="Link to this heading"></a></h2>
+<p>Complete examples can be found in the repository:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">examples/m2m_detection_example.py</span></code> - M2M token detection</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">examples/rate_limiting_example.py</span></code> - Rate limiting patterns</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">examples/audit_example.py</span></code> - Audit logging integration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">examples/metrics_example.py</span></code> - Metrics collection</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="auth-authn.html" class="btn btn-neutral float-left" title="Control Authentication and Authorization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jwks-cache.html" class="btn btn-neutral float-right" title="JWKS Cache Strategies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

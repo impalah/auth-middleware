@@ -435,6 +435,325 @@ Security Best Practices
    - Test user pool recovery procedures
    - Keep app client secrets secure
 
+Step 8: Create Identity Pool (Optional)
+=======================================
+
+Identity Pools allow your users to obtain temporary AWS credentials to access AWS services (S3, DynamoDB, etc.) after authenticating through your User Pool.
+
+Create Identity Pool
+-------------------
+
+1. **Navigate to Identity Pools**
+   
+   - In the AWS Console, go to Amazon Cognito
+   - Click "Federated Identities" (or "Identity pools" in newer console)
+   - Click "Create identity pool"
+
+2. **Configure Identity Pool**
+   
+   - **Identity pool name**: "MyAppIdentityPool"
+   - **Enable access to unauthenticated identities**: Uncheck (unless needed)
+   - Click "Create pool"
+
+3. **Configure Authentication Providers**
+   
+   - **Authentication providers** tab
+   - Select "Cognito" tab
+   - Add your User Pool:
+     - **User Pool ID**: us-east-1_XXXXXXXXX (from Step 1)
+     - **App client ID**: Use your User Authentication app client ID
+   - Click "Save changes"
+
+4. **Create IAM Roles**
+   
+   The console will prompt you to create IAM roles:
+   
+   **Authenticated role** (for logged-in users):
+   
+   - **Role name**: "Cognito_MyAppIdentityPoolAuth_Role"
+   - **Trusted entities**: Cognito Identity Pool
+   - **Permissions**: Add policies based on your needs:
+     
+     .. code-block:: json
+     
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject"
+              ],
+              "Resource": "arn:aws:s3:::my-bucket/users/${cognito-identity.amazonaws.com:sub}/*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": "arn:aws:dynamodb:us-east-1:123456789012:table/MyTable",
+              "Condition": {
+                "ForAllValues:StringEquals": {
+                  "dynamodb:LeadingKeys": ["${cognito-identity.amazonaws.com:sub}"]
+                }
+              }
+            }
+          ]
+        }
+   
+   **Unauthenticated role** (if enabled):
+   
+   - **Role name**: "Cognito_MyAppIdentityPoolUnauth_Role"
+   - **Permissions**: Very restricted access or none
+
+5. **Save Identity Pool Configuration**
+   
+   - Click "Allow" to create the IAM roles
+   - **Save the Identity Pool ID** - you'll need this for configuration
+
+Configure Enhanced Flow
+-----------------------
+
+For better security, use the enhanced (simplified) authflow:
+
+1. **Edit Identity Pool**
+   
+   - Go to your Identity Pool settings
+   - Click "Edit identity pool"
+   - Check "Use enhanced flow"
+   - Save changes
+
+2. **Trust Relationships**
+   
+   Verify the authenticated role has the correct trust relationship:
+   
+   .. code-block:: json
+   
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Federated": "cognito-identity.amazonaws.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+              "StringEquals": {
+                "cognito-identity.amazonaws.com:aud": "us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+              },
+              "ForAnyValue:StringLike": {
+                "cognito-identity.amazonaws.com:amr": "authenticated"
+              }
+            }
+          }
+        ]
+      }
+
+Test Identity Pool with AWS CLI
+-------------------------------
+
+1. **Get ID Token from User Pool** (from Step 7):
+
+   .. code-block:: bash
+
+      # Save the idToken from authentication response
+      ID_TOKEN="eyJraWQ..."
+
+2. **Get Identity ID**:
+
+   .. code-block:: bash
+
+      aws cognito-identity get-id \
+        --identity-pool-id "us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" \
+        --logins "cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX=$ID_TOKEN" \
+        --region us-east-1
+
+   Response:
+
+   .. code-block:: json
+
+      {
+        "IdentityId": "us-east-1:yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+      }
+
+3. **Get AWS Credentials**:
+
+   .. code-block:: bash
+
+      aws cognito-identity get-credentials-for-identity \
+        --identity-id "us-east-1:yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy" \
+        --logins "cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX=$ID_TOKEN" \
+        --region us-east-1
+
+   Response:
+
+   .. code-block:: json
+
+      {
+        "IdentityId": "us-east-1:yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy",
+        "Credentials": {
+          "AccessKeyId": "ASIA...",
+          "SecretKey": "...",
+          "SessionToken": "...",
+          "Expiration": 1735574400.0
+        }
+      }
+
+4. **Use AWS Credentials**:
+
+   .. code-block:: bash
+
+      # Export credentials
+      export AWS_ACCESS_KEY_ID="ASIA..."
+      export AWS_SECRET_ACCESS_KEY="..."
+      export AWS_SESSION_TOKEN="..."
+
+      # Test access to S3
+      aws s3 ls s3://my-bucket/users/
+
+Test Identity Pool with Bruno
+-----------------------------
+
+1. **Request 1: Get Identity ID**
+
+   .. code-block:: text
+
+      POST https://cognito-identity.us-east-1.amazonaws.com/
+      Content-Type: application/x-amz-json-1.1
+      X-Amz-Target: AWSCognitoIdentityService.GetId
+
+      {
+        "IdentityPoolId": "us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+        "Logins": {
+          "cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX": "{{idToken}}"
+        }
+      }
+
+   Save the `IdentityId` from the response.
+
+2. **Request 2: Get AWS Credentials**
+
+   .. code-block:: text
+
+      POST https://cognito-identity.us-east-1.amazonaws.com/
+      Content-Type: application/x-amz-json-1.1
+      X-Amz-Target: AWSCognitoIdentityService.GetCredentialsForIdentity
+
+      {
+        "IdentityId": "{{identityId}}",
+        "Logins": {
+          "cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX": "{{idToken}}"
+        }
+      }
+
+   Response contains temporary AWS credentials.
+
+Configure auth-middleware Identity Pool Provider
+-----------------------------------------------
+
+If you're using the identity pool provider in auth-middleware:
+
+.. code-block:: python
+
+   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+       CognitoAuthzProviderSettings
+   )
+   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+   
+   settings = CognitoAuthzProviderSettings(
+       # User Pool settings
+       user_pool_id="us-east-1_XXXXXXXXX",
+       user_pool_region="us-east-1",
+       user_pool_client_id="your-client-id",
+       
+       # Identity Pool settings (optional)
+       identity_pool_id="us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+       identity_pool_region="us-east-1",
+   )
+   
+   provider = CognitoProvider(settings=settings)
+
+Then in your application, you can obtain AWS credentials:
+
+.. code-block:: python
+
+   from fastapi import Request, Depends
+   from auth_middleware.functions import require_user
+   
+   @app.get("/aws-credentials")
+   async def get_aws_credentials(
+       request: Request,
+       _: None = Depends(require_user())
+   ):
+       user = request.state.current_user
+       
+       # Get AWS credentials for the authenticated user
+       # This would use the provider's identity pool integration
+       credentials = await provider.get_aws_credentials(user.id_token)
+       
+       return {
+           "access_key_id": credentials.access_key_id,
+           "secret_access_key": credentials.secret_access_key,
+           "session_token": credentials.session_token,
+           "expiration": credentials.expiration,
+       }
+
+Identity Pool Configuration Summary
+-----------------------------------
+
+After completing Identity Pool setup:
+
+.. code-block:: yaml
+
+   Identity Pool ID: us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   Identity Pool Region: us-east-1
+   
+   Authentication Provider:
+     Type: Cognito User Pool
+     User Pool ID: us-east-1_XXXXXXXXX
+     App Client ID: yyyyyyyyyyyyyyyyyyyy
+   
+   IAM Roles:
+     Authenticated Role: Cognito_MyAppIdentityPoolAuth_Role
+     Authenticated Role ARN: arn:aws:iam::123456789012:role/Cognito_MyAppIdentityPoolAuth_Role
+
+Identity Pool Best Practices
+----------------------------
+
+1. **Principle of Least Privilege**
+   
+   - Grant only necessary permissions in IAM roles
+   - Use resource-level permissions with user context
+   - Leverage condition keys like ``${cognito-identity.amazonaws.com:sub}``
+
+2. **Use Enhanced Flow**
+   
+   - Always enable enhanced (simplified) authflow
+   - More secure than classic flow
+   - Better integration with modern SDKs
+
+3. **Credential Caching**
+   
+   - Cache AWS credentials until expiration
+   - Refresh before expiration (e.g., at 80% of lifetime)
+   - Don't request new credentials for every API call
+
+4. **Resource Isolation**
+   
+   - Use Cognito identity ID in resource paths
+   - Example S3 path: ``s3://bucket/users/${cognito-identity.amazonaws.com:sub}/``
+   - Example DynamoDB key: Use identity ID as partition key
+
+5. **Monitoring**
+   
+   - Monitor IAM role usage in CloudTrail
+   - Set up alarms for unauthorized access attempts
+   - Track credential request patterns
+
 Next Steps
 ==========
 
@@ -444,6 +763,7 @@ Now that your Cognito infrastructure is set up:
 2. Implement the authentication flow in your application
 3. Set up authorization rules based on user groups
 4. Test the complete authentication and authorization flow
-5. Deploy to production with appropriate security settings
+5. (Optional) Implement Identity Pool integration for AWS resource access
+6. Deploy to production with appropriate security settings
 
 For implementation details, see the :doc:`../cognito_provider` documentation.

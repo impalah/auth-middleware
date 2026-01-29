@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AWS Cognito Infrastructure Setup &mdash; Auth Middleware 0.2.16 documentation</title>
+  <title>AWS Cognito Infrastructure Setup &mdash; Auth Middleware 0.2.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/infrastructure/cognito-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=e2418eca"></script>
+      <script src="../_static/documentation_options.js?v=d5b904a0"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -78,6 +78,16 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-8-create-identity-pool-optional">Step 8: Create Identity Pool (Optional)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-identity-pool">Create Identity Pool</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-enhanced-flow">Configure Enhanced Flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-identity-pool-with-aws-cli">Test Identity Pool with AWS CLI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-identity-pool-with-bruno">Test Identity Pool with Bruno</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configure-auth-middleware-identity-pool-provider">Configure auth-middleware Identity Pool Provider</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#identity-pool-configuration-summary">Identity Pool Configuration Summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#identity-pool-best-practices">Identity Pool Best Practices</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html">Azure Entra ID Infrastructure Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#overview">Overview</a></li>
@@ -137,6 +147,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../exceptions.html">Exception Handling</a></li>
 </ul>
@@ -638,6 +664,322 @@
 </li>
 </ol>
 </section>
+<section id="step-8-create-identity-pool-optional">
+<h1>Step 8: Create Identity Pool (Optional)<a class="headerlink" href="#step-8-create-identity-pool-optional" title="Link to this heading"></a></h1>
+<p>Identity Pools allow your users to obtain temporary AWS credentials to access AWS services (S3, DynamoDB, etc.) after authenticating through your User Pool.</p>
+<section id="create-identity-pool">
+<h2>Create Identity Pool<a class="headerlink" href="#create-identity-pool" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Navigate to Identity Pools</strong></p>
+<ul class="simple">
+<li><p>In the AWS Console, go to Amazon Cognito</p></li>
+<li><p>Click “Federated Identities” (or “Identity pools” in newer console)</p></li>
+<li><p>Click “Create identity pool”</p></li>
+</ul>
+</li>
+<li><p><strong>Configure Identity Pool</strong></p>
+<ul class="simple">
+<li><p><strong>Identity pool name</strong>: “MyAppIdentityPool”</p></li>
+<li><p><strong>Enable access to unauthenticated identities</strong>: Uncheck (unless needed)</p></li>
+<li><p>Click “Create pool”</p></li>
+</ul>
+</li>
+<li><p><strong>Configure Authentication Providers</strong></p>
+<ul class="simple">
+<li><p><strong>Authentication providers</strong> tab</p></li>
+<li><p>Select “Cognito” tab</p></li>
+<li><p>Add your User Pool:
+- <strong>User Pool ID</strong>: us-east-1_XXXXXXXXX (from Step 1)
+- <strong>App client ID</strong>: Use your User Authentication app client ID</p></li>
+<li><p>Click “Save changes”</p></li>
+</ul>
+</li>
+<li><p><strong>Create IAM Roles</strong></p>
+<p>The console will prompt you to create IAM roles:</p>
+<p><strong>Authenticated role</strong> (for logged-in users):</p>
+<ul>
+<li><p><strong>Role name</strong>: “Cognito_MyAppIdentityPoolAuth_Role”</p></li>
+<li><p><strong>Trusted entities</strong>: Cognito Identity Pool</p></li>
+<li><p><strong>Permissions</strong>: Add policies based on your needs:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;s3:GetObject&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;s3:PutObject&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:s3:::my-bucket/users/${cognito-identity.amazonaws.com:sub}/*&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;dynamodb:GetItem&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;dynamodb:PutItem&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;dynamodb:UpdateItem&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;Resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:dynamodb:us-east-1:123456789012:table/MyTable&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Condition&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;ForAllValues:StringEquals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;dynamodb:LeadingKeys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;${cognito-identity.amazonaws.com:sub}&quot;</span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p><strong>Unauthenticated role</strong> (if enabled):</p>
+<ul class="simple">
+<li><p><strong>Role name</strong>: “Cognito_MyAppIdentityPoolUnauth_Role”</p></li>
+<li><p><strong>Permissions</strong>: Very restricted access or none</p></li>
+</ul>
+</li>
+<li><p><strong>Save Identity Pool Configuration</strong></p>
+<ul class="simple">
+<li><p>Click “Allow” to create the IAM roles</p></li>
+<li><p><strong>Save the Identity Pool ID</strong> - you’ll need this for configuration</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="configure-enhanced-flow">
+<h2>Configure Enhanced Flow<a class="headerlink" href="#configure-enhanced-flow" title="Link to this heading"></a></h2>
+<p>For better security, use the enhanced (simplified) authflow:</p>
+<ol class="arabic">
+<li><p><strong>Edit Identity Pool</strong></p>
+<ul class="simple">
+<li><p>Go to your Identity Pool settings</p></li>
+<li><p>Click “Edit identity pool”</p></li>
+<li><p>Check “Use enhanced flow”</p></li>
+<li><p>Save changes</p></li>
+</ul>
+</li>
+<li><p><strong>Trust Relationships</strong></p>
+<p>Verify the authenticated role has the correct trust relationship:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2012-10-17&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Statement&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;Effect&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Allow&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Federated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cognito-identity.amazonaws.com&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;Action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sts:AssumeRoleWithWebIdentity&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;Condition&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;StringEquals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;cognito-identity.amazonaws.com:aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;ForAnyValue:StringLike&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;cognito-identity.amazonaws.com:amr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;authenticated&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="test-identity-pool-with-aws-cli">
+<h2>Test Identity Pool with AWS CLI<a class="headerlink" href="#test-identity-pool-with-aws-cli" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Get ID Token from User Pool</strong> (from Step 7):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save the idToken from authentication response</span>
+<span class="nv">ID_TOKEN</span><span class="o">=</span><span class="s2">&quot;eyJraWQ...&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Get Identity ID</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>aws<span class="w"> </span>cognito-identity<span class="w"> </span>get-id<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--identity-pool-id<span class="w"> </span><span class="s2">&quot;us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--logins<span class="w"> </span><span class="s2">&quot;cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX=</span><span class="nv">$ID_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--region<span class="w"> </span>us-east-1
+</pre></div>
+</div>
+<p>Response:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;IdentityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1:yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Get AWS Credentials</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>aws<span class="w"> </span>cognito-identity<span class="w"> </span>get-credentials-for-identity<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--identity-id<span class="w"> </span><span class="s2">&quot;us-east-1:yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--logins<span class="w"> </span><span class="s2">&quot;cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX=</span><span class="nv">$ID_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--region<span class="w"> </span>us-east-1
+</pre></div>
+</div>
+<p>Response:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;IdentityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-1:yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;Credentials&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;AccessKeyId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASIA...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;SecretKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;SessionToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;Expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1735574400.0</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Use AWS Credentials</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Export credentials</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;ASIA...&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SESSION_TOKEN</span><span class="o">=</span><span class="s2">&quot;...&quot;</span>
+
+<span class="c1"># Test access to S3</span>
+aws<span class="w"> </span>s3<span class="w"> </span>ls<span class="w"> </span>s3://my-bucket/users/
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="test-identity-pool-with-bruno">
+<h2>Test Identity Pool with Bruno<a class="headerlink" href="#test-identity-pool-with-bruno" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Request 1: Get Identity ID</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>POST https://cognito-identity.us-east-1.amazonaws.com/
+Content-Type: application/x-amz-json-1.1
+X-Amz-Target: AWSCognitoIdentityService.GetId
+
+{
+  &quot;IdentityPoolId&quot;: &quot;us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;,
+  &quot;Logins&quot;: {
+    &quot;cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX&quot;: &quot;{{idToken}}&quot;
+  }
+}
+</pre></div>
+</div>
+<p>Save the <cite>IdentityId</cite> from the response.</p>
+</li>
+<li><p><strong>Request 2: Get AWS Credentials</strong></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>POST https://cognito-identity.us-east-1.amazonaws.com/
+Content-Type: application/x-amz-json-1.1
+X-Amz-Target: AWSCognitoIdentityService.GetCredentialsForIdentity
+
+{
+  &quot;IdentityId&quot;: &quot;{{identityId}}&quot;,
+  &quot;Logins&quot;: {
+    &quot;cognito-idp.us-east-1.amazonaws.com/us-east-1_XXXXXXXXX&quot;: &quot;{{idToken}}&quot;
+  }
+}
+</pre></div>
+</div>
+<p>Response contains temporary AWS credentials.</p>
+</li>
+</ol>
+</section>
+<section id="configure-auth-middleware-identity-pool-provider">
+<h2>Configure auth-middleware Identity Pool Provider<a class="headerlink" href="#configure-auth-middleware-identity-pool-provider" title="Link to this heading"></a></h2>
+<p>If you’re using the identity pool provider in auth-middleware:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoAuthzProviderSettings</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+
+<span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
+    <span class="c1"># User Pool settings</span>
+    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_XXXXXXXXX&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+
+    <span class="c1"># Identity Pool settings (optional)</span>
+    <span class="n">identity_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx&quot;</span><span class="p">,</span>
+    <span class="n">identity_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">provider</span> <span class="o">=</span> <span class="n">CognitoProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then in your application, you can obtain AWS credentials:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Depends</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/aws-credentials&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_aws_credentials</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
+    <span class="n">_</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())</span>
+<span class="p">):</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
+
+    <span class="c1"># Get AWS credentials for the authenticated user</span>
+    <span class="c1"># This would use the provider&#39;s identity pool integration</span>
+    <span class="n">credentials</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">get_aws_credentials</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id_token</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;access_key_id&quot;</span><span class="p">:</span> <span class="n">credentials</span><span class="o">.</span><span class="n">access_key_id</span><span class="p">,</span>
+        <span class="s2">&quot;secret_access_key&quot;</span><span class="p">:</span> <span class="n">credentials</span><span class="o">.</span><span class="n">secret_access_key</span><span class="p">,</span>
+        <span class="s2">&quot;session_token&quot;</span><span class="p">:</span> <span class="n">credentials</span><span class="o">.</span><span class="n">session_token</span><span class="p">,</span>
+        <span class="s2">&quot;expiration&quot;</span><span class="p">:</span> <span class="n">credentials</span><span class="o">.</span><span class="n">expiration</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="identity-pool-configuration-summary">
+<h2>Identity Pool Configuration Summary<a class="headerlink" href="#identity-pool-configuration-summary" title="Link to this heading"></a></h2>
+<p>After completing Identity Pool setup:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Identity Pool ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</span>
+<span class="nt">Identity Pool Region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1</span>
+
+<span class="nt">Authentication Provider</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cognito User Pool</span>
+<span class="w">  </span><span class="nt">User Pool ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">us-east-1_XXXXXXXXX</span>
+<span class="w">  </span><span class="nt">App Client ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yyyyyyyyyyyyyyyyyyyy</span>
+
+<span class="nt">IAM Roles</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">Authenticated Role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cognito_MyAppIdentityPoolAuth_Role</span>
+<span class="w">  </span><span class="nt">Authenticated Role ARN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:iam::123456789012:role/Cognito_MyAppIdentityPoolAuth_Role</span>
+</pre></div>
+</div>
+</section>
+<section id="identity-pool-best-practices">
+<h2>Identity Pool Best Practices<a class="headerlink" href="#identity-pool-best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Principle of Least Privilege</strong></p>
+<ul class="simple">
+<li><p>Grant only necessary permissions in IAM roles</p></li>
+<li><p>Use resource-level permissions with user context</p></li>
+<li><p>Leverage condition keys like <code class="docutils literal notranslate"><span class="pre">${cognito-identity.amazonaws.com:sub}</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Use Enhanced Flow</strong></p>
+<ul class="simple">
+<li><p>Always enable enhanced (simplified) authflow</p></li>
+<li><p>More secure than classic flow</p></li>
+<li><p>Better integration with modern SDKs</p></li>
+</ul>
+</li>
+<li><p><strong>Credential Caching</strong></p>
+<ul class="simple">
+<li><p>Cache AWS credentials until expiration</p></li>
+<li><p>Refresh before expiration (e.g., at 80% of lifetime)</p></li>
+<li><p>Don’t request new credentials for every API call</p></li>
+</ul>
+</li>
+<li><p><strong>Resource Isolation</strong></p>
+<ul class="simple">
+<li><p>Use Cognito identity ID in resource paths</p></li>
+<li><p>Example S3 path: <code class="docutils literal notranslate"><span class="pre">s3://bucket/users/${cognito-identity.amazonaws.com:sub}/</span></code></p></li>
+<li><p>Example DynamoDB key: Use identity ID as partition key</p></li>
+</ul>
+</li>
+<li><p><strong>Monitoring</strong></p>
+<ul class="simple">
+<li><p>Monitor IAM role usage in CloudTrail</p></li>
+<li><p>Set up alarms for unauthorized access attempts</p></li>
+<li><p>Track credential request patterns</p></li>
+</ul>
+</li>
+</ol>
+</section>
+</section>
 <section id="next-steps">
 <h1>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h1>
 <p>Now that your Cognito infrastructure is set up:</p>
@@ -646,6 +988,7 @@
 <li><p>Implement the authentication flow in your application</p></li>
 <li><p>Set up authorization rules based on user groups</p></li>
 <li><p>Test the complete authentication and authorization flow</p></li>
+<li><p>(Optional) Implement Identity Pool integration for AWS resource access</p></li>
 <li><p>Deploy to production with appropriate security settings</p></li>
 </ol>
 <p>For implementation details, see the <a class="reference internal" href="../cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a> documentation.</p>

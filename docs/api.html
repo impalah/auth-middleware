@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; Auth Middleware 0.2.16 documentation</title>
+  <title>API Reference &mdash; Auth Middleware 0.2.15 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/api.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=e2418eca"></script>
+      <script src="_static/documentation_options.js?v=d5b904a0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -103,6 +103,22 @@
 <li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
 <li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
 </ul>
@@ -120,6 +136,25 @@
 <li class="toctree-l3"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#services">Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="services.html">Services Module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l3"><a class="reference internal" href="services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="services.html#see-also">See Also</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jwks-cache.html#see-also">See Also</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#utilities">Utilities</a><ul>
@@ -240,6 +275,90 @@
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#integration-examples">Integration Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#best-practices">Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider">API Reference</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="services">
+<h2>Services<a class="headerlink" href="#services" title="Link to this heading"></a></h2>
+<p>Additional services for cross-cutting concerns like M2M detection, rate limiting, audit logging, and metrics:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#m2m-token-detection">M2M Token Detection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="services.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#m2mtokendetector-class">M2MTokenDetector Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#usage-with-user-model">Usage with User Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#rate-limiting">Rate Limiting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="services.html#ratelimiter-class">RateLimiter Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#rate-limit-decorator">rate_limit Decorator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#manual-rate-limiting">Manual Rate Limiting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#audit-logging">Audit Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="services.html#auditevent-class">AuditEvent Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#auditlogger-class">AuditLogger Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#auditmiddleware-class">AuditMiddleware Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#manual-audit-logging">Manual Audit Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#metrics-collection">Metrics Collection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="services.html#metricscollector-class">MetricsCollector Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#usage-example">Usage Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#best-practices">Best Practices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="services.html#id1">M2M Token Detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#id2">Rate Limiting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#id3">Audit Logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="services.html#id4">Metrics Collection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#see-also">See Also</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="services.html#example-code">Example Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html">JWKS Cache Strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#overview">Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#cache-strategies">Cache Strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#time-based-strategy">Time-Based Strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#usage-based-strategy">Usage-Based Strategy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#combined-strategy-recommended">Combined Strategy (Recommended)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#background-refresh">Background Refresh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#how-it-works">How It Works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#benefits">Benefits</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#configuration-examples">Configuration Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#high-traffic-application">High-Traffic Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#low-traffic-high-security-application">Low-Traffic / High-Security Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#development-testing">Development / Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#custom-metrics">Custom Metrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#logging">Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#cache-not-refreshing">Cache Not Refreshing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#high-latency-spikes">High Latency Spikes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#frequent-refreshes">Frequent Refreshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#error-background-refresh-failed">Error: “Background refresh failed”</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#see-also">See Also</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jwks-cache.html#example-code">Example Code</a></li>
 </ul>
 </li>
 </ul>

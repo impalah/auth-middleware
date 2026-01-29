@@ -103,6 +103,8 @@ Documentation Contents
    extending-authz-providers
    user-property
    auth-authn
+   services
+   jwks-cache
    jwt_bearer_manager
    exceptions
 
