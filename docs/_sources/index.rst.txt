@@ -23,14 +23,14 @@ Auth Middleware Documentation
 Key Features
 ============
 
-* 🔐 **JWT Authentication**: Secure JWT token validation and processing
-* 🏢 **Multiple Providers**: AWS Cognito, Azure Entra ID, Google, and custom providers
-* 👥 **Group-based Authorization**: Fine-grained access control with user groups
-* 🛡️ **Permission System**: Flexible permission-based authorization
-* ⚡ **High Performance**: Async-first design for maximum throughput
-* 🔧 **Easy Integration**: Simple middleware setup with minimal configuration
-* 📊 **OpenAPI Support**: Automatic API documentation with security schemas
-* 🎯 **Type Safety**: Full TypeScript-style type hints for better development experience
+* **JWT Authentication**: Secure JWT token validation and processing
+* **Multiple Providers**: AWS Cognito, Azure Entra ID, Google, and custom providers
+* **Group-based Authorization**: Fine-grained access control with user groups
+* **Permission System**: Flexible permission-based authorization
+* **High Performance**: Async-first design for maximum throughput
+* **Easy Integration**: Simple middleware setup with minimal configuration
+* **OpenAPI Support**: Automatic API documentation with security schemas
+* **Type Safety**: Full TypeScript-style type hints for better development experience
 
 Quick Start
 ===========

@@ -6,17 +6,17 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; Auth Middleware 0.2.15 documentation</title>
+  <title>Installation &mdash; Auth Middleware 0.2.16 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
     <link rel="canonical" href="/auth-middleware/installation.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=d5b904a0"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/documentation_options.js?v=e2418eca"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -152,8 +152,8 @@
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>Python</strong>: 3.10 or higher</p></li>
-<li><p><strong>FastAPI</strong>: 0.115.6 or higher (for FastAPI applications)</p></li>
+<li><p><strong>Python</strong>: 3.14 or higher</p></li>
+<li><p><strong>FastAPI</strong>: 0.128.0 or higher (for FastAPI applications)</p></li>
 <li><p><strong>Starlette</strong>: Compatible with Starlette-based applications</p></li>
 </ul>
 </section>
@@ -224,12 +224,12 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 <p>For containerized applications, add auth-middleware to your requirements:</p>
 <p><strong>requirements.txt</strong>:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>auth-middleware&gt;=0.2.0
-fastapi&gt;=0.115.6
-uvicorn&gt;=0.35.0
+fastapi&gt;=0.128.0
+uvicorn&gt;=0.40.0
 </pre></div>
 </div>
 <p><strong>Dockerfile example</strong>:</p>
-<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.12-slim</span>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.14-slim</span>
 
 <span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span>
 

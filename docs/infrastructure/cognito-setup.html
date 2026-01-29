@@ -6,17 +6,17 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AWS Cognito Infrastructure Setup &mdash; Auth Middleware 0.2.15 documentation</title>
+  <title>AWS Cognito Infrastructure Setup &mdash; Auth Middleware 0.2.16 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
     <link rel="canonical" href="/auth-middleware/infrastructure/cognito-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d5b904a0"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=e2418eca"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -199,9 +199,9 @@
 <ul class="simple">
 <li><p><strong>Authentication providers</strong>: Select “Cognito user pool”</p></li>
 <li><p><strong>Cognito user pool sign-in options</strong>: Choose your preferred options:
-- ✅ <strong>Email</strong> (recommended for most applications)
-- ✅ <strong>Username</strong> (optional, based on your needs)
-- ⚠️ <strong>Phone number</strong> (optional, requires SMS configuration)</p></li>
+- <strong>Email</strong> (recommended for most applications)
+- <strong>Username</strong> (optional, based on your needs)
+- <strong>Phone number</strong> (optional, requires SMS configuration)</p></li>
 <li><p>Click “Next”</p></li>
 </ul>
 </li>
@@ -210,16 +210,16 @@
 <li><p><strong>Password policy</strong>: Choose between “Cognito defaults” or “Custom”</p>
 <p>For custom policy, recommended settings:
 - Minimum length: 8 characters
-- ✅ Require numbers
-- ✅ Require special characters
-- ✅ Require uppercase letters
-- ✅ Require lowercase letters</p>
+- Require numbers
+- Require special characters
+- Require uppercase letters
+- Require lowercase letters</p>
 </li>
 <li><p><strong>Multi-factor authentication</strong>:
 - <strong>Optional</strong> (recommended for production)
 - <strong>Required</strong> (for high-security applications)</p></li>
 <li><p><strong>User account recovery</strong>: Select preferred options:
-- ✅ <strong>Email only</strong> (most common)
+- <strong>Email only</strong> (most common)
 - <strong>SMS and email</strong> (if phone numbers are collected)</p></li>
 <li><p>Click “Next”</p></li>
 </ul>
@@ -228,10 +228,10 @@
 <ul class="simple">
 <li><p><strong>Self-service sign-up</strong>: Enable if you want users to self-register</p></li>
 <li><p><strong>Cognito-assisted verification</strong>: Choose verification methods:
-- ✅ <strong>Send email verification</strong> (recommended)
+- <strong>Send email verification</strong> (recommended)
 - <strong>Send SMS verification</strong> (if using phone numbers)</p></li>
 <li><p><strong>Required attributes</strong>: Select attributes to collect during sign-up:
-- ✅ <strong>email</strong> (strongly recommended)
+- <strong>email</strong> (strongly recommended)
 - <strong>given_name</strong> (optional)
 - <strong>family_name</strong> (optional)
 - <strong>preferred_username</strong> (optional)</p></li>
@@ -286,24 +286,24 @@
 <ul class="simple">
 <li><p><strong>App type</strong>: Select “Confidential client”</p></li>
 <li><p><strong>App client name</strong>: “MyApp-ClientCredentials”</p></li>
-<li><p><strong>Client secret</strong>: ✅ “Generate a client secret”</p></li>
+<li><p><strong>Client secret</strong>: “Generate a client secret”</p></li>
 <li><p><strong>Allowed callback URLs</strong>: Not needed for client credentials</p></li>
 <li><p><strong>Allowed sign-out URLs</strong>: Not needed for client credentials</p></li>
 </ul>
 </li>
 <li><p><strong>Authentication Flows</strong></p>
 <ul class="simple">
-<li><p>❌ Uncheck “ALLOW_USER_SRP_AUTH”</p></li>
-<li><p>❌ Uncheck “ALLOW_USER_PASSWORD_AUTH”</p></li>
-<li><p>❌ Uncheck “ALLOW_REFRESH_TOKEN_AUTH”</p></li>
-<li><p>✅ Check “ALLOW_ADMIN_USER_PASSWORD_AUTH” (for admin operations)</p></li>
-<li><p>✅ Check “ALLOW_CUSTOM_AUTH” (optional)</p></li>
+<li><p>Uncheck “ALLOW_USER_SRP_AUTH”</p></li>
+<li><p>Uncheck “ALLOW_USER_PASSWORD_AUTH”</p></li>
+<li><p>Uncheck “ALLOW_REFRESH_TOKEN_AUTH”</p></li>
+<li><p>Check “ALLOW_ADMIN_USER_PASSWORD_AUTH” (for admin operations)</p></li>
+<li><p>Check “ALLOW_CUSTOM_AUTH” (optional)</p></li>
 </ul>
 </li>
 <li><p><strong>OAuth 2.0 Settings</strong></p>
 <ul class="simple">
 <li><p><strong>Allowed OAuth flows</strong>:
-- ✅ <strong>Client credentials</strong></p></li>
+- <strong>Client credentials</strong></p></li>
 <li><p><strong>Allowed OAuth scopes</strong>: Select appropriate scopes for your API</p></li>
 <li><p><strong>Hosted UI settings</strong>: Not needed for client credentials</p></li>
 </ul>
@@ -330,27 +330,27 @@
 <li><p><strong>App type</strong>: Select “Public client” or “Confidential client” based on your needs</p></li>
 <li><p><strong>App client name</strong>: “MyApp-UserAuth”</p></li>
 <li><p><strong>Client secret</strong>:
-- ❌ Don’t generate for public clients (mobile/SPA)
-- ✅ Generate for confidential clients (server-side web apps)</p></li>
+- Don’t generate for public clients (mobile/SPA)
+- Generate for confidential clients (server-side web apps)</p></li>
 </ul>
 </li>
 <li><p><strong>Authentication Flows</strong></p>
 <ul class="simple">
-<li><p>✅ Check “ALLOW_USER_PASSWORD_AUTH”</p></li>
-<li><p>✅ Check “ALLOW_REFRESH_TOKEN_AUTH”</p></li>
-<li><p>❌ Uncheck “ALLOW_USER_SRP_AUTH” (unless you need SRP)</p></li>
-<li><p>❌ Uncheck “ALLOW_ADMIN_USER_PASSWORD_AUTH”</p></li>
+<li><p>Check “ALLOW_USER_PASSWORD_AUTH”</p></li>
+<li><p>Check “ALLOW_REFRESH_TOKEN_AUTH”</p></li>
+<li><p>Uncheck “ALLOW_USER_SRP_AUTH” (unless you need SRP)</p></li>
+<li><p>Uncheck “ALLOW_ADMIN_USER_PASSWORD_AUTH”</p></li>
 </ul>
 </li>
 <li><p><strong>OAuth 2.0 Settings</strong></p>
 <ul class="simple">
 <li><p><strong>Allowed OAuth flows</strong>:
-- ✅ <strong>Authorization code grant</strong>
-- ✅ <strong>Implicit grant</strong> (only if needed for legacy apps)</p></li>
+- <strong>Authorization code grant</strong>
+- <strong>Implicit grant</strong> (only if needed for legacy apps)</p></li>
 <li><p><strong>Allowed OAuth scopes</strong>:
-- ✅ <strong>email</strong>
-- ✅ <strong>openid</strong>
-- ✅ <strong>profile</strong></p></li>
+- <strong>email</strong>
+- <strong>openid</strong>
+- <strong>profile</strong></p></li>
 <li><p><strong>Callback URLs</strong>: Add your application’s callback URLs</p></li>
 <li><p><strong>Sign-out URLs</strong>: Add your application’s sign-out URLs</p></li>
 </ul>
@@ -420,9 +420,9 @@
 <li><p><strong>Username</strong>: “<a class="reference external" href="mailto:admin&#37;&#52;&#48;example&#46;com">admin<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
 <li><p><strong>Email</strong>: “<a class="reference external" href="mailto:admin&#37;&#52;&#48;example&#46;com">admin<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
 <li><p><strong>Temporary password</strong>: Generate a secure password</p></li>
-<li><p>✅ Check “Send an invitation to this new user?”</p></li>
-<li><p>✅ Check “Mark phone number as verified” (if applicable)</p></li>
-<li><p>✅ Check “Mark email as verified”</p></li>
+<li><p>Check “Send an invitation to this new user?”</p></li>
+<li><p>Check “Mark phone number as verified” (if applicable)</p></li>
+<li><p>Check “Mark email as verified”</p></li>
 <li><p>Click “Create user”</p></li>
 </ul>
 </li>
@@ -432,8 +432,8 @@
 <li><p><strong>Username</strong>: “<a class="reference external" href="mailto:user&#37;&#52;&#48;example&#46;com">user<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
 <li><p><strong>Email</strong>: “<a class="reference external" href="mailto:user&#37;&#52;&#48;example&#46;com">user<span>&#64;</span>example<span>&#46;</span>com</a>”</p></li>
 <li><p><strong>Temporary password</strong>: Generate a secure password</p></li>
-<li><p>✅ Check “Send an invitation to this new user?”</p></li>
-<li><p>✅ Check “Mark email as verified”</p></li>
+<li><p>Check “Send an invitation to this new user?”</p></li>
+<li><p>Check “Mark email as verified”</p></li>
 <li><p>Click “Create user”</p></li>
 </ul>
 </li>
@@ -470,7 +470,7 @@
 <ul class="simple">
 <li><p>Go to “App integration” → “App client settings”</p></li>
 <li><p>Configure each app client:
-- <strong>Enabled Identity Providers</strong>: ✅ Cognito User Pool
+- <strong>Enabled Identity Providers</strong>: Cognito User Pool
 - <strong>Callback URL(s)</strong>: Your application’s callback URLs
 - <strong>Sign out URL(s)</strong>: Your application’s logout URLs
 - <strong>Allowed OAuth Flows</strong>: Based on your app client type

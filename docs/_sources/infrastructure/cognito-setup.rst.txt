@@ -27,9 +27,9 @@ Step 1: Create a User Pool
    
    - **Authentication providers**: Select "Cognito user pool"
    - **Cognito user pool sign-in options**: Choose your preferred options:
-     - ✅ **Email** (recommended for most applications)
-     - ✅ **Username** (optional, based on your needs)
-     - ⚠️ **Phone number** (optional, requires SMS configuration)
+     - **Email** (recommended for most applications)
+     - **Username** (optional, based on your needs)
+     - **Phone number** (optional, requires SMS configuration)
    - Click "Next"
 
 3. **Configure Security Requirements**
@@ -38,17 +38,17 @@ Step 1: Create a User Pool
      
      For custom policy, recommended settings:
      - Minimum length: 8 characters
-     - ✅ Require numbers
-     - ✅ Require special characters
-     - ✅ Require uppercase letters
-     - ✅ Require lowercase letters
+     - Require numbers
+     - Require special characters
+     - Require uppercase letters
+     - Require lowercase letters
    
    - **Multi-factor authentication**: 
      - **Optional** (recommended for production)
      - **Required** (for high-security applications)
    
    - **User account recovery**: Select preferred options:
-     - ✅ **Email only** (most common)
+     - **Email only** (most common)
      - **SMS and email** (if phone numbers are collected)
    
    - Click "Next"
@@ -57,11 +57,11 @@ Step 1: Create a User Pool
    
    - **Self-service sign-up**: Enable if you want users to self-register
    - **Cognito-assisted verification**: Choose verification methods:
-     - ✅ **Send email verification** (recommended)
+     - **Send email verification** (recommended)
      - **Send SMS verification** (if using phone numbers)
    
    - **Required attributes**: Select attributes to collect during sign-up:
-     - ✅ **email** (strongly recommended)
+     - **email** (strongly recommended)
      - **given_name** (optional)
      - **family_name** (optional)
      - **preferred_username** (optional)
@@ -116,22 +116,22 @@ This client is used for server-to-server authentication.
    
    - **App type**: Select "Confidential client"
    - **App client name**: "MyApp-ClientCredentials"
-   - **Client secret**: ✅ "Generate a client secret"
+   - **Client secret**: "Generate a client secret"
    - **Allowed callback URLs**: Not needed for client credentials
    - **Allowed sign-out URLs**: Not needed for client credentials
 
 3. **Authentication Flows**
    
-   - ❌ Uncheck "ALLOW_USER_SRP_AUTH"
-   - ❌ Uncheck "ALLOW_USER_PASSWORD_AUTH" 
-   - ❌ Uncheck "ALLOW_REFRESH_TOKEN_AUTH"
-   - ✅ Check "ALLOW_ADMIN_USER_PASSWORD_AUTH" (for admin operations)
-   - ✅ Check "ALLOW_CUSTOM_AUTH" (optional)
+   - Uncheck "ALLOW_USER_SRP_AUTH"
+   - Uncheck "ALLOW_USER_PASSWORD_AUTH" 
+   - Uncheck "ALLOW_REFRESH_TOKEN_AUTH"
+   - Check "ALLOW_ADMIN_USER_PASSWORD_AUTH" (for admin operations)
+   - Check "ALLOW_CUSTOM_AUTH" (optional)
 
 4. **OAuth 2.0 Settings**
    
    - **Allowed OAuth flows**: 
-     - ✅ **Client credentials**
+     - **Client credentials**
    - **Allowed OAuth scopes**: Select appropriate scopes for your API
    - **Hosted UI settings**: Not needed for client credentials
 
@@ -154,25 +154,25 @@ This client is used for user authentication with username/password.
    - **App type**: Select "Public client" or "Confidential client" based on your needs
    - **App client name**: "MyApp-UserAuth"
    - **Client secret**: 
-     - ❌ Don't generate for public clients (mobile/SPA)
-     - ✅ Generate for confidential clients (server-side web apps)
+     - Don't generate for public clients (mobile/SPA)
+     - Generate for confidential clients (server-side web apps)
 
 3. **Authentication Flows**
    
-   - ✅ Check "ALLOW_USER_PASSWORD_AUTH"
-   - ✅ Check "ALLOW_REFRESH_TOKEN_AUTH"
-   - ❌ Uncheck "ALLOW_USER_SRP_AUTH" (unless you need SRP)
-   - ❌ Uncheck "ALLOW_ADMIN_USER_PASSWORD_AUTH"
+   - Check "ALLOW_USER_PASSWORD_AUTH"
+   - Check "ALLOW_REFRESH_TOKEN_AUTH"
+   - Uncheck "ALLOW_USER_SRP_AUTH" (unless you need SRP)
+   - Uncheck "ALLOW_ADMIN_USER_PASSWORD_AUTH"
 
 4. **OAuth 2.0 Settings**
    
    - **Allowed OAuth flows**: 
-     - ✅ **Authorization code grant**
-     - ✅ **Implicit grant** (only if needed for legacy apps)
+     - **Authorization code grant**
+     - **Implicit grant** (only if needed for legacy apps)
    - **Allowed OAuth scopes**: 
-     - ✅ **email**
-     - ✅ **openid**
-     - ✅ **profile**
+     - **email**
+     - **openid**
+     - **profile**
    - **Callback URLs**: Add your application's callback URLs
    - **Sign-out URLs**: Add your application's sign-out URLs
 
@@ -234,9 +234,9 @@ Create test users to verify your setup.
    - **Username**: "admin@example.com"
    - **Email**: "admin@example.com"
    - **Temporary password**: Generate a secure password
-   - ✅ Check "Send an invitation to this new user?"
-   - ✅ Check "Mark phone number as verified" (if applicable)
-   - ✅ Check "Mark email as verified"
+   - Check "Send an invitation to this new user?"
+   - Check "Mark phone number as verified" (if applicable)
+   - Check "Mark email as verified"
    - Click "Create user"
 
 2. **Create Regular User**
@@ -245,8 +245,8 @@ Create test users to verify your setup.
    - **Username**: "user@example.com"
    - **Email**: "user@example.com"
    - **Temporary password**: Generate a secure password
-   - ✅ Check "Send an invitation to this new user?"
-   - ✅ Check "Mark email as verified"
+   - Check "Send an invitation to this new user?"
+   - Check "Mark email as verified"
    - Click "Create user"
 
 Step 5: Assign Users to Groups
@@ -277,7 +277,7 @@ Advanced Configuration
    
    - Go to "App integration" → "App client settings"
    - Configure each app client:
-     - **Enabled Identity Providers**: ✅ Cognito User Pool
+     - **Enabled Identity Providers**: Cognito User Pool
      - **Callback URL(s)**: Your application's callback URLs
      - **Sign out URL(s)**: Your application's logout URLs
      - **Allowed OAuth Flows**: Based on your app client type
