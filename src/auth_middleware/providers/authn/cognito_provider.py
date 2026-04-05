@@ -12,6 +12,7 @@ from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.providers.authz.groups_provider import GroupsProvider
 from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
 from auth_middleware.providers.exceptions.aws_exception import AWSException
+from auth_middleware.providers.profile.profile_provider import ProfileProvider
 from auth_middleware.services.m2m_detector import M2MTokenDetector
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
@@ -27,6 +28,7 @@ class CognitoProvider(JWTProvider):
         | PermissionsProvider
         | None = None,
         groups_provider: type[GroupsProvider] | GroupsProvider | None = None,
+        profile_provider: type[ProfileProvider] | ProfileProvider | None = None,
     ) -> CognitoProvider:
         logger.debug("Creating CognitoProvider instance")
 
@@ -41,6 +43,7 @@ class CognitoProvider(JWTProvider):
         | PermissionsProvider
         | None = None,
         groups_provider: type[GroupsProvider] | GroupsProvider | None = None,
+        profile_provider: type[ProfileProvider] | ProfileProvider | None = None,
     ) -> None:
         logger.debug("Initializing CognitoProvider instance")
 
@@ -78,15 +81,29 @@ class CognitoProvider(JWTProvider):
                 elif isinstance(groups_provider, GroupsProvider):
                     logger.debug("Setting GroupsProvider")
                     final_groups_provider = groups_provider
+
+            # Lazy initialization for ProfileProvider
+            final_profile_provider: ProfileProvider | None = None
+            if profile_provider:
+                if isinstance(profile_provider, type) and issubclass(
+                    profile_provider, ProfileProvider
+                ):
+                    logger.debug("Initializing ProfileProvider")
+                    final_profile_provider = profile_provider()
+                elif isinstance(profile_provider, ProfileProvider):
+                    logger.debug("Setting ProfileProvider")
+                    final_profile_provider = profile_provider
                 else:
                     raise ValueError(
-                        "groups_provider must be a GroupsProvider or a subclass thereof"
+                        "profile_provider must be a ProfileProvider "
+                        "or a subclass thereof"
                     )
 
             super().__init__(
                 settings=settings,
                 permissions_provider=final_permissions_provider,
                 groups_provider=final_groups_provider,
+                profile_provider=final_profile_provider,
             )
             self._initialized = True
 
@@ -196,6 +213,7 @@ class CognitoProvider(JWTProvider):
             jwt_credentials=token,
             groups_provider=self._groups_provider,
             permissions_provider=self._permissions_provider,
+            profile_provider=self._profile_provider,
             id=token.claims["sub"],
             name=(
                 token.claims[name_property]

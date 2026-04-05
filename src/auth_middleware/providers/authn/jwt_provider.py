@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     )
     from auth_middleware.providers.authz.groups_provider import GroupsProvider
     from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+    from auth_middleware.providers.profile.profile_provider import ProfileProvider
 
 
 class JWTProvider(metaclass=ABCMeta):
@@ -25,6 +26,7 @@ class JWTProvider(metaclass=ABCMeta):
     _settings: JWTProviderSettings | None
     _permissions_provider: PermissionsProvider | None
     _groups_provider: GroupsProvider | None
+    _profile_provider: ProfileProvider | None
     _background_refresh_task: asyncio.Task | None
 
     def __init__(
@@ -32,10 +34,12 @@ class JWTProvider(metaclass=ABCMeta):
         settings: JWTProviderSettings | None = None,
         permissions_provider: PermissionsProvider | None = None,
         groups_provider: GroupsProvider | None = None,
+        profile_provider: ProfileProvider | None = None,
     ) -> None:
         self._settings = settings
         self._permissions_provider = permissions_provider
         self._groups_provider = groups_provider
+        self._profile_provider = profile_provider
         self._background_refresh_task = None
 
     async def _get_jwks(self) -> JWKS | None:

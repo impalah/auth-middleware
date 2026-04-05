@@ -1,6 +1,6 @@
 [project]
 name = "auth-middleware"
-version = "0.2.17"
+version = "0.3.1"
 description = "Async Auth Middleware for FastAPI/Starlette"
 authors = [
     {name = "impalah", email = "impalah@gmail.com"}
@@ -61,8 +61,7 @@ dev = [
     "mock>=5.2.0",
     "pytest-env>=1.2.0",
     "alembic>=1.18.2",
-    "psycopg2>=2.9.11",
-    "mysqlclient>=2.2.7",
+    "psycopg2-binary>=2.9.11",
     "uvicorn>=0.40.0",
 ]
 docs = [
