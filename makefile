@@ -1,3 +1,9 @@
+# Cargar variables desde .env si existe
+ifneq (,$(wildcard .env))
+include .env
+export
+endif
+
 # Variables
 PROFILE="pak"
 DOMAIN="impalah"
@@ -7,6 +13,11 @@ REPOSITORY_NAME="auth-middleware"
 PLATFORM="linux/amd64"
 BUILDER_NAME="mybuilder"
 PART ?= patch  # can be overwritten with: make bump-version PART=minor
+
+SONAR_HOST_URL ?= http://localhost:9000
+SONAR_TOKEN ?=
+PY_SRC ?= src
+
 
 # Delete the virtual environment and force a sync
 venv:
@@ -28,9 +39,16 @@ build: bump-version
 	uv build
 
 # Clean build artifacts
-clean:
+clean-artifacts:
 	rm -rf dist *.egg-info build && \
 	echo "Cleaned build artifacts"
+
+clean: clean-artifacts ## Clean temporary files
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
 
 # Publish package on PyPI (use UV_PYPI_TOKEN or .pypirc for authentication)
 publish: build
@@ -85,9 +103,15 @@ security-check:
 check: lint format type-check security-check
 	echo "All checks completed"
 
-# Run tests with pytest
-test:
-	uv run pytest tests/ --cov=src/ --cov-report=term --cov-report=html --cov-report=xml --junitxml=junit.xml -v
+test: ## Run tests
+	uv run pytest -v
+
+test-cov: ## Run tests with coverage report
+	uv run pytest --cov --cov-report=xml --cov-report=term --cov-report=html
+
+# # Run tests with pytest
+# test:
+# 	uv run pytest tests/ --cov=src/ --cov-report=term --cov-report=html --cov-report=xml --junitxml=junit.xml -v
 
 # Install project in development mode
 install:
@@ -146,4 +170,10 @@ help:
 	@echo "  info          - Show project information"
 	@echo "  help          - Show this help"
 
-.PHONY: venv bump-version build clean publish publish-test docker-build docker-release lint format type-check security-check check test install install-all run shell info docs docs-serve help
+sonar: ## Run SonarQube analysis with pysonar
+	@test -n "$(SONAR_TOKEN)" || (echo "ERROR: define SONAR_TOKEN"; exit 1)
+	SONAR_HOST_URL=$(SONAR_HOST_URL) SONAR_TOKEN=$(SONAR_TOKEN) uv run pysonar
+
+sonar-check: test-cov sonar ## Run coverage and SonarQube analysis
+
+.PHONY: venv bump-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info docs docs-serve help sonar sonar-check

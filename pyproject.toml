@@ -63,6 +63,7 @@ dev = [
     "alembic>=1.18.2",
     "psycopg2-binary>=2.9.11",
     "uvicorn>=0.40.0",
+    "pysonar>=1.4.0.4676",
 ]
 docs = [
     "sphinx>=9.1.0",
