@@ -1,8 +1,9 @@
 import time
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
+from joserfc.errors import JoseError
 
 from auth_middleware.providers.authn.cognito_authz_provider_settings import (
     CognitoAuthzProviderSettings,
@@ -85,35 +86,36 @@ async def test_load_jwks(mocker, cognito_provider):
 )
 @pytest.mark.asyncio
 async def test_verify_token_valid(mocker, cognito_provider):
-    # Mock the jwk.construct method
-    mock_jwk_construct = Mock()
+    mock_hmac_key = AsyncMock()
+    cognito_provider._get_hmac_key = mock_hmac_key
+    mock_hmac_key.return_value = {
+        "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+        "alg": "RS256",
+        "kty": "RSA",
+    }
 
-    with patch("jose.jwk.construct", mock_jwk_construct):
-        # Mock the _get_hmac_key method
-        mock_hmac_key = AsyncMock()
-        cognito_provider._get_hmac_key = mock_hmac_key
-        mock_hmac_key.return_value = {
+    token = JWTAuthorizationCredentials(
+        jwt_token="my_token",
+        header={"alg": "HS256", "typ": "JWT"},
+        signature="valid_signature",
+        message="valid_message",
+        claims={
+            "sub": "1234567890",
+            "username": "test_user",
+            "exp": int(time.time()) + 3600,  # Token expires in 1 hour
+            "iss": "my_issuer",
+            "aud": "my_audience",
             "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
-            "alg": "RS256",
-            "kty": "RSA",
-        }
+        },
+    )
 
-        # TODO: send to utilities file
-        token = JWTAuthorizationCredentials(
-            jwt_token="my_token",
-            header={"alg": "HS256", "typ": "JWT"},
-            signature="valid_signature",
-            message="valid_message",
-            claims={
-                "sub": "1234567890",
-                "username": "test_user",
-                "exp": int(time.time()) + 3600,  # Token expires in 1 hour
-                "iss": "my_issuer",
-                "aud": "my_audience",
-                "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
-            },
-        )
-
+    with patch(
+        "auth_middleware.providers.authn.cognito_provider.import_key",
+        return_value=MagicMock(),
+    ), patch(
+        "auth_middleware.providers.authn.cognito_provider.joserfc_jwt.decode",
+        return_value=MagicMock(),
+    ):
         result = await cognito_provider.verify_token(token)
 
     assert result is True
@@ -141,40 +143,36 @@ async def test_verify_token_valid(mocker, cognito_provider):
 )
 @pytest.mark.asyncio
 async def test_verify_token_invalid(mocker, cognito_provider):
-    # Mock the jwk.construct method
-    mock_jwk_construct = Mock()
+    mock_hmac_key = AsyncMock()
+    cognito_provider._get_hmac_key = mock_hmac_key
+    mock_hmac_key.return_value = {
+        "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+        "alg": "RS256",
+        "kty": "RSA",
+    }
 
-    with patch("jose.jwk.construct", mock_jwk_construct):
-        # Mock the _get_hmac_key method
-        mock_hmac_key = AsyncMock()
-        cognito_provider._get_hmac_key = mock_hmac_key
-        mock_hmac_key.return_value = {
+    token = JWTAuthorizationCredentials(
+        jwt_token="my_token",
+        header={"alg": "HS256", "typ": "JWT"},
+        signature="valid_signature",
+        message="valid_message",
+        claims={
+            "sub": "1234567890",
+            "username": "test_user",
+            "exp": int(time.time()) + 3600,  # Token expires in 1 hour
+            "iss": "my_issuer",
+            "aud": "my_audience",
             "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
-            "alg": "RS256",
-            "kty": "RSA",
-        }
+        },
+    )
 
-        # Mock the constructed JWK to have a verify method that returns False
-        mock_jwk = Mock()
-        mock_jwk.verify.return_value = False
-        mock_jwk_construct.return_value = mock_jwk
-
-        # TODO: send to utilities file
-        token = JWTAuthorizationCredentials(
-            jwt_token="my_token",
-            header={"alg": "HS256", "typ": "JWT"},
-            signature="valid_signature",
-            message="valid_message",
-            claims={
-                "sub": "1234567890",
-                "username": "test_user",
-                "exp": int(time.time()) + 3600,  # Token expires in 1 hour
-                "iss": "my_issuer",
-                "aud": "my_audience",
-                "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
-            },
-        )
-
+    with patch(
+        "auth_middleware.providers.authn.cognito_provider.import_key",
+        return_value=MagicMock(),
+    ), patch(
+        "auth_middleware.providers.authn.cognito_provider.joserfc_jwt.decode",
+        side_effect=JoseError("bad signature"),
+    ):
         result = await cognito_provider.verify_token(token)
 
     assert result is False
@@ -202,37 +200,31 @@ async def test_verify_token_invalid(mocker, cognito_provider):
 )
 @pytest.mark.asyncio
 async def test_verify_token_no_hmac_key_candidate(mocker, cognito_provider):
-    # Mock the jwk.construct method
-    mock_jwk_construct = Mock()
+    mock_hmac_key = AsyncMock()
+    cognito_provider._get_hmac_key = mock_hmac_key
+    mock_hmac_key.return_value = None
 
-    with patch("jose.jwk.construct", mock_jwk_construct):
-        # Mock the _get_hmac_key method
-        mock_hmac_key = AsyncMock()
-        cognito_provider._get_hmac_key = mock_hmac_key
-        mock_hmac_key.return_value = None
+    token = JWTAuthorizationCredentials(
+        jwt_token="my_token",
+        header={"alg": "HS256", "typ": "JWT"},
+        signature="valid_signature",
+        message="valid_message",
+        claims={
+            "sub": "1234567890",
+            "username": "test_user",
+            "exp": int(time.time()) + 3600,  # Token expires in 1 hour
+            "iss": "my_issuer",
+            "aud": "my_audience",
+            "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
+        },
+    )
 
-        # TODO: send to utilities file
-        token = JWTAuthorizationCredentials(
-            jwt_token="my_token",
-            header={"alg": "HS256", "typ": "JWT"},
-            signature="valid_signature",
-            message="valid_message",
-            claims={
-                "sub": "1234567890",
-                "username": "test_user",
-                "exp": int(time.time()) + 3600,  # Token expires in 1 hour
-                "iss": "my_issuer",
-                "aud": "my_audience",
-                "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
-            },
-        )
+    # Since there's no hmac key candidate, should raise an exception
+    with pytest.raises(AWSException) as exc_info:
+        await cognito_provider.verify_token(token)
 
-        # Since there's no hmac key candidate, should raise an exception
-        with pytest.raises(AWSException) as exc_info:
-            await cognito_provider.verify_token(token)
-
-        # Assert that the exception has the correct status code and detail
-        assert str(exc_info.value) == "No public key found!"
+    # Assert that the exception has the correct status code and detail
+    assert str(exc_info.value) == "No public key found!"
 
 
 @pytest.mark.asyncio

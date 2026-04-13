@@ -2,7 +2,10 @@ from time import time_ns
 from typing import Any
 
 import httpx
-from jose import JWTError, jwt
+from joserfc import jwt as joserfc_jwt
+from joserfc.errors import JoseError
+from joserfc.jwk import import_key
+from joserfc.jwt import JWTClaimsRegistry
 
 from auth_middleware.logging import logger
 from auth_middleware.providers.authn.jwt_provider import JWTProvider
@@ -126,24 +129,27 @@ class EntraIDProvider(JWTProvider):
             raise AzureException("No public key found!")
 
         try:
-            rsa_key = {
+            rsa_key_dict = {
                 "kty": hmac_key_candidate["kty"],
                 "kid": hmac_key_candidate["kid"],
                 "use": hmac_key_candidate["use"],
                 "n": hmac_key_candidate["n"],
                 "e": hmac_key_candidate["e"],
             }
-
-            # Decode jwt token
-            payload = jwt.decode(
+            key = import_key(rsa_key_dict)
+            audience = settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID
+            token_obj = joserfc_jwt.decode(
                 token.jwt_token,
-                rsa_key,
+                key,
                 algorithms=["RS256"],
-                audience=settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID,
-                options={"verify_at_hash": False},  # Disable at_hash verification
             )
-            return False if payload.get("sub") is None else True
-        except JWTError as je:
+            if audience:
+                claims_registry = JWTClaimsRegistry(
+                    aud={"essential": True, "value": audience}
+                )
+                claims_registry.validate(token_obj.claims)
+            return bool(token_obj.claims.get("sub"))
+        except JoseError as je:
             logger.error("Error in EntraIDClient: {}", str(je))
             return False
         except Exception as e:

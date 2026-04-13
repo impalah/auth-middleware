@@ -4,7 +4,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
-from jose import jwt
+from joserfc import jwt
+from joserfc.jwk import OctKey
 from starlette.requests import Request
 from starlette.types import Scope
 
@@ -33,7 +34,7 @@ async def test_get_credentials_valid_token():
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
 
     # Define your secret key. This should be a secure, unguessable string.
-    secret = "my_secret_key"
+    secret = "my_secret_key_long_enough"
 
     # Define the payload. This is the data that will be included in the token.
     # In a real application, this might include info about the user.
@@ -53,7 +54,8 @@ async def test_get_credentials_valid_token():
     }
 
     # Generate the token.
-    token = jwt.encode(payload, secret, algorithm="HS256")
+    _key = OctKey.import_key(secret.encode())
+    token = jwt.encode({"alg": "HS256"}, payload, _key)
     message, signature = token.rsplit(".", 1)
 
     authorization = b"Bearer " + token.encode()
@@ -70,7 +72,7 @@ async def test_get_credentials_valid_token():
 
     assert credentials is not None
     assert credentials.jwt_token == token
-    assert credentials.header == {"alg": "HS256", "typ": "JWT"}
+    assert credentials.header == {"typ": "JWT", "alg": "HS256"}
     assert credentials.claims["sub"] == "2fMX3FwVHqJXleMwtDdV4xGjrum"
     assert credentials.signature == signature
     assert credentials.message == message
@@ -83,7 +85,7 @@ async def test_get_credentials_invalid_token():
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
 
     # Define your secret key. This should be a secure, unguessable string.
-    secret = "my_secret_key"
+    secret = "my_secret_key_long_enough"
 
     # Define the payload. This is the data that will be included in the token.
     # In a real application, this might include info about the user.
@@ -103,7 +105,8 @@ async def test_get_credentials_invalid_token():
     }
 
     # Generate the token.
-    token = jwt.encode(payload, secret, algorithm="HS256")
+    _key = OctKey.import_key(secret.encode())
+    token = jwt.encode({"alg": "HS256"}, payload, _key)
     message, signature = token.rsplit(".", 1)
 
     authorization = b"Bearer " + token.encode()
@@ -217,14 +220,14 @@ async def test_get_credentials_auth_provider_verify_exception():
     mock_auth_provider.verify_token.side_effect = Exception("Provider error")
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
 
-    secret = "my_secret_key"
+    secret = "my_secret_key_long_enough"
     payload = {
         "sub": "test_user",
         "exp": int(time.time()) + 3600,
         "iat": int(time.time()),
     }
 
-    token = jwt.encode(payload, secret, algorithm="HS256")
+    token = jwt.encode({"alg": "HS256"}, payload, OctKey.import_key(secret.encode()))
     authorization = b"Bearer " + token.encode()
 
     scope: Scope = {
@@ -282,7 +285,7 @@ async def test_get_credentials_with_complex_jwt():
     mock_auth_provider.verify_token.return_value = True
     manager = JWTBearerManager(auth_provider=mock_auth_provider)
 
-    secret = "my_secret_key"
+    secret = "my_secret_key_long_enough"
     payload = {
         "sub": "user123",
         "username": "testuser",
@@ -296,7 +299,7 @@ async def test_get_credentials_with_complex_jwt():
         "aud": "my-app",
     }
 
-    token = jwt.encode(payload, secret, algorithm="HS256")
+    token = jwt.encode({"alg": "HS256"}, payload, OctKey.import_key(secret.encode()))
     authorization = b"Bearer " + token.encode()
 
     scope: Scope = {
