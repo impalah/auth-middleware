@@ -38,10 +38,10 @@ jobs:
           echo "Bumping version ..."
           v=$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)
           echo "Current version: $v"
-          part="patch"
-          uvx --from bump2version bumpversion --allow-dirty --current-version "$v" "$part"
-          BASE_VERSION=$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)
-          echo "Bumped version to $BASE_VERSION"
+          new_v=$(python3 -c "v='$v'; p=v.split('.'); p[-1]=str(int(p[-1])+1); print('.'.join(p))")
+          echo "New version: $new_v"
+          sed -i "s/^version = \"$v\"/version = \"$new_v\"/" pyproject.toml
+          echo "Bumped version to $new_v"
           
       - name: Sync version across files
         run: |
