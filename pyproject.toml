@@ -96,6 +96,16 @@ strict = true
 ignore_missing_imports = true
 pretty = true
 
+[tool.bumpversion]
+current_version = "0.3.2"
+commit = false
+tag = false
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
 
 
 
