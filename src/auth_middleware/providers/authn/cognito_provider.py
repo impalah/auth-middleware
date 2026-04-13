@@ -1,8 +1,9 @@
-from time import time, time_ns
+from time import time_ns
 
 import httpx
-from jose import jwk
-from jose.utils import base64url_decode
+from joserfc import jwt as joserfc_jwt
+from joserfc.errors import JoseError
+from joserfc.jwk import import_key
 
 from auth_middleware.logging import logger
 from auth_middleware.providers.authn.cognito_authz_provider_settings import (
@@ -175,15 +176,12 @@ class CognitoProvider(JWTProvider):
             )
             raise AWSException("No public key found!")
 
-        hmac_key = jwk.construct(hmac_key_candidate)
-
-        decoded_signature = base64url_decode(token.signature.encode())
-
-        # if crypto is OK, then check expiry date
-        if hmac_key.verify(token.message.encode(), decoded_signature):
-            return bool(token.claims["exp"] > time())
-
-        return False
+        key = import_key(hmac_key_candidate)
+        try:
+            joserfc_jwt.decode(token.jwt_token, key, algorithms=["RS256"])
+            return True
+        except JoseError:
+            return False
 
     async def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
         """Initializes a domain User object with data recovered from a JWT TOKEN.

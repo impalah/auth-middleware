@@ -1,6 +1,9 @@
+import base64
+import json
+
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
+from joserfc.errors import JoseError
 from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
@@ -56,15 +59,21 @@ class JWTBearerManager(HTTPBearer):
             message, signature = jwt_token.rsplit(".", 1)
 
             try:
+                _parts = jwt_token.split(".")
+
+                def _b64d(part: str) -> dict:  # type: ignore[return]
+                    padded = part + "=" * (-len(part) % 4)
+                    return json.loads(base64.urlsafe_b64decode(padded))
+
                 jwt_credentials = JWTAuthorizationCredentials(
                     jwt_token=jwt_token,
-                    header=jwt.get_unverified_header(jwt_token),
-                    claims=jwt.get_unverified_claims(jwt_token),
+                    header=_b64d(_parts[0]),
+                    claims=_b64d(_parts[1]),
                     signature=signature,
                     message=message,
                 )
 
-            except JWTError as jwt_err:
+            except (JoseError, Exception) as jwt_err:
                 logger.error("Error in JWTBearerManager: JWTError")
                 raise InvalidTokenException(
                     status_code=HTTP_403_FORBIDDEN,
