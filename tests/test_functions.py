@@ -12,8 +12,10 @@ from auth_middleware.functions import (
     get_current_user,
     has_groups,
     has_permissions,
+    has_roles,
     require_groups,
     require_permissions,
+    require_roles,
     require_user,
 )
 
@@ -357,3 +359,63 @@ class TestFunctionsIntegration:
         group_checker1 = require_groups(["admin"])
         group_checker2 = require_groups(["user"])
         assert group_checker1 != group_checker2
+
+
+class TestRequireRoles:
+    """Tests for require_roles."""
+
+    def test_require_roles_returns_callable(self):
+        result = require_roles(["admin"])
+        assert callable(result)
+
+    @pytest.mark.asyncio
+    async def test_require_roles_passes_when_role_matches(self, mock_request_with_user):
+        with patch("auth_middleware.role_checker.settings.AUTH_MIDDLEWARE_DISABLED", False):
+            mock_user = Mock()
+            mock_user.roles = AsyncMock(return_value=["admin"])()
+            mock_request_with_user.state.current_user = mock_user
+
+            checker = require_roles(["admin"])
+            await checker(mock_request_with_user)  # should not raise
+
+    @pytest.mark.asyncio
+    async def test_require_roles_raises_403_when_role_missing(self, mock_request_with_user):
+        with patch("auth_middleware.role_checker.settings.AUTH_MIDDLEWARE_DISABLED", False):
+            mock_user = Mock()
+            mock_user.roles = AsyncMock(return_value=["viewer"])()
+            mock_request_with_user.state.current_user = mock_user
+
+            checker = require_roles(["admin"])
+            with pytest.raises(HTTPException) as exc_info:
+                await checker(mock_request_with_user)
+            assert exc_info.value.status_code == 403
+
+
+class TestHasRoles:
+    """Tests for has_roles."""
+
+    @pytest.mark.asyncio
+    async def test_has_roles_returns_true(self, mock_request_with_user):
+        with patch("auth_middleware.role_checker.settings.AUTH_MIDDLEWARE_DISABLED", False):
+            mock_user = Mock()
+            mock_user.roles = AsyncMock(return_value=["admin"])()
+            mock_request_with_user.state.current_user = mock_user
+
+            result = await has_roles(mock_request_with_user, ["admin"])
+            assert result is True
+
+    @pytest.mark.asyncio
+    async def test_has_roles_returns_false(self, mock_request_with_user):
+        with patch("auth_middleware.role_checker.settings.AUTH_MIDDLEWARE_DISABLED", False):
+            mock_user = Mock()
+            mock_user.roles = AsyncMock(return_value=["viewer"])()
+            mock_request_with_user.state.current_user = mock_user
+
+            result = await has_roles(mock_request_with_user, ["admin"])
+            assert result is False
+
+    @pytest.mark.asyncio
+    async def test_has_roles_returns_false_when_no_user(self, mock_request_without_user):
+        with patch("auth_middleware.role_checker.settings.AUTH_MIDDLEWARE_DISABLED", False):
+            result = await has_roles(mock_request_without_user, ["admin"])
+            assert result is False

@@ -193,7 +193,7 @@ class TestIdentityPoolProvider:
         assert mock_credentials.identity_id in provider._credentials_cache
 
         # Clear cache for this user
-        await provider.clear_credentials_cache(user_id=user_id)
+        provider.clear_credentials_cache(user_id=user_id)
 
         # Verify cache is empty
         assert user_id not in provider._identity_id_cache
@@ -218,7 +218,7 @@ class TestIdentityPoolProvider:
         assert len(provider._credentials_cache) > 0
 
         # Clear all cache
-        await provider.clear_credentials_cache()
+        provider.clear_credentials_cache()
 
         # Verify cache is empty
         assert len(provider._identity_id_cache) == 0

@@ -2,6 +2,7 @@ from fastapi import HTTPException, Request
 
 from auth_middleware.group_checker import GroupChecker
 from auth_middleware.permissions_checker import PermissionsChecker
+from auth_middleware.role_checker import RoleChecker
 from auth_middleware.settings import settings
 
 
@@ -93,6 +94,48 @@ async def has_groups(request: Request, allowed_groups: list[str]) -> bool:
         return True
     except HTTPException:
         return False
+
+
+def require_roles(allowed_roles: list[str]) -> Callable[..., Any]:
+    """Check if the user has the required roles
+
+    Args:
+        allowed_roles (List[str]): a list of required roles
+    """
+
+    async def _role_checker(request: Request) -> None:
+        """Calls the RoleChecker class to check if
+        the user has the required roles
+
+        Args:
+            request (Request): FastAPI request object
+
+        Returns:
+            RoleChecker: role checker object
+        """
+        checker = RoleChecker(allowed_roles)
+        await checker(request)
+
+    return _role_checker
+
+
+async def has_roles(request: Request, allowed_roles: list[str]) -> bool:
+    """Check if the user has the required roles asynchronously
+
+    Args:
+        request (Request): FastAPI request object
+        allowed_roles (List[str]): a list of required roles
+
+    Returns:
+        bool: True if the user has the required roles, False otherwise
+    """
+    checker = RoleChecker(allowed_roles=allowed_roles)
+    try:
+        await checker(request)
+        return True
+    except HTTPException:
+        return False
+
 
 
 def require_user() -> Callable[..., Any]:

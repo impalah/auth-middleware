@@ -5,19 +5,23 @@ metadata = Base.metadata
 
 
 class BaseModel:
-    """Common model"""
+    """Common model
+    
+    # change your schema here
+    __table_args__ = ({'schema': 'core_schema'})
+
+    created_by: Mapped[str] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), default=datetime.now()
+    )
+    updated_by: Mapped[str] = mapped_column(String(500), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False),
+        default=datetime.now(),
+        onupdate=datetime.now(),
+    )
+    
+    """
 
     __tablename__ = "common_base"
-    # change your schema here
-    # __table_args__ = ({'schema': 'core_schema'})
 
-    # created_by: Mapped[str] = mapped_column(String(500), nullable=True)
-    # created_at: Mapped[datetime] = mapped_column(
-    #     DateTime(timezone=False), default=datetime.now()
-    # )
-    # updated_by: Mapped[str] = mapped_column(String(500), nullable=True)
-    # updated_at: Mapped[datetime] = mapped_column(
-    #     DateTime(timezone=False),
-    #     default=datetime.now(),
-    #     onupdate=datetime.now(),
-    # )

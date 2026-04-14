@@ -177,7 +177,7 @@ class IdentityPoolProvider(CognitoProvider):
 
         return credentials
 
-    async def clear_credentials_cache(self, user_id: str | None = None):
+    def clear_credentials_cache(self, user_id: str | None = None):
         """Clear cached credentials.
 
         Args:

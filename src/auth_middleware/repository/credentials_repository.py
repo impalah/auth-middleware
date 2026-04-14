@@ -14,7 +14,3 @@ class CredentialsRepository(metaclass=ABCMeta):
     @abstractmethod
     async def get_by_id(self, *, id: str) -> UserCredentials | None:
         raise NotImplementedError()
-
-    # @abstractmethod
-    # async def get_all(self) -> List[UserCredentials]:
-    #     raise NotImplementedError()

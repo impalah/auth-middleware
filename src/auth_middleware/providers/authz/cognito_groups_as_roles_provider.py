@@ -1,19 +1,19 @@
 from typing import Any
 
 from auth_middleware.providers.cognito import COGNITO_GROUPS_CLAIM
-from auth_middleware.providers.authz.groups_provider import GroupsProvider
+from auth_middleware.providers.authz.roles_provider import RolesProvider
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 
-class CognitoGroupsProvider(GroupsProvider):
+class CognitoGroupsAsRolesProvider(RolesProvider):
     """Recovers groups from AWS Cognito using the token provided
 
     Args:
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    async def fetch_groups(self, token: str | JWTAuthorizationCredentials) -> list[str]:
-        """Get groups using the token provided
+    async def fetch_roles(self, token: str | JWTAuthorizationCredentials) -> list[str]:
+        """Get roles using the token provided
 
         Args:
             token (JWTAuthorizationCredentials | str): The token containing the claims.

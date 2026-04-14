@@ -144,10 +144,12 @@ class TestCLI:
         mock_provider = AsyncMock()
         mock_provider.get_permissions_from_db.return_value = ["test"]
         mock_provider_class.return_value = mock_provider
-        
+        # Close the coroutine so it is not left unawaited (avoids RuntimeWarning)
+        mock_asyncio_run.side_effect = lambda coro: coro.close()
+
         runner = CliRunner()
         result = runner.invoke(get_permissions, ['testuser'])
-        
+
         # asyncio.run should have been called
         mock_asyncio_run.assert_called_once()
 
