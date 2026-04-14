@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authn.cognito_provider &mdash; Auth Middleware 0.3.5 documentation</title>
+  <title>auth_middleware.providers.authn.cognito_provider &mdash; Auth Middleware 0.3.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authn/cognito_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=ba50482b"></script>
+      <script src="../../../../_static/documentation_options.js?v=29d04658"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -158,6 +158,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">joserfc.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">JoseError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">joserfc.jwk</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_key</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.roles_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">RolesProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.cognito</span><span class="w"> </span><span class="kn">import</span> <span class="n">COGNITO_USERNAME_CLAIM</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
@@ -172,6 +174,32 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
 
 
+<span class="n">T_Provider</span> <span class="o">=</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="n">ProfileProvider</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_provider</span><span class="p">(</span>
+    <span class="n">provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">T_Provider</span><span class="p">]</span> <span class="o">|</span> <span class="n">T_Provider</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">base_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">T_Provider</span><span class="p">],</span>
+    <span class="n">allow_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T_Provider</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate *provider* if it is a class; return it as-is if already an</span>
+<span class="sd">    instance; raise ValueError if it is neither (unless *allow_missing* is True,</span>
+<span class="sd">    in which case ``None`` is returned silently).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">provider</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_class</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">provider</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_class</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">provider</span>
+    <span class="k">if</span> <span class="n">allow_missing</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;provider must be a </span><span class="si">{</span><span class="n">base_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> instance or subclass thereof&quot;</span>
+    <span class="p">)</span>
+
+
 <div class="viewcode-block" id="CognitoProvider">
 <a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CognitoProvider</span><span class="p">(</span><span class="n">JWTProvider</span><span class="p">):</span>
@@ -184,6 +212,7 @@
         <span class="o">|</span> <span class="n">PermissionsProvider</span>
         <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">groups_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">roles_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">RolesProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">profile_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">ProfileProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CognitoProvider</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating CognitoProvider instance&quot;</span><span class="p">)</span>
@@ -201,6 +230,7 @@
         <span class="o">|</span> <span class="n">PermissionsProvider</span>
         <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">groups_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">roles_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">RolesProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">profile_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">ProfileProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing CognitoProvider instance&quot;</span><span class="p">)</span>
@@ -209,59 +239,20 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Settings must be provided&quot;</span><span class="p">)</span>
 
-            <span class="c1"># TODO: Refactor this</span>
-            <span class="c1"># Lazy initialization for PermissionsProvider</span>
-            <span class="n">final_permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">permissions_provider</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">permissions_provider</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span>
-                    <span class="n">permissions_provider</span><span class="p">,</span> <span class="n">PermissionsProvider</span>
-                <span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing PermissionsProvider&quot;</span><span class="p">)</span>
-                    <span class="n">final_permissions_provider</span> <span class="o">=</span> <span class="n">permissions_provider</span><span class="p">()</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">permissions_provider</span><span class="p">,</span> <span class="n">PermissionsProvider</span><span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting PermissionsProvider&quot;</span><span class="p">)</span>
-                    <span class="n">final_permissions_provider</span> <span class="o">=</span> <span class="n">permissions_provider</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;permissions_provider must be a PermissionsProvider &quot;</span>
-                        <span class="s2">&quot;or a subclass thereof&quot;</span>
-                    <span class="p">)</span>
-
-            <span class="c1"># TODO: Refactor this</span>
-            <span class="c1"># Lazy initialization for GroupsProvider</span>
-            <span class="n">final_groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">groups_provider</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">groups_provider</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span>
-                    <span class="n">groups_provider</span><span class="p">,</span> <span class="n">GroupsProvider</span>
-                <span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing GroupsProvider&quot;</span><span class="p">)</span>
-                    <span class="n">final_groups_provider</span> <span class="o">=</span> <span class="n">groups_provider</span><span class="p">()</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">groups_provider</span><span class="p">,</span> <span class="n">GroupsProvider</span><span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting GroupsProvider&quot;</span><span class="p">)</span>
-                    <span class="n">final_groups_provider</span> <span class="o">=</span> <span class="n">groups_provider</span>
-
-            <span class="c1"># Lazy initialization for ProfileProvider</span>
-            <span class="n">final_profile_provider</span><span class="p">:</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="n">profile_provider</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">profile_provider</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span>
-                    <span class="n">profile_provider</span><span class="p">,</span> <span class="n">ProfileProvider</span>
-                <span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing ProfileProvider&quot;</span><span class="p">)</span>
-                    <span class="n">final_profile_provider</span> <span class="o">=</span> <span class="n">profile_provider</span><span class="p">()</span>
-                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">profile_provider</span><span class="p">,</span> <span class="n">ProfileProvider</span><span class="p">):</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting ProfileProvider&quot;</span><span class="p">)</span>
-                    <span class="n">final_profile_provider</span> <span class="o">=</span> <span class="n">profile_provider</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;profile_provider must be a ProfileProvider &quot;</span>
-                        <span class="s2">&quot;or a subclass thereof&quot;</span>
-                    <span class="p">)</span>
-
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
                 <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
-                <span class="n">permissions_provider</span><span class="o">=</span><span class="n">final_permissions_provider</span><span class="p">,</span>
-                <span class="n">groups_provider</span><span class="o">=</span><span class="n">final_groups_provider</span><span class="p">,</span>
-                <span class="n">profile_provider</span><span class="o">=</span><span class="n">final_profile_provider</span><span class="p">,</span>
+                <span class="n">permissions_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>
+                    <span class="n">permissions_provider</span><span class="p">,</span> <span class="n">PermissionsProvider</span>
+                <span class="p">),</span>
+                <span class="n">groups_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>
+                    <span class="n">groups_provider</span><span class="p">,</span> <span class="n">GroupsProvider</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">),</span>
+                <span class="n">roles_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>
+                    <span class="n">roles_provider</span><span class="p">,</span> <span class="n">RolesProvider</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">),</span>
+                <span class="n">profile_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>
+                    <span class="n">profile_provider</span><span class="p">,</span> <span class="n">ProfileProvider</span>
+                <span class="p">),</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">True</span></div>
 
@@ -366,7 +357,7 @@
         <span class="n">client_id</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">get_client_id</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_m2m</span> <span class="k">else</span> <span class="kc">None</span>
 
         <span class="n">name_property</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;username&quot;</span> <span class="k">if</span> <span class="s2">&quot;username&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="s2">&quot;cognito:username&quot;</span>
+            <span class="s2">&quot;username&quot;</span> <span class="k">if</span> <span class="s2">&quot;username&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="n">COGNITO_USERNAME_CLAIM</span>
         <span class="p">)</span>
 
         <span class="c1"># Get groups directly using the groups provider</span>
@@ -375,10 +366,17 @@
             <span class="c1"># M2M tokens typically don&#39;t have groups</span>
             <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
+        <span class="c1"># Get roles directly using the roles provider</span>
+        <span class="n">roles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
+            <span class="c1"># M2M tokens typically don&#39;t have roles</span>
+            <span class="n">roles</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="o">.</span><span class="n">fetch_roles</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
             <span class="n">token</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">token</span><span class="p">),</span>
             <span class="n">jwt_credentials</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
             <span class="n">groups_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="p">,</span>
+            <span class="n">roles_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="p">,</span>
             <span class="n">permissions_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span><span class="p">,</span>
             <span class="n">profile_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_profile_provider</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">],</span>
@@ -389,6 +387,7 @@
             <span class="p">),</span>
             <span class="n">email</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;email&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
+            <span class="n">roles</span><span class="o">=</span><span class="n">roles</span><span class="p">,</span>
             <span class="n">is_m2m</span><span class="o">=</span><span class="n">is_m2m</span><span class="p">,</span>
             <span class="n">client_id</span><span class="o">=</span><span class="n">client_id</span><span class="p">,</span>
         <span class="p">)</span></div>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authn.jwt_provider &mdash; Auth Middleware 0.3.5 documentation</title>
+  <title>auth_middleware.providers.authn.jwt_provider &mdash; Auth Middleware 0.3.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authn/jwt_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=ba50482b"></script>
+      <script src="../../../../_static/documentation_options.js?v=29d04658"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -164,6 +164,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">JWTProviderSettings</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.roles_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">RolesProvider</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.profile.profile_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProfileProvider</span>
@@ -181,6 +182,7 @@
     <span class="n">_settings</span><span class="p">:</span> <span class="n">JWTProviderSettings</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">_permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">_groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">_roles_provider</span><span class="p">:</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">_profile_provider</span><span class="p">:</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">_background_refresh_task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span> <span class="o">|</span> <span class="kc">None</span>
 
@@ -191,11 +193,13 @@
         <span class="n">settings</span><span class="p">:</span> <span class="n">JWTProviderSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">roles_provider</span><span class="p">:</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">profile_provider</span><span class="p">:</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span> <span class="o">=</span> <span class="n">permissions_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="o">=</span> <span class="n">groups_provider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span> <span class="o">=</span> <span class="n">roles_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_profile_provider</span> <span class="o">=</span> <span class="n">profile_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_background_refresh_task</span> <span class="o">=</span> <span class="kc">None</span></div>
 
@@ -266,9 +270,8 @@
                 <span class="k">return</span> <span class="kc">True</span>
 
         <span class="c1"># Check usage-based refresh</span>
-        <span class="k">if</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;usage&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;usage&quot;</span><span class="p">,</span> <span class="s2">&quot;both&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">jks</span><span class="o">.</span><span class="n">usage_counter</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="kc">False</span>
 

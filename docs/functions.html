@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Authentication Functions &mdash; Auth Middleware 0.3.5 documentation</title>
+  <title>Authentication Functions &mdash; Auth Middleware 0.3.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/functions.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=ba50482b"></script>
+      <script src="_static/documentation_options.js?v=29d04658"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -150,8 +150,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.get_current_user"><code class="docutils literal notranslate"><span class="pre">get_current_user()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.has_groups"><code class="docutils literal notranslate"><span class="pre">has_groups()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.has_permissions"><code class="docutils literal notranslate"><span class="pre">has_permissions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.has_roles"><code class="docutils literal notranslate"><span class="pre">has_roles()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.require_groups"><code class="docutils literal notranslate"><span class="pre">require_groups()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.require_permissions"><code class="docutils literal notranslate"><span class="pre">require_permissions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.require_roles"><code class="docutils literal notranslate"><span class="pre">require_roles()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.functions.require_user"><code class="docutils literal notranslate"><span class="pre">require_user()</span></code></a></li>
 </ul>
 </li>
@@ -459,6 +461,26 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="auth_middleware.functions.has_roles">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.functions.</span></span><span class="sig-name descname"><span class="pre">has_roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://fastapi.tiangolo.com/reference/request/#fastapi.Request" title="(in FastAPI v0.0.0)"><span class="pre">Request</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">allowed_roles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/functions.html#has_roles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.functions.has_roles" title="Link to this definition"></a></dt>
+<dd><p>Check if the user has the required roles asynchronously</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>Request</em>) – FastAPI request object</p></li>
+<li><p><strong>allowed_roles</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – a list of required roles</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the user has the required roles, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="auth_middleware.functions.require_groups">
 <span class="sig-prename descclassname"><span class="pre">auth_middleware.functions.</span></span><span class="sig-name descname"><span class="pre">require_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/functions.html#require_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.functions.require_groups" title="Link to this definition"></a></dt>
 <dd><p>Check if the user has the required groups</p>
@@ -476,6 +498,17 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>allowed_permissions</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – a list of required permissions</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="auth_middleware.functions.require_roles">
+<span class="sig-prename descclassname"><span class="pre">auth_middleware.functions.</span></span><span class="sig-name descname"><span class="pre">require_roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allowed_roles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/functions.html#require_roles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.functions.require_roles" title="Link to this definition"></a></dt>
+<dd><p>Check if the user has the required roles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>allowed_roles</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – a list of required roles</p>
 </dd>
 </dl>
 </dd></dl>

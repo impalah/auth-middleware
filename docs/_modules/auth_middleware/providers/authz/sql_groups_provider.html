@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.authz.sql_groups_provider &mdash; Auth Middleware 0.3.5 documentation</title>
+  <title>auth_middleware.providers.authz.sql_groups_provider &mdash; Auth Middleware 0.3.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/authz/sql_groups_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=ba50482b"></script>
+      <script src="../../../../_static/documentation_options.js?v=29d04658"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -152,7 +152,6 @@
              
   <h1>Source code for auth_middleware.providers.authz.sql_groups_provider</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ksuid</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ksuid</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">String</span><span class="p">,</span> <span class="n">select</span>
@@ -198,11 +197,11 @@
 
 <div class="viewcode-block" id="SqlGroupsProvider.fetch_groups">
 <a class="viewcode-back" href="../../../../groups-provider.html#auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider.fetch_groups">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get groups using the token provided</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            token (JWTAuthorizationCredentials): _description_</span>
+<span class="sd">            token (JWTAuthorizationCredentials | str): The token containing the claims.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            NotImplementedError: _description_</span>
