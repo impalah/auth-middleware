@@ -3,16 +3,16 @@ from abc import ABCMeta, abstractmethod
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 
-class PermissionsProvider(metaclass=ABCMeta):
-    """Basic interface for a permissions provider
+class RolesProvider(metaclass=ABCMeta):
+    """Basic interface for a roles provider
 
     Args:
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
     @abstractmethod
-    async def fetch_permissions(self, token: str | JWTAuthorizationCredentials) -> list[str]:
-        """Get permissions using the token provided
+    async def fetch_roles(self, token: str | JWTAuthorizationCredentials) -> list[str]:
+        """Get roles using the token provided
 
         Args:
             token (JWTAuthorizationCredentials | str): The token containing the claims.

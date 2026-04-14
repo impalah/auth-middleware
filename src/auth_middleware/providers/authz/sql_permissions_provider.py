@@ -1,6 +1,5 @@
 # Activate annotations for Python 3.7+ and from __future__ import annotations
 from __future__ import annotations
-from typing import Union
 
 from ksuid import Ksuid
 from sqlalchemy import String, select
@@ -42,11 +41,11 @@ class SqlPermissionsProvider(PermissionsProvider):
         metaclass (_type_, optional): _description_. Defaults to ABCMeta.
     """
 
-    async def fetch_permissions(self, token: Union[str, JWTAuthorizationCredentials]) -> list[str]:
+    async def fetch_permissions(self, token: str | JWTAuthorizationCredentials) -> list[str]:
         """Get groups using the token provided
 
         Args:
-            token (JWTAuthorizationCredentials): _description_
+            token (JWTAuthorizationCredentials | str): The token containing the claims.
 
         Raises:
             NotImplementedError: _description_

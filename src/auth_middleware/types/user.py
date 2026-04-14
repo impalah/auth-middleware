@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, PrivateAttr
 
+from auth_middleware.providers.authz.roles_provider import RolesProvider
+
 if TYPE_CHECKING:
     from auth_middleware.providers.authz.groups_provider import GroupsProvider
     from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
@@ -21,12 +23,15 @@ class User(BaseModel):
 
     _permissions_provider: PermissionsProvider | None = PrivateAttr(default=None)
     _groups_provider: GroupsProvider | None = PrivateAttr(default=None)
+    _roles_provider: RolesProvider | None = PrivateAttr(default=None)
     _profile_provider: ProfileProvider | None = PrivateAttr(default=None)
     _token: str | None = PrivateAttr(default=None)
     _jwt_credentials: JWTAuthorizationCredentials | None = PrivateAttr(default=None)
 
     _groups: list[str] | None = None
     _groups_task: asyncio.Task[list[str]] | None = None
+    _roles: list[str] | None = None
+    _roles_task: asyncio.Task[list[str]] | None = None
     _permissions: list[str] | None = None
     _permissions_task: asyncio.Task[list[str]] | None = None
     _profile: dict[str, Any] | None = None
@@ -38,6 +43,7 @@ class User(BaseModel):
         jwt_credentials: JWTAuthorizationCredentials | None = None,
         permissions_provider: PermissionsProvider | None = None,
         groups_provider: GroupsProvider | None = None,
+        roles_provider: RolesProvider | None = None,
         profile_provider: ProfileProvider | None = None,
         **data: Any,
     ):
@@ -55,12 +61,18 @@ class User(BaseModel):
         # Store the groups provider (e.g., SQL, DynamoDB, etc.)
         self._groups_provider = groups_provider
 
+        # Store the roles provider (e.g., SQL, DynamoDB, etc.)
+        self._roles_provider = roles_provider
+
         # Store the profile provider (e.g., Cognito, SQL, etc.)
         self._profile_provider = profile_provider
 
         # Handle groups passed directly in constructor
         if "groups" in data:
             self._groups = data["groups"]
+        
+        if "roles" in data:
+            self._roles = data["roles"]
 
     id: str = Field(
         ...,
@@ -106,39 +118,6 @@ class User(BaseModel):
         },
     )
 
-    # groups: Optional[List[str]] = Field(
-    #     default=None,
-    #     json_schema_extra={
-    #         "description": "List of user groups",
-    #         "example": '["admin", "user"]',
-    #     },
-    # )
-
-    # groups: Optional[List[str]] = Field(
-    #     default=[],
-    #     json_schema_extra={
-    #         "description": "List of user groups",
-    #         "example": '["admin", "user"]',
-    #     },
-    # )
-
-    # @property
-    # def groups(self) -> List[str]:
-    #     """Lazy loads the groups from the given provider
-
-    #     Returns:
-    #         List[str]: List of groups for the user
-    #     """
-    #     if not self._groups_provider or not self._token:
-    #         return []
-
-    #     cache_key = f"user:{self.id}:groups"
-
-    #     # If not in cache, fetch from the database using the injected provider
-    #     groups = await self._groups_provider.fetch_groups(self._token)
-
-    #     return groups
-
     @property
     async def groups(self) -> list[str]:
         """Async property to get the groups of the user.
@@ -156,6 +135,7 @@ class User(BaseModel):
 
         return self._groups
 
+
     async def _load_groups(self) -> list[str]:
         """Load the groups of the user.
 
@@ -171,6 +151,40 @@ class User(BaseModel):
 
         groups = await self._groups_provider.fetch_groups(self._token)
         return groups
+
+    @property
+    async def roles(self) -> list[str]:
+        """Async property to get the roles of the user.
+
+        Returns:
+            List[str]: _description_
+        """
+        if self._roles is None:
+            if self._roles_task is None:
+                # Init a new async task to load the roles
+                self._roles_task = asyncio.create_task(self._load_roles())
+
+            # Wait for the task to finish
+            self._roles = await self._roles_task
+
+        return self._roles
+
+
+    async def _load_roles(self) -> list[str]:
+        """Load the roles of the user.
+
+        Returns:
+            List[str]: _description_
+        """
+        # If roles were set directly in constructor, return them
+        if self._roles is not None:
+            return self._roles
+
+        if not self._roles_provider or not self._token:
+            return []
+
+        roles = await self._roles_provider.fetch_roles(self._token)
+        return roles
 
     @property
     async def permissions(self) -> list[str]:

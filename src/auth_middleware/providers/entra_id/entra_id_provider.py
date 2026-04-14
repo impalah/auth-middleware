@@ -18,10 +18,6 @@ from auth_middleware.types.user import User
 
 
 class EntraIDProvider(JWTProvider):
-    # def __new__(cls):
-    #     if not hasattr(cls, "instance"):
-    #         cls.instance = super(EntraIDProvider, cls).__new__(cls)
-    #     return cls.instance
 
     def __new__(
         cls,
@@ -169,12 +165,6 @@ class EntraIDProvider(JWTProvider):
         name_property: str = (
             "username" if "username" in token.claims else "preferred_username"
         )
-
-        # groups=(
-        #     token.claims["groups"]
-        #     if "groups" in token.claims
-        #     else [str(token.claims["scope"]).split("/")[-1]]
-        # ),
 
         groups: list[str] = (
             await self._groups_provider.fetch_groups(token) if self._groups_provider else []

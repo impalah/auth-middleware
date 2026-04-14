@@ -5,6 +5,8 @@ from joserfc import jwt as joserfc_jwt
 from joserfc.errors import JoseError
 from joserfc.jwk import import_key
 
+from auth_middleware.providers.authz.roles_provider import RolesProvider
+from auth_middleware.providers.cognito import COGNITO_USERNAME_CLAIM
 from auth_middleware.logging import logger
 from auth_middleware.providers.authn.cognito_authz_provider_settings import (
     CognitoAuthzProviderSettings,
@@ -19,6 +21,32 @@ from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
 
+T_Provider = PermissionsProvider | GroupsProvider | ProfileProvider
+
+
+def _resolve_provider(
+    provider: type[T_Provider] | T_Provider | None,
+    base_class: type[T_Provider],
+    allow_missing: bool = False,
+) -> T_Provider | None:
+    """Instantiate *provider* if it is a class; return it as-is if already an
+    instance; raise ValueError if it is neither (unless *allow_missing* is True,
+    in which case ``None`` is returned silently)."""
+    if provider is None:
+        return None
+    if isinstance(provider, type) and issubclass(provider, base_class):
+        logger.debug("Initializing %s", base_class.__name__)
+        return provider()
+    if isinstance(provider, base_class):
+        logger.debug("Setting %s", base_class.__name__)
+        return provider
+    if allow_missing:
+        return None
+    raise ValueError(
+        f"provider must be a {base_class.__name__} instance or subclass thereof"
+    )
+
+
 class CognitoProvider(JWTProvider):
     _instances = {}  # Dict to store separate instances per class
 
@@ -29,6 +57,7 @@ class CognitoProvider(JWTProvider):
         | PermissionsProvider
         | None = None,
         groups_provider: type[GroupsProvider] | GroupsProvider | None = None,
+        roles_provider: type[RolesProvider] | RolesProvider | None = None,
         profile_provider: type[ProfileProvider] | ProfileProvider | None = None,
     ) -> CognitoProvider:
         logger.debug("Creating CognitoProvider instance")
@@ -44,6 +73,7 @@ class CognitoProvider(JWTProvider):
         | PermissionsProvider
         | None = None,
         groups_provider: type[GroupsProvider] | GroupsProvider | None = None,
+        roles_provider: type[RolesProvider] | RolesProvider | None = None,
         profile_provider: type[ProfileProvider] | ProfileProvider | None = None,
     ) -> None:
         logger.debug("Initializing CognitoProvider instance")
@@ -52,59 +82,20 @@ class CognitoProvider(JWTProvider):
             if not settings:
                 raise ValueError("Settings must be provided")
 
-            # TODO: Refactor this
-            # Lazy initialization for PermissionsProvider
-            final_permissions_provider: PermissionsProvider | None = None
-            if permissions_provider:
-                if isinstance(permissions_provider, type) and issubclass(
-                    permissions_provider, PermissionsProvider
-                ):
-                    logger.debug("Initializing PermissionsProvider")
-                    final_permissions_provider = permissions_provider()
-                elif isinstance(permissions_provider, PermissionsProvider):
-                    logger.debug("Setting PermissionsProvider")
-                    final_permissions_provider = permissions_provider
-                else:
-                    raise ValueError(
-                        "permissions_provider must be a PermissionsProvider "
-                        "or a subclass thereof"
-                    )
-
-            # TODO: Refactor this
-            # Lazy initialization for GroupsProvider
-            final_groups_provider: GroupsProvider | None = None
-            if groups_provider:
-                if isinstance(groups_provider, type) and issubclass(
-                    groups_provider, GroupsProvider
-                ):
-                    logger.debug("Initializing GroupsProvider")
-                    final_groups_provider = groups_provider()
-                elif isinstance(groups_provider, GroupsProvider):
-                    logger.debug("Setting GroupsProvider")
-                    final_groups_provider = groups_provider
-
-            # Lazy initialization for ProfileProvider
-            final_profile_provider: ProfileProvider | None = None
-            if profile_provider:
-                if isinstance(profile_provider, type) and issubclass(
-                    profile_provider, ProfileProvider
-                ):
-                    logger.debug("Initializing ProfileProvider")
-                    final_profile_provider = profile_provider()
-                elif isinstance(profile_provider, ProfileProvider):
-                    logger.debug("Setting ProfileProvider")
-                    final_profile_provider = profile_provider
-                else:
-                    raise ValueError(
-                        "profile_provider must be a ProfileProvider "
-                        "or a subclass thereof"
-                    )
-
             super().__init__(
                 settings=settings,
-                permissions_provider=final_permissions_provider,
-                groups_provider=final_groups_provider,
-                profile_provider=final_profile_provider,
+                permissions_provider=_resolve_provider(
+                    permissions_provider, PermissionsProvider
+                ),
+                groups_provider=_resolve_provider(
+                    groups_provider, GroupsProvider, allow_missing=True
+                ),
+                roles_provider=_resolve_provider(
+                    roles_provider, RolesProvider, allow_missing=True
+                ),
+                profile_provider=_resolve_provider(
+                    profile_provider, ProfileProvider
+                ),
             )
             self._initialized = True
 
@@ -197,7 +188,7 @@ class CognitoProvider(JWTProvider):
         client_id = M2MTokenDetector.get_client_id(token) if is_m2m else None
 
         name_property: str = (
-            "username" if "username" in token.claims else "cognito:username"
+            "username" if "username" in token.claims else COGNITO_USERNAME_CLAIM
         )
 
         # Get groups directly using the groups provider
@@ -206,10 +197,17 @@ class CognitoProvider(JWTProvider):
             # M2M tokens typically don't have groups
             groups = await self._groups_provider.fetch_groups(token)
 
+        # Get roles directly using the roles provider
+        roles: list[str] = []
+        if self._roles_provider and not is_m2m:
+            # M2M tokens typically don't have roles
+            roles = await self._roles_provider.fetch_roles(token)
+
         return User(
             token=str(token),
             jwt_credentials=token,
             groups_provider=self._groups_provider,
+            roles_provider=self._roles_provider,
             permissions_provider=self._permissions_provider,
             profile_provider=self._profile_provider,
             id=token.claims["sub"],
@@ -220,6 +218,7 @@ class CognitoProvider(JWTProvider):
             ),
             email=token.claims["email"] if "email" in token.claims else None,
             groups=groups,
+            roles=roles,
             is_m2m=is_m2m,
             client_id=client_id,
         )

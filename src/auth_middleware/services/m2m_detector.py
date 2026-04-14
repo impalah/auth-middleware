@@ -8,6 +8,7 @@ in AWS Cognito authentication flows.
 import logging
 from typing import Any
 
+from auth_middleware.providers.cognito import COGNITO_USERNAME_CLAIM
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 logger = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ class M2MTokenDetector:
         claims = token.claims
 
         # Primary indicator: Missing cognito:username (Cognito-specific)
-        has_cognito_username = "cognito:username" in claims or "username" in claims
+        has_cognito_username = COGNITO_USERNAME_CLAIM in claims or "username" in claims
 
         # Secondary indicators
         token_use = claims.get("token_use", "")
@@ -89,7 +90,7 @@ class M2MTokenDetector:
             )
         else:
             logger.debug(
-                f"Detected user token: username={claims.get('cognito:username') or claims.get('username')}"
+                f"Detected user token: username={claims.get(COGNITO_USERNAME_CLAIM) or claims.get('username')}"
             )
 
         return is_m2m
@@ -143,7 +144,7 @@ class M2MTokenDetector:
             "token_use": claims.get("token_use"),
             "scopes": claims.get("scope", "").split() if claims.get("scope") else [],
             "has_user_context": bool(
-                claims.get("cognito:username")
+                claims.get(COGNITO_USERNAME_CLAIM)
                 or claims.get("username")
                 or claims.get("email")
             ),
@@ -155,7 +156,7 @@ class M2MTokenDetector:
             metadata["service_account"] = claims.get("client_id")
         else:
             # User-specific metadata
-            metadata["username"] = claims.get("cognito:username") or claims.get(
+            metadata["username"] = claims.get(COGNITO_USERNAME_CLAIM) or claims.get(
                 "username"
             )
             metadata["email"] = claims.get("email")

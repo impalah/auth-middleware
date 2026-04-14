@@ -155,6 +155,52 @@ class RateLimiter:
         logger.debug("All rate limit data cleared")
 
 
+def _resolve_identifier(
+    request: Request, identifier_fn: Callable[[Request], str] | None
+) -> str:
+    """Extract a rate-limit identifier from the request."""
+    if identifier_fn:
+        return identifier_fn(request)
+    if hasattr(request.state, "current_user"):
+        return request.state.current_user.id
+    return request.client.host if request.client else "unknown"
+
+
+def _enforce_rate_limit(
+    limiter: RateLimiter,
+    identifier: str,
+    max_requests: int,
+    window_seconds: int,
+) -> None:
+    """Raise HTTP 429 if the rate limit is exceeded."""
+    if not limiter.is_allowed(identifier):
+        remaining = limiter.get_remaining(identifier)
+        raise HTTPException(
+            status_code=HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Rate limit exceeded. Max {max_requests} requests per {window_seconds}s",
+            headers={
+                "X-RateLimit-Limit": str(max_requests),
+                "X-RateLimit-Remaining": str(remaining),
+                "X-RateLimit-Reset": str(int(time.time() + window_seconds)),
+            },
+        )
+
+
+def _apply_rate_limit_headers(
+    response: object,
+    limiter: RateLimiter,
+    identifier: str,
+    max_requests: int,
+    window_seconds: int,
+) -> None:
+    """Attach X-RateLimit-* headers to *response* if it supports them."""
+    if hasattr(response, "headers"):
+        remaining = limiter.get_remaining(identifier)
+        response.headers["X-RateLimit-Limit"] = str(max_requests)  # type: ignore[union-attr]
+        response.headers["X-RateLimit-Remaining"] = str(remaining)  # type: ignore[union-attr]
+        response.headers["X-RateLimit-Reset"] = str(int(time.time() + window_seconds))  # type: ignore[union-attr]
+
+
 def rate_limit(
     max_requests: int = 100,
     window_seconds: int = 60,
@@ -198,77 +244,18 @@ def rate_limit(
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def async_wrapper(request: Request, *args, **kwargs):
-            # Get identifier
-            if identifier_fn:
-                identifier = identifier_fn(request)
-            elif hasattr(request.state, "current_user"):
-                identifier = request.state.current_user.id
-            else:
-                # Fallback to client IP if no user
-                identifier = request.client.host if request.client else "unknown"
-
-            # Check rate limit
-            if not limiter.is_allowed(identifier):
-                remaining = limiter.get_remaining(identifier)
-                raise HTTPException(
-                    status_code=HTTP_429_TOO_MANY_REQUESTS,
-                    detail=f"Rate limit exceeded. Max {max_requests} requests per {window_seconds}s",
-                    headers={
-                        "X-RateLimit-Limit": str(max_requests),
-                        "X-RateLimit-Remaining": str(remaining),
-                        "X-RateLimit-Reset": str(int(time.time() + window_seconds)),
-                    },
-                )
-
-            # Add rate limit headers to response
+            identifier = _resolve_identifier(request, identifier_fn)
+            _enforce_rate_limit(limiter, identifier, max_requests, window_seconds)
             response = await func(request, *args, **kwargs)
-
-            # Try to add headers if response supports it
-            if hasattr(response, "headers"):
-                remaining = limiter.get_remaining(identifier)
-                response.headers["X-RateLimit-Limit"] = str(max_requests)
-                response.headers["X-RateLimit-Remaining"] = str(remaining)
-                response.headers["X-RateLimit-Reset"] = str(
-                    int(time.time() + window_seconds)
-                )
-
+            _apply_rate_limit_headers(response, limiter, identifier, max_requests, window_seconds)
             return response
 
         @wraps(func)
         def sync_wrapper(request: Request, *args, **kwargs):
-            # Get identifier
-            if identifier_fn:
-                identifier = identifier_fn(request)
-            elif hasattr(request.state, "current_user"):
-                identifier = request.state.current_user.id
-            else:
-                identifier = request.client.host if request.client else "unknown"
-
-            # Check rate limit
-            if not limiter.is_allowed(identifier):
-                remaining = limiter.get_remaining(identifier)
-                raise HTTPException(
-                    status_code=HTTP_429_TOO_MANY_REQUESTS,
-                    detail=f"Rate limit exceeded. Max {max_requests} requests per {window_seconds}s",
-                    headers={
-                        "X-RateLimit-Limit": str(max_requests),
-                        "X-RateLimit-Remaining": str(remaining),
-                        "X-RateLimit-Reset": str(int(time.time() + window_seconds)),
-                    },
-                )
-
-            # Execute function
+            identifier = _resolve_identifier(request, identifier_fn)
+            _enforce_rate_limit(limiter, identifier, max_requests, window_seconds)
             response = func(request, *args, **kwargs)
-
-            # Try to add headers if response supports it
-            if hasattr(response, "headers"):
-                remaining = limiter.get_remaining(identifier)
-                response.headers["X-RateLimit-Limit"] = str(max_requests)
-                response.headers["X-RateLimit-Remaining"] = str(remaining)
-                response.headers["X-RateLimit-Reset"] = str(
-                    int(time.time() + window_seconds)
-                )
-
+            _apply_rate_limit_headers(response, limiter, identifier, max_requests, window_seconds)
             return response
 
         # Return appropriate wrapper based on function type
