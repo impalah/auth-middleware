@@ -1,6 +1,6 @@
 [project]
 name = "auth-middleware"
-version = "0.3.5"
+version = "0.3.6"
 description = "Async Auth Middleware for FastAPI/Starlette"
 authors = [
     {name = "impalah", email = "impalah@gmail.com"}
