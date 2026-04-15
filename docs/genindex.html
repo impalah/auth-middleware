@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; Auth Middleware 0.3.7 documentation</title>
+  <title>Index &mdash; Auth Middleware 0.3.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/genindex.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=29d04658"></script>
+      <script src="_static/documentation_options.js?v=c1cae59a"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -177,9 +177,21 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.__init__">__init__() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
+      <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError.__init__">__init__() (auth_middleware.exceptions.AuthenticationError method)</a>
 
       <ul>
+        <li><a href="exceptions.html#auth_middleware.exceptions.ChallengeRequiredError.__init__">(auth_middleware.exceptions.ChallengeRequiredError method)</a>
+</li>
+        <li><a href="exceptions.html#auth_middleware.exceptions.InvalidChallengeError.__init__">(auth_middleware.exceptions.InvalidChallengeError method)</a>
+</li>
+        <li><a href="exceptions.html#auth_middleware.exceptions.MfaSetupError.__init__">(auth_middleware.exceptions.MfaSetupError method)</a>
+</li>
+        <li><a href="exceptions.html#auth_middleware.exceptions.PasswordPolicyError.__init__">(auth_middleware.exceptions.PasswordPolicyError method)</a>
+</li>
+        <li><a href="exceptions.html#auth_middleware.exceptions.UserNotFoundError.__init__">(auth_middleware.exceptions.UserNotFoundError method)</a>
+</li>
+        <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.__init__">(auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
+</li>
         <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager.__init__">(auth_middleware.jwt_bearer_manager.JWTBearerManager method)</a>
 </li>
         <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.__init__">(auth_middleware.providers.authn.cognito_provider.CognitoProvider method)</a>
@@ -290,6 +302,8 @@
         <li><a href="types.html#module-auth_middleware.types">module</a>
 </li>
       </ul></li>
+      <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError">AuthenticationError</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -309,14 +323,16 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="exceptions.html#auth_middleware.exceptions.ChallengeRequiredError">ChallengeRequiredError</a>
+</li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.client_id">client_id (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings">CognitoAuthzProviderSettings (class in auth_middleware.providers.authn.cognito_authz_provider_settings)</a>
 </li>
-      <li><a href="cognito_provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider">CognitoGroupsProvider (class in auth_middleware.providers.authz.cognito_groups_provider)</a>, <a href="groups-provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="cognito_provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider">CognitoGroupsProvider (class in auth_middleware.providers.authz.cognito_groups_provider)</a>, <a href="groups-provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider">[1]</a>
+</li>
       <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider">CognitoProvider (class in auth_middleware.providers.authn.cognito_provider)</a>
 </li>
       <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider.create_user_from_token">create_user_from_token() (auth_middleware.providers.authn.cognito_provider.CognitoProvider method)</a>
@@ -411,10 +427,18 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="services.html#auth_middleware.services.AuditEvent.ip_address">ip_address (auth_middleware.services.AuditEvent attribute)</a>
+      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidAuthorizationException">InvalidAuthorizationException</a>
+</li>
+      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidChallengeError">InvalidChallengeError</a>
+</li>
+      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidCredentialsException">InvalidCredentialsException</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidTokenException">InvalidTokenException</a>
+</li>
+      <li><a href="services.html#auth_middleware.services.AuditEvent.ip_address">ip_address (auth_middleware.services.AuditEvent attribute)</a>
+</li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.is_m2m">is_m2m (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.M2MTokenDetector.is_m2m_token">is_m2m_token() (auth_middleware.services.M2MTokenDetector static method)</a>
@@ -485,6 +509,8 @@
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.method">method (auth_middleware.services.AuditEvent attribute)</a>
 </li>
+      <li><a href="exceptions.html#auth_middleware.exceptions.MfaSetupError">MfaSetupError</a>
+</li>
       <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.model_config">model_config (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 
       <ul>
@@ -522,10 +548,12 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="services.html#auth_middleware.services.AuditEvent.path">path (auth_middleware.services.AuditEvent attribute)</a>
+      <li><a href="exceptions.html#auth_middleware.exceptions.PasswordPolicyError">PasswordPolicyError</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="services.html#auth_middleware.services.AuditEvent.path">path (auth_middleware.services.AuditEvent attribute)</a>
+</li>
       <li><a href="permissions-provider.html#auth_middleware.providers.authz.permissions_provider.PermissionsProvider">PermissionsProvider (class in auth_middleware.providers.authz.permissions_provider)</a>
 </li>
   </ul></td>
@@ -593,6 +621,8 @@
       <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_id">user_pool_id (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
       <li><a href="cognito_provider.html#auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_region">user_pool_region (auth_middleware.providers.authn.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+</li>
+      <li><a href="exceptions.html#auth_middleware.exceptions.UserNotFoundError">UserNotFoundError</a>
 </li>
   </ul></td>
 </tr></table>
