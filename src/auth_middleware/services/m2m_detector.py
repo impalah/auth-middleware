@@ -77,7 +77,7 @@ class M2MTokenDetector:
         # - Have client_id but no user-specific claims
         is_m2m = (
             not has_cognito_username
-            and (token_use == "access" or not token_use)
+            and (token_use == "access" or not token_use)  # nosec B105 - JWT token_use claim value, not a password
             and has_client_id
             and not has_email
             and not has_name

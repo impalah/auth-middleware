@@ -51,8 +51,8 @@ class AWSCredentials(BaseModel):
         json_schema_extra={
             "example": {
                 "access_key_id": "ASIAXAMPLEXAMPLEXA",
-                "secret_access_key": "secretaccesskeyexamplesecretaccesskeyexample",
-                "session_token": "FwoGZXIvYXdzEBExample//////////SessionTokenExample",
+                "secret_access_key": "secretaccesskeyexamplesecretaccesskeyexample",  # nosec B105 - example value in docstring
+                "session_token": "FwoGZXIvYXdzEBExample//////////SessionTokenExample",  # nosec B105 - example value in docstring
                 "expiration": "2026-01-29T15:00:00Z",
                 "identity_id": "us-east-1:12345678-1234-1234-1234-123456789012",
             }
