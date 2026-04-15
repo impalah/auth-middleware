@@ -87,9 +87,8 @@ docker-release: docker-build
 lint:
 	uv run ruff check src/ tests/
 
-# Format code with black
-format:
-	uv run black src/ tests/
+format: ## Format code
+	uv run ruff format .
 
 # Run type checking with mypy
 type-check:
