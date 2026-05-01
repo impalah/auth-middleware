@@ -1,4 +1,29 @@
 {
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingParameterType": "warning",
+        "reportMissingTypeArgument": "warning",
+        "reportUnknownParameterType": "warning",
+        "reportUnknownVariableType": "information",
+        "reportUnknownMemberType": "information"
+    },
+    "mypy-type-checker.severity": {
+        "error": "Warning",
+        "note": "Information"
+    },
+    "mypy-type-checker.args": [
+        "--config-file",
+        "${workspaceFolder}/pyproject.toml"
+    ],
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
     "sonarlint.connectedMode.project": {
         "connectionId": "local",
         "projectKey": "auth-middleware"

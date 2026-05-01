@@ -1,5 +1,15 @@
 {
   "recommendations": [
+    // Python core
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.debugpy",
+    // Linting / formatting
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    // Security
+    "SonarSource.sonarlint-vscode",
+    // Containers
     "ms-vscode-remote.remote-containers"
   ]
 }
