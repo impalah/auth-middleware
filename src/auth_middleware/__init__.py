@@ -4,7 +4,7 @@ from .group_checker import GroupChecker
 from .jwt_auth_middleware import JwtAuthMiddleware
 
 # Version info
-__version__ = "0.3.8"
+__version__ = "0.3.9"
 
 
 __all__ = [
