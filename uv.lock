@@ -123,11 +123,9 @@ wheels = [
 
 [[package]]
 name = "auth-middleware"
-version = "0.4.0"
+version = "0.4.3"
 source = { editable = "." }
 dependencies = [
-    { name = "aiomysql" },
-    { name = "asyncpg" },
     { name = "click" },
     { name = "fastapi" },
     { name = "httpx" },
@@ -136,8 +134,14 @@ dependencies = [
     { name = "pydantic", extra = ["email"] },
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
     { name = "svix-ksuid" },
+]
+
+[package.optional-dependencies]
+sqlalchemy = [
+    { name = "aiomysql" },
+    { name = "asyncpg" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
 ]
 
 [package.dev-dependencies]
@@ -170,8 +174,8 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiomysql", specifier = ">=0.3.2" },
-    { name = "asyncpg", specifier = ">=0.31.0" },
+    { name = "aiomysql", marker = "extra == 'sqlalchemy'", specifier = ">=0.3.2" },
+    { name = "asyncpg", marker = "extra == 'sqlalchemy'", specifier = ">=0.31.0" },
     { name = "click", specifier = ">=8.3.1" },
     { name = "fastapi", specifier = ">=0.128.0" },
     { name = "httpx", specifier = ">=0.28.1" },
@@ -180,9 +184,10 @@ requires-dist = [
     { name = "pydantic", extras = ["email"], specifier = ">=2.12.5" },
     { name = "pydantic-settings", specifier = ">=2.12.0" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.46" },
+    { name = "sqlalchemy", extras = ["asyncio"], marker = "extra == 'sqlalchemy'", specifier = ">=2.0.46" },
     { name = "svix-ksuid", specifier = ">=0.6.2" },
 ]
+provides-extras = ["sqlalchemy"]
 
 [package.metadata.requires-dev]
 dev = [

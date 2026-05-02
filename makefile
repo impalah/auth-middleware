@@ -27,15 +27,20 @@ venv:
 	echo "Created virtual environment" && \
 	uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version
 
-# Bump patch/minor/major version
+# Sync version from pyproject.toml to __init__.py and docs_source/conf.py
+sync-version:
+	uv run python scripts/update_version.py
+
+# Bump patch/minor/major version and sync across all files
 bump-version:
 	@v=$$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version) && \
 	echo "Current version: $$v" && \
 	uvx --from bump2version bumpversion --allow-dirty --current-version "$$v" $(PART) pyproject.toml && \
 	echo "Version bumped to new $(PART)"
+	$(MAKE) sync-version
 
-# Build python package
-build: bump-version
+# Build python package (run 'make bump-version' first if needed)
+build:
 	uv build
 
 # Clean build artifacts
@@ -149,7 +154,8 @@ help:
 	@echo "  venv          - Delete and recreate virtual environment"
 	@echo "  install       - Install project dependencies"
 	@echo "  install-all   - Install with all optional dependencies"
-	@echo "  bump-version  - Bump version (PART=patch|minor|major)"
+	@echo "  bump-version  - Bump version (PART=patch|minor|major) + sync"
+	@echo "  sync-version  - Sync version from pyproject.toml to all files"
 	@echo "  build         - Build package"
 	@echo "  publish       - Publish to PyPI"
 	@echo "  publish-test  - Publish to TestPyPI"
@@ -175,4 +181,4 @@ sonar: ## Run SonarQube analysis with pysonar
 
 sonar-check: test-cov sonar ## Run coverage and SonarQube analysis
 
-.PHONY: venv bump-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info docs docs-serve help sonar sonar-check
+.PHONY: venv bump-version sync-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info docs docs-serve help sonar sonar-check
