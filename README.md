@@ -13,137 +13,121 @@ Auth Middleware is a comprehensive, production-ready authentication and authoriz
 
 ### **Authentication Providers**
 
-- **AWS Cognito** - Full integration with Amazon Cognito User Pools
-- **Azure Entra ID** - Microsoft Azure Active Directory authentication
-- **Generic JWT** - Support for any JWT-based identity provider
-- **Custom Providers** - Extensible architecture for custom authentication
+- **AWS Cognito** — Full integration with Amazon Cognito User Pools
+- **AWS Cognito Identity Pool** — Exchange User Pool tokens for temporary AWS credentials
+- **Azure Entra ID** — Microsoft Azure Active Directory authentication
+- **Generic JWT** — Support for any JWT-based identity provider
+- **Basic Auth** — Username/password authentication via `BasicAuthMiddleware`
+- **Custom Providers** — Extensible architecture via the `JWTProvider` contract
 
 ### **Authorization & Access Control**
 
-- **Group-based Authorization** - Role-based access control with user groups
-- **Permission-based Authorization** - Fine-grained permission system
-- **SQL Backend Support** - PostgreSQL and MySQL for groups/permissions storage
-- **Cognito Groups Integration** - Direct integration with AWS Cognito groups
-- **Custom Authorization Providers** - Build your own authorization logic
+- **Group-based Authorization** — Role-based access control with user groups
+- **Role-based Authorization** — Fine-grained role system
+- **Permission-based Authorization** — Fine-grained permission system
+- **SQL Backend Support** — PostgreSQL and MySQL for groups/permissions storage via SQLAlchemy
+- **Cognito Groups Integration** — Direct integration with AWS Cognito groups (`cognito:groups` claim)
+- **Cognito Groups-as-Roles** — Map Cognito groups directly to roles
+- **Custom Authorization Providers** — Build your own via the `GroupsProvider`, `RolesProvider` and `PermissionsProvider` contracts
 
 ### **Performance & Reliability**
 
-- **Async-First Design** - Built for high-performance async applications
-- **JWKS Caching** - Intelligent caching of JSON Web Key Sets
-- **Connection Pooling** - Efficient database and HTTP connections
-- **Lazy Loading** - User groups and permissions loaded on-demand
-- **Error Resilience** - Graceful degradation on provider failures
+- **Async-First Design** — Built for high-performance async applications
+- **JWKS Caching** — Intelligent caching of JSON Web Key Sets
+- **Connection Pooling** — Efficient database and HTTP connections
+- **Lazy Loading** — User groups and permissions loaded on-demand
+- **Error Resilience** — Graceful degradation on provider failures
 
 ### **Developer Experience**
 
-- **Type-Safe** - Full TypeScript-style type hints throughout
-- **FastAPI Integration** - Native dependency injection support
-- **Middleware Pattern** - Standard ASGI middleware implementation
-- **Environment Configuration** - 12-factor app configuration support
-- **Comprehensive Documentation** - Detailed guides and API reference
+- **Type-Safe** — Full type hints throughout, compatible with mypy strict mode
+- **FastAPI Integration** — Native dependency injection support
+- **Middleware Pattern** — Standard ASGI middleware implementation
+- **Environment Configuration** — 12-factor app configuration support
+- **Comprehensive Documentation** — Detailed guides and API reference
 
 ## Installation
 
-### Using pip
-
 ```bash
+# pip
 pip install auth-middleware
-```
 
-### Using poetry
-
-```bash
+# poetry
 poetry add auth-middleware
-```
 
-### Using uv (recommended)
-
-```bash
+# uv (recommended)
 uv add auth-middleware
 ```
 
 ## Quick Start
 
-### Basic FastAPI Setup
+### JWT Authentication with AWS Cognito
 
 ```python
 from fastapi import FastAPI, Depends, Request
 from auth_middleware import JwtAuthMiddleware
-from auth_middleware.functions import require_user, require_groups
-from auth_middleware.providers.authn.cognito_provider import CognitoProvider
-from auth_middleware.providers.authn.cognito_authz_provider_settings import CognitoAuthzProviderSettings
+from auth_middleware.guards import require_user, require_groups
+from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+from auth_middleware.providers.aws.cognito_authz_provider_settings import CognitoAuthzProviderSettings
 
 app = FastAPI()
 
-# Configure authentication provider
 auth_settings = CognitoAuthzProviderSettings(
     user_pool_id="us-east-1_abcdef123",
     user_pool_region="us-east-1",
     jwt_token_verification_disabled=False,
 )
 
-# Add authentication middleware
 app.add_middleware(
     JwtAuthMiddleware,
     auth_provider=CognitoProvider(settings=auth_settings),
 )
 
-# Protected endpoint - requires valid authentication
+# Requires valid authentication
 @app.get("/protected", dependencies=[Depends(require_user())])
 async def protected_endpoint(request: Request):
     user = request.state.current_user
-    return {
-        "message": f"Hello {user.name}",
-        "user_id": user.id,
-        "email": user.email
-    }
+    return {"message": f"Hello {user.name}", "user_id": user.id}
 
-# Role-based endpoint - requires specific groups
+# Requires group membership
 @app.get("/admin", dependencies=[Depends(require_groups(["admin", "moderator"]))])
 async def admin_endpoint(request: Request):
-    user = request.state.current_user
-    groups = await user.groups
-    return {
-        "message": "Admin access granted",
-        "user_groups": groups
-    }
+    return {"message": "Admin access granted"}
 ```
 
-### Azure Entra ID Setup
+### Azure Entra ID
+
+Set the required environment variables (read at module load time):
+
+```bash
+AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID=your-tenant-id
+AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID=your-app-client-id
+```
 
 ```python
-from auth_middleware.providers.authn.entra_id_provider import EntraIdProvider
-from auth_middleware.providers.authn.entra_id_provider_settings import EntraIdProviderSettings
-
-# Configure Azure Entra ID
-entra_settings = EntraIdProviderSettings(
-    tenant_id="your-tenant-id",
-    client_id="your-client-id",
-    issuer="https://sts.windows.net/your-tenant-id/",
-)
+from auth_middleware import JwtAuthMiddleware
+from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
 
 app.add_middleware(
     JwtAuthMiddleware,
-    auth_provider=EntraIdProvider(settings=entra_settings),
+    auth_provider=EntraIDProvider(),
 )
 ```
 
-### Generic JWT Provider
+### Basic Auth
 
 ```python
-from auth_middleware.providers.authn.jwt_provider import JWTProvider
-from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
+from auth_middleware import BasicAuthMiddleware
+from auth_middleware.contracts import CredentialsRepository
 
-# Configure generic JWT provider
-jwt_settings = JWTProviderSettings(
-    secret_key="your-secret-key",
-    algorithm="HS256",
-    issuer="your-issuer",
-)
+class MyCredentialsRepository(CredentialsRepository):
+    async def get_credentials(self, username: str):
+        # Return stored credentials for the given username
+        ...
 
 app.add_middleware(
-    JwtAuthMiddleware,
-    auth_provider=JWTProvider(settings=jwt_settings),
+    BasicAuthMiddleware,
+    credentials_repository=MyCredentialsRepository(),
 )
 ```
 
@@ -151,39 +135,35 @@ app.add_middleware(
 
 ### Environment Variables
 
-Configure the middleware using environment variables:
-
 ```bash
-# Core middleware settings
+# Core middleware — always read from environment
 AUTH_MIDDLEWARE_DISABLED=false
 AUTH_MIDDLEWARE_LOG_LEVEL=INFO
 
-# JWKS caching configuration
-AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES=20
-AUTH_MIDDLEWARE_JWKS_CACHE_USAGES=1000
+# Azure Entra ID — always read from environment at module load (required when using EntraIDProvider)
+AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID=your-tenant-id
+AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID=your-client-id
 
-# AWS Cognito settings (if using Cognito provider)
-COGNITO_USER_POOL_ID=us-east-1_abcdef123
-COGNITO_USER_POOL_REGION=us-east-1
-
-# Azure Entra ID settings (if using Entra ID provider)
-AZURE_TENANT_ID=your-tenant-id
-AZURE_CLIENT_ID=your-client-id
-AZURE_CLIENT_SECRET=your-client-secret
-
-# JWT settings (if using generic JWT provider)
-JWT_SECRET_KEY=your-secret-key
-JWT_ALGORITHM=HS256
-JWT_ISSUER=your-issuer
+# AWS Cognito — optional; alternative to passing values programmatically to CognitoAuthzProviderSettings
+# USER_POOL_ID=us-east-1_abcdef123
+# USER_POOL_REGION=us-east-1
+# JWKS_CACHE_INTERVAL=20      # minutes, default 20
+# JWKS_CACHE_USAGES=1000      # verifications before refresh, default 1000
 ```
 
-### Advanced Configuration with Groups and Permissions
+### SQL-backed Groups and Permissions
 
 ```python
-from auth_middleware.providers.authz.sql_groups_provider import SqlGroupsProvider
-from auth_middleware.providers.authz.sql_permissions_provider import SqlPermissionsProvider
+from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+from auth_middleware.providers.sqlalchemy.sql_groups_provider import SqlGroupsProvider
+from auth_middleware.providers.sqlalchemy.sql_permissions_provider import SqlPermissionsProvider
+from auth_middleware.providers.sqlalchemy.async_database import AsyncDatabase
+from auth_middleware.providers.sqlalchemy.async_database_settings import AsyncDatabaseSettings
 
-# Setup with database-backed authorization
+AsyncDatabase.configure(AsyncDatabaseSettings(
+    database_url="postgresql+asyncpg://user:pass@localhost/mydb"
+))
+
 auth_provider = CognitoProvider(
     settings=auth_settings,
     groups_provider=SqlGroupsProvider(),
@@ -191,172 +171,192 @@ auth_provider = CognitoProvider(
 )
 
 app.add_middleware(JwtAuthMiddleware, auth_provider=auth_provider)
+```
 
-# Use permission-based authorization
-from auth_middleware.functions import require_permissions
+### Cognito Groups Provider
 
-@app.post("/admin/users", dependencies=[Depends(require_permissions(["user.create", "user.manage"]))])
-async def create_user(request: Request):
-    user = request.state.current_user
-    permissions = await user.permissions
-    return {"message": "User creation allowed", "permissions": permissions}
+```python
+from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+from auth_middleware.providers.aws.cognito_groups_provider import CognitoGroupsProvider
+
+# Groups extracted directly from the cognito:groups JWT claim
+auth_provider = CognitoProvider(
+    settings=auth_settings,
+    groups_provider=CognitoGroupsProvider,
+)
 ```
 
 ## Usage Examples
 
-### Making Authenticated Requests
-
-```bash
-# Get JWT token from your identity provider, then:
-curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-     http://localhost:8000/protected
-```
-
 ### Accessing User Information
 
 ```python
-@app.get("/profile")
+@app.get("/profile", dependencies=[Depends(require_user())])
 async def get_profile(request: Request):
     user = request.state.current_user
-
     return {
         "id": user.id,
         "name": user.name,
         "email": user.email,
         "groups": await user.groups,
-        "permissions": await user.permissions
+        "permissions": await user.permissions,
     }
 ```
 
-### Custom Authorization Logic
+### Role and Permission Guards
 
 ```python
-from auth_middleware.functions import require_user
+from auth_middleware.guards import require_roles, require_permissions
 
-@app.delete("/posts/{post_id}")
-async def delete_post(post_id: str, request: Request, _: None = Depends(require_user())):
-    user = request.state.current_user
-    post = await get_post(post_id)
+@app.get("/reports", dependencies=[Depends(require_roles(["analyst", "manager"]))])
+async def get_reports(request: Request):
+    return {"message": "Reports access granted"}
 
-    # Custom authorization logic
-    user_groups = await user.groups
-    if post.owner_id != user.id and "admin" not in user_groups:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this post")
-
-    await delete_post_by_id(post_id)
-    return {"message": "Post deleted successfully"}
+@app.post("/admin/users", dependencies=[Depends(require_permissions(["user.create"]))])
+async def create_user(request: Request):
+    return {"message": "User creation allowed"}
 ```
 
-## Documentation
+### curl
 
-### Core Components
+```bash
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+     http://localhost:8000/protected
+```
 
-| Component             | Description                                      |
-| --------------------- | ------------------------------------------------ |
-| `JwtAuthMiddleware`   | Main ASGI middleware for request authentication  |
-| `JWTProvider`         | Abstract base for authentication providers       |
-| `GroupsProvider`      | Abstract base for group-based authorization      |
-| `PermissionsProvider` | Abstract base for permission-based authorization |
-| `User`                | Pydantic model representing authenticated users  |
+## Package Structure
 
-### User Object Properties
-
-The authenticated user is available in `request.state.current_user`:
-
-| Property      | Type               | Description                                   |
-| ------------- | ------------------ | --------------------------------------------- |
-| `id`          | `str`              | Unique user identifier from identity provider |
-| `name`        | `str \| None`      | User's display name                           |
-| `email`       | `EmailStr \| None` | User's email address                          |
-| `groups`      | `list[str]`        | User groups (async property)                  |
-| `permissions` | `list[str]`        | User permissions (async property)             |
-
-### Authorization Functions
-
-| Function                           | Description                                 |
-| ---------------------------------- | ------------------------------------------- |
-| `require_user()`                   | Ensures user is authenticated               |
-| `require_groups(groups)`           | Requires user to be in specified groups     |
-| `require_permissions(permissions)` | Requires user to have specified permissions |
+```
+auth_middleware/
+├── jwt_auth_middleware.py       # JwtAuthMiddleware (ASGI)
+├── basic_auth_middleware.py     # BasicAuthMiddleware (ASGI)
+├── constants.py                 # AUTH_SCHEME_BASIC, AUTH_SCHEME_BEARER
+├── contracts/                   # Abstract base classes
+│   ├── jwt_provider.py          #   JWTProvider
+│   ├── groups_provider.py       #   GroupsProvider
+│   ├── roles_provider.py        #   RolesProvider
+│   ├── permissions_provider.py  #   PermissionsProvider
+│   ├── profile_provider.py      #   ProfileProvider
+│   └── credentials_repository.py #  CredentialsRepository
+├── guards/                      # FastAPI dependency guards
+│   ├── functions.py             #   require_user, require_groups, require_roles,
+│   │                            #   require_permissions, get_current_user
+│   ├── group_checker.py         #   GroupChecker
+│   ├── role_checker.py          #   RoleChecker
+│   └── permissions_checker.py   #   PermissionsChecker
+├── providers/
+│   ├── aws/                     # AWS Cognito & Identity Pool
+│   │   ├── cognito_provider.py
+│   │   ├── cognito_groups_provider.py
+│   │   ├── cognito_groups_as_roles_provider.py
+│   │   ├── cognito_profile_provider.py
+│   │   ├── cognito_authz_provider_settings.py
+│   │   ├── identity_pool_provider.py
+│   │   └── services/            #   Cognito auth service, M2M detector
+│   ├── azure/                   # Azure Entra ID
+│   │   ├── entra_id_provider.py
+│   │   └── settings.py
+│   └── sqlalchemy/              # SQL-backed authorization
+│       ├── sql_groups_provider.py
+│       ├── sql_permissions_provider.py
+│       ├── async_database.py
+│       └── async_database_settings.py
+└── exceptions/                  # InvalidTokenException, AuthenticationError, …
+```
 
 ## Architecture
 
 ```mermaid
 graph TD
-    A[HTTP Request] --> B[JwtAuthMiddleware]
+    A[HTTP Request] --> B[JwtAuthMiddleware\nor BasicAuthMiddleware]
     B --> C[JWTBearerManager]
-    C --> D[JWT Provider]
-    D --> E[Token Validation]
-    E --> F[User Creation]
-    F --> G[Groups Provider]
-    F --> H[Permissions Provider]
-    G --> I[request.state.current_user]
-    H --> I
+    C --> D[JWTProvider\nCognitoProvider · EntraIdProvider · IdentityPoolProvider]
+    D --> E[Token Validation\nJWKS cache]
+    E --> F[User object]
+    F --> G[GroupsProvider\nCognitoGroupsProvider · SqlGroupsProvider]
+    F --> H[PermissionsProvider\nSqlPermissionsProvider]
+    F --> I[RolesProvider\nCognitoGroupsAsRolesProvider]
+    G --> J[request.state.current_user]
+    H --> J
+    I --> J
+    J --> K[Guards\nrequire_user · require_groups\nrequire_roles · require_permissions]
 ```
+
+## Core Components
+
+| Component | Import path | Description |
+| --------- | ----------- | ----------- |
+| `JwtAuthMiddleware` | `auth_middleware` | ASGI middleware for JWT authentication |
+| `BasicAuthMiddleware` | `auth_middleware` | ASGI middleware for Basic Auth |
+| `JWTProvider` | `auth_middleware.contracts` | Abstract base for JWT providers |
+| `GroupsProvider` | `auth_middleware.contracts` | Abstract base for group authorization |
+| `RolesProvider` | `auth_middleware.contracts` | Abstract base for role authorization |
+| `PermissionsProvider` | `auth_middleware.contracts` | Abstract base for permission authorization |
+| `CredentialsRepository` | `auth_middleware.contracts` | Abstract base for Basic Auth credential lookup |
+| `require_user` | `auth_middleware.guards` | Guard: requires authenticated user |
+| `require_groups` | `auth_middleware.guards` | Guard: requires group membership |
+| `require_roles` | `auth_middleware.guards` | Guard: requires role membership |
+| `require_permissions` | `auth_middleware.guards` | Guard: requires specific permissions |
+| `get_current_user` | `auth_middleware.guards` | Dependency: returns current user or `None` |
+| `CognitoProvider` | `auth_middleware.providers.aws.cognito_provider` | AWS Cognito JWT provider |
+| `CognitoGroupsProvider` | `auth_middleware.providers.aws.cognito_groups_provider` | Groups from `cognito:groups` claim |
+| `CognitoGroupsAsRolesProvider` | `auth_middleware.providers.aws.cognito_groups_as_roles_provider` | Cognito groups mapped as roles |
+| `IdentityPoolProvider` | `auth_middleware.providers.aws.identity_pool_provider` | Cognito + Identity Pool |
+| `EntraIDProvider` | `auth_middleware.providers.azure.entra_id_provider` | Azure Entra ID JWT provider |
+| `SqlGroupsProvider` | `auth_middleware.providers.sqlalchemy.sql_groups_provider` | DB-backed groups |
+| `SqlPermissionsProvider` | `auth_middleware.providers.sqlalchemy.sql_permissions_provider` | DB-backed permissions |
+
+### Authenticated User Properties
+
+Available on `request.state.current_user`:
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| `id` | `str` | Unique identifier from the identity provider |
+| `name` | `str \| None` | Display name |
+| `email` | `EmailStr \| None` | Email address |
+| `groups` | `list[str]` (async) | User groups |
+| `roles` | `list[str]` (async) | User roles |
+| `permissions` | `list[str]` (async) | User permissions |
 
 ## Development
 
-### Setup Development Environment
-
 ```bash
-# Clone the repository
+# Clone and set up
 git clone https://github.com/impalah/auth-middleware.git
 cd auth-middleware
-
-# Create virtual environment and install dependencies
 make venv
 
-# Run tests
-make test
+# Quality checks
+make test          # run test suite
+make type-check    # mypy strict
+make lint          # ruff
+make check         # all checks at once
 
-# Run type checking
-make type-check
-
-# Run linting
-make lint
-
-# Run all quality checks
-make check
-```
-
-### Build and Release
-
-```bash
-# Build package
+# Build & publish
 make build
-
-# Publish to PyPI
 make publish
-
-# Build Docker image
-make docker-build
 ```
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE) for details.
 
 ## Links
 
-- **Documentation**: [Full documentation and guides](https://auth-middleware.readthedocs.io/)
+- **Documentation**: [https://impalah.github.io/auth-middleware/](https://impalah.github.io/auth-middleware/)
 - **PyPI Package**: [https://pypi.org/project/auth-middleware/](https://pypi.org/project/auth-middleware/)
 - **Source Code**: [https://github.com/impalah/auth-middleware](https://github.com/impalah/auth-middleware)
 - **Bug Reports**: [GitHub Issues](https://github.com/impalah/auth-middleware/issues)
 
-## Credits
-
-Created by [impalah](https://github.com/impalah)
-
 ---
 
-**Made for modern Python async applications**
+Created by [impalah](https://github.com/impalah) — Made for modern Python async applications
