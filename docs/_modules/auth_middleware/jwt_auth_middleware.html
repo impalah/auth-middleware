@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.jwt_auth_middleware &mdash; Auth Middleware 0.3.9 documentation</title>
+  <title>auth_middleware.jwt_auth_middleware &mdash; Auth Middleware 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/jwt_auth_middleware.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=65b26183"></script>
+      <script src="../../_static/documentation_options.js?v=ff822928"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -159,10 +159,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">starlette.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span><span class="p">,</span> <span class="n">Response</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">starlette.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ASGIApp</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.invalid_token_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.jwt_bearer_manager</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTBearerManager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
 
@@ -257,8 +257,6 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid Token </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ite</span><span class="p">))</span>
             <span class="k">raise</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="c1"># TODO: Control &quot;No public key found that matches the one present</span>
-            <span class="c1"># in the TOKEN!&quot;</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Not controlled exception </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
             <span class="k">raise</span></div>
 

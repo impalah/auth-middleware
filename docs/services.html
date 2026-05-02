@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Services Module &mdash; Auth Middleware 0.3.9 documentation</title>
+  <title>Services Module &mdash; Auth Middleware 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/services.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=65b26183"></script>
+      <script src="_static/documentation_options.js?v=ff822928"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -356,7 +356,7 @@
 <h2>Usage with User Model<a class="headerlink" href="#usage-with-user-model" title="Link to this heading"></a></h2>
 <p>The User model includes M2M detection fields:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">HTTPException</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Permissions Provider &mdash; Auth Middleware 0.3.9 documentation</title>
+  <title>Permissions Provider &mdash; Auth Middleware 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/permissions-provider.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=65b26183"></script>
+      <script src="_static/documentation_options.js?v=ff822928"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -92,13 +92,13 @@
 <li class="toctree-l1"><a class="reference internal" href="#best-practices">Best Practices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#api-reference">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#auth_middleware.providers.authz.permissions_provider.PermissionsProvider"><code class="docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.authz.permissions_provider.PermissionsProvider.fetch_permissions"><code class="docutils literal notranslate"><span class="pre">PermissionsProvider.fetch_permissions()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider"><code class="docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider.fetch_permissions"><code class="docutils literal notranslate"><span class="pre">PermissionsProvider.fetch_permissions()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider.fetch_permissions()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider.get_permissions_from_db()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider.fetch_permissions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider.get_permissions_from_db()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -200,9 +200,9 @@
 </pre></div>
 </div>
 <p><strong>Usage:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.sql_permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqlPermissionsProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.async_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncDatabase</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.async_database_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncDatabaseSettings</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.sqlalchemy.sql_permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqlPermissionsProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.sqlalchemy.async_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncDatabase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.sqlalchemy.async_database_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncDatabaseSettings</span>
 
 <span class="c1"># Configure database connection</span>
 <span class="n">db_settings</span> <span class="o">=</span> <span class="n">AsyncDatabaseSettings</span><span class="p">(</span>
@@ -223,8 +223,8 @@
 </div>
 <p><strong>Managing Permissions:</strong></p>
 <p>Add permissions to users by inserting records:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.sql_permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsModel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.async_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncDatabase</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.sqlalchemy.sql_permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.sqlalchemy.async_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncDatabase</span>
 
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">grant_permission</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">permission</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">AsyncDatabase</span><span class="o">.</span><span class="n">get_session</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
@@ -257,7 +257,7 @@
 <h1>Using Permissions in Your Application<a class="headerlink" href="#using-permissions-in-your-application" title="Link to this heading"></a></h1>
 <p>Once configured, permissions are automatically available in your endpoints:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">FastAPI</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_permissions</span><span class="p">,</span> <span class="n">get_current_user</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_permissions</span><span class="p">,</span> <span class="n">get_current_user</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
@@ -359,7 +359,7 @@
 <h1>Custom Permissions Provider<a class="headerlink" href="#custom-permissions-provider" title="Link to this heading"></a></h1>
 <p>Create custom permissions providers by implementing the <code class="docutils literal notranslate"><span class="pre">PermissionsProvider</span></code> interface:</p>
 <p><strong>Basic Implementation:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
@@ -381,7 +381,7 @@
 <p><strong>Redis Permissions Provider:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">redis.asyncio</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">redis</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RedisPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
@@ -422,7 +422,7 @@
 </pre></div>
 </div>
 <p><strong>JWT Claims-based Provider:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">JwtPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
@@ -448,7 +448,7 @@
 </div>
 <p><strong>API-based Permissions Provider:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ApiPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
@@ -490,7 +490,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">FilePermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
@@ -593,7 +593,7 @@
 <p><strong>Cached Permissions Provider:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authz.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CachedPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
@@ -638,7 +638,7 @@
 <p><strong>Permission Management API:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">HTTPException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_permissions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_permissions</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
@@ -792,31 +792,24 @@
 <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="auth_middleware.providers.authz.permissions_provider.PermissionsProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.authz.permissions_provider.</span></span><span class="sig-name descname"><span class="pre">PermissionsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/providers/authz/permissions_provider.html#PermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authz.permissions_provider.PermissionsProvider" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="auth_middleware.contracts.permissions_provider.PermissionsProvider">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.contracts.permissions_provider.</span></span><span class="sig-name descname"><span class="pre">PermissionsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/contracts/permissions_provider.html#PermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Basic interface for a permissions provider</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>metaclass</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to ABCMeta.</p>
-</dd>
-</dl>
+<p>Abstract contract for a permissions provider.</p>
+<p>Implementations must return the list of permissions granted to the
+authenticated user, given either a raw token string or a parsed
+<code class="docutils literal notranslate"><span class="pre">JWTAuthorizationCredentials</span></code> object.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.authz.permissions_provider.PermissionsProvider.fetch_permissions">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authz/permissions_provider.html#PermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authz.permissions_provider.PermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
-<dd><p>Get permissions using the token provided</p>
+<dt class="sig sig-object py" id="auth_middleware.contracts.permissions_provider.PermissionsProvider.fetch_permissions">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/contracts/permissions_provider.html#PermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
+<dd><p>Return the permissions for the authenticated user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token containing the claims.</p>
+<dd class="field-odd"><p><strong>token</strong> – The token containing the claims, either as a raw string
+or a parsed <code class="docutils literal notranslate"><span class="pre">JWTAuthorizationCredentials</span></code> object.</p>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – _description_</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>_description_</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of permission name strings (may be empty).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -824,9 +817,9 @@
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.authz.sql_permissions_provider.</span></span><span class="sig-name descname"><span class="pre">SqlPermissionsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/providers/authz/sql_permissions_provider.html#SqlPermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#auth_middleware.providers.authz.permissions_provider.PermissionsProvider" title="auth_middleware.providers.authz.permissions_provider.PermissionsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a></p>
+<dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.sqlalchemy.sql_permissions_provider.</span></span><span class="sig-name descname"><span class="pre">SqlPermissionsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a></p>
 <p>Recovers groups from AWS Cognito using the token provided</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -834,8 +827,8 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authz/sql_permissions_provider.html#SqlPermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
 <dd><p>Get groups using the token provided</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -854,8 +847,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_permissions_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/authz/sql_permissions_provider.html#SqlPermissionsProvider.get_permissions_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_permissions_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.get_permissions_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db" title="Link to this definition"></a></dt>
 <dd><p>Gets permissions from the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

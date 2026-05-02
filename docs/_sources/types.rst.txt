@@ -288,7 +288,7 @@ Type Hints in Application Code
 
    from fastapi import FastAPI, Depends
    from auth_middleware.types import User, AuthenticatedRequest
-   from auth_middleware import get_current_user
+   from auth_middleware.guards import get_current_user
 
    app = FastAPI()
 

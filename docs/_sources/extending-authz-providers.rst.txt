@@ -72,7 +72,7 @@ External Database Integration
 .. code-block:: python
 
    from motor.motor_asyncio import AsyncIOMotorClient
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts.groups_provider import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class MongoGroupsProvider(GroupsProvider):
@@ -106,7 +106,7 @@ External Database Integration
 .. code-block:: python
 
    from elasticsearch import AsyncElasticsearch
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class ElasticsearchPermissionsProvider(PermissionsProvider):
@@ -157,7 +157,7 @@ Microservices Integration
 .. code-block:: python
 
    import grpc
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts.groups_provider import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
    # Import your generated gRPC stubs
    from your_proto import user_service_pb2, user_service_pb2_grpc
@@ -203,7 +203,7 @@ Microservices Integration
 .. code-block:: python
 
    import httpx
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class GraphQLPermissionsProvider(PermissionsProvider):
@@ -283,7 +283,7 @@ Cloud Services Integration
 
    import boto3
    from botocore.exceptions import ClientError
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts.groups_provider import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class DynamoDBGroupsProvider(GroupsProvider):
@@ -318,7 +318,7 @@ Cloud Services Integration
 
    from azure.cosmos.aio import CosmosClient
    from azure.cosmos import exceptions
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class CosmosDBPermissionsProvider(PermissionsProvider):
@@ -483,7 +483,7 @@ Make authorization decisions based on request context:
 .. code-block:: python
 
    from contextvars import ContextVar
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    # Context variables to store request information
@@ -558,7 +558,7 @@ Advanced Caching Provider
    import hashlib
    import json
    from datetime import datetime, timedelta
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts.groups_provider import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class AdvancedCachedGroupsProvider(GroupsProvider):
@@ -674,7 +674,7 @@ Circuit Breaker Provider
    import asyncio
    from enum import Enum
    from datetime import datetime, timedelta
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class CircuitState(Enum):
@@ -746,7 +746,7 @@ Retry Provider
 .. code-block:: python
 
    import asyncio
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts.groups_provider import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class RetryGroupsProvider(GroupsProvider):
@@ -852,8 +852,8 @@ Deployment Considerations
 .. code-block:: python
 
    import os
-   from auth_middleware.providers.authz.sql_groups_provider import SqlGroupsProvider
-   from auth_middleware.providers.authz.cognito_groups_provider import CognitoGroupsProvider
+   from auth_middleware.providers.sqlalchemy.sql_groups_provider import SqlGroupsProvider
+   from auth_middleware.providers.aws.cognito_groups_provider import CognitoGroupsProvider
    from your_app.providers import CustomGroupsProvider
 
    def create_groups_provider():
@@ -876,7 +876,7 @@ Deployment Considerations
 .. code-block:: python
 
    from fastapi import FastAPI
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts.groups_provider import GroupsProvider
 
    app = FastAPI()
 

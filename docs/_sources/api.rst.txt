@@ -58,24 +58,21 @@ Common Classes and Functions
    - :class:`auth_middleware.JwtAuthMiddleware` - Main authentication middleware
 
 **Authentication Functions**
-   - :func:`auth_middleware.require_user` - Require authenticated user
-   - :func:`auth_middleware.require_groups` - Require group membership
-   - :func:`auth_middleware.require_permissions` - Require specific permissions
-   - :func:`auth_middleware.get_current_user` - Get current user from request
+   - :func:`auth_middleware.guards.functions.require_user` - Require authenticated user
+   - :func:`auth_middleware.guards.functions.require_groups` - Require group membership
+   - :func:`auth_middleware.guards.functions.require_permissions` - Require specific permissions
+   - :func:`auth_middleware.guards.functions.get_current_user` - Get current user from request
 
 **Providers**
-   - :class:`auth_middleware.providers.authn.cognito_provider.CognitoProvider` - AWS Cognito
-   - :class:`auth_middleware.providers.authn.entra_id_provider.EntraIdProvider` - Azure Entra ID
-   - :class:`auth_middleware.providers.authn.jwt_provider.JWTProvider` - Generic JWT
+   - :class:`auth_middleware.providers.aws.cognito_provider.CognitoProvider` - AWS Cognito
+   - :class:`auth_middleware.providers.azure.entra_id_provider.EntraIdProvider` - Azure Entra ID
+   - :class:`auth_middleware.contracts.jwt_provider.JWTProvider` - Generic JWT
 
 **Exceptions**
-   - :exc:`auth_middleware.exceptions.AuthenticationError` - Authentication failures
-   - :exc:`auth_middleware.exceptions.AuthorizationError` - Authorization failures
-   - :exc:`auth_middleware.exceptions.ConfigurationError` - Configuration issues
+   - :exc:`auth_middleware.exceptions.invalid_token_exception.InvalidTokenException` - Token validation failures
 
 **Types**
-   - :class:`auth_middleware.types.User` - User representation
-   - :class:`auth_middleware.types.AuthenticatedRequest` - Extended request with auth context
+   - :class:`auth_middleware.types.user.User` - User representation
 
 Usage Patterns
 ---------------
@@ -87,7 +84,7 @@ Basic Setup
 
    from fastapi import FastAPI
    from auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 
    app = FastAPI()
    
@@ -106,7 +103,7 @@ Endpoint Protection
 .. code-block:: python
 
    from fastapi import Depends
-   from auth_middleware import require_user, require_groups
+   from auth_middleware.guards import require_user, require_groups
 
    @app.get("/protected", dependencies=[Depends(require_user())])
    async def protected_endpoint(request):
@@ -123,19 +120,12 @@ Error Handling
 .. code-block:: python
 
    from fastapi.responses import JSONResponse
-   from auth_middleware.exceptions import AuthenticationError, AuthorizationError
+   from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 
    @app.exception_handler(AuthenticationError)
    async def auth_error_handler(request, exc):
        return JSONResponse(
            status_code=401,
            content={"error": "Authentication failed"}
-       )
-
-   @app.exception_handler(AuthorizationError)
-   async def authz_error_handler(request, exc):
-       return JSONResponse(
-           status_code=403,
-           content={"error": "Access denied"}
        )
 

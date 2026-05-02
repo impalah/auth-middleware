@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>auth_middleware.providers.aws.cognito_exceptions &mdash; Auth Middleware 0.4.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/aws/cognito_exceptions.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=ff822928"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwt_auth_provider.html">JWT Authentication Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">auth_middleware.providers.aws.cognito_exceptions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for auth_middleware.providers.aws.cognito_exceptions</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Cognito-specific exceptions for challenge and MFA flows.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.status</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP_400_BAD_REQUEST</span>
+
+
+<div class="viewcode-block" id="ChallengeRequiredError">
+<a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.ChallengeRequiredError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChallengeRequiredError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal signal: Cognito returned a challenge instead of tokens.</span>
+
+<span class="sd">    Not raised directly to the HTTP layer — caught by the service and</span>
+<span class="sd">    converted to a ChallengeResponse.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ChallengeRequiredError.__init__">
+<a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.ChallengeRequiredError.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">challenge_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">challenge_name</span> <span class="o">=</span> <span class="n">challenge_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="InvalidChallengeError">
+<a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.InvalidChallengeError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvalidChallengeError</span><span class="p">(</span><span class="n">HTTPException</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when the challenge response is incorrect or the session is expired.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="InvalidChallengeError.__init__">
+<a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.InvalidChallengeError.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Invalid or expired challenge&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_400_BAD_REQUEST</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="n">detail</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MfaSetupError">
+<a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.MfaSetupError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MfaSetupError</span><span class="p">(</span><span class="n">HTTPException</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a TOTP setup or verification operation fails.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MfaSetupError.__init__">
+<a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.MfaSetupError.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;MFA setup failed&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_400_BAD_REQUEST</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="n">detail</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

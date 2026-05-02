@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; Auth Middleware 0.3.9 documentation</title>
+  <title>API Reference &mdash; Auth Middleware 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/api.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=65b26183"></script>
+      <script src="_static/documentation_options.js?v=ff822928"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -216,9 +216,10 @@
 <li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#authentication-decorators">Authentication Decorators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#checker-classes">Checker Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#advanced-usage-examples">Advanced Usage Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#error-handling">Error Handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functions.html#module-auth_middleware.functions">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-auth_middleware.guards.functions">API Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a><ul>
@@ -233,7 +234,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-hierarchy">Exception Hierarchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-types">Exception Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-handling-patterns">Exception Handling Patterns</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#module-auth_middleware.exceptions">API Reference</a></li>
@@ -251,7 +251,7 @@
 <li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#configuration">Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#example-application">Example Application</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#module-auth_middleware.providers.authn.cognito_provider">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#module-auth_middleware.providers.aws.cognito_provider">API Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a><ul>
@@ -265,7 +265,7 @@
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#error-handling">Error Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#best-practices">Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#troubleshooting">Troubleshooting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#module-auth_middleware.providers.azure.entra_id_provider">API Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a><ul>
@@ -274,7 +274,7 @@
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#token-structure">Token Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#integration-examples">Integration Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#best-practices">Best Practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#module-auth_middleware.contracts.jwt_provider">API Reference</a></li>
 </ul>
 </li>
 </ul>
@@ -387,27 +387,24 @@
 </ul>
 </dd>
 <dt><strong>Authentication Functions</strong></dt><dd><ul class="simple">
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.require_user()</span></code> - Require authenticated user</p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.require_groups()</span></code> - Require group membership</p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.require_permissions()</span></code> - Require specific permissions</p></li>
-<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.get_current_user()</span></code> - Get current user from request</p></li>
+<li><p><a class="reference internal" href="functions.html#auth_middleware.guards.functions.require_user" title="auth_middleware.guards.functions.require_user"><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.guards.functions.require_user()</span></code></a> - Require authenticated user</p></li>
+<li><p><a class="reference internal" href="functions.html#auth_middleware.guards.functions.require_groups" title="auth_middleware.guards.functions.require_groups"><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.guards.functions.require_groups()</span></code></a> - Require group membership</p></li>
+<li><p><a class="reference internal" href="functions.html#auth_middleware.guards.functions.require_permissions" title="auth_middleware.guards.functions.require_permissions"><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.guards.functions.require_permissions()</span></code></a> - Require specific permissions</p></li>
+<li><p><a class="reference internal" href="functions.html#auth_middleware.guards.functions.get_current_user" title="auth_middleware.guards.functions.get_current_user"><code class="xref py py-func docutils literal notranslate"><span class="pre">auth_middleware.guards.functions.get_current_user()</span></code></a> - Get current user from request</p></li>
 </ul>
 </dd>
 <dt><strong>Providers</strong></dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="cognito_provider.html#auth_middleware.providers.authn.cognito_provider.CognitoProvider" title="auth_middleware.providers.authn.cognito_provider.CognitoProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.authn.cognito_provider.CognitoProvider</span></code></a> - AWS Cognito</p></li>
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.authn.entra_id_provider.EntraIdProvider</span></code> - Azure Entra ID</p></li>
-<li><p><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.providers.authn.jwt_provider.JWTProvider" title="auth_middleware.providers.authn.jwt_provider.JWTProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.authn.jwt_provider.JWTProvider</span></code></a> - Generic JWT</p></li>
+<li><p><a class="reference internal" href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider" title="auth_middleware.providers.aws.cognito_provider.CognitoProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.aws.cognito_provider.CognitoProvider</span></code></a> - AWS Cognito</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.azure.entra_id_provider.EntraIdProvider</span></code> - Azure Entra ID</p></li>
+<li><p><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider" title="auth_middleware.contracts.jwt_provider.JWTProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.contracts.jwt_provider.JWTProvider</span></code></a> - Generic JWT</p></li>
 </ul>
 </dd>
 <dt><strong>Exceptions</strong></dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="exceptions.html#auth_middleware.exceptions.AuthenticationError" title="auth_middleware.exceptions.AuthenticationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">auth_middleware.exceptions.AuthenticationError</span></code></a> - Authentication failures</p></li>
-<li><p><code class="xref py py-exc docutils literal notranslate"><span class="pre">auth_middleware.exceptions.AuthorizationError</span></code> - Authorization failures</p></li>
-<li><p><code class="xref py py-exc docutils literal notranslate"><span class="pre">auth_middleware.exceptions.ConfigurationError</span></code> - Configuration issues</p></li>
+<li><p><a class="reference internal" href="exceptions.html#auth_middleware.exceptions.InvalidTokenException" title="auth_middleware.exceptions.invalid_token_exception.InvalidTokenException"><code class="xref py py-exc docutils literal notranslate"><span class="pre">auth_middleware.exceptions.invalid_token_exception.InvalidTokenException</span></code></a> - Token validation failures</p></li>
 </ul>
 </dd>
 <dt><strong>Types</strong></dt><dd><ul class="simple">
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.types.User</span></code> - User representation</p></li>
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.types.AuthenticatedRequest</span></code> - Extended request with auth context</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.types.user.User</span></code> - User representation</p></li>
 </ul>
 </dd>
 </dl>
@@ -419,7 +416,7 @@
 <h3>Basic Setup<a class="headerlink" href="#basic-setup" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
@@ -437,7 +434,7 @@
 <section id="endpoint-protection">
 <h3>Endpoint Protection<a class="headerlink" href="#endpoint-protection" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Depends</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span><span class="p">,</span> <span class="n">require_groups</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span><span class="p">,</span> <span class="n">require_groups</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/protected&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">protected_endpoint</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
@@ -453,20 +450,13 @@
 <section id="error-handling">
 <h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationError</span><span class="p">,</span> <span class="n">AuthorizationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.invalid_token_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthenticationError</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">auth_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
         <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
         <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Authentication failed&quot;</span><span class="p">}</span>
-    <span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthorizationError</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authz_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-        <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
-        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Access denied&quot;</span><span class="p">}</span>
     <span class="p">)</span>
 </pre></div>
 </div>

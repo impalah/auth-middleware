@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AWS Cognito Infrastructure Setup &mdash; Auth Middleware 0.3.9 documentation</title>
+  <title>AWS Cognito Infrastructure Setup &mdash; Auth Middleware 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/infrastructure/cognito-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=65b26183"></script>
+      <script src="../_static/documentation_options.js?v=ff822928"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -879,10 +879,10 @@ X-Amz-Target: AWSCognitoIdentityService.GetCredentialsForIdentity
 <section id="configure-auth-middleware-identity-pool-provider">
 <h2>Configure auth-middleware Identity Pool Provider<a class="headerlink" href="#configure-auth-middleware-identity-pool-provider" title="Link to this heading"></a></h2>
 <p>If you’re using the identity pool provider in auth-middleware:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CognitoAuthzProviderSettings</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
 
 <span class="n">settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
     <span class="c1"># User Pool settings</span>
@@ -900,7 +900,7 @@ X-Amz-Target: AWSCognitoIdentityService.GetCredentialsForIdentity
 </div>
 <p>Then in your application, you can obtain AWS credentials:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Depends</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.functions</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/aws-credentials&quot;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_aws_credentials</span><span class="p">(</span>

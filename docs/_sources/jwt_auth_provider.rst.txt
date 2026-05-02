@@ -23,8 +23,8 @@ Basic Configuration
 .. code-block:: python
 
    from auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.authn.jwt_provider import JWTProvider
-   from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
+   from auth_middleware.contracts.jwt_provider import JWTProvider
+   from auth_middleware.providers.aws.jwt_provider_settings import JWTProviderSettings
 
    # Configure JWT settings
    jwt_settings = JWTProviderSettings(
@@ -48,7 +48,7 @@ For production deployments, use environment variables:
 .. code-block:: python
 
    import os
-   from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
+   from auth_middleware.providers.aws.jwt_provider_settings import JWTProviderSettings
 
    def create_jwt_settings():
        return JWTProviderSettings(
@@ -112,8 +112,8 @@ With Custom Token Service
 
    from fastapi import FastAPI, Depends
    from auth_middleware import JwtAuthMiddleware, require_user
-   from auth_middleware.providers.authn.jwt_provider import JWTProvider
-   from auth_middleware.providers.authn.jwt_provider_settings import JWTProviderSettings
+   from auth_middleware.contracts.jwt_provider import JWTProvider
+   from auth_middleware.providers.aws.jwt_provider_settings import JWTProviderSettings
 
    app = FastAPI(title="Custom JWT API")
 
@@ -158,8 +158,8 @@ Security Recommendations
 API Reference
 -------------
 
-.. automodule:: auth_middleware.providers.authn.jwt_provider
+.. automodule:: auth_middleware.contracts.jwt_provider
    :members:
 
-.. automodule:: auth_middleware.providers.authn.jwt_provider_settings
+.. automodule:: auth_middleware.providers.aws.jwt_provider_settings
    :members:

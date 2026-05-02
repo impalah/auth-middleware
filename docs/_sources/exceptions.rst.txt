@@ -3,98 +3,106 @@ Exception Handling
 
 This module defines the custom exceptions used throughout the auth-middleware library. These exceptions provide specific error handling for authentication and authorization scenarios.
 
-Exception Hierarchy
--------------------
-
-The auth-middleware library uses a hierarchical exception structure:
-
-.. code-block:: text
-
-   AuthMiddlewareException (base)
-   ├── AuthenticationError
-   ├── AuthorizationError
-   └── ConfigurationError
-
 Exception Types
 --------------
 
-AuthenticationError
-~~~~~~~~~~~~~~~~~~
+InvalidTokenException
+~~~~~~~~~~~~~~~~~~~~~
 
-Raised when authentication fails, such as:
+The primary exception raised during token validation failures. Carries an HTTP status code and detail message.
+
+Common causes:
 
 * Invalid or expired JWT tokens
-* Missing authentication credentials
-* Token validation failures
-* Provider-specific authentication errors
+* Missing or malformed Authorization header
+* No public key found for the token
+* Token signature verification failure
+
+.. code-block:: python
+
+   from auth_middleware.exceptions import InvalidTokenException
+
+   try:
+       user = await authenticate_user(token)
+   except InvalidTokenException as e:
+       return JSONResponse(
+           status_code=e.status_code,
+           content={"error": "Token error", "detail": e.detail}
+       )
+
+AuthenticationError
+~~~~~~~~~~~~~~~~~~~
+
+Raised when low-level authentication fails (e.g., HMAC computation, credential decoding).
 
 .. code-block:: python
 
    from auth_middleware.exceptions import AuthenticationError
-   
+
    try:
-       user = await authenticate_user(token)
+       result = await provider.verify_token(credentials)
    except AuthenticationError as e:
-       return JSONResponse(
-           status_code=401,
-           content={"error": "Authentication failed", "detail": str(e)}
-       )
+       logger.warning(f"Authentication error: {e}")
 
-AuthorizationError
-~~~~~~~~~~~~~~~~~
+InvalidAuthorizationException
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Raised when authorization checks fail, such as:
-
-* Insufficient permissions
-* Required group membership not met
-* Access to protected resources denied
+Raised when the Authorization header is present but malformed (wrong scheme, missing parts).
 
 .. code-block:: python
 
-   from auth_middleware.exceptions import AuthorizationError
-   
-   try:
-       await check_user_permissions(user, required_permissions)
-   except AuthorizationError as e:
-       return JSONResponse(
-           status_code=403,
-           content={"error": "Access denied", "detail": str(e)}
-       )
+   from auth_middleware.exceptions import InvalidAuthorizationException
 
-ConfigurationError
-~~~~~~~~~~~~~~~~~
+InvalidCredentialsException
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Raised when there are configuration issues, such as:
-
-* Missing required environment variables
-* Invalid provider settings
-* Malformed configuration parameters
+Raised when Basic Auth credentials are invalid (wrong username or password).
 
 .. code-block:: python
 
-   from auth_middleware.exceptions import ConfigurationError
-   
-   try:
-       provider = create_auth_provider(settings)
-   except ConfigurationError as e:
-       logger.error(f"Configuration error: {e}")
-       raise
+   from auth_middleware.exceptions import InvalidCredentialsException
+
+UserNotFoundError
+~~~~~~~~~~~~~~~~~
+
+Raised when a user cannot be found in the identity provider.
+
+.. code-block:: python
+
+   from auth_middleware.exceptions import UserNotFoundError
+
+PasswordPolicyError
+~~~~~~~~~~~~~~~~~~~
+
+Raised when a password change fails due to policy requirements.
+
+.. code-block:: python
+
+   from auth_middleware.exceptions import PasswordPolicyError
 
 Exception Handling Patterns
 ---------------------------
 
-Middleware Error Handling
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The middleware automatically handles exceptions and converts them to appropriate HTTP responses:
+Global Exception Handler
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
    from fastapi import FastAPI, Request
    from fastapi.responses import JSONResponse
-   from auth_middleware.exceptions import AuthenticationError, AuthorizationError
+   from auth_middleware.exceptions import InvalidTokenException, AuthenticationError
 
    app = FastAPI()
+
+   @app.exception_handler(InvalidTokenException)
+   async def invalid_token_handler(request: Request, exc: InvalidTokenException):
+       return JSONResponse(
+           status_code=exc.status_code,
+           content={
+               "error": "token_error",
+               "message": exc.detail,
+           }
+       )
 
    @app.exception_handler(AuthenticationError)
    async def authentication_error_handler(request: Request, exc: AuthenticationError):
@@ -103,83 +111,8 @@ The middleware automatically handles exceptions and converts them to appropriate
            content={
                "error": "authentication_failed",
                "message": str(exc),
-               "type": "AuthenticationError"
            }
        )
-
-   @app.exception_handler(AuthorizationError)
-   async def authorization_error_handler(request: Request, exc: AuthorizationError):
-       return JSONResponse(
-           status_code=403,
-           content={
-               "error": "access_denied",
-               "message": str(exc),
-               "type": "AuthorizationError"
-           }
-       )
-
-Custom Error Responses
-~~~~~~~~~~~~~~~~~~~~~
-
-You can customize error responses based on the authentication provider:
-
-.. code-block:: python
-
-   @app.exception_handler(AuthenticationError)
-   async def custom_auth_error_handler(request: Request, exc: AuthenticationError):
-       # Customize response based on provider type
-       provider_type = getattr(request.state, 'auth_provider_type', 'unknown')
-       
-       if provider_type == 'cognito':
-           return JSONResponse(
-               status_code=401,
-               content={
-                   "error": "invalid_token",
-                   "error_description": "AWS Cognito authentication failed",
-                   "error_uri": "https://docs.aws.amazon.com/cognito/"
-               }
-           )
-       elif provider_type == 'entra_id':
-           return JSONResponse(
-               status_code=401,
-               content={
-                   "error": "invalid_token",
-                   "error_description": "Azure AD authentication failed",
-                   "error_uri": "https://docs.microsoft.com/azure/active-directory/"
-               }
-           )
-       
-       return JSONResponse(
-           status_code=401,
-           content={"error": "authentication_failed", "message": str(exc)}
-       )
-
-Logging Exceptions
-~~~~~~~~~~~~~~~~~
-
-It's recommended to log exceptions for debugging and monitoring:
-
-.. code-block:: python
-
-   import logging
-   from auth_middleware.exceptions import AuthMiddlewareException
-
-   logger = logging.getLogger(__name__)
-
-   @app.exception_handler(AuthMiddlewareException)
-   async def log_auth_errors(request: Request, exc: AuthMiddlewareException):
-       logger.warning(
-           f"Auth error: {exc.__class__.__name__}: {exc}",
-           extra={
-               "path": request.url.path,
-               "method": request.method,
-               "client": request.client.host if request.client else None,
-               "user_agent": request.headers.get("user-agent"),
-           }
-       )
-       
-       # Re-raise to let other handlers process it
-       raise exc
 
 API Reference
 -------------

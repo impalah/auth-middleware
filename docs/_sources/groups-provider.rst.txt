@@ -31,9 +31,9 @@ Extracts groups directly from AWS Cognito JWT tokens.
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.cognito_groups_provider import CognitoGroupsProvider
+   from auth_middleware.providers.aws.cognito_groups_provider import CognitoGroupsProvider
    from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 
    # Configure the authentication provider
    auth_provider = CognitoProvider(settings=auth_settings)
@@ -99,9 +99,9 @@ Retrieves groups from a SQL database using SQLAlchemy.
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.sql_groups_provider import SqlGroupsProvider
-   from auth_middleware.providers.authz.async_database import AsyncDatabase
-   from auth_middleware.providers.authz.async_database_settings import AsyncDatabaseSettings
+   from auth_middleware.providers.sqlalchemy.sql_groups_provider import SqlGroupsProvider
+   from auth_middleware.providers.sqlalchemy.async_database import AsyncDatabase
+   from auth_middleware.providers.sqlalchemy.async_database_settings import AsyncDatabaseSettings
 
    # Configure database connection
    db_settings = AsyncDatabaseSettings(
@@ -125,8 +125,8 @@ Add users to groups by inserting records:
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.sql_groups_provider import GroupsModel
-   from auth_middleware.providers.authz.async_database import AsyncDatabase
+   from auth_middleware.providers.sqlalchemy.sql_groups_provider import SqlGroupsProvider, GroupsModel
+   from auth_middleware.providers.sqlalchemy.async_database import AsyncDatabase
 
    async def add_user_to_group(username: str, group: str):
        async with AsyncDatabase.get_session() as session:
@@ -146,7 +146,7 @@ Once configured, groups are automatically available in your endpoints through th
 .. code-block:: python
 
    from fastapi import Depends, FastAPI
-   from auth_middleware.functions import require_groups, get_current_user
+   from auth_middleware.guards import require_groups, get_current_user
    from auth_middleware.types.user import User
 
    app = FastAPI()
@@ -174,7 +174,7 @@ You can create custom groups providers by implementing the ``GroupsProvider`` in
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class CustomGroupsProvider(GroupsProvider):
@@ -198,7 +198,7 @@ You can create custom groups providers by implementing the ``GroupsProvider`` in
 
    import json
    import redis.asyncio as redis
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class RedisGroupsProvider(GroupsProvider):
@@ -242,7 +242,7 @@ You can create custom groups providers by implementing the ``GroupsProvider`` in
 .. code-block:: python
 
    import ldap3
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class LdapGroupsProvider(GroupsProvider):
@@ -281,7 +281,7 @@ You can create custom groups providers by implementing the ``GroupsProvider`` in
 .. code-block:: python
 
    import httpx
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class ApiGroupsProvider(GroupsProvider):
@@ -321,11 +321,11 @@ Configuration Examples
 
    class HybridGroupsProvider(GroupsProvider):
        """Combines multiple groups sources."""
-       
+
        def __init__(self, cognito_provider, sql_provider):
            self.cognito_provider = cognito_provider
            self.sql_provider = sql_provider
-       
+
        async def fetch_groups(self, token: JWTAuthorizationCredentials) -> list[str]:
            """Fetch groups from multiple sources."""
            # Get groups from Cognito token
@@ -345,7 +345,7 @@ Configuration Examples
 
    import asyncio
    from functools import wraps
-   from auth_middleware.providers.authz.groups_provider import GroupsProvider
+   from auth_middleware.contracts import GroupsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class CachedGroupsProvider(GroupsProvider):
@@ -494,8 +494,8 @@ When using SqlGroupsProvider, ensure your database schema is properly migrated:
 .. code-block:: python
 
    import os
-   from auth_middleware.providers.authz.sql_groups_provider import SqlGroupsProvider
-   from auth_middleware.providers.authz.cognito_groups_provider import CognitoGroupsProvider
+   from auth_middleware.providers.sqlalchemy.sql_groups_provider import SqlGroupsProvider
+   from auth_middleware.providers.aws.cognito_groups_provider import CognitoGroupsProvider
 
    def create_groups_provider():
        """Factory function for groups provider based on environment."""
@@ -543,13 +543,13 @@ Enable debug logging to troubleshoot issues:
 API Reference
 =============
 
-.. autoclass:: auth_middleware.providers.authz.groups_provider.GroupsProvider
+.. autoclass:: auth_middleware.contracts.groups_provider.GroupsProvider
    :members:
 
-.. autoclass:: auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider
+.. autoclass:: auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider
    :members:
 
-.. autoclass:: auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider
+.. autoclass:: auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider
    :members:
 
 See Also

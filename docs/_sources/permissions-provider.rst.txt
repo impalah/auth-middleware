@@ -43,9 +43,9 @@ Retrieves permissions from a SQL database using SQLAlchemy.
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.sql_permissions_provider import SqlPermissionsProvider
-   from auth_middleware.providers.authz.async_database import AsyncDatabase
-   from auth_middleware.providers.authz.async_database_settings import AsyncDatabaseSettings
+   from auth_middleware.providers.sqlalchemy.sql_permissions_provider import SqlPermissionsProvider
+   from auth_middleware.providers.sqlalchemy.async_database import AsyncDatabase
+   from auth_middleware.providers.sqlalchemy.async_database_settings import AsyncDatabaseSettings
 
    # Configure database connection
    db_settings = AsyncDatabaseSettings(
@@ -69,8 +69,8 @@ Add permissions to users by inserting records:
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.sql_permissions_provider import PermissionsModel
-   from auth_middleware.providers.authz.async_database import AsyncDatabase
+   from auth_middleware.providers.sqlalchemy.sql_permissions_provider import PermissionsModel
+   from auth_middleware.providers.sqlalchemy.async_database import AsyncDatabase
 
    async def grant_permission(username: str, permission: str):
        async with AsyncDatabase.get_session() as session:
@@ -104,7 +104,7 @@ Once configured, permissions are automatically available in your endpoints:
 .. code-block:: python
 
    from fastapi import Depends, FastAPI
-   from auth_middleware.functions import require_permissions, get_current_user
+   from auth_middleware.guards import require_permissions, get_current_user
    from auth_middleware.types.user import User
 
    app = FastAPI()
@@ -213,7 +213,7 @@ Create custom permissions providers by implementing the ``PermissionsProvider`` 
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class CustomPermissionsProvider(PermissionsProvider):
@@ -237,7 +237,7 @@ Create custom permissions providers by implementing the ``PermissionsProvider`` 
 
    import json
    import redis.asyncio as redis
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class RedisPermissionsProvider(PermissionsProvider):
@@ -280,7 +280,7 @@ Create custom permissions providers by implementing the ``PermissionsProvider`` 
 
 .. code-block:: python
 
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class JwtPermissionsProvider(PermissionsProvider):
@@ -308,7 +308,7 @@ Create custom permissions providers by implementing the ``PermissionsProvider`` 
 .. code-block:: python
 
    import httpx
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class ApiPermissionsProvider(PermissionsProvider):
@@ -352,7 +352,7 @@ Create custom permissions providers by implementing the ``PermissionsProvider`` 
    import json
    import os
    from pathlib import Path
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class FilePermissionsProvider(PermissionsProvider):
@@ -461,7 +461,7 @@ Advanced Features
 
    import asyncio
    from datetime import datetime, timedelta
-   from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+   from auth_middleware.contracts.permissions_provider import PermissionsProvider
    from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
    class CachedPermissionsProvider(PermissionsProvider):
@@ -508,7 +508,7 @@ Permission Management
 
    from fastapi import FastAPI, Depends, HTTPException
    from pydantic import BaseModel
-   from auth_middleware.functions import require_permissions
+   from auth_middleware.guards import require_permissions
 
    app = FastAPI()
 
@@ -662,10 +662,10 @@ Troubleshooting
 API Reference
 =============
 
-.. autoclass:: auth_middleware.providers.authz.permissions_provider.PermissionsProvider
+.. autoclass:: auth_middleware.contracts.permissions_provider.PermissionsProvider
    :members:
 
-.. autoclass:: auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider
+.. autoclass:: auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider
    :members:
 
 See Also

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exception Handling &mdash; Auth Middleware 0.3.9 documentation</title>
+  <title>Exception Handling &mdash; Auth Middleware 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/exceptions.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=65b26183"></script>
+      <script src="_static/documentation_options.js?v=ff822928"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -121,17 +121,17 @@
 <li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#see-also">See Also</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Exception Handling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#exception-hierarchy">Exception Hierarchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#exception-types">Exception Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#invalidtokenexception">InvalidTokenException</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#authenticationerror">AuthenticationError</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#authorizationerror">AuthorizationError</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#configurationerror">ConfigurationError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#invalidauthorizationexception">InvalidAuthorizationException</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#invalidcredentialsexception">InvalidCredentialsException</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#usernotfounderror">UserNotFoundError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#passwordpolicyerror">PasswordPolicyError</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#exception-handling-patterns">Exception Handling Patterns</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#middleware-error-handling">Middleware Error Handling</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#custom-error-responses">Custom Error Responses</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#logging-exceptions">Logging Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#global-exception-handler">Global Exception Handler</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-auth_middleware.exceptions">API Reference</a><ul>
@@ -201,88 +201,90 @@
   <section id="exception-handling">
 <h1>Exception Handling<a class="headerlink" href="#exception-handling" title="Link to this heading"></a></h1>
 <p>This module defines the custom exceptions used throughout the auth-middleware library. These exceptions provide specific error handling for authentication and authorization scenarios.</p>
-<section id="exception-hierarchy">
-<h2>Exception Hierarchy<a class="headerlink" href="#exception-hierarchy" title="Link to this heading"></a></h2>
-<p>The auth-middleware library uses a hierarchical exception structure:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>AuthMiddlewareException (base)
-├── AuthenticationError
-├── AuthorizationError
-└── ConfigurationError
-</pre></div>
-</div>
-</section>
 <section id="exception-types">
 <h2>Exception Types<a class="headerlink" href="#exception-types" title="Link to this heading"></a></h2>
-<section id="authenticationerror">
-<h3>AuthenticationError<a class="headerlink" href="#authenticationerror" title="Link to this heading"></a></h3>
-<p>Raised when authentication fails, such as:</p>
+<section id="invalidtokenexception">
+<h3>InvalidTokenException<a class="headerlink" href="#invalidtokenexception" title="Link to this heading"></a></h3>
+<p>The primary exception raised during token validation failures. Carries an HTTP status code and detail message.</p>
+<p>Common causes:</p>
 <ul class="simple">
 <li><p>Invalid or expired JWT tokens</p></li>
-<li><p>Missing authentication credentials</p></li>
-<li><p>Token validation failures</p></li>
-<li><p>Provider-specific authentication errors</p></li>
+<li><p>Missing or malformed Authorization header</p></li>
+<li><p>No public key found for the token</p></li>
+<li><p>Token signature verification failure</p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationError</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">authenticate_user</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">InvalidTokenException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Token error&quot;</span><span class="p">,</span> <span class="s2">&quot;detail&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">detail</span><span class="p">}</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="authenticationerror">
+<h3>AuthenticationError<a class="headerlink" href="#authenticationerror" title="Link to this heading"></a></h3>
+<p>Raised when low-level authentication fails (e.g., HMAC computation, credential decoding).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationError</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">verify_token</span><span class="p">(</span><span class="n">credentials</span><span class="p">)</span>
 <span class="k">except</span> <span class="n">AuthenticationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-        <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
-        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Authentication failed&quot;</span><span class="p">,</span> <span class="s2">&quot;detail&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span>
-    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Authentication error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="authorizationerror">
-<h3>AuthorizationError<a class="headerlink" href="#authorizationerror" title="Link to this heading"></a></h3>
-<p>Raised when authorization checks fail, such as:</p>
-<ul class="simple">
-<li><p>Insufficient permissions</p></li>
-<li><p>Required group membership not met</p></li>
-<li><p>Access to protected resources denied</p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthorizationError</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="k">await</span> <span class="n">check_user_permissions</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">required_permissions</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">AuthorizationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-        <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
-        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Access denied&quot;</span><span class="p">,</span> <span class="s2">&quot;detail&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span>
-    <span class="p">)</span>
+<section id="invalidauthorizationexception">
+<h3>InvalidAuthorizationException<a class="headerlink" href="#invalidauthorizationexception" title="Link to this heading"></a></h3>
+<p>Raised when the Authorization header is present but malformed (wrong scheme, missing parts).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidAuthorizationException</span>
 </pre></div>
 </div>
 </section>
-<section id="configurationerror">
-<h3>ConfigurationError<a class="headerlink" href="#configurationerror" title="Link to this heading"></a></h3>
-<p>Raised when there are configuration issues, such as:</p>
-<ul class="simple">
-<li><p>Missing required environment variables</p></li>
-<li><p>Invalid provider settings</p></li>
-<li><p>Malformed configuration parameters</p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigurationError</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">provider</span> <span class="o">=</span> <span class="n">create_auth_provider</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">ConfigurationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">raise</span>
+<section id="invalidcredentialsexception">
+<h3>InvalidCredentialsException<a class="headerlink" href="#invalidcredentialsexception" title="Link to this heading"></a></h3>
+<p>Raised when Basic Auth credentials are invalid (wrong username or password).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidCredentialsException</span>
+</pre></div>
+</div>
+</section>
+<section id="usernotfounderror">
+<h3>UserNotFoundError<a class="headerlink" href="#usernotfounderror" title="Link to this heading"></a></h3>
+<p>Raised when a user cannot be found in the identity provider.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">UserNotFoundError</span>
+</pre></div>
+</div>
+</section>
+<section id="passwordpolicyerror">
+<h3>PasswordPolicyError<a class="headerlink" href="#passwordpolicyerror" title="Link to this heading"></a></h3>
+<p>Raised when a password change fails due to policy requirements.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">PasswordPolicyError</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="exception-handling-patterns">
 <h2>Exception Handling Patterns<a class="headerlink" href="#exception-handling-patterns" title="Link to this heading"></a></h2>
-<section id="middleware-error-handling">
-<h3>Middleware Error Handling<a class="headerlink" href="#middleware-error-handling" title="Link to this heading"></a></h3>
-<p>The middleware automatically handles exceptions and converts them to appropriate HTTP responses:</p>
+<section id="global-exception-handler">
+<h3>Global Exception Handler<a class="headerlink" href="#global-exception-handler" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Request</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthenticationError</span><span class="p">,</span> <span class="n">AuthorizationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span><span class="p">,</span> <span class="n">AuthenticationError</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">InvalidTokenException</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">invalid_token_handler</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">InvalidTokenException</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+        <span class="n">content</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;token_error&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthenticationError</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authentication_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">AuthenticationError</span><span class="p">):</span>
@@ -291,79 +293,8 @@
         <span class="n">content</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;authentication_failed&quot;</span><span class="p">,</span>
             <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;AuthenticationError&quot;</span>
         <span class="p">}</span>
     <span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthorizationError</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authorization_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">AuthorizationError</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-        <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
-        <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;access_denied&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;AuthorizationError&quot;</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="custom-error-responses">
-<h3>Custom Error Responses<a class="headerlink" href="#custom-error-responses" title="Link to this heading"></a></h3>
-<p>You can customize error responses based on the authentication provider:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthenticationError</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">custom_auth_error_handler</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">AuthenticationError</span><span class="p">):</span>
-    <span class="c1"># Customize response based on provider type</span>
-    <span class="n">provider_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;auth_provider_type&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s1">&#39;cognito&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-            <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
-            <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;invalid_token&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;error_description&quot;</span><span class="p">:</span> <span class="s2">&quot;AWS Cognito authentication failed&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;error_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://docs.aws.amazon.com/cognito/&quot;</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s1">&#39;entra_id&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-            <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
-            <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;invalid_token&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;error_description&quot;</span><span class="p">:</span> <span class="s2">&quot;Azure AD authentication failed&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;error_uri&quot;</span><span class="p">:</span> <span class="s2">&quot;https://docs.microsoft.com/azure/active-directory/&quot;</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-        <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
-        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;authentication_failed&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)}</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="logging-exceptions">
-<h3>Logging Exceptions<a class="headerlink" href="#logging-exceptions" title="Link to this heading"></a></h3>
-<p>It’s recommended to log exceptions for debugging and monitoring:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthMiddlewareException</span>
-
-<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-<span class="nd">@app</span><span class="o">.</span><span class="n">exception_handler</span><span class="p">(</span><span class="n">AuthMiddlewareException</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">log_auth_errors</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">AuthMiddlewareException</span><span class="p">):</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Auth error: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">extra</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
-            <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
-            <span class="s2">&quot;client&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">host</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">client</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="s2">&quot;user_agent&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user-agent&quot;</span><span class="p">),</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Re-raise to let other handlers process it</span>
-    <span class="k">raise</span> <span class="n">exc</span>
 </pre></div>
 </div>
 </section>
@@ -373,26 +304,26 @@
 <p>Auth-middleware exceptions.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.AuthenticationError">
-<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">AuthenticationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">credentials'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#AuthenticationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.AuthenticationError" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">AuthenticationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">credentials'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/authentication_error.html#AuthenticationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.AuthenticationError" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://fastapi.tiangolo.com/reference/exceptions/#fastapi.HTTPException" title="(in FastAPI v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPException</span></code></a></p>
 <p>Raised when credentials are invalid or the session has expired.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.AuthenticationError.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">credentials'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#AuthenticationError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.AuthenticationError.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">credentials'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/authentication_error.html#AuthenticationError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.AuthenticationError.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.ChallengeRequiredError">
-<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">ChallengeRequiredError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">challenge_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#ChallengeRequiredError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.ChallengeRequiredError" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">ChallengeRequiredError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">challenge_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_exceptions.html#ChallengeRequiredError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.ChallengeRequiredError" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Internal signal: Cognito returned a challenge instead of tokens.</p>
 <p>Not raised directly to the HTTP layer — caught by the service and
 converted to a ChallengeResponse.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.ChallengeRequiredError.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">challenge_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#ChallengeRequiredError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.ChallengeRequiredError.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">challenge_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_exceptions.html#ChallengeRequiredError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.ChallengeRequiredError.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -411,12 +342,12 @@ converted to a ChallengeResponse.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.InvalidChallengeError">
-<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">InvalidChallengeError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">or</span> <span class="pre">expired</span> <span class="pre">challenge'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#InvalidChallengeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.InvalidChallengeError" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">InvalidChallengeError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">or</span> <span class="pre">expired</span> <span class="pre">challenge'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_exceptions.html#InvalidChallengeError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.InvalidChallengeError" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://fastapi.tiangolo.com/reference/exceptions/#fastapi.HTTPException" title="(in FastAPI v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPException</span></code></a></p>
 <p>Raised when the challenge response is incorrect or the session is expired.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.InvalidChallengeError.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">or</span> <span class="pre">expired</span> <span class="pre">challenge'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#InvalidChallengeError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.InvalidChallengeError.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">or</span> <span class="pre">expired</span> <span class="pre">challenge'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_exceptions.html#InvalidChallengeError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.InvalidChallengeError.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -447,36 +378,36 @@ converted to a ChallengeResponse.</p>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.MfaSetupError">
-<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">MfaSetupError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'MFA</span> <span class="pre">setup</span> <span class="pre">failed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#MfaSetupError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.MfaSetupError" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">MfaSetupError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'MFA</span> <span class="pre">setup</span> <span class="pre">failed'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_exceptions.html#MfaSetupError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.MfaSetupError" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://fastapi.tiangolo.com/reference/exceptions/#fastapi.HTTPException" title="(in FastAPI v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPException</span></code></a></p>
 <p>Raised when a TOTP setup or verification operation fails.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.MfaSetupError.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'MFA</span> <span class="pre">setup</span> <span class="pre">failed'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#MfaSetupError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.MfaSetupError.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'MFA</span> <span class="pre">setup</span> <span class="pre">failed'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_exceptions.html#MfaSetupError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.MfaSetupError.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.PasswordPolicyError">
-<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">PasswordPolicyError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Password</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">meet</span> <span class="pre">policy</span> <span class="pre">requirements'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#PasswordPolicyError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.PasswordPolicyError" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">PasswordPolicyError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Password</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">meet</span> <span class="pre">policy</span> <span class="pre">requirements'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/password_policy_error.html#PasswordPolicyError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.PasswordPolicyError" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://fastapi.tiangolo.com/reference/exceptions/#fastapi.HTTPException" title="(in FastAPI v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPException</span></code></a></p>
-<p>Raised when the new password does not meet Cognito’s password policy.</p>
+<p>Raised when the new password does not meet the password policy.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.PasswordPolicyError.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Password</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">meet</span> <span class="pre">policy</span> <span class="pre">requirements'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#PasswordPolicyError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.PasswordPolicyError.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Password</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">meet</span> <span class="pre">policy</span> <span class="pre">requirements'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/password_policy_error.html#PasswordPolicyError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.PasswordPolicyError.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py exception">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.UserNotFoundError">
-<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">UserNotFoundError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'User</span> <span class="pre">not</span> <span class="pre">found'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#UserNotFoundError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.UserNotFoundError" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.exceptions.</span></span><span class="sig-name descname"><span class="pre">UserNotFoundError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'User</span> <span class="pre">not</span> <span class="pre">found'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/exceptions/user_not_found_error.html#UserNotFoundError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.UserNotFoundError" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://fastapi.tiangolo.com/reference/exceptions/#fastapi.HTTPException" title="(in FastAPI v0.0.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPException</span></code></a></p>
-<p>Raised when the requested user does not exist in the user pool.</p>
+<p>Raised when the requested user does not exist.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.exceptions.UserNotFoundError.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'User</span> <span class="pre">not</span> <span class="pre">found'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/cognito_exceptions.html#UserNotFoundError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.UserNotFoundError.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'User</span> <span class="pre">not</span> <span class="pre">found'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/exceptions/user_not_found_error.html#UserNotFoundError.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.exceptions.UserNotFoundError.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

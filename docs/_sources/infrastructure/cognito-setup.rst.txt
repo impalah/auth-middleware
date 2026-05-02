@@ -659,10 +659,10 @@ If you're using the identity pool provider in auth-middleware:
 
 .. code-block:: python
 
-   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
        CognitoAuthzProviderSettings
    )
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
    
    settings = CognitoAuthzProviderSettings(
        # User Pool settings
@@ -682,7 +682,7 @@ Then in your application, you can obtain AWS credentials:
 .. code-block:: python
 
    from fastapi import Request, Depends
-   from auth_middleware.functions import require_user
+   from auth_middleware.guards import require_user
    
    @app.get("/aws-credentials")
    async def get_aws_credentials(

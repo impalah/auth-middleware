@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auth Middleware Documentation &mdash; Auth Middleware 0.3.9 documentation</title>
+  <title>Auth Middleware Documentation &mdash; Auth Middleware 0.4.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/index.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=65b26183"></script>
+      <script src="_static/documentation_options.js?v=ff822928"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -183,10 +183,14 @@
 </div>
 <p>Basic usage with AWS Cognito:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">require_user</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.authn.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">CognitoGroupsProvider</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Secure API&quot;</span><span class="p">)</span>
@@ -209,9 +213,7 @@
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Hello </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
 </pre></div>
 </div>
-</section>
-<section id="documentation-contents">
-<h1>Documentation Contents<a class="headerlink" href="#documentation-contents" title="Link to this heading"></a></h1>
+<hr class="docutils" />
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul>
@@ -292,7 +294,7 @@
 <li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#configuration">Configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#example-application">Example Application</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#module-auth_middleware.providers.authn.cognito_provider">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#module-auth_middleware.providers.aws.cognito_provider">API Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a><ul>
@@ -306,7 +308,7 @@
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#error-handling">Error Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#best-practices">Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#troubleshooting">Troubleshooting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#module-auth_middleware.providers.azure.entra_id_provider">API Reference</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a><ul>
@@ -315,7 +317,7 @@
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#token-structure">Token Structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#integration-examples">Integration Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#best-practices">Best Practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#module-auth_middleware.providers.authn.jwt_provider">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#module-auth_middleware.contracts.jwt_provider">API Reference</a></li>
 </ul>
 </li>
 </ul>
@@ -338,9 +340,9 @@
 <li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.authz.groups_provider.GroupsProvider"><code class="docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.authz.cognito_groups_provider.CognitoGroupsProvider"><code class="docutils literal notranslate"><span class="pre">CognitoGroupsProvider</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.authz.sql_groups_provider.SqlGroupsProvider"><code class="docutils literal notranslate"><span class="pre">SqlGroupsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider"><code class="docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider"><code class="docutils literal notranslate"><span class="pre">CognitoGroupsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider"><code class="docutils literal notranslate"><span class="pre">SqlGroupsProvider</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
@@ -359,8 +361,8 @@
 <li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="permissions-provider.html#auth_middleware.providers.authz.permissions_provider.PermissionsProvider"><code class="docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="permissions-provider.html#auth_middleware.providers.authz.sql_permissions_provider.SqlPermissionsProvider"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider"><code class="docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="permissions-provider.html#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
@@ -475,7 +477,6 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-hierarchy">Exception Hierarchy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-types">Exception Types</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#exception-handling-patterns">Exception Handling Patterns</a></li>
 <li class="toctree-l2"><a class="reference internal" href="exceptions.html#module-auth_middleware.exceptions">API Reference</a></li>
@@ -509,9 +510,10 @@
 <li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#authentication-decorators">Authentication Decorators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#checker-classes">Checker Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#advanced-usage-examples">Advanced Usage Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#error-handling">Error Handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="functions.html#module-auth_middleware.functions">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#module-auth_middleware.guards.functions">API Reference</a></li>
 </ul>
 </li>
 </ul>

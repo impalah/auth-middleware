@@ -23,14 +23,13 @@ Basic Configuration
 .. code-block:: python
 
    from auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.authn.entra_id_provider import EntraIdProvider
-   from auth_middleware.providers.authn.entra_id_provider_settings import EntraIdProviderSettings
+   from auth_middleware.providers.azure.entra_id_provider import EntraIdProvider
+   from auth_middleware.providers.azure.settings import ModuleSettings as EntraIdSettings
 
    # Configure Entra ID settings
-   entra_settings = EntraIdProviderSettings(
-       tenant_id="your-tenant-id",
-       client_id="your-application-id",
-       issuer="https://sts.windows.net/your-tenant-id/",
+   entra_settings = EntraIdSettings(
+       AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID="your-tenant-id",
+       AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID="your-application-id",
    )
 
    # Create Entra ID provider
@@ -46,11 +45,8 @@ For applications that need to accept users from any Azure AD tenant:
 
 .. code-block:: python
 
-   entra_settings = EntraIdProviderSettings(
-       tenant_id="common",  # Accept from any tenant
-       client_id="your-application-id",
-       issuer="https://sts.windows.net/",  # Generic issuer for multi-tenant
-       validate_tenant=False,  # Skip tenant validation
+   entra_settings = EntraIdSettings(
+       AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID="common",  # Accept from any tenant
    )
 
 Environment Variables
@@ -76,16 +72,10 @@ Environment-based Configuration
 .. code-block:: python
 
    import os
-   from auth_middleware.providers.authn.entra_id_provider_settings import EntraIdProviderSettings
+   from auth_middleware.providers.azure.settings import ModuleSettings as EntraIdSettings
 
    def create_entra_settings():
-       return EntraIdProviderSettings(
-           tenant_id=os.getenv("ENTRA_TENANT_ID"),
-           client_id=os.getenv("ENTRA_CLIENT_ID"),
-           issuer=os.getenv("ENTRA_ISSUER"),
-           audience=os.getenv("ENTRA_AUDIENCE"),
-           validate_tenant=os.getenv("ENTRA_VALIDATE_TENANT", "true").lower() == "true",
-       )
+       return EntraIdSettings()
 
 Token Structure
 --------------
@@ -173,17 +163,17 @@ Single-tenant Application
 .. code-block:: python
 
    from fastapi import FastAPI, Depends
-   from auth_middleware import JwtAuthMiddleware, require_user, require_groups
-   from auth_middleware.providers.authn.entra_id_provider import EntraIdProvider
-   from auth_middleware.providers.authn.entra_id_provider_settings import EntraIdProviderSettings
+   from auth_middleware import JwtAuthMiddleware
+   from auth_middleware.guards import require_user, require_groups
+   from auth_middleware.providers.azure.entra_id_provider import EntraIdProvider
+   from auth_middleware.providers.azure.settings import ModuleSettings as EntraIdSettings
 
    app = FastAPI(title="Enterprise API")
 
    # Single-tenant configuration
-   entra_settings = EntraIdProviderSettings(
-       tenant_id="12345678-1234-1234-1234-123456789012",
-       client_id="87654321-4321-4321-4321-210987654321",
-       issuer="https://sts.windows.net/12345678-1234-1234-1234-123456789012/",
+   entra_settings = EntraIdSettings(
+       AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID="12345678-1234-1234-1234-123456789012",
+       AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID="87654321-4321-4321-4321-210987654321",
    )
 
    app.add_middleware(
@@ -213,11 +203,8 @@ Multi-tenant SaaS Application
 .. code-block:: python
 
    # Multi-tenant configuration
-   entra_settings = EntraIdProviderSettings(
-       tenant_id="common",
-       client_id="your-saas-app-id",
-       issuer="https://sts.windows.net/",
-       validate_tenant=False,
+   entra_settings = EntraIdSettings(
+       AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID="common",
    )
 
    app.add_middleware(
@@ -302,23 +289,17 @@ Entra ID Specific Errors
 
 .. code-block:: python
 
-   from auth_middleware.exceptions import AuthenticationError
+   from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
    from fastapi import HTTPException
 
-   @app.exception_handler(AuthenticationError)
+   @app.exception_handler(InvalidTokenException)
    async def entra_auth_error_handler(request, exc):
-       error_details = {
-           "error": "authentication_failed",
-           "error_description": str(exc),
-           "tenant_hint": "Use your organization account"
-       }
-       
-       if "tenant" in str(exc).lower():
-           error_details["error_uri"] = "https://docs.microsoft.com/azure/active-directory/develop/howto-convert-app-to-be-multi-tenant"
-       
        return JSONResponse(
-           status_code=401,
-           content=error_details
+           status_code=exc.status_code,
+           content={
+               "error": "authentication_failed",
+               "error_description": exc.detail,
+           }
        )
 
 Best Practices
@@ -361,10 +342,10 @@ Common Issues
 API Reference
 -------------
 
-.. automodule:: auth_middleware.providers.authn.entra_id_provider
+.. automodule:: auth_middleware.providers.azure.entra_id_provider
    :members:
 
-.. automodule:: auth_middleware.providers.authn.entra_id_provider_settings
+.. automodule:: auth_middleware.providers.azure.settings
    :members:
 
 For more information about other authentication providers, see:

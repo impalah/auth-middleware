@@ -109,7 +109,7 @@ The User model includes M2M detection fields:
 .. code-block:: python
 
    from fastapi import FastAPI, Depends, Request, HTTPException
-   from auth_middleware.functions import require_user
+   from auth_middleware.guards import require_user
 
    app = FastAPI()
 
