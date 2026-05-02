@@ -1,5 +1,6 @@
 import base64
 import json
+from typing import Any
 
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -7,9 +8,10 @@ from joserfc.errors import JoseError
 from starlette.requests import Request
 from starlette.status import HTTP_403_FORBIDDEN
 
+from auth_middleware.constants import AUTH_SCHEME_BEARER
+from auth_middleware.contracts.jwt_provider import JWTProvider
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.logging import logger
-from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.settings import settings
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
@@ -44,8 +46,7 @@ class JWTBearerManager(HTTPBearer):
             ) from e
 
         if credentials:
-            # TODO: use a constant for the string "Bearer"
-            if credentials.scheme != "Bearer":
+            if credentials.scheme != AUTH_SCHEME_BEARER:
                 logger.error("Error in JWTBearerManager: Wrong authentication method")
                 raise InvalidTokenException(
                     status_code=HTTP_403_FORBIDDEN,
@@ -54,16 +55,13 @@ class JWTBearerManager(HTTPBearer):
 
             jwt_token = credentials.credentials
 
-            # TODO: control exceptions if token is not a valid JWT
-            # (does not have a . in it)
-            message, signature = jwt_token.rsplit(".", 1)
-
             try:
+                message, signature = jwt_token.rsplit(".", 1)
                 _parts = jwt_token.split(".")
 
-                def _b64d(part: str) -> dict:  # type: ignore[return]
+                def _b64d(part: str) -> dict[str, Any]:
                     padded = part + "=" * (-len(part) % 4)
-                    return json.loads(base64.urlsafe_b64decode(padded))
+                    return dict(json.loads(base64.urlsafe_b64decode(padded)))
 
                 jwt_credentials = JWTAuthorizationCredentials(
                     jwt_token=jwt_token,

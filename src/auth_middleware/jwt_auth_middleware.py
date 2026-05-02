@@ -6,10 +6,10 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.responses import JSONResponse, Response
 from starlette.types import ASGIApp
 
+from auth_middleware.contracts.jwt_provider import JWTProvider
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
-from auth_middleware.providers.authn.jwt_provider import JWTProvider
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
@@ -94,8 +94,6 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
             logger.error("Invalid Token {}", str(ite))
             raise
         except Exception as e:
-            # TODO: Control "No public key found that matches the one present
-            # in the TOKEN!"
             logger.error("Not controlled exception {}", str(e))
             raise
 

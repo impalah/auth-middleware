@@ -31,12 +31,13 @@ Here's a complete example using AWS Cognito as the authentication provider:
 
    from fastapi import FastAPI, Depends
    from starlette.requests import Request
-   from auth_middleware import JwtAuthMiddleware, require_user, require_groups
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
-   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+   from auth_middleware import JwtAuthMiddleware
+   from auth_middleware.guards import require_user, require_groups
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
        CognitoAuthzProviderSettings,
    )
-   from auth_middleware.providers.authz.cognito_groups_provider import (
+   from auth_middleware.providers.aws.cognito_groups_provider import (
        CognitoGroupsProvider,
    )
 
@@ -103,7 +104,7 @@ Set the required environment variables for your authentication provider:
 .. code-block:: python
 
    import os
-   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
        CognitoAuthzProviderSettings,
    )
 
@@ -193,7 +194,7 @@ Within protected endpoints, you can access the current user information:
 .. code-block:: python
 
    from starlette.requests import Request
-   from auth_middleware import get_current_user
+   from auth_middleware.guards import get_current_user
 
    @app.get("/user-info", dependencies=[Depends(require_user())])
    async def get_user_info(request: Request):
@@ -226,24 +227,13 @@ Auth Middleware provides specific exceptions for different authentication and au
 .. code-block:: python
 
    from fastapi import HTTPException
-   from auth_middleware.exceptions import (
-       AuthenticationError,
-       AuthorizationError,
-       InvalidTokenError,
-   )
+   from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 
-   @app.exception_handler(AuthenticationError)
-   async def authentication_exception_handler(request, exc):
+   @app.exception_handler(InvalidTokenException)
+   async def invalid_token_exception_handler(request, exc):
        return JSONResponse(
-           status_code=401,
-           content={"error": "Authentication failed", "detail": str(exc)}
-       )
-
-   @app.exception_handler(AuthorizationError)
-   async def authorization_exception_handler(request, exc):
-       return JSONResponse(
-           status_code=403,
-           content={"error": "Access denied", "detail": str(exc)}
+           status_code=exc.status_code,
+           content={"error": "Authentication failed", "detail": exc.detail}
        )
 
 Development Tips

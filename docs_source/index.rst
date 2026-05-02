@@ -44,10 +44,14 @@ Basic usage with AWS Cognito:
 .. code-block:: python
 
    from fastapi import FastAPI, Depends
-   from auth_middleware import JwtAuthMiddleware, require_user
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
-   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+   from auth_middleware import JwtAuthMiddleware
+   from auth_middleware.guards import require_user
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
        CognitoAuthzProviderSettings,
+   )
+   from auth_middleware.providers.aws.cognito_groups_provider import (
+       CognitoGroupsProvider,
    )
 
    app = FastAPI(title="My Secure API")
@@ -68,8 +72,6 @@ Basic usage with AWS Cognito:
    @app.get("/protected", dependencies=[Depends(require_user())])
    async def protected_endpoint(request):
        return {"message": f"Hello {request.state.current_user.name}"}
-
-Documentation Contents
 ======================
 
 .. toctree::

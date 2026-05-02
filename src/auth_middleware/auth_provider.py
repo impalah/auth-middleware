@@ -11,7 +11,9 @@ class AuthProvider(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    async def validate_credentials[TCredentials](self, credentials: TCredentials) -> User: ...
+    async def validate_credentials[TCredentials](
+        self, credentials: TCredentials
+    ) -> User: ...
 
     @abstractmethod
     def create_user_from_credentials[TCredentials](

@@ -1,0 +1,2 @@
+AUTH_SCHEME_BASIC = "basic"
+AUTH_SCHEME_BEARER = "Bearer"

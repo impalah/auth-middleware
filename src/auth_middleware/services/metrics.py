@@ -36,7 +36,7 @@ class MetricsCollector:
         ```
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize metrics collector."""
         self._tokens_validated = 0
         self._tokens_failed = 0
@@ -45,7 +45,7 @@ class MetricsCollector:
         self._lock = asyncio.Lock()
         self._start_time = datetime.now(UTC)
 
-    async def record_validation_success(self, duration_ms: float):
+    async def record_validation_success(self, duration_ms: float) -> None:
         """Record successful token validation.
 
         Args:
@@ -55,7 +55,9 @@ class MetricsCollector:
             self._tokens_validated += 1
             self._validation_times.append(duration_ms)
 
-    async def record_validation_failure(self, error_type: str, duration_ms: float):
+    async def record_validation_failure(
+        self, error_type: str, duration_ms: float
+    ) -> None:
         """Record failed token validation.
 
         Args:
@@ -146,7 +148,7 @@ class MetricsCollector:
             index = len(sorted_times) - 1
         return sorted_times[index]
 
-    async def reset(self):
+    async def reset(self) -> None:
         """Reset all metrics to initial state."""
         async with self._lock:
             self._tokens_validated = 0

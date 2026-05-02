@@ -10,11 +10,11 @@ import time
 from fastapi import Depends, FastAPI, Request
 
 from auth_middleware import JwtAuthMiddleware
-from auth_middleware.functions import require_user
-from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+from auth_middleware.guards.functions import require_user
+from auth_middleware.providers.aws.cognito_authz_provider_settings import (
     CognitoAuthzProviderSettings,
 )
-from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 from auth_middleware.services import MetricsCollector
 
 app = FastAPI(title="Metrics Collection Example")

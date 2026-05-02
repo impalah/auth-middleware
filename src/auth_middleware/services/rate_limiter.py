@@ -10,6 +10,7 @@ import time
 from collections import defaultdict
 from collections.abc import Callable
 from functools import wraps
+from typing import Any
 
 from fastapi import HTTPException, Request
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
@@ -162,7 +163,7 @@ def _resolve_identifier(
     if identifier_fn:
         return identifier_fn(request)
     if hasattr(request.state, "current_user"):
-        return request.state.current_user.id
+        return str(request.state.current_user.id)
     return request.client.host if request.client else "unknown"
 
 
@@ -177,7 +178,10 @@ def _enforce_rate_limit(
         remaining = limiter.get_remaining(identifier)
         raise HTTPException(
             status_code=HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Rate limit exceeded. Max {max_requests} requests per {window_seconds}s",
+            detail=(
+                "Rate limit exceeded."
+                f" Max {max_requests} requests per {window_seconds}s"
+            ),
             headers={
                 "X-RateLimit-Limit": str(max_requests),
                 "X-RateLimit-Remaining": str(remaining),
@@ -196,16 +200,16 @@ def _apply_rate_limit_headers(
     """Attach X-RateLimit-* headers to *response* if it supports them."""
     if hasattr(response, "headers"):
         remaining = limiter.get_remaining(identifier)
-        response.headers["X-RateLimit-Limit"] = str(max_requests)  # type: ignore[union-attr]
-        response.headers["X-RateLimit-Remaining"] = str(remaining)  # type: ignore[union-attr]
-        response.headers["X-RateLimit-Reset"] = str(int(time.time() + window_seconds))  # type: ignore[union-attr]
+        response.headers["X-RateLimit-Limit"] = str(max_requests)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        response.headers["X-RateLimit-Reset"] = str(int(time.time() + window_seconds))
 
 
 def rate_limit(
     max_requests: int = 100,
     window_seconds: int = 60,
     identifier_fn: Callable[[Request], str] | None = None,
-) -> Callable:
+) -> Callable[..., Any]:
     """Decorator to apply rate limiting to FastAPI endpoints.
 
     Args:
@@ -241,21 +245,27 @@ def rate_limit(
     """
     limiter = RateLimiter(max_requests=max_requests, window_seconds=window_seconds)
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        async def async_wrapper(request: Request, *args, **kwargs):
+        async def async_wrapper(
+            request: Request, *args: object, **kwargs: object
+        ) -> object:
             identifier = _resolve_identifier(request, identifier_fn)
             _enforce_rate_limit(limiter, identifier, max_requests, window_seconds)
             response = await func(request, *args, **kwargs)
-            _apply_rate_limit_headers(response, limiter, identifier, max_requests, window_seconds)
+            _apply_rate_limit_headers(
+                response, limiter, identifier, max_requests, window_seconds
+            )
             return response
 
         @wraps(func)
-        def sync_wrapper(request: Request, *args, **kwargs):
+        def sync_wrapper(request: Request, *args: object, **kwargs: object) -> object:
             identifier = _resolve_identifier(request, identifier_fn)
             _enforce_rate_limit(limiter, identifier, max_requests, window_seconds)
             response = func(request, *args, **kwargs)
-            _apply_rate_limit_headers(response, limiter, identifier, max_requests, window_seconds)
+            _apply_rate_limit_headers(
+                response, limiter, identifier, max_requests, window_seconds
+            )
             return response
 
         # Return appropriate wrapper based on function type

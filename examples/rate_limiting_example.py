@@ -34,7 +34,7 @@ async def limited_endpoint():
     window_seconds=60,
     identifier=lambda request: request.state.current_user.id
     if hasattr(request.state, "current_user")
-    else request.client.host,
+    else (request.client.host if request.client else "unknown"),
 )
 async def user_limited_endpoint(request: Request):
     """Endpoint with per-user rate limiting."""
@@ -45,7 +45,7 @@ async def user_limited_endpoint(request: Request):
 @app.get("/api/manual-limit")
 async def manual_limited_endpoint(request: Request):
     """Endpoint with manual rate limit checking."""
-    client_id = request.client.host
+    client_id = request.client.host if request.client else "unknown"
 
     # Check if request is allowed
     if not await api_limiter.is_allowed(client_id):
@@ -84,7 +84,7 @@ async def headers_example(request: Request):
     """Endpoint that shows rate limit info in headers."""
     from fastapi.responses import JSONResponse
 
-    client_id = request.client.host
+    client_id = request.client.host if request.client else "unknown"
 
     if not await api_limiter.is_allowed(client_id):
         remaining = await api_limiter.get_remaining(client_id)

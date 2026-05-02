@@ -35,7 +35,7 @@ Refresh cache after a specified time interval.
 
 .. code-block:: python
 
-   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
        CognitoAuthzProviderSettings
    )
 
@@ -272,7 +272,7 @@ Track cache effectiveness:
 
 .. code-block:: python
 
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
    from auth_middleware.services import MetricsCollector
    
    provider = CognitoProvider(settings=settings)
@@ -303,7 +303,7 @@ Enable debug logging to monitor cache behavior:
    import logging
    
    # Enable debug logging for JWT provider
-   logging.getLogger("auth_middleware.providers.authn.jwt_provider").setLevel(logging.DEBUG)
+   logging.getLogger("auth_middleware.contracts.jwt_provider").setLevel(logging.DEBUG)
 
 **Example Output:**
 

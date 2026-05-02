@@ -2,8 +2,8 @@ import json
 import os
 from typing import Any
 
+from auth_middleware.contracts.credentials_repository import CredentialsRepository
 from auth_middleware.logging import logger
-from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.repository.settings import settings
 from auth_middleware.types.user_credentials import UserCredentials
 

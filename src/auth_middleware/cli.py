@@ -4,7 +4,7 @@ import asyncio
 
 import click
 
-from auth_middleware.providers.authz.sql_permissions_provider import (
+from auth_middleware.providers.sqlalchemy.sql_permissions_provider import (
     SqlPermissionsProvider,
 )
 

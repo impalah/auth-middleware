@@ -7,6 +7,8 @@ from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
 
+from auth_middleware.constants import AUTH_SCHEME_BASIC
+from auth_middleware.contracts.credentials_repository import CredentialsRepository
 from auth_middleware.exceptions.invalid_authorization_exception import (
     InvalidAuthorizationException,
 )
@@ -14,7 +16,6 @@ from auth_middleware.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
 )
 from auth_middleware.logging import logger
-from auth_middleware.repository.credentials_repository import CredentialsRepository
 from auth_middleware.settings import settings
 from auth_middleware.types.user import User
 from auth_middleware.types.user_credentials import UserCredentials
@@ -61,7 +62,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         return response
 
-    async def get_credentials(self, request: Request) -> tuple[str, str] | None:
+    def get_credentials(self, request: Request) -> tuple[str, str] | None:
         """Get credentials from the request
 
         Args:
@@ -95,8 +96,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             return None
 
         # Check scheme
-        # TODO: use a constant for the string "basic"
-        if not credentials[0] or credentials[0].lower() != "basic":
+        if not credentials[0] or credentials[0].lower() != AUTH_SCHEME_BASIC:
             logger.error("Error in get_credentials: Wrong authentication method")
             raise InvalidAuthorizationException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -130,7 +130,9 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         logger.debug("Get Current Active User ...")
 
         # Recover credentials from the request
-        credentials: tuple[str, str] | None = await self.get_credentials(request=request)
+        credentials: tuple[str, str] | None = self.get_credentials(
+            request=request
+        )
         if not credentials:
             raise InvalidAuthorizationException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -139,9 +141,9 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
         logger.debug("Credentials: {}", credentials)
 
         # Get user credentials from the repository
-        user_credentials: UserCredentials | None = (
-            await self._credentials_repository.get_by_id(id=credentials[0])
-        )
+        user_credentials: (
+            UserCredentials | None
+        ) = await self._credentials_repository.get_by_id(id=credentials[0])
         if not user_credentials:
             raise InvalidAuthorizationException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

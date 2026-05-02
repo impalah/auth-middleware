@@ -8,10 +8,10 @@ for optimizing public key retrieval and validation performance.
 from fastapi import FastAPI
 
 from auth_middleware import JwtAuthMiddleware
-from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+from auth_middleware.providers.aws.cognito_authz_provider_settings import (
     CognitoAuthzProviderSettings,
 )
-from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 
 app = FastAPI(title="JWKS Cache Example")
 

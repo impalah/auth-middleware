@@ -1,0 +1,104 @@
+# Activate annotations for Python 3.7+ and from __future__ import annotations
+from __future__ import annotations
+
+from ksuid import Ksuid
+from sqlalchemy import String, select
+from sqlalchemy.orm import Mapped, mapped_column
+
+from auth_middleware.contracts.permissions_provider import PermissionsProvider
+from auth_middleware.logging import logger
+from auth_middleware.types.jwt import JWTAuthorizationCredentials
+
+from .async_database import AsyncDatabase
+from .sql_base_model import Base
+
+
+class PermissionsModel(Base):  # type: ignore[misc]
+    """Repository permissions model
+
+    Args:
+        Base (_type_): SQLAlchemy base model
+        BaseModel (_type_): base entity model
+    """
+
+    __tablename__ = "authz_permissions"
+
+    id: Mapped[str] = mapped_column(
+        String(27),
+        primary_key=True,
+        default=lambda: str(Ksuid()),
+        index=True,
+    )
+
+    username: Mapped[str] = mapped_column(String(500), nullable=False)
+    permission: Mapped[str] = mapped_column(String(100), nullable=False)
+
+
+class SqlPermissionsProvider(PermissionsProvider):
+    """Recovers groups from AWS Cognito using the token provided
+
+    Args:
+        metaclass (_type_, optional): _description_. Defaults to ABCMeta.
+    """
+
+    async def fetch_permissions(
+        self, token: str | JWTAuthorizationCredentials
+    ) -> list[str]:
+        """Get groups using the token provided
+
+        Args:
+            token (JWTAuthorizationCredentials | str): The token containing the claims.
+
+        Raises:
+            NotImplementedError: _description_
+
+        Returns:
+            List[str]: _description_
+        """
+
+        # 1. Get the username from the token
+        username: str = (
+            token.claims["username"]
+            if isinstance(token, JWTAuthorizationCredentials)
+            else token
+        )
+
+        # 2. Check if permissions are in the cache
+
+        # 3. If not in cache, fetch from the database
+        permissions: list[str] = await self.get_permissions_from_db(username=username)
+
+        # 4. Return the permissions
+        return permissions
+
+    async def get_permissions_from_db(
+        self,
+        *,
+        username: str,
+    ) -> list[str]:
+        """Gets permissions from the database
+
+        Args:
+            username (str): Username
+
+        Returns:
+            List[str]: List of permissions
+        """
+
+        logger.debug("Username: {}", username)
+
+        try:
+            async with AsyncDatabase.get_session() as session:
+                query = select(PermissionsModel).filter(
+                    PermissionsModel.username == username
+                )
+
+                result = await session.execute(query)
+
+                scalars = result.scalars()
+                items: list[PermissionsModel] = list(scalars.all())
+                return [item.permission for item in items]
+
+        except Exception as ex:
+            logger.exception("AsyncDatabase error")
+            raise ex

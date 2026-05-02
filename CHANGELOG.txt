@@ -1,0 +1,147 @@
+CHANGELOG
+=========
+
+Version 0.4.1 (2026-05-02)
+---------------------------
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+**Guard helpers and checker classes** moved to a dedicated ``guards`` package.
+The old top-level module paths have been **deleted** — they no longer exist.
+
+  OLD LOCATION (deleted)                            NEW LOCATION
+  -----------------------------------------------   -----------------------------------------------
+  auth_middleware.functions                         auth_middleware.guards.functions
+  auth_middleware.group_checker                     auth_middleware.guards.group_checker
+  auth_middleware.role_checker                      auth_middleware.guards.role_checker
+  auth_middleware.permissions_checker               auth_middleware.guards.permissions_checker
+
+**Provider implementations** reorganised into technology-scoped packages.
+All old module paths have been **deleted** — they no longer exist.
+
+  OLD LOCATION (deleted)                                           NEW LOCATION
+  --------------------------------------------------------------   ---------------------------------------------------
+  auth_middleware.providers.authn.cognito_provider                 auth_middleware.providers.aws.cognito_provider
+  auth_middleware.providers.authn.cognito_authz_provider_settings  auth_middleware.providers.aws.cognito_authz_provider_settings
+  auth_middleware.providers.authn.identity_pool_provider           auth_middleware.providers.aws.identity_pool_provider
+  auth_middleware.providers.authn.identity_pool_client             auth_middleware.providers.aws.identity_pool_client
+  auth_middleware.providers.authn.identity_pool_settings           auth_middleware.providers.aws.identity_pool_settings
+  auth_middleware.providers.authn.jwt_provider_settings            auth_middleware.providers.aws.jwt_provider_settings
+  auth_middleware.providers.authz.cognito_groups_provider          auth_middleware.providers.aws.cognito_groups_provider
+  auth_middleware.providers.authz.cognito_groups_as_roles_provider auth_middleware.providers.aws.cognito_groups_as_roles_provider
+  auth_middleware.providers.profile.cognito_profile_provider       auth_middleware.providers.aws.cognito_profile_provider
+  auth_middleware.providers.cognito (COGNITO_*_CLAIM constants)    auth_middleware.providers.aws (same constants)
+  auth_middleware.providers.cognito.utils                          auth_middleware.providers.aws.utils
+  auth_middleware.providers.exceptions.aws_exception               auth_middleware.providers.aws.aws_exception
+  auth_middleware.providers.entra_id.entra_id_provider             auth_middleware.providers.azure.entra_id_provider
+  auth_middleware.providers.entra_id.settings                      auth_middleware.providers.azure.settings
+  auth_middleware.providers.entra_id.utils                         auth_middleware.providers.azure.utils
+  auth_middleware.providers.exceptions.azure_exception             auth_middleware.providers.azure.azure_exception
+  auth_middleware.providers.authz.async_database                   auth_middleware.providers.sqlalchemy.async_database
+  auth_middleware.providers.authz.async_database_settings          auth_middleware.providers.sqlalchemy.async_database_settings
+  auth_middleware.providers.authz.sql_base_model                   auth_middleware.providers.sqlalchemy.sql_base_model
+  auth_middleware.providers.authz.sql_groups_provider              auth_middleware.providers.sqlalchemy.sql_groups_provider
+  auth_middleware.providers.authz.sql_permissions_provider         auth_middleware.providers.sqlalchemy.sql_permissions_provider
+
+Migration
+~~~~~~~~~
+
+Guards:
+
+  # Before (no longer works — ImportError)
+  from auth_middleware.functions import require_user, require_groups, require_roles
+  from auth_middleware.functions import require_permissions, has_groups, has_roles
+  from auth_middleware.functions import has_permissions, get_current_user
+  from auth_middleware.group_checker import GroupChecker
+  from auth_middleware.role_checker import RoleChecker
+  from auth_middleware.permissions_checker import PermissionsChecker
+
+  # After
+  from auth_middleware.guards import (
+      require_user,
+      require_groups,
+      require_roles,
+      require_permissions,
+      has_groups,
+      has_roles,
+      has_permissions,
+      get_current_user,
+      GroupChecker,
+      RoleChecker,
+      PermissionsChecker,
+  )
+
+Providers:
+
+  providers.authn.*                        → providers.aws.*
+  providers.authz.cognito_*                → providers.aws.cognito_*
+  providers.authz.sql_*                    → providers.sqlalchemy.sql_*
+  providers.authz.async_database*          → providers.sqlalchemy.async_database*
+  providers.profile.*                      → providers.aws.*
+  providers.cognito                        → providers.aws
+  providers.entra_id.*                     → providers.azure.*
+  providers.exceptions.aws_exception       → providers.aws.aws_exception
+  providers.exceptions.azure_exception     → providers.azure.azure_exception
+
+Deleted package directories: authn/, authz/, profile/, cognito/, entra_id/, exceptions/
+
+Other Changes
+~~~~~~~~~~~~~
+
+- New internal module ``auth_middleware.constants`` introduced with
+  ``AUTH_SCHEME_BASIC`` and ``AUTH_SCHEME_BEARER`` constants.
+  This module is not part of the public API.
+
+Version 0.4.0 (2026-05-01)
+---------------------------
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+Provider interfaces / ABCs moved to a dedicated ``contracts`` package.
+The old module paths have been **deleted** — they no longer exist.
+
+  OLD LOCATION (deleted)                                    NEW LOCATION
+  -------------------------------------------------------  -----------------------------------------------
+  auth_middleware.providers.authn.jwt_provider             auth_middleware.contracts.jwt_provider
+  auth_middleware.providers.authz.groups_provider          auth_middleware.contracts.groups_provider
+  auth_middleware.providers.authz.roles_provider           auth_middleware.contracts.roles_provider
+  auth_middleware.providers.authz.permissions_provider     auth_middleware.contracts.permissions_provider
+  auth_middleware.providers.profile.profile_provider       auth_middleware.contracts.profile_provider
+
+Migration
+~~~~~~~~~
+
+Update your imports to use the new canonical paths:
+
+  # Before (no longer works — ImportError)
+  from auth_middleware.providers.authn.jwt_provider import JWTProvider
+  from auth_middleware.providers.authz.groups_provider import GroupsProvider
+  from auth_middleware.providers.authz.roles_provider import RolesProvider
+  from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
+  from auth_middleware.providers.profile.profile_provider import ProfileProvider
+
+  # After
+  from auth_middleware.contracts import (
+      JWTProvider,
+      GroupsProvider,
+      RolesProvider,
+      PermissionsProvider,
+      ProfileProvider,
+  )
+
+  # Or via top-level package
+  from auth_middleware import JWTProvider, GroupsProvider, RolesProvider, PermissionsProvider, ProfileProvider
+
+Other Changes
+~~~~~~~~~~~~~
+
+- Provider contracts are now exported from the top-level ``auth_middleware``
+  package, making them available via ``from auth_middleware import JWTProvider``
+  etc. without knowing the internal module structure.
+
+Version 0.3.x and earlier
+--------------------------
+
+See git history for previous changes.

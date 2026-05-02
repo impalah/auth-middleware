@@ -12,7 +12,7 @@ The Auth Middleware is added to your FastAPI or Starlette application using the 
 
    from fastapi import FastAPI
    from auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 
    app = FastAPI()
 
@@ -250,7 +250,7 @@ For providers that make HTTP requests (like Cognito), configure connection pooli
 .. code-block:: python
 
    import httpx
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 
    # Custom HTTP client with connection pooling
    http_client = httpx.AsyncClient(
@@ -347,8 +347,7 @@ Custom Error Handlers
    from fastapi.responses import JSONResponse
    from auth_middleware.exceptions import (
        AuthenticationError,
-       AuthorizationError,
-       TokenExpiredError,
+       InvalidTokenException,
    )
 
    app = FastAPI()
@@ -364,25 +363,14 @@ Custom Error Handlers
            }
        )
 
-   @app.exception_handler(AuthorizationError)
-   async def authorization_error_handler(request, exc):
+   @app.exception_handler(InvalidTokenException)
+   async def invalid_token_handler(request, exc):
        return JSONResponse(
-           status_code=403,
+           status_code=exc.status_code,
            content={
-               "error": "Access Denied",
-               "message": "You don't have permission to access this resource",
-               "type": "authorization_error"
-           }
-       )
-
-   @app.exception_handler(TokenExpiredError)
-   async def token_expired_handler(request, exc):
-       return JSONResponse(
-           status_code=401,
-           content={
-               "error": "Token Expired",
-               "message": "Your authentication token has expired. Please login again",
-               "type": "token_expired"
+               "error": "Token Error",
+               "message": exc.detail,
+               "type": "invalid_token"
            }
        )
 

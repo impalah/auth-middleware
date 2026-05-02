@@ -10,7 +10,7 @@ import logging
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -268,7 +268,9 @@ class AuditMiddleware(BaseHTTPMiddleware):
             "/openapi.json",
         ]
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[..., Any]
+    ) -> Response:
         """Process request and log audit event.
 
         Args:
@@ -279,11 +281,11 @@ class AuditMiddleware(BaseHTTPMiddleware):
             HTTP response
         """
         if not self.enabled:
-            return await call_next(request)
+            return cast(Response, await call_next(request))
 
         # Skip excluded paths
         if request.url.path in self.exclude_paths:
-            return await call_next(request)
+            return cast(Response, await call_next(request))
 
         # Collect request information
         start_time = time.time()
@@ -303,7 +305,7 @@ class AuditMiddleware(BaseHTTPMiddleware):
 
         # Process request
         try:
-            response = await call_next(request)
+            response = cast(Response, await call_next(request))
             status_code = response.status_code
 
             # Log successful request

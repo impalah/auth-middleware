@@ -1,6 +1,6 @@
 [project]
 name = "auth-middleware"
-version = "0.3.9"
+version = "0.4.1"
 description = "Async Auth Middleware for FastAPI/Starlette"
 authors = [
     {name = "impalah", email = "impalah@gmail.com"}
@@ -96,6 +96,26 @@ python_version = "3.14"
 strict = true
 ignore_missing_imports = true
 pretty = true
+
+[[tool.mypy.overrides]]
+module = ["tests", "tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+disallow_subclassing_any = false
+disallow_any_generics = false
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = ["examples", "examples.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+disallow_subclassing_any = false
+disallow_any_generics = false
+warn_return_any = false
 
 
 

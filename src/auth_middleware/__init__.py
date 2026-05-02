@@ -1,17 +1,26 @@
 from .basic_auth_middleware import BasicAuthMiddleware
-from .functions import get_current_user, require_groups, require_user
-from .group_checker import GroupChecker
+from .contracts import (
+    CredentialsRepository,
+    GroupsProvider,
+    JWTProvider,
+    PermissionsProvider,
+    ProfileProvider,
+    RolesProvider,
+)
 from .jwt_auth_middleware import JwtAuthMiddleware
 
 # Version info
-__version__ = "0.3.9"
+__version__ = "0.4.1"
 
 
 __all__ = [
-    "require_groups",
-    "require_user",
-    "get_current_user",
-    "GroupChecker",
     "JwtAuthMiddleware",
     "BasicAuthMiddleware",
+    # Provider contracts
+    "CredentialsRepository",
+    "JWTProvider",
+    "GroupsProvider",
+    "RolesProvider",
+    "PermissionsProvider",
+    "ProfileProvider",
 ]

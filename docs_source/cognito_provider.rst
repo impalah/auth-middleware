@@ -29,11 +29,11 @@ Basic Configuration
 .. code-block:: python
 
    from auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
-   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
        CognitoAuthzProviderSettings,
    )
-   from auth_middleware.providers.authz.cognito_groups_provider import (
+   from auth_middleware.providers.aws.cognito_groups_provider import (
        CognitoGroupsProvider,
    )
 
@@ -76,12 +76,13 @@ Complete example with Cognito integration:
 
    from fastapi import FastAPI, Depends
    from starlette.requests import Request
-   from auth_middleware import JwtAuthMiddleware, require_user, require_groups
-   from auth_middleware.providers.authn.cognito_provider import CognitoProvider
-   from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+   from auth_middleware import JwtAuthMiddleware
+   from auth_middleware.guards import require_user, require_groups
+   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
        CognitoAuthzProviderSettings,
    )
-   from auth_middleware.providers.authz.cognito_groups_provider import (
+   from auth_middleware.providers.aws.cognito_groups_provider import (
        CognitoGroupsProvider,
    )
 
@@ -117,11 +118,11 @@ Complete example with Cognito integration:
 API Reference
 -------------
 
-.. automodule:: auth_middleware.providers.authn.cognito_provider
+.. automodule:: auth_middleware.providers.aws.cognito_provider
    :members:
 
-.. automodule:: auth_middleware.providers.authn.cognito_authz_provider_settings
+.. automodule:: auth_middleware.providers.aws.cognito_authz_provider_settings
    :members:
 
-.. automodule:: auth_middleware.providers.authz.cognito_groups_provider
+.. automodule:: auth_middleware.providers.aws.cognito_groups_provider
    :members:

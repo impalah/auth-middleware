@@ -10,11 +10,11 @@ import json
 from fastapi import Depends, FastAPI, HTTPException, Request
 
 from auth_middleware import JwtAuthMiddleware
-from auth_middleware.functions import require_user
-from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+from auth_middleware.guards.functions import require_user
+from auth_middleware.providers.aws.cognito_authz_provider_settings import (
     CognitoAuthzProviderSettings,
 )
-from auth_middleware.providers.authn.cognito_provider import CognitoProvider
+from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 from auth_middleware.services import AuditEvent, AuditLogger, AuditMiddleware
 
 app = FastAPI(title="Audit Logging Example")
@@ -56,7 +56,7 @@ app.add_middleware(JwtAuthMiddleware, auth_provider=auth_provider)
 
 # Example 2: Manual audit logging
 @app.post("/api/sensitive-operation", dependencies=[Depends(require_user())])
-async def sensitive_operation(request: Request, data: dict):
+async def sensitive_operation(request: Request, data: dict[str, object]):
     """Endpoint with manual audit logging for specific events."""
     user = request.state.current_user
 
@@ -123,7 +123,7 @@ async def admin_only(request: Request):
 
 # Example 4: Track specific user actions
 @app.post("/api/resource/{resource_id}", dependencies=[Depends(require_user())])
-async def modify_resource(resource_id: str, request: Request, changes: dict):
+async def modify_resource(resource_id: str, request: Request, changes: dict[str, object]):
     """Track resource modifications in audit log."""
     user = request.state.current_user
 

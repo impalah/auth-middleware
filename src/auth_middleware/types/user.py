@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, PrivateAttr
 
-from auth_middleware.providers.authz.roles_provider import RolesProvider
+from auth_middleware.contracts.roles_provider import RolesProvider
 
 if TYPE_CHECKING:
-    from auth_middleware.providers.authz.groups_provider import GroupsProvider
-    from auth_middleware.providers.authz.permissions_provider import PermissionsProvider
-    from auth_middleware.providers.profile.profile_provider import ProfileProvider
+    from auth_middleware.contracts.groups_provider import GroupsProvider
+    from auth_middleware.contracts.permissions_provider import PermissionsProvider
+    from auth_middleware.contracts.profile_provider import ProfileProvider
     from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 
@@ -70,7 +70,7 @@ class User(BaseModel):
         # Handle groups passed directly in constructor
         if "groups" in data:
             self._groups = data["groups"]
-        
+
         if "roles" in data:
             self._roles = data["roles"]
 
@@ -135,7 +135,6 @@ class User(BaseModel):
 
         return self._groups
 
-
     async def _load_groups(self) -> list[str]:
         """Load the groups of the user.
 
@@ -168,7 +167,6 @@ class User(BaseModel):
             self._roles = await self._roles_task
 
         return self._roles
-
 
     async def _load_roles(self) -> list[str]:
         """Load the roles of the user.

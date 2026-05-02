@@ -21,7 +21,10 @@ async def test_get_credentials_disabled_middleware():
     request: Request = Request(scope=scope)
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", True):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        True,
+    ):
         credentials = await manager.get_credentials(request)
 
         assert credentials is None
@@ -67,7 +70,10 @@ async def test_get_credentials_valid_token():
     request: Request = Request(scope=scope)
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         credentials = await manager.get_credentials(request)
 
     assert credentials is not None
@@ -118,7 +124,10 @@ async def test_get_credentials_invalid_token():
     request: Request = Request(scope=scope)
 
     # Mock the settings.AUTH_MIDDLEWARE_DISABLED variable
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         with pytest.raises(InvalidTokenException) as exc_info:
             await manager.get_credentials(request)
 
@@ -139,7 +148,10 @@ async def test_get_credentials_no_authorization_header():
     }
     request: Request = Request(scope=scope)
 
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         # Should raise HTTPException when no credentials
         with pytest.raises(HTTPException) as exc_info:
             await manager.get_credentials(request)
@@ -160,7 +172,10 @@ async def test_get_credentials_wrong_scheme():
     }
     request: Request = Request(scope=scope)
 
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         # HTTPBearer will raise HTTPException for wrong scheme
         with pytest.raises(HTTPException) as exc_info:
             await manager.get_credentials(request)
@@ -184,9 +199,13 @@ async def test_get_credentials_malformed_jwt():
     }
     request: Request = Request(scope=scope)
 
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
-        with pytest.raises(ValueError):  # rsplit will fail on malformed token
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
+        with pytest.raises(InvalidTokenException) as exc_info:
             await manager.get_credentials(request)
+        assert exc_info.value.detail == "JWK-invalid"
 
 
 @pytest.mark.asyncio
@@ -205,7 +224,10 @@ async def test_get_credentials_jwt_decode_error():
     }
     request: Request = Request(scope=scope)
 
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         with pytest.raises(InvalidTokenException) as exc_info:
             await manager.get_credentials(request)
 
@@ -236,7 +258,10 @@ async def test_get_credentials_auth_provider_verify_exception():
     }
     request: Request = Request(scope=scope)
 
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         with pytest.raises(Exception, match="Provider error"):
             await manager.get_credentials(request)
 
@@ -255,7 +280,10 @@ async def test_get_credentials_empty_bearer_token():
     }
     request: Request = Request(scope=scope)
 
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         # HTTPBearer should raise HTTPException for empty token
         with pytest.raises(HTTPException) as exc_info:
             await manager.get_credentials(request)
@@ -308,7 +336,10 @@ async def test_get_credentials_with_complex_jwt():
     }
     request: Request = Request(scope=scope)
 
-    with patch("auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False):
+    with patch(
+        "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED",
+        False,
+    ):
         credentials = await manager.get_credentials(request)
 
     assert credentials is not None
@@ -339,7 +370,7 @@ async def test_get_credentials_case_sensitive_bearer():
         request: Request = Request(scope=scope)
 
         with patch(
-            "auth_middleware.functions.settings.AUTH_MIDDLEWARE_DISABLED", False
+            "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED", False
         ):
             with pytest.raises(InvalidTokenException) as exc_info:
                 await manager.get_credentials(request)

@@ -3,23 +3,24 @@
 Example of how to configure different cache backends with dependency injection
 """
 
+from typing import Any
 
 from fastapi import Depends, FastAPI
 from fastapi.openapi.utils import get_openapi
 
-from auth_middleware.functions import require_groups, require_user
+from auth_middleware.guards.functions import require_groups, require_user
 from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
-from auth_middleware.providers.authn.cognito_authz_provider_settings import (
+from auth_middleware.providers.aws.cognito_authz_provider_settings import (
     CognitoAuthzProviderSettings,
 )
-from auth_middleware.providers.authn.cognito_provider import CognitoProvider
-from auth_middleware.providers.authz.cognito_groups_provider import (
+from auth_middleware.providers.aws.cognito_groups_provider import (
     CognitoGroupsProvider,
 )
+from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 
 # Configuration for Cognito provider
 # TODO: Set your own parameters
-configuration: dict[str, str] = {
+configuration: dict[str, object] = {
     "USER_POOL_ID": "your_user_pool_id",
     "AWS_REGION": "your_aws_region",
     "TOKEN_VERIFICATION_DISABLED": False,  # or "True" based on your needs
@@ -79,7 +80,7 @@ def create_app_with_cognito():
 
 
 # Example endpoints for any app
-async def get_items(q: str = None, page: int = 1):
+async def get_items(q: str | None = None, page: int = 1):
     return {"query": q, "page": page, "result": [f"item-{i}" for i in range(1, 6)]}
 
 
@@ -91,7 +92,7 @@ async def get_user(user_id: int):
     }
 
 
-async def calculate(data: dict):
+async def calculate(data: dict[str, Any]):
     """
     Calculate the sum of numbers with caching.
 
