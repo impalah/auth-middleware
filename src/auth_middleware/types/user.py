@@ -8,7 +8,6 @@ from auth_middleware.contracts.roles_provider import RolesProvider
 if TYPE_CHECKING:
     from auth_middleware.contracts.groups_provider import GroupsProvider
     from auth_middleware.contracts.permissions_provider import PermissionsProvider
-    from auth_middleware.contracts.profile_provider import ProfileProvider
     from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 
@@ -24,7 +23,6 @@ class User(BaseModel):
     _permissions_provider: PermissionsProvider | None = PrivateAttr(default=None)
     _groups_provider: GroupsProvider | None = PrivateAttr(default=None)
     _roles_provider: RolesProvider | None = PrivateAttr(default=None)
-    _profile_provider: ProfileProvider | None = PrivateAttr(default=None)
     _token: str | None = PrivateAttr(default=None)
     _jwt_credentials: JWTAuthorizationCredentials | None = PrivateAttr(default=None)
 
@@ -34,8 +32,6 @@ class User(BaseModel):
     _roles_task: asyncio.Task[list[str]] | None = None
     _permissions: list[str] | None = None
     _permissions_task: asyncio.Task[list[str]] | None = None
-    _profile: dict[str, Any] | None = None
-    _profile_task: asyncio.Task[dict[str, Any]] | None = None
 
     def __init__(
         self,
@@ -44,7 +40,6 @@ class User(BaseModel):
         permissions_provider: PermissionsProvider | None = None,
         groups_provider: GroupsProvider | None = None,
         roles_provider: RolesProvider | None = None,
-        profile_provider: ProfileProvider | None = None,
         **data: Any,
     ):
         super().__init__(**data)
@@ -63,9 +58,6 @@ class User(BaseModel):
 
         # Store the roles provider (e.g., SQL, DynamoDB, etc.)
         self._roles_provider = roles_provider
-
-        # Store the profile provider (e.g., Cognito, SQL, etc.)
-        self._profile_provider = profile_provider
 
         # Handle groups passed directly in constructor
         if "groups" in data:
@@ -213,27 +205,3 @@ class User(BaseModel):
         permissions = await self._permissions_provider.fetch_permissions(self._token)
         return permissions
 
-    @property
-    async def profile(self) -> dict[str, Any]:
-        """Async property to get the profile attributes of the user.
-
-        Returns the arbitrary key-value dict provided by the configured
-        ``ProfileProvider``. Returns an empty dict when no provider is set or
-        the user has no profile.
-
-        Returns:
-            dict[str, Any]: Profile attributes.
-        """
-        if self._profile is None:
-            if self._profile_task is None:
-                self._profile_task = asyncio.create_task(self._load_profile())
-            self._profile = await self._profile_task
-
-        return self._profile
-
-    async def _load_profile(self) -> dict[str, Any]:
-        """Load the profile attributes of the user."""
-        if not self._profile_provider:
-            return {}
-
-        return await self._profile_provider.fetch_profile(self.id)

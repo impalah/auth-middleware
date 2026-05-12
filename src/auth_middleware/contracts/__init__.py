@@ -1,7 +1,6 @@
 from auth_middleware.contracts.credentials_repository import CredentialsRepository
 from auth_middleware.contracts.groups_provider import GroupsProvider
 from auth_middleware.contracts.permissions_provider import PermissionsProvider
-from auth_middleware.contracts.profile_provider import ProfileProvider
 from auth_middleware.contracts.roles_provider import RolesProvider
 
 # JWTProvider is loaded lazily to avoid a circular import:
@@ -23,5 +22,4 @@ __all__ = [
     "GroupsProvider",
     "RolesProvider",
     "PermissionsProvider",
-    "ProfileProvider",
 ]

@@ -9,7 +9,6 @@ from joserfc.jwk import import_key
 from auth_middleware.contracts.groups_provider import GroupsProvider
 from auth_middleware.contracts.jwt_provider import JWTProvider
 from auth_middleware.contracts.permissions_provider import PermissionsProvider
-from auth_middleware.contracts.profile_provider import ProfileProvider
 from auth_middleware.contracts.roles_provider import RolesProvider
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.logging import logger
@@ -21,7 +20,7 @@ from auth_middleware.providers.aws.services.m2m_detector import M2MTokenDetector
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
-T_Provider = PermissionsProvider | GroupsProvider | ProfileProvider | RolesProvider
+T_Provider = PermissionsProvider | GroupsProvider | RolesProvider
 
 
 def _resolve_provider(
@@ -60,7 +59,6 @@ class CognitoProvider(JWTProvider):
         | None = None,
         groups_provider: type[GroupsProvider] | GroupsProvider | None = None,
         roles_provider: type[RolesProvider] | RolesProvider | None = None,
-        profile_provider: type[ProfileProvider] | ProfileProvider | None = None,
     ) -> CognitoProvider:
         logger.debug("Creating CognitoProvider instance")
 
@@ -76,7 +74,6 @@ class CognitoProvider(JWTProvider):
         | None = None,
         groups_provider: type[GroupsProvider] | GroupsProvider | None = None,
         roles_provider: type[RolesProvider] | RolesProvider | None = None,
-        profile_provider: type[ProfileProvider] | ProfileProvider | None = None,
     ) -> None:
         logger.debug("Initializing CognitoProvider instance")
 
@@ -94,9 +91,6 @@ class CognitoProvider(JWTProvider):
                 ),
                 roles_provider=_resolve_provider(  # type: ignore[arg-type]
                     roles_provider, RolesProvider, allow_missing=True
-                ),
-                profile_provider=_resolve_provider(  # type: ignore[arg-type]
-                    profile_provider, ProfileProvider
                 ),
             )
             self._initialized = True
@@ -237,7 +231,6 @@ class CognitoProvider(JWTProvider):
             groups_provider=self._groups_provider,
             roles_provider=self._roles_provider,
             permissions_provider=self._permissions_provider,
-            profile_provider=self._profile_provider,
             id=token.claims["sub"],
             name=(
                 token.claims[name_property]

@@ -4,7 +4,6 @@ from .contracts import (
     GroupsProvider,
     JWTProvider,
     PermissionsProvider,
-    ProfileProvider,
     RolesProvider,
 )
 from .jwt_auth_middleware import JwtAuthMiddleware
@@ -22,5 +21,4 @@ __all__ = [
     "GroupsProvider",
     "RolesProvider",
     "PermissionsProvider",
-    "ProfileProvider",
 ]

@@ -10,7 +10,6 @@ from auth_middleware.types.user import User
 if TYPE_CHECKING:
     from auth_middleware.contracts.groups_provider import GroupsProvider
     from auth_middleware.contracts.permissions_provider import PermissionsProvider
-    from auth_middleware.contracts.profile_provider import ProfileProvider
     from auth_middleware.contracts.roles_provider import RolesProvider
     from auth_middleware.providers.aws.jwt_provider_settings import (
         JWTProviderSettings,
@@ -30,7 +29,6 @@ class JWTProvider(metaclass=ABCMeta):
     _permissions_provider: PermissionsProvider | None
     _groups_provider: GroupsProvider | None
     _roles_provider: RolesProvider | None
-    _profile_provider: ProfileProvider | None
     _background_refresh_task: asyncio.Task[None] | None
 
     def __init__(
@@ -39,13 +37,11 @@ class JWTProvider(metaclass=ABCMeta):
         permissions_provider: PermissionsProvider | None = None,
         groups_provider: GroupsProvider | None = None,
         roles_provider: RolesProvider | None = None,
-        profile_provider: ProfileProvider | None = None,
     ) -> None:
         self._settings = settings
         self._permissions_provider = permissions_provider
         self._groups_provider = groups_provider
         self._roles_provider = roles_provider
-        self._profile_provider = profile_provider
         self._background_refresh_task = None
 
     async def _get_jwks(self) -> JWKS | None:
