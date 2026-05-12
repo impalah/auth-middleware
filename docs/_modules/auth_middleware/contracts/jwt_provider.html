@@ -163,7 +163,6 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.profile_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProfileProvider</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.roles_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">RolesProvider</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
         <span class="n">JWTProviderSettings</span><span class="p">,</span>
@@ -185,7 +184,6 @@
     <span class="n">_permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">_groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">_roles_provider</span><span class="p">:</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span>
-    <span class="n">_profile_provider</span><span class="p">:</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">_background_refresh_task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Task</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="JWTProvider.__init__">
@@ -196,13 +194,11 @@
         <span class="n">permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">roles_provider</span><span class="p">:</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">profile_provider</span><span class="p">:</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span> <span class="o">=</span> <span class="n">permissions_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="o">=</span> <span class="n">groups_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span> <span class="o">=</span> <span class="n">roles_provider</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_profile_provider</span> <span class="o">=</span> <span class="n">profile_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_background_refresh_task</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 

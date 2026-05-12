@@ -162,7 +162,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.profile_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProfileProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.roles_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">RolesProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.invalid_token_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
@@ -174,7 +173,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWK</span><span class="p">,</span> <span class="n">JWKS</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
 
-<span class="n">T_Provider</span> <span class="o">=</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="n">RolesProvider</span>
+<span class="n">T_Provider</span> <span class="o">=</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="n">RolesProvider</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_provider</span><span class="p">(</span>
@@ -215,7 +214,6 @@
         <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">groups_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">roles_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">RolesProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">profile_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">ProfileProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CognitoProvider</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Creating CognitoProvider instance&quot;</span><span class="p">)</span>
 
@@ -233,7 +231,6 @@
         <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">groups_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">roles_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">RolesProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">profile_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">ProfileProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">ProfileProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing CognitoProvider instance&quot;</span><span class="p">)</span>
 
@@ -251,9 +248,6 @@
                 <span class="p">),</span>
                 <span class="n">roles_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>  <span class="c1"># type: ignore[arg-type]</span>
                     <span class="n">roles_provider</span><span class="p">,</span> <span class="n">RolesProvider</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">True</span>
-                <span class="p">),</span>
-                <span class="n">profile_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>  <span class="c1"># type: ignore[arg-type]</span>
-                    <span class="n">profile_provider</span><span class="p">,</span> <span class="n">ProfileProvider</span>
                 <span class="p">),</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">True</span></div>
@@ -406,7 +400,6 @@
             <span class="n">groups_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="p">,</span>
             <span class="n">roles_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="p">,</span>
             <span class="n">permissions_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span><span class="p">,</span>
-            <span class="n">profile_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_profile_provider</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">],</span>
             <span class="n">name</span><span class="o">=</span><span class="p">(</span>
                 <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="n">name_property</span><span class="p">]</span>
