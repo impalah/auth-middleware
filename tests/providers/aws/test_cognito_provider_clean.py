@@ -1,6 +1,6 @@
 """Tests for _resolve_provider helper and uncovered CognitoProvider branches."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -138,6 +138,137 @@ class TestVerifyTokenDisabled:
         provider = CognitoProvider(settings=settings)
         token = _make_token({"sub": "u1"})
         result = await provider.verify_token(token)
+        assert result is True
+
+
+# ---------------------------------------------------------------------------
+# verify_token — client_id/aud validation (signature alone is not enough:
+# any token signed by the user pool, for any app client, must be rejected
+# unless it was issued for the configured user_pool_client_id)
+# ---------------------------------------------------------------------------
+
+
+class TestVerifyTokenClientId:
+    def setup_method(self):
+        CognitoProvider._instances.pop(CognitoProvider, None)
+
+    @staticmethod
+    def _provider_with_signature_ok(**settings_kwargs):
+        """A CognitoProvider whose signature check always succeeds, so tests
+        only exercise the client_id/aud branch."""
+        CognitoProvider._instances.pop(CognitoProvider, None)
+        provider = CognitoProvider(settings=_settings(**settings_kwargs))
+        provider._get_hmac_key = AsyncMock(return_value={"kid": "k1"})
+        return provider
+
+    @pytest.mark.asyncio
+    async def test_rejects_token_from_a_different_app_client_via_aud(self):
+        provider = self._provider_with_signature_ok(
+            user_pool_client_id="expected_client_id"
+        )
+        token = _make_token({"sub": "u1", "aud": "other_client_id"})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_rejects_access_token_from_a_different_app_client_via_client_id(self):
+        # Access tokens carry the app client id in "client_id", not "aud".
+        provider = self._provider_with_signature_ok(
+            user_pool_client_id="expected_client_id"
+        )
+        token = _make_token(
+            {"sub": "u1", "token_use": "access", "client_id": "other_client_id"}
+        )
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_accepts_id_token_matching_configured_client_id(self):
+        provider = self._provider_with_signature_ok(
+            user_pool_client_id="expected_client_id"
+        )
+        token = _make_token({"sub": "u1", "aud": "expected_client_id"})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_accepts_access_token_matching_configured_client_id(self):
+        provider = self._provider_with_signature_ok(
+            user_pool_client_id="expected_client_id"
+        )
+        token = _make_token(
+            {"sub": "u1", "token_use": "access", "client_id": "expected_client_id"}
+        )
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_skips_check_when_no_user_pool_client_id_configured(self):
+        # Backward compatibility: if the app didn't configure
+        # user_pool_client_id, signature validation alone still governs.
+        provider = self._provider_with_signature_ok()
+        token = _make_token({"sub": "u1", "aud": "whatever_client_id"})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
         assert result is True
 
 

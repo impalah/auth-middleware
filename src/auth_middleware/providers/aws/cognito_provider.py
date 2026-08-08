@@ -192,9 +192,45 @@ class CognitoProvider(JWTProvider):
         key = import_key(hmac_key_candidate)
         try:
             joserfc_jwt.decode(token.jwt_token, key, algorithms=["RS256"])
-            return True
         except JoseError:
             return False
+
+        return self.__verify_client_id(token)
+
+    def __verify_client_id(self, token: JWTAuthorizationCredentials) -> bool:
+        """Verify the token was issued for the configured app client.
+
+        Cognito ID tokens carry the app client id in the ``aud`` claim;
+        access tokens carry it in ``client_id`` instead (they have no
+        ``aud`` claim). Without this check, any token signed by the user
+        pool - regardless of which app client it was issued for - would be
+        accepted.
+
+        Args:
+            token (JWTAuthorizationCredentials): The token to check.
+
+        Returns:
+            bool: True if no app client is configured to check against, or
+            if the token's client id/audience matches it.
+        """
+        expected_client_id = (
+            self._settings.user_pool_client_id
+            if isinstance(self._settings, CognitoAuthzProviderSettings)
+            else None
+        )
+        if not expected_client_id:
+            return True
+
+        token_client_id = token.claims.get("aud") or token.claims.get("client_id")
+        if token_client_id != expected_client_id:
+            logger.error(
+                "Token client_id/aud '{}' does not match configured "
+                "user_pool_client_id",
+                token_client_id,
+            )
+            return False
+
+        return True
 
     async def create_user_from_token(self, token: JWTAuthorizationCredentials) -> User:
         """Initializes a domain User object with data recovered from a JWT TOKEN.

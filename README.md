@@ -75,6 +75,7 @@ app = FastAPI()
 auth_settings = CognitoAuthzProviderSettings(
     user_pool_id="us-east-1_abcdef123",
     user_pool_region="us-east-1",
+    user_pool_client_id="your-app-client-id",  # recommended: rejects tokens from other app clients
     jwt_token_verification_disabled=False,
 )
 

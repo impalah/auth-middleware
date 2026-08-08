@@ -107,7 +107,7 @@ async def test_verify_token_valid(mocker, cognito_provider):
             "username": "test_user",
             "exp": int(time.time()) + 3600,  # Token expires in 1 hour
             "iss": "my_issuer",
-            "aud": "my_audience",
+            "aud": "test_client_id",
             "kid": "g23WGFYfO80xug2LFX3NGpFWFyFZByRz9iYjsHeFl4Q=",
         },
     )

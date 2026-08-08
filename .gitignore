@@ -207,3 +207,9 @@ terraform.rc
 .terraform.lock.hcl
 
 **/.sonar/
+
+# graphify output (generated knowledge graph artifacts)
+graphify-out/
+
+# Claude Code project instructions (not committed yet)
+CLAUDE.md
