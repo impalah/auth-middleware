@@ -16,6 +16,7 @@ AWS Cognito is a managed identity service that provides:
 The Cognito provider in auth-middleware handles:
 
 * JWT token validation and signature verification
+* App client (``aud``/``client_id``) validation, when ``user_pool_client_id`` is configured
 * User information extraction from tokens
 * Group membership resolution
 * Token expiration checking
@@ -41,6 +42,7 @@ Basic Configuration
    auth_settings = CognitoAuthzProviderSettings(
        user_pool_id="us-east-1_abcdef123",
        user_pool_region="us-east-1",
+       user_pool_client_id="your-app-client-id",
        jwt_token_verification_disabled=False,
    )
 
@@ -52,6 +54,17 @@ Basic Configuration
 
    # Add to FastAPI application
    app.add_middleware(JwtAuthMiddleware, auth_provider=cognito_provider)
+
+.. warning::
+
+   ``user_pool_client_id`` is optional but strongly recommended. Cognito
+   signs tokens for every app client in a user pool with the same JWKS, so
+   signature verification alone accepts a valid token from *any* app
+   client of that user pool. Setting ``user_pool_client_id`` makes
+   ``CognitoProvider`` also check the token's ``aud`` claim (ID tokens) or
+   ``client_id`` claim (access tokens) against it, and reject tokens
+   issued for a different app client. Without it, this check is skipped
+   for backward compatibility.
 
 Environment Variables
 ~~~~~~~~~~~~~~~~~~~~

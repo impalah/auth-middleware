@@ -203,6 +203,7 @@
 <p>The Cognito provider in auth-middleware handles:</p>
 <ul class="simple">
 <li><p>JWT token validation and signature verification</p></li>
+<li><p>App client (<code class="docutils literal notranslate"><span class="pre">aud</span></code>/<code class="docutils literal notranslate"><span class="pre">client_id</span></code>) validation, when <code class="docutils literal notranslate"><span class="pre">user_pool_client_id</span></code> is configured</p></li>
 <li><p>User information extraction from tokens</p></li>
 <li><p>Group membership resolution</p></li>
 <li><p>Token expiration checking</p></li>
@@ -225,6 +226,7 @@
 <span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
     <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;us-east-1_abcdef123&quot;</span><span class="p">,</span>
     <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
+    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-app-client-id&quot;</span><span class="p">,</span>
     <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -237,6 +239,17 @@
 <span class="c1"># Add to FastAPI application</span>
 <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">auth_provider</span><span class="o">=</span><span class="n">cognito_provider</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">user_pool_client_id</span></code> is optional but strongly recommended. Cognito
+signs tokens for every app client in a user pool with the same JWKS, so
+signature verification alone accepts a valid token from <em>any</em> app
+client of that user pool. Setting <code class="docutils literal notranslate"><span class="pre">user_pool_client_id</span></code> makes
+<code class="docutils literal notranslate"><span class="pre">CognitoProvider</span></code> also check the token’s <code class="docutils literal notranslate"><span class="pre">aud</span></code> claim (ID tokens) or
+<code class="docutils literal notranslate"><span class="pre">client_id</span></code> claim (access tokens) against it, and reject tokens
+issued for a different app client. Without it, this check is skipped
+for backward compatibility.</p>
 </div>
 </section>
 <section id="environment-variables">

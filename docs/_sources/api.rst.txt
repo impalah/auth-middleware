@@ -85,16 +85,20 @@ Basic Setup
    from fastapi import FastAPI
    from auth_middleware import JwtAuthMiddleware
    from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
+       CognitoAuthzProviderSettings,
+   )
 
    app = FastAPI()
-   
+
    # Setup authentication
-   auth_provider = CognitoProvider(
+   auth_settings = CognitoAuthzProviderSettings(
        user_pool_id="your-user-pool-id",
-       client_id="your-client-id",
-       region="us-east-1"
+       user_pool_region="us-east-1",
+       user_pool_client_id="your-app-client-id",  # recommended: rejects tokens from other app clients
    )
-   
+   auth_provider = CognitoProvider(settings=auth_settings)
+
    app.add_middleware(JwtAuthMiddleware, auth_provider=auth_provider)
 
 Endpoint Protection

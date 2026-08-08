@@ -358,10 +358,46 @@
         <span class="n">key</span> <span class="o">=</span> <span class="n">import_key</span><span class="p">(</span><span class="n">hmac_key_candidate</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">joserfc_jwt</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">jwt_token</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">])</span>
-            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="n">JoseError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
+            <span class="k">return</span> <span class="kc">False</span>
 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__verify_client_id</span><span class="p">(</span><span class="n">token</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__verify_client_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Verify the token was issued for the configured app client.</span>
+
+<span class="sd">        Cognito ID tokens carry the app client id in the ``aud`` claim;</span>
+<span class="sd">        access tokens carry it in ``client_id`` instead (they have no</span>
+<span class="sd">        ``aud`` claim). Without this check, any token signed by the user</span>
+<span class="sd">        pool - regardless of which app client it was issued for - would be</span>
+<span class="sd">        accepted.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            token (JWTAuthorizationCredentials): The token to check.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if no app client is configured to check against, or</span>
+<span class="sd">            if the token&#39;s client id/audience matches it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">expected_client_id</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">user_pool_client_id</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">)</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">expected_client_id</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">token_client_id</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;aud&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;client_id&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">token_client_id</span> <span class="o">!=</span> <span class="n">expected_client_id</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Token client_id/aud &#39;</span><span class="si">{}</span><span class="s2">&#39; does not match configured &quot;</span>
+                <span class="s2">&quot;user_pool_client_id&quot;</span><span class="p">,</span>
+                <span class="n">token_client_id</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="CognitoProvider.create_user_from_token">
 <a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.create_user_from_token">[docs]</a>
