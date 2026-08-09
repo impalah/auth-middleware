@@ -1,6 +1,24 @@
 CHANGELOG
 =========
 
+Version 0.4.6 (2026-08-09)
+---------------------------
+
+Security Fixes
+~~~~~~~~~~~~~~~
+
+- ``python-dotenv`` 1.2.1 → 1.2.2, fixing a symlink-following vulnerability
+  in ``set_key()``/``unset_key()`` that could let a local attacker overwrite
+  arbitrary files via a crafted symlink (CVE-2026-28684, GHSA-mf9w-mj56-hr94).
+- ``requests`` 2.32.5 → 2.34.2 (dev-only, pulled in transitively by
+  ``pysonar``), fixing insecure temp file reuse in
+  ``extract_zipped_paths()`` (CVE-2026-25645, GHSA-gc5v-m9x4-r6x2). Not
+  reachable through normal library usage; auth-middleware never calls
+  ``extract_zipped_paths()`` directly.
+- ``pysonar`` (dev dependency, used by ``make sonar``) bumped 1.4.0.4676 →
+  1.7.0.5143 to relax its pin on ``requests`` (previously locked to
+  exactly 2.32.5), which is what unblocked the ``requests`` fix above.
+
 Version 0.4.5 (2026-08-09)
 ---------------------------
 

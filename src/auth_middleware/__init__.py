@@ -9,7 +9,7 @@ from .contracts import (
 from .jwt_auth_middleware import JwtAuthMiddleware
 
 # Version info
-__version__ = "0.4.5"
+__version__ = "0.4.6"
 
 
 __all__ = [
