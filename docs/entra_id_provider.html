@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azure Entra ID Authentication Provider &mdash; Auth Middleware 0.4.6 documentation</title>
+  <title>Azure Entra ID Authentication Provider &mdash; Auth Middleware 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,13 +14,13 @@
     <link rel="canonical" href="/auth-middleware/entra_id_provider.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=03f3338f"></script>
+      <script src="_static/documentation_options.js?v=1dd76d02"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="JWT Authentication Provider" href="jwt_auth_provider.html" />
+    <link rel="next" title="Generic OIDC Provider" href="oidc_provider.html" />
     <link rel="prev" title="AWS Cognito Provider" href="cognito_provider.html" /> 
 </head>
 
@@ -118,6 +118,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings"><code class="docutils literal notranslate"><span class="pre">ModuleSettings</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span></code></a></li>
 </ul>
 </li>
@@ -125,7 +126,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -545,7 +546,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.azure.entra_id_provider.</span></span><span class="sig-name descname"><span class="pre">EntraIDProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><span class="pre">PermissionsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><span class="pre">GroupsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider" title="auth_middleware.contracts.jwt_provider.JWTProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">JWTProvider</span></code></a></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">JWTProvider</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><span class="pre">PermissionsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><span class="pre">GroupsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.__init__" title="Link to this definition"></a></dt>
@@ -569,28 +570,32 @@ token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jwks_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys" title="Link to this definition"></a></dt>
-<dd><p>Get keys</p>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jwks_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys" title="Link to this definition"></a></dt>
+<dd><p>Get keys from the Entra ID JWKS endpoint.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List[JWK]: a list of JWK</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>jwks_uri</strong> – The JWKS endpoint URL, as returned by the OIDC
+discovery document.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>TODO</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a list of JWK keys</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[JWK]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_openid_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_openid_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config" title="Link to this definition"></a></dt>
-<dd><p>Get openid config from entradid</p>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_openid_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_openid_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config" title="Link to this definition"></a></dt>
+<dd><p>Get the OIDC discovery document for the configured Entra ID tenant.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>a list of JWK</p>
+<dd class="field-odd"><p>the discovery document.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>List[JWK]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, Any]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -601,7 +606,7 @@ token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
 <dd><p>Load JWKS credentials from remote Identity Provider</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>_description_</p>
+<dd class="field-odd"><p>cached key set with refresh metadata.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>JWKS</p>
@@ -647,6 +652,11 @@ token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY">
+<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID">
 <span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -656,7 +666,7 @@ token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
 <p>For more information about other authentication providers, see:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a> - AWS Cognito integration</p></li>
-<li><p><a class="reference internal" href="jwt_auth_provider.html"><span class="doc">JWT Authentication Provider</span></a> - Generic JWT provider</p></li>
+<li><p><a class="reference internal" href="oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a> - Generic OIDC provider (Authentik, Keycloak, Auth0, …)</p></li>
 </ul>
 </section>
 </section>
@@ -666,7 +676,7 @@ token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="cognito_provider.html" class="btn btn-neutral float-left" title="AWS Cognito Provider" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="jwt_auth_provider.html" class="btn btn-neutral float-right" title="JWT Authentication Provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="oidc_provider.html" class="btn btn-neutral float-right" title="Generic OIDC Provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

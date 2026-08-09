@@ -1,0 +1,441 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keycloak Infrastructure Setup &mdash; Auth Middleware 0.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/infrastructure/keycloak-setup.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Google Identity Infrastructure Setup" href="google-setup.html" />
+    <link rel="prev" title="Authentik Infrastructure Setup" href="authentik-setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html">AWS Cognito Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-1-create-a-user-pool">Step 1: Create a User Pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-2-create-app-clients">Step 2: Create App Clients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-3-create-user-groups">Step 3: Create User Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-4-create-users">Step 4: Create Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-5-assign-users-to-groups">Step 5: Assign Users to Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-6-configure-user-pool-settings">Step 6: Configure User Pool Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-7-testing-your-setup">Step 7: Testing Your Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-8-create-identity-pool-optional">Step 8: Create Identity Pool (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html">Azure Entra ID Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html">Authentik Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-1-create-an-oauth2-openid-provider">Step 1: Create an OAuth2/OpenID Provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-2-create-an-application">Step 2: Create an Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-3-include-groups-in-the-token-optional">Step 3: Include Groups in the Token (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-4-create-groups-and-users">Step 4: Create Groups and Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-5-testing-your-setup">Step 5: Testing Your Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#configure-auth-middleware">Configure auth-middleware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Keycloak Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-1-create-a-realm">Step 1: Create a Realm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-2-create-a-client">Step 2: Create a Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-3-include-groups-in-the-token-optional">Step 3: Include Groups in the Token (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-4-create-groups-and-users">Step 4: Create Groups and Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#step-5-testing-your-setup">Step 5: Testing Your Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-auth-middleware">Configure auth-middleware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html">Google Identity Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cognito_provider.html">AWS Cognito Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oidc_provider.html">Generic OIDC Provider</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../infrastructure.html">Infrastructure Setup</a></li>
+      <li class="breadcrumb-item active">Keycloak Infrastructure Setup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/infrastructure/keycloak-setup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="keycloak-infrastructure-setup">
+<span id="id1"></span><h1>Keycloak Infrastructure Setup<a class="headerlink" href="#keycloak-infrastructure-setup" title="Link to this heading"></a></h1>
+<p>This guide walks you through setting up <a class="reference external" href="https://www.keycloak.org/">Keycloak</a> as an OpenID Connect identity provider for use with <code class="docutils literal notranslate"><span class="pre">auth-middleware</span></code>’s <a class="reference internal" href="../oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a>. It covers creating a realm and client, mapping groups into the token, creating users, and testing the setup.</p>
+</section>
+<section id="prerequisites">
+<h1>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h1>
+<p>Before starting, ensure you have:</p>
+<ul class="simple">
+<li><p>A running Keycloak instance with admin access</p></li>
+<li><p>Access to the Keycloak admin console, normally at <code class="docutils literal notranslate"><span class="pre">https://keycloak.example.com/admin/</span></code></p></li>
+</ul>
+</section>
+<section id="step-1-create-a-realm">
+<h1>Step 1: Create a Realm<a class="headerlink" href="#step-1-create-a-realm" title="Link to this heading"></a></h1>
+<p>Realms isolate a set of users, clients, and roles from each other. Most applications get their own realm.</p>
+<ol class="arabic simple">
+<li><p><strong>Open the realm dropdown</strong> (top-left of the admin console) → <strong>Create Realm</strong></p></li>
+<li><p><strong>Realm name</strong>: e.g. <code class="docutils literal notranslate"><span class="pre">myapp</span></code></p></li>
+<li><p>Click <strong>Create</strong></p></li>
+</ol>
+<p>All following steps assume you’re working inside this realm.</p>
+</section>
+<section id="step-2-create-a-client">
+<h1>Step 2: Create a Client<a class="headerlink" href="#step-2-create-a-client" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p><strong>Navigate to Clients</strong></p>
+<ul class="simple">
+<li><p>Go to <strong>Clients</strong> → <strong>Create client</strong></p></li>
+</ul>
+</li>
+<li><p><strong>General Settings</strong></p>
+<ul class="simple">
+<li><p><strong>Client type</strong>: <code class="docutils literal notranslate"><span class="pre">OpenID</span> <span class="pre">Connect</span></code></p></li>
+<li><p><strong>Client ID</strong>: e.g. <code class="docutils literal notranslate"><span class="pre">my-app</span></code> — you’ll need this for <code class="docutils literal notranslate"><span class="pre">OidcProviderSettings.audience</span></code></p></li>
+<li><p>Click <strong>Next</strong></p></li>
+</ul>
+</li>
+<li><p><strong>Capability Config</strong></p>
+<ul class="simple">
+<li><p><strong>Client authentication</strong>: <strong>On</strong> for a confidential client that can keep a secret (recommended for server-side apps), <strong>Off</strong> for a public client (SPA/mobile)</p></li>
+<li><p><strong>Authentication flow</strong>: enable the flows you need:</p>
+<ul>
+<li><p><strong>Standard flow</strong> (authorization code) — for browser-based login</p></li>
+<li><p><strong>Direct access grants</strong> — for the Resource Owner Password flow (useful for testing)</p></li>
+<li><p><strong>Service accounts roles</strong> — for machine-to-machine, client-credentials tokens</p></li>
+</ul>
+</li>
+<li><p>Click <strong>Next</strong></p></li>
+</ul>
+</li>
+<li><p><strong>Login Settings</strong></p>
+<ul class="simple">
+<li><p><strong>Valid redirect URIs</strong>: your application’s callback URL(s), if it performs the login flow directly</p></li>
+<li><p>Click <strong>Save</strong></p></li>
+</ul>
+</li>
+<li><p><strong>Client Secret</strong> (confidential clients only)</p>
+<ul class="simple">
+<li><p>Go to the client’s <strong>Credentials</strong> tab to find the generated <strong>Client secret</strong> — only needed if your application performs the OAuth2 login flow itself (<code class="docutils literal notranslate"><span class="pre">auth-middleware</span></code> only verifies tokens, it doesn’t need the secret)</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-3-include-groups-in-the-token-optional">
+<span id="keycloak-groups-claim"></span><h1>Step 3: Include Groups in the Token (Optional)<a class="headerlink" href="#step-3-include-groups-in-the-token-optional" title="Link to this heading"></a></h1>
+<p>To use <code class="docutils literal notranslate"><span class="pre">OidcProviderSettings.groups_claim</span></code> (instead of a separate <a class="reference internal" href="../groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a>), add a group-membership mapper:</p>
+<ol class="arabic simple">
+<li><p><strong>Navigate to Client Scopes</strong></p>
+<ul class="simple">
+<li><p>Go to <strong>Client scopes</strong>, and either edit the client’s dedicated scope (<code class="docutils literal notranslate"><span class="pre">my-app-dedicated</span></code>) or create a new reusable scope (e.g. <code class="docutils literal notranslate"><span class="pre">groups</span></code>) and assign it to the client under the client’s <strong>Client scopes</strong> tab</p></li>
+</ul>
+</li>
+<li><p><strong>Add a Mapper</strong></p>
+<ul class="simple">
+<li><p>Open the scope, go to the <strong>Mappers</strong> tab → <strong>Add mapper</strong> → <strong>By configuration</strong> → <strong>Group Membership</strong></p></li>
+<li><p><strong>Name</strong>: <code class="docutils literal notranslate"><span class="pre">groups</span></code></p></li>
+<li><p><strong>Token Claim Name</strong>: <code class="docutils literal notranslate"><span class="pre">groups</span></code></p></li>
+<li><p><strong>Full group path</strong>: <strong>Off</strong> (so you get plain group names like <code class="docutils literal notranslate"><span class="pre">admin</span></code> instead of <code class="docutils literal notranslate"><span class="pre">/admin</span></code>)</p></li>
+<li><p><strong>Add to ID token</strong>: <strong>On</strong></p></li>
+<li><p><strong>Add to access token</strong>: <strong>On</strong> (needed if your application authenticates with access tokens rather than ID tokens)</p></li>
+<li><p>Click <strong>Save</strong></p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-4-create-groups-and-users">
+<h1>Step 4: Create Groups and Users<a class="headerlink" href="#step-4-create-groups-and-users" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p><strong>Create Groups</strong></p>
+<ul class="simple">
+<li><p>Go to <strong>Groups</strong> → <strong>Create group</strong>, name it e.g. <code class="docutils literal notranslate"><span class="pre">admin</span></code></p></li>
+<li><p>Repeat for any other groups your application needs (e.g. <code class="docutils literal notranslate"><span class="pre">user</span></code>)</p></li>
+</ul>
+</li>
+<li><p><strong>Create Users</strong></p>
+<ul class="simple">
+<li><p>Go to <strong>Users</strong> → <strong>Add user</strong>, fill in username/email</p></li>
+<li><p>After creating the user, go to the <strong>Credentials</strong> tab to set a password (toggle <strong>Temporary</strong> off for a permanent password in test setups)</p></li>
+<li><p>Go to the <strong>Groups</strong> tab and join the user to a group</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="step-5-testing-your-setup">
+<h1>Step 5: Testing Your Setup<a class="headerlink" href="#step-5-testing-your-setup" title="Link to this heading"></a></h1>
+<p>Fetch the discovery document to confirm the realm is reachable:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>https://keycloak.example.com/realms/myapp/.well-known/openid-configuration
+</pre></div>
+</div>
+<p>It should return a JSON document including <code class="docutils literal notranslate"><span class="pre">issuer</span></code> and <code class="docutils literal notranslate"><span class="pre">jwks_uri</span></code>.</p>
+<p>To obtain a token for testing (Direct Access Grants / Resource Owner Password flow):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://keycloak.example.com/realms/myapp/protocol/openid-connect/token<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;grant_type=password&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_id=my-app&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_secret=your-client-secret&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;username=user@example.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;password=user_password&quot;</span>
+</pre></div>
+</div>
+<p>Or, for machine-to-machine testing (Client Credentials flow):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>https://keycloak.example.com/realms/myapp/protocol/openid-connect/token<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;grant_type=client_credentials&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_id=my-app&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s2">&quot;client_secret=your-client-secret&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="configuration-summary">
+<h1>Configuration Summary<a class="headerlink" href="#configuration-summary" title="Link to this heading"></a></h1>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">Issuer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://keycloak.example.com/realms/myapp</span>
+<span class="nt">Client ID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app</span>
+<span class="nt">Discovery URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://keycloak.example.com/realms/myapp/.well-known/openid-configuration</span>
+</pre></div>
+</div>
+</section>
+<section id="configure-auth-middleware">
+<h1>Configure auth-middleware<a class="headerlink" href="#configure-auth-middleware" title="Link to this heading"></a></h1>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">OidcProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">OidcProviderSettings</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://keycloak.example.com/realms/myapp&quot;</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;my-app&quot;</span><span class="p">,</span>
+    <span class="n">groups_claim</span><span class="o">=</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span>  <span class="c1"># only if you completed Step 3</span>
+<span class="p">)</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">OidcProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Use these values as described in the <a class="reference internal" href="../oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a> documentation.</p>
+</section>
+<section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p><strong>401 “No public key found”</strong></p>
+<ul class="simple">
+<li><p>Confirm the discovery document’s <code class="docutils literal notranslate"><span class="pre">jwks_uri</span></code> (usually
+<code class="docutils literal notranslate"><span class="pre">https://keycloak.example.com/realms/myapp/protocol/openid-connect/certs</span></code>) is reachable from your application server</p></li>
+<li><p>Realm keys are managed under <strong>Realm settings</strong> → <strong>Keys</strong> — ensure an active RS256 key pair exists</p></li>
+</ul>
+</li>
+<li><p><strong>Groups missing from the token</strong></p>
+<ul class="simple">
+<li><p>Confirm the <strong>Group Membership</strong> mapper (Step 3) is attached to a scope the client actually requests</p></li>
+<li><p>Check whether your token is an access token or ID token, and that the mapper is enabled for the one you’re verifying</p></li>
+<li><p>As a fallback, use a dedicated <a class="reference internal" href="../groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a> instead of <code class="docutils literal notranslate"><span class="pre">groups_claim</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>“aud” mismatch / token rejected</strong></p>
+<ul class="simple">
+<li><p>By default, Keycloak access tokens may not include your client in the <code class="docutils literal notranslate"><span class="pre">aud</span></code> claim unless “Add to audience” is configured. Either add an <strong>Audience</strong> mapper for your client, or omit <code class="docutils literal notranslate"><span class="pre">OidcProviderSettings.audience</span></code> and rely on <code class="docutils literal notranslate"><span class="pre">iss</span></code> validation alone (less strict, but works with default Keycloak tokens)</p></li>
+</ul>
+</li>
+<li><p><strong>Wrong issuer</strong></p>
+<ul class="simple">
+<li><p>The issuer is realm-scoped: <code class="docutils literal notranslate"><span class="pre">https://&lt;host&gt;/realms/&lt;realm-name&gt;</span></code> — not the client name or a per-application path</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="security-best-practices">
+<h1>Security Best Practices<a class="headerlink" href="#security-best-practices" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p>Use <strong>confidential</strong> clients with client authentication enabled for server-side applications</p></li>
+<li><p>Disable <strong>Direct access grants</strong> and <strong>Implicit flow</strong> in production unless you specifically need them</p></li>
+<li><p>Rotate realm signing keys periodically (<strong>Realm settings</strong> → <strong>Keys</strong>)</p></li>
+<li><p>Scope group/role mappers to only the claims your application needs</p></li>
+<li><p>Serve Keycloak over HTTPS only, and keep it patched — it is a critical security component</p></li>
+</ol>
+</section>
+<section id="next-steps">
+<h1>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h1>
+<ol class="arabic simple">
+<li><p>Configure <code class="docutils literal notranslate"><span class="pre">auth-middleware</span></code> with your Keycloak settings as shown above</p></li>
+<li><p>Test the authentication flow end-to-end from your application</p></li>
+<li><p>Implement authorization rules using <code class="docutils literal notranslate"><span class="pre">require_groups</span></code>/<code class="docutils literal notranslate"><span class="pre">require_roles</span></code>/<code class="docutils literal notranslate"><span class="pre">require_permissions</span></code></p></li>
+<li><p>Deploy Keycloak and your application with production-grade TLS and monitoring</p></li>
+</ol>
+<p>For implementation details, see the <a class="reference internal" href="../oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a> documentation.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="authentik-setup.html" class="btn btn-neutral float-left" title="Authentik Infrastructure Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="google-setup.html" class="btn btn-neutral float-right" title="Google Identity Infrastructure Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

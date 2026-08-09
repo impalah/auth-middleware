@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; Auth Middleware 0.4.6 documentation</title>
+  <title>Index &mdash; Auth Middleware 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/genindex.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=03f3338f"></script>
+      <script src="_static/documentation_options.js?v=1dd76d02"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -58,7 +58,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
-<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -166,6 +166,7 @@
  | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -177,11 +178,9 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider.__init__">__init__() (auth_middleware.contracts.jwt_provider.JWTProvider method)</a>
+      <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError.__init__">__init__() (auth_middleware.exceptions.AuthenticationError method)</a>
 
       <ul>
-        <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError.__init__">(auth_middleware.exceptions.AuthenticationError method)</a>
-</li>
         <li><a href="exceptions.html#auth_middleware.exceptions.ChallengeRequiredError.__init__">(auth_middleware.exceptions.ChallengeRequiredError method)</a>
 </li>
         <li><a href="exceptions.html#auth_middleware.exceptions.InvalidChallengeError.__init__">(auth_middleware.exceptions.InvalidChallengeError method)</a>
@@ -206,6 +205,12 @@
 </li>
         <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.__init__">(auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 </li>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.__init__">(auth_middleware.providers.oidc.oidc_provider.OidcProvider method)</a>
+</li>
+        <li><a href="groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.__init__">(auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider method)</a>
+</li>
+        <li><a href="permissions-provider.html#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.__init__">(auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider method)</a>
+</li>
         <li><a href="services.html#auth_middleware.services.AuditLogger.__init__">(auth_middleware.services.AuditLogger method)</a>
 </li>
         <li><a href="services.html#auth_middleware.services.MetricsCollector.__init__">(auth_middleware.services.MetricsCollector method)</a>
@@ -219,13 +224,10 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    auth_middleware.contracts.jwt_provider
-
-      <ul>
-        <li><a href="jwt_auth_provider.html#module-auth_middleware.contracts.jwt_provider">module</a>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.algorithms">algorithms (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-      </ul></li>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.audience">audience (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
       <li>
     auth_middleware.exceptions
 
@@ -299,13 +301,6 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
-    auth_middleware.providers.aws.jwt_provider_settings
-
-      <ul>
-        <li><a href="jwt_auth_provider.html#module-auth_middleware.providers.aws.jwt_provider_settings">module</a>
-</li>
-      </ul></li>
-      <li>
     auth_middleware.providers.azure.entra_id_provider
 
       <ul>
@@ -317,6 +312,20 @@
 
       <ul>
         <li><a href="entra_id_provider.html#module-auth_middleware.providers.azure.settings">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.providers.oidc.oidc_provider
+
+      <ul>
+        <li><a href="oidc_provider.html#module-auth_middleware.providers.oidc.oidc_provider">module</a>
+</li>
+      </ul></li>
+      <li>
+    auth_middleware.providers.oidc.oidc_provider_settings
+
+      <ul>
+        <li><a href="oidc_provider.html#module-auth_middleware.providers.oidc.oidc_provider_settings">module</a>
 </li>
       </ul></li>
       <li><a href="services.html#auth_middleware.services.AuditEvent">auth_middleware.services.AuditEvent (built-in class)</a>
@@ -348,6 +357,8 @@
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
 </li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE">AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
+</li>
+      <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY">AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
 </li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
 </li>
@@ -384,12 +395,12 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider">CognitoProvider (class in auth_middleware.providers.aws.cognito_provider)</a>
 </li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider.create_user_from_token">create_user_from_token() (auth_middleware.contracts.jwt_provider.JWTProvider method)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.create_user_from_token">create_user_from_token() (auth_middleware.providers.aws.cognito_provider.CognitoProvider method)</a>
 
       <ul>
-        <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.create_user_from_token">(auth_middleware.providers.aws.cognito_provider.CognitoProvider method)</a>
-</li>
         <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.create_user_from_token">(auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
+</li>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.create_user_from_token">(auth_middleware.providers.oidc.oidc_provider.OidcProvider method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -397,6 +408,10 @@
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.discovery_url">discovery_url (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.dispatch">dispatch() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
 </li>
@@ -457,6 +472,8 @@
       <ul>
         <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys">(auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 </li>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.get_keys">(auth_middleware.providers.oidc.oidc_provider.OidcProvider method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -467,6 +484,8 @@
       <li><a href="services.html#auth_middleware.services.M2MTokenDetector.get_token_metadata">get_token_metadata() (auth_middleware.services.M2MTokenDetector static method)</a>
 </li>
       <li><a href="functions.html#auth_middleware.guards.group_checker.GroupChecker">GroupChecker (class in auth_middleware.guards.group_checker)</a>
+</li>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.groups_claim">groups_claim (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
       <li><a href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider">GroupsProvider (class in auth_middleware.contracts.groups_provider)</a>
 </li>
@@ -496,15 +515,17 @@
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidCredentialsException">InvalidCredentialsException</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidTokenException">InvalidTokenException</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="services.html#auth_middleware.services.AuditEvent.ip_address">ip_address (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.is_m2m">is_m2m (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.M2MTokenDetector.is_m2m_token">is_m2m_token() (auth_middleware.services.M2MTokenDetector static method)</a>
+</li>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.issuer">issuer (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -512,33 +533,27 @@
 <h2 id="J">J</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings.jwks_background_refresh">jwks_background_refresh (auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings attribute)</a>
-</li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings.jwks_background_refresh_threshold">jwks_background_refresh_threshold (auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings attribute)</a>
-</li>
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_interval">jwks_cache_interval (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+
+      <ul>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.jwks_cache_interval">(auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings.jwks_cache_strategy">jwks_cache_strategy (auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings attribute)</a>
-</li>
+      </ul></li>
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_cache_usages">jwks_cache_usages (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+
+      <ul>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.jwks_cache_usages">(auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-      <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_url_template">jwks_url_template (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
-</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings.jwt_algorithm">jwt_algorithm (auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings attribute)</a>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.jwks_uri">jwks_uri (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings.jwt_secret_key">jwt_secret_key (auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings attribute)</a>
-</li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings.jwt_token_verification_disabled">jwt_token_verification_disabled (auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings attribute)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.jwks_url_template">jwks_url_template (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware">JwtAuthMiddleware (class in auth_middleware.jwt_auth_middleware)</a>
 </li>
       <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager">JWTBearerManager (class in auth_middleware.jwt_bearer_manager)</a>
-</li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider">JWTProvider (class in auth_middleware.contracts.jwt_provider)</a>
-</li>
-      <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings">JWTProviderSettings (class in auth_middleware.providers.aws.jwt_provider_settings)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -546,12 +561,12 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider.load_jwks">load_jwks() (auth_middleware.contracts.jwt_provider.JWTProvider method)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.load_jwks">load_jwks() (auth_middleware.providers.aws.cognito_provider.CognitoProvider method)</a>
 
       <ul>
-        <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.load_jwks">(auth_middleware.providers.aws.cognito_provider.CognitoProvider method)</a>
-</li>
         <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.load_jwks">(auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
+</li>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.load_jwks">(auth_middleware.providers.oidc.oidc_provider.OidcProvider method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -579,15 +594,13 @@
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.model_config">model_config (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 
       <ul>
-        <li><a href="jwt_auth_provider.html#auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings.model_config">(auth_middleware.providers.aws.jwt_provider_settings.JWTProviderSettings attribute)</a>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.model_config">(auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
       </ul></li>
       <li>
     module
 
       <ul>
-        <li><a href="jwt_auth_provider.html#module-auth_middleware.contracts.jwt_provider">auth_middleware.contracts.jwt_provider</a>
-</li>
         <li><a href="exceptions.html#module-auth_middleware.exceptions">auth_middleware.exceptions</a>
 </li>
         <li><a href="functions.html#module-auth_middleware.guards.functions">auth_middleware.guards.functions</a>
@@ -608,11 +621,13 @@
 </li>
         <li><a href="cognito_provider.html#module-auth_middleware.providers.aws.cognito_provider">auth_middleware.providers.aws.cognito_provider</a>
 </li>
-        <li><a href="jwt_auth_provider.html#module-auth_middleware.providers.aws.jwt_provider_settings">auth_middleware.providers.aws.jwt_provider_settings</a>
-</li>
         <li><a href="entra_id_provider.html#module-auth_middleware.providers.azure.entra_id_provider">auth_middleware.providers.azure.entra_id_provider</a>
 </li>
         <li><a href="entra_id_provider.html#module-auth_middleware.providers.azure.settings">auth_middleware.providers.azure.settings</a>
+</li>
+        <li><a href="oidc_provider.html#module-auth_middleware.providers.oidc.oidc_provider">auth_middleware.providers.oidc.oidc_provider</a>
+</li>
+        <li><a href="oidc_provider.html#module-auth_middleware.providers.oidc.oidc_provider_settings">auth_middleware.providers.oidc.oidc_provider_settings</a>
 </li>
         <li><a href="types.html#module-auth_middleware.types">auth_middleware.types</a>
 </li>
@@ -620,6 +635,18 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings">ModuleSettings (class in auth_middleware.providers.azure.settings)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider">OidcProvider (class in auth_middleware.providers.oidc.oidc_provider)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings">OidcProviderSettings (class in auth_middleware.providers.oidc.oidc_provider_settings)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -697,13 +724,15 @@
 </li>
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_id">user_pool_client_id (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_client_secret">user_pool_client_secret (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_id">user_pool_id (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
 </li>
       <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings.user_pool_region">user_pool_region (auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings attribute)</a>
+</li>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.username_claim">username_claim (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.UserNotFoundError">UserNotFoundError</a>
 </li>
@@ -713,12 +742,12 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider.verify_token">verify_token() (auth_middleware.contracts.jwt_provider.JWTProvider method)</a>
+      <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.verify_token">verify_token() (auth_middleware.providers.aws.cognito_provider.CognitoProvider method)</a>
 
       <ul>
-        <li><a href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.verify_token">(auth_middleware.providers.aws.cognito_provider.CognitoProvider method)</a>
-</li>
         <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.verify_token">(auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
+</li>
+        <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.verify_token">(auth_middleware.providers.oidc.oidc_provider.OidcProvider method)</a>
 </li>
       </ul></li>
   </ul></td>

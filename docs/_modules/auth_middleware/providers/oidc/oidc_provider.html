@@ -5,12 +5,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.aws.cognito_provider &mdash; Auth Middleware 0.5.0 documentation</title>
+  <title>auth_middleware.providers.oidc.oidc_provider &mdash; Auth Middleware 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
   
-    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/aws/cognito_provider.html" />
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/oidc/oidc_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
@@ -141,7 +141,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">auth_middleware.providers.aws.cognito_provider</li>
+      <li class="breadcrumb-item active">auth_middleware.providers.oidc.oidc_provider</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -150,14 +150,24 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for auth_middleware.providers.aws.cognito_provider</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_ns</span>
+  <h1>Source code for auth_middleware.providers.oidc.oidc_provider</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generic OpenID Connect JWT provider.</span>
+
+<span class="sd">Works with any standards-compliant OIDC identity provider — Authentik,</span>
+<span class="sd">Keycloak, Auth0, Okta, or any other issuer that exposes a</span>
+<span class="sd">``.well-known/openid-configuration`` discovery document and a JWKS</span>
+<span class="sd">endpoint — instead of being tied to a specific cloud vendor.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_ns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">status</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">joserfc</span><span class="w"> </span><span class="kn">import</span> <span class="n">jwt</span> <span class="k">as</span> <span class="n">joserfc_jwt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">joserfc.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">JoseError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">joserfc.jwk</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_key</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joserfc.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTClaimsRegistry</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
@@ -165,118 +175,159 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.roles_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">RolesProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.invalid_token_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws</span><span class="w"> </span><span class="kn">import</span> <span class="n">COGNITO_USERNAME_CLAIM</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.services.m2m_detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">M2MTokenDetector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">OidcException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">OidcProviderSettings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWK</span><span class="p">,</span> <span class="n">JWKS</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
 
-<span class="n">T_Provider</span> <span class="o">=</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="n">RolesProvider</span>
 
+<div class="viewcode-block" id="OidcProvider">
+<a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OidcProvider</span><span class="p">(</span><span class="n">JWTProvider</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;JWT authentication provider for any standards-compliant OIDC issuer.</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_provider</span><span class="p">(</span>
-    <span class="n">provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">T_Provider</span><span class="p">]</span> <span class="o">|</span> <span class="n">T_Provider</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">base_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">T_Provider</span><span class="p">],</span>
-    <span class="n">allow_missing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T_Provider</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate *provider* if it is a class; return it as-is if already an</span>
-<span class="sd">    instance; raise ValueError if it is neither (unless *allow_missing* is True,</span>
-<span class="sd">    in which case ``None`` is returned silently).&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">provider</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_class</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">provider</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="n">base_class</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_class</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">provider</span>  <span class="c1"># type: ignore[return-value]</span>
-    <span class="k">if</span> <span class="n">allow_missing</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;provider must be a </span><span class="si">{</span><span class="n">base_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> instance or subclass thereof&quot;</span>
-    <span class="p">)</span>
+<span class="sd">    Example:</span>
+<span class="sd">        .. code-block:: python</span>
 
+<span class="sd">            from auth_middleware.providers.oidc.oidc_provider import OidcProvider</span>
+<span class="sd">            from auth_middleware.providers.oidc.oidc_provider_settings import (</span>
+<span class="sd">                OidcProviderSettings,</span>
+<span class="sd">            )</span>
 
-<div class="viewcode-block" id="CognitoProvider">
-<a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CognitoProvider</span><span class="p">(</span><span class="n">JWTProvider</span><span class="p">):</span>
-<div class="viewcode-block" id="CognitoProvider.__init__">
-<a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.__init__">[docs]</a>
+<span class="sd">            settings = OidcProviderSettings(</span>
+<span class="sd">                issuer=&quot;https://authentik.example.com/application/o/my-app/&quot;,</span>
+<span class="sd">                audience=&quot;my-client-id&quot;,</span>
+<span class="sd">            )</span>
+<span class="sd">            auth_provider = OidcProvider(settings=settings)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_settings</span><span class="p">:</span> <span class="n">OidcProviderSettings</span>
+    <span class="n">_jwks_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="OidcProvider.__init__">
+<a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">settings</span><span class="p">:</span> <span class="n">CognitoAuthzProviderSettings</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">permissions_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">PermissionsProvider</span><span class="p">]</span>
-        <span class="o">|</span> <span class="n">PermissionsProvider</span>
-        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">groups_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">roles_provider</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">RolesProvider</span><span class="p">]</span> <span class="o">|</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="n">OidcProviderSettings</span><span class="p">,</span>
+        <span class="n">permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">roles_provider</span><span class="p">:</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing CognitoProvider instance&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Settings must be provided&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">OidcProviderSettings</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;OidcProvider requires OidcProviderSettings&quot;</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
-            <span class="n">permissions_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="n">permissions_provider</span><span class="p">,</span> <span class="n">PermissionsProvider</span>
-            <span class="p">),</span>
-            <span class="n">groups_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="n">groups_provider</span><span class="p">,</span> <span class="n">GroupsProvider</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">),</span>
-            <span class="n">roles_provider</span><span class="o">=</span><span class="n">_resolve_provider</span><span class="p">(</span>  <span class="c1"># type: ignore[arg-type]</span>
-                <span class="n">roles_provider</span><span class="p">,</span> <span class="n">RolesProvider</span><span class="p">,</span> <span class="n">allow_missing</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">),</span>
-        <span class="p">)</span></div>
+            <span class="n">permissions_provider</span><span class="o">=</span><span class="n">permissions_provider</span><span class="p">,</span>
+            <span class="n">groups_provider</span><span class="o">=</span><span class="n">groups_provider</span><span class="p">,</span>
+            <span class="n">roles_provider</span><span class="o">=</span><span class="n">roles_provider</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">jwks_uri</span></div>
 
 
-<div class="viewcode-block" id="CognitoProvider.get_keys">
-<a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.get_keys">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get keys from AWS Cognito</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_discover_jwks_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve the JWKS URL, discovering it from the OIDC discovery</span>
+<span class="sd">        document the first time it&#39;s needed if not explicitly configured.</span>
+<span class="sd">        The result is cached on the instance so the discovery document is</span>
+<span class="sd">        not re-fetched on every JWKS refresh.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List[JWK]: a list of JWK keys</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;CognitoProvider requires CognitoAuthzProviderSettings&quot;</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_url_template</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;jwks_url_template is required in CognitoAuthzProviderSettings&quot;</span>
-            <span class="p">)</span>
+<span class="sd">            str: the JWKS endpoint URL.</span>
 
-        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_url_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">user_pool_region</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">user_pool_id</span><span class="p">,</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            InvalidTokenException: if the discovery document cannot be</span>
+<span class="sd">                fetched or parsed.</span>
+<span class="sd">            OidcException: if the discovery document has no &#39;jwks_uri&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span>
+
+        <span class="n">discovery_url</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">discovery_url</span>
+            <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">issuer</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/.well-known/openid-configuration&quot;</span>
         <span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">discovery_url</span><span class="p">)</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+                <span class="n">discovery_doc</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPStatusError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;OIDC discovery endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">exc</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">discovery_url</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to retrieve OIDC discovery document&quot;</span><span class="p">,</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Network error fetching OIDC discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">discovery_url</span><span class="p">,</span>
+                <span class="n">exc</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to reach identity provider&quot;</span><span class="p">,</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Invalid JSON in OIDC discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">discovery_url</span><span class="p">,</span>
+                <span class="n">exc</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid OIDC discovery response from identity provider&quot;</span><span class="p">,</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="n">jwks_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">discovery_doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">jwks_uri</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;OIDC discovery document from </span><span class="si">{}</span><span class="s2"> has no &#39;jwks_uri&#39;&quot;</span><span class="p">,</span> <span class="n">discovery_url</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">OidcException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;OIDC discovery document at </span><span class="si">{</span><span class="n">discovery_url</span><span class="si">}</span><span class="s2"> is missing &#39;jwks_uri&#39;&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span> <span class="o">=</span> <span class="n">jwks_uri</span>
+        <span class="k">return</span> <span class="n">jwks_uri</span>
+
+<div class="viewcode-block" id="OidcProvider.get_keys">
+<a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.get_keys">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the JWKS keys from the OIDC identity provider.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[JWK]: a list of JWK keys</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">jwks_uri</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discover_jwks_uri</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">jwks_uri</span><span class="p">)</span>
                 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
                 <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPStatusError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Cognito JWKS endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;OIDC JWKS endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
                 <span class="n">exc</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
-                <span class="n">url</span><span class="p">,</span>
+                <span class="n">jwks_uri</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
                 <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
                 <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to retrieve public keys from identity provider&quot;</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Network error fetching Cognito JWKS from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Network error fetching OIDC JWKS from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
                 <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
                 <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to reach identity provider&quot;</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unexpected JWKS response format from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unexpected JWKS response format from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
             <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
                 <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
                 <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid JWKS response from identity provider&quot;</span><span class="p">,</span>
@@ -285,46 +336,31 @@
         <span class="k">return</span> <span class="n">keys</span></div>
 
 
-<div class="viewcode-block" id="CognitoProvider.load_jwks">
-<a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.load_jwks">[docs]</a>
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load_jwks</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWKS</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load JWKS credentials from remote Identity Provider</span>
+<div class="viewcode-block" id="OidcProvider.load_jwks">
+<a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.load_jwks">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load_jwks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWKS</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load JWKS credentials from the OIDC identity provider.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            JWKS: _description_</span>
+<span class="sd">            JWKS: cached key set with refresh metadata.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_keys</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CognitoProvider requires CognitoAuthzProviderSettings&quot;</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_keys</span><span class="p">()</span>
 
         <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">time_ns</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_cache_interval</span> <span class="ow">or</span> <span class="mi">20</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000000000</span>
+            <span class="n">time_ns</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_cache_interval</span> <span class="ow">or</span> <span class="mi">20</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1_000_000_000</span>
         <span class="p">)</span>
-
         <span class="n">usage_counter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwks_cache_usages</span> <span class="ow">or</span> <span class="mi">1000</span>
-        <span class="n">jks</span><span class="p">:</span> <span class="n">JWKS</span> <span class="o">=</span> <span class="n">JWKS</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">usage_counter</span><span class="o">=</span><span class="n">usage_counter</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">jks</span></div>
+        <span class="k">return</span> <span class="n">JWKS</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">usage_counter</span><span class="o">=</span><span class="n">usage_counter</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CognitoProvider.verify_token">
-<a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.verify_token">[docs]</a>
+<div class="viewcode-block" id="OidcProvider.verify_token">
+<a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.verify_token">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">verify_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span>
-            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="s2">&quot;jwt_token_verification_disabled&quot;</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_token_verification_disabled</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_token_verification_disabled</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Verifying token through signature&quot;</span><span class="p">)</span>
-
         <span class="n">hmac_key_candidate</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_hmac_key</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="n">hmac_key_candidate</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="s2">&quot;No public key found that matches the one present in the TOKEN!&quot;</span>
@@ -335,80 +371,52 @@
             <span class="p">)</span>
 
         <span class="n">key</span> <span class="o">=</span> <span class="n">import_key</span><span class="p">(</span><span class="n">hmac_key_candidate</span><span class="p">)</span>
-        <span class="n">leeway</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_leeway</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">joserfc_jwt</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">jwt_token</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_registered_claims</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">,</span> <span class="n">leeway</span><span class="o">=</span><span class="n">leeway</span><span class="p">)</span>
+            <span class="n">joserfc_jwt</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
+                <span class="n">token</span><span class="o">.</span><span class="n">jwt_token</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">algorithms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">algorithms</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_registered_claims</span><span class="p">(</span>
+                <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">,</span> <span class="n">leeway</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_leeway</span>
+            <span class="p">)</span>
+
+            <span class="n">registry_options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;iss&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;essential&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">issuer</span><span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">audience</span><span class="p">:</span>
+                <span class="n">registry_options</span><span class="p">[</span><span class="s2">&quot;aud&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;essential&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">audience</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="n">JWTClaimsRegistry</span><span class="p">(</span>
+                <span class="n">leeway</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_leeway</span><span class="p">,</span> <span class="o">**</span><span class="n">registry_options</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">JoseError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__verify_client_id</span><span class="p">(</span><span class="n">token</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="kc">True</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">__verify_client_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Verify the token was issued for the configured app client.</span>
-
-<span class="sd">        Cognito ID tokens carry the app client id in the ``aud`` claim;</span>
-<span class="sd">        access tokens carry it in ``client_id`` instead (they have no</span>
-<span class="sd">        ``aud`` claim). Without this check, any token signed by the user</span>
-<span class="sd">        pool - regardless of which app client it was issued for - would be</span>
-<span class="sd">        accepted.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            token (JWTAuthorizationCredentials): The token to check.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            bool: True if no app client is configured to check against, or</span>
-<span class="sd">            if the token&#39;s client id/audience matches it.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">expected_client_id</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">user_pool_client_id</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="p">,</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">)</span>
-            <span class="k">else</span> <span class="kc">None</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">expected_client_id</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="n">token_client_id</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;aud&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;client_id&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">token_client_id</span> <span class="o">!=</span> <span class="n">expected_client_id</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Token client_id/aud &#39;</span><span class="si">{}</span><span class="s2">&#39; does not match configured &quot;</span>
-                <span class="s2">&quot;user_pool_client_id&quot;</span><span class="p">,</span>
-                <span class="n">token_client_id</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="k">return</span> <span class="kc">True</span>
-
-<div class="viewcode-block" id="CognitoProvider.create_user_from_token">
-<a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider.create_user_from_token">[docs]</a>
+<div class="viewcode-block" id="OidcProvider.create_user_from_token">
+<a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.create_user_from_token">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_user_from_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a domain User object with data recovered from a JWT TOKEN.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a domain User object with data recovered from a JWT</span>
+<span class="sd">        token issued by the configured OIDC provider.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">        token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</span>
+<span class="sd">            token (JWTAuthorizationCredentials): the verified token.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            User: Domain object.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Detect if this is an M2M token</span>
-        <span class="n">is_m2m</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">is_m2m_token</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-        <span class="n">client_id</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">get_client_id</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_m2m</span> <span class="k">else</span> <span class="kc">None</span>
-
-        <span class="n">name_property</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;username&quot;</span> <span class="k">if</span> <span class="s2">&quot;username&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="n">COGNITO_USERNAME_CLAIM</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Get groups directly using the groups provider</span>
         <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
-            <span class="c1"># M2M tokens typically don&#39;t have groups</span>
+        <span class="n">groups_claim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">groups_claim</span>
+        <span class="k">if</span> <span class="n">groups_claim</span> <span class="ow">and</span> <span class="n">groups_claim</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">:</span>
+            <span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="n">groups_claim</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="p">:</span>
             <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
-        <span class="c1"># Get roles directly using the roles provider</span>
         <span class="n">roles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
-            <span class="c1"># M2M tokens typically don&#39;t have roles</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="p">:</span>
             <span class="n">roles</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="o">.</span><span class="n">fetch_roles</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
@@ -418,16 +426,10 @@
             <span class="n">roles_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="p">,</span>
             <span class="n">permissions_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">],</span>
-            <span class="n">name</span><span class="o">=</span><span class="p">(</span>
-                <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="n">name_property</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">name_property</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span>
-                <span class="k">else</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
-            <span class="p">),</span>
-            <span class="n">email</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;email&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">username_claim</span><span class="p">,</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]),</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">),</span>
             <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
             <span class="n">roles</span><span class="o">=</span><span class="n">roles</span><span class="p">,</span>
-            <span class="n">is_m2m</span><span class="o">=</span><span class="n">is_m2m</span><span class="p">,</span>
-            <span class="n">client_id</span><span class="o">=</span><span class="n">client_id</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 

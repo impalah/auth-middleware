@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.sqlalchemy.sql_groups_provider &mdash; Auth Middleware 0.4.6 documentation</title>
+  <title>auth_middleware.providers.sqlalchemy.sql_groups_provider &mdash; Auth Middleware 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=03f3338f"></script>
+      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -58,7 +58,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../jwt_auth_provider.html">JWT Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -189,11 +189,23 @@
 <div class="viewcode-block" id="SqlGroupsProvider">
 <a class="viewcode-back" href="../../../../groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SqlGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recovers groups from AWS Cognito using the token provided</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recovers groups from a SQL database, keyed by an identifier claim</span>
+<span class="sd">    from the JWT.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        metaclass (_type_, optional): _description_. Defaults to ABCMeta.</span>
+<span class="sd">        id_claim (str): name of the JWT claim used as the lookup key when</span>
+<span class="sd">            ``fetch_groups`` is called with a ``JWTAuthorizationCredentials``.</span>
+<span class="sd">            Defaults to ``&quot;username&quot;`` (Cognito&#39;s convention) for backward</span>
+<span class="sd">            compatibility. Identity providers name this claim differently —</span>
+<span class="sd">            e.g. Entra ID/OIDC providers typically use ``&quot;preferred_username&quot;``</span>
+<span class="sd">            (or the always-present, provider-agnostic ``&quot;sub&quot;``) instead.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SqlGroupsProvider.__init__">
+<a class="viewcode-back" href="../../../../groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">id_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;username&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_id_claim</span> <span class="o">=</span> <span class="n">id_claim</span></div>
+
 
 <div class="viewcode-block" id="SqlGroupsProvider.fetch_groups">
 <a class="viewcode-back" href="../../../../groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.fetch_groups">[docs]</a>
@@ -204,23 +216,31 @@
 <span class="sd">            token (JWTAuthorizationCredentials | str): The token containing the claims.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            NotImplementedError: _description_</span>
+<span class="sd">            ValueError: If a JWTAuthorizationCredentials token is missing</span>
+<span class="sd">                the configured id_claim.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[str]: _description_</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># 1. Get the username from the token</span>
-        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span>
-            <span class="k">else</span> <span class="n">token</span>
-        <span class="p">)</span>
+        <span class="c1"># 1. Get the lookup identifier from the token</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">):</span>
+            <span class="n">identifier</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_claim</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">identifier</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Token is missing the &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_id_claim</span><span class="si">}</span><span class="s2">&#39; claim required &quot;</span>
+                    <span class="s2">&quot;to look up groups. Pass a different id_claim to &quot;</span>
+                    <span class="s2">&quot;SqlGroupsProvider matching a claim your identity &quot;</span>
+                    <span class="s2">&quot;provider actually issues (e.g. &#39;preferred_username&#39; or &quot;</span>
+                    <span class="s2">&quot;&#39;sub&#39;).&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">identifier</span> <span class="o">=</span> <span class="n">token</span>
 
         <span class="c1"># 2. Check if groups are in the cache</span>
 
         <span class="c1"># 3. If not in cache, fetch from the database</span>
-        <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_groups_from_db</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
+        <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_groups_from_db</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span>
 
         <span class="c1"># 4. Return the groups</span>
         <span class="k">return</span> <span class="n">groups</span></div>

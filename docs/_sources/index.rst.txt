@@ -94,7 +94,7 @@ Basic usage with AWS Cognito:
 
    cognito_provider
    entra_id_provider
-   jwt_auth_provider
+   oidc_provider
 
 .. toctree::
    :maxdepth: 2

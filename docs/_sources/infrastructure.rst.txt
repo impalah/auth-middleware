@@ -16,6 +16,8 @@ Provider-Specific Setup Guides
 
    infrastructure/cognito-setup
    infrastructure/entra-id-setup
+   infrastructure/authentik-setup
+   infrastructure/keycloak-setup
    infrastructure/google-setup
 
 Overview
@@ -34,6 +36,12 @@ Each identity provider requires different infrastructure components:
    - Service Principal configuration
    - Group assignments
    - API permissions
+
+**Authentik / Keycloak / other generic OIDC providers**
+   - An OAuth2/OIDC provider (client) registration
+   - An application/realm binding that exposes the issuer and discovery document
+   - Groups (with an optional claim mapper to include them in the token)
+   - User provisioning and group assignment
 
 **Google Identity**
    - OAuth 2.0 Client IDs

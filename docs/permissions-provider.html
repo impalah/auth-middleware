@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Permissions Provider &mdash; Auth Middleware 0.4.6 documentation</title>
+  <title>Permissions Provider &mdash; Auth Middleware 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/permissions-provider.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=03f3338f"></script>
+      <script src="_static/documentation_options.js?v=1dd76d02"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -61,7 +61,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
-<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul class="current">
@@ -97,6 +97,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.__init__"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider.__init__()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider.fetch_permissions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db"><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider.get_permissions_from_db()</span></code></a></li>
 </ul>
@@ -220,6 +221,21 @@
     <span class="n">permissions_provider</span><span class="o">=</span><span class="n">permissions_provider</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">SqlPermissionsProvider</span></code> looks up the <code class="docutils literal notranslate"><span class="pre">username</span></code> column using the
+<code class="docutils literal notranslate"><span class="pre">&quot;username&quot;</span></code> JWT claim by default (Cognito’s convention). If you’re
+using it with <a class="reference internal" href="entra_id_provider.html"><span class="doc">Azure Entra ID Authentication Provider</span></a> or <a class="reference internal" href="oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a>, that
+claim usually doesn’t exist — pass <code class="docutils literal notranslate"><span class="pre">id_claim</span></code> to match what your
+identity provider actually issues:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Entra ID / generic OIDC providers typically use &quot;preferred_username&quot;</span>
+<span class="n">permissions_provider</span> <span class="o">=</span> <span class="n">SqlPermissionsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">&quot;preferred_username&quot;</span><span class="p">)</span>
+
+<span class="c1"># Or use &quot;sub&quot; for a stable, provider-agnostic identifier</span>
+<span class="n">permissions_provider</span> <span class="o">=</span> <span class="n">SqlPermissionsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <p><strong>Managing Permissions:</strong></p>
 <p>Add permissions to users by inserting records:</p>
@@ -818,14 +834,26 @@ or a parsed <code class="docutils literal notranslate"><span class="pre">JWTAuth
 
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.sqlalchemy.sql_permissions_provider.</span></span><span class="sig-name descname"><span class="pre">SqlPermissionsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.sqlalchemy.sql_permissions_provider.</span></span><span class="sig-name descname"><span class="pre">SqlPermissionsProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a></p>
-<p>Recovers groups from AWS Cognito using the token provided</p>
+<p>Recovers permissions from a SQL database, keyed by an identifier
+claim from the JWT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>metaclass</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to ABCMeta.</p>
+<dd class="field-odd"><p><strong>id_claim</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the JWT claim used as the lookup key when
+<code class="docutils literal notranslate"><span class="pre">fetch_permissions</span></code> is called with a
+<code class="docutils literal notranslate"><span class="pre">JWTAuthorizationCredentials</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;username&quot;</span></code>
+(Cognito’s convention) for backward compatibility. Identity
+providers name this claim differently — e.g. Entra ID/OIDC
+providers typically use <code class="docutils literal notranslate"><span class="pre">&quot;preferred_username&quot;</span></code> (or the
+always-present, provider-agnostic <code class="docutils literal notranslate"><span class="pre">&quot;sub&quot;</span></code>) instead.</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions">
 <span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
@@ -835,7 +863,8 @@ or a parsed <code class="docutils literal notranslate"><span class="pre">JWTAuth
 <dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token containing the claims.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – _description_</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a JWTAuthorizationCredentials token is missing
+    the configured id_claim.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>_description_</p>

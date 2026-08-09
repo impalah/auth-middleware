@@ -5,12 +5,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.aws.cognito_authz_provider_settings &mdash; Auth Middleware 0.5.0 documentation</title>
+  <title>auth_middleware.providers.oidc.oidc_provider_settings &mdash; Auth Middleware 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
   
-    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/aws/cognito_authz_provider_settings.html" />
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/oidc/oidc_provider_settings.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
@@ -141,7 +141,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">auth_middleware.providers.aws.cognito_authz_provider_settings</li>
+      <li class="breadcrumb-item active">auth_middleware.providers.oidc.oidc_provider_settings</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -150,42 +150,71 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for auth_middleware.providers.aws.cognito_authz_provider_settings</h1><div class="highlight"><pre>
+  <h1>Source code for auth_middleware.providers.oidc.oidc_provider_settings</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProviderSettings</span>
 
 
-<div class="viewcode-block" id="CognitoAuthzProviderSettings">
-<a class="viewcode-back" href="../../../../cognito_provider.html#auth_middleware.providers.aws.cognito_authz_provider_settings.CognitoAuthzProviderSettings">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CognitoAuthzProviderSettings</span><span class="p">(</span><span class="n">JWTProviderSettings</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Settings for Cognito provider</span>
+<div class="viewcode-block" id="OidcProviderSettings">
+<a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">OidcProviderSettings</span><span class="p">(</span><span class="n">JWTProviderSettings</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Settings for a generic OpenID Connect provider.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        BaseModel (_type_): _description_</span>
+<span class="sd">    Works with any standards-compliant OIDC identity provider (Authentik,</span>
+<span class="sd">    Keycloak, Auth0, Okta, ...): the JWKS is discovered from the issuer&#39;s</span>
+<span class="sd">    ``.well-known/openid-configuration`` document unless ``jwks_uri`` is</span>
+<span class="sd">    set explicitly.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">user_pool_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Secret key for JWT&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">user_pool_region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;User pool region&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;OIDC issuer URL, e.g. https://authentik.example.com/application/o/my-app/&quot;</span>
+        <span class="p">),</span>
     <span class="p">)</span>
 
-    <span class="n">user_pool_client_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">audience</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;OAuth2 Client ID&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Expected &#39;aud&#39; claim (the OIDC client ID). Strongly &quot;</span>
+            <span class="s2">&quot;recommended: without it, any token signed by the issuer for &quot;</span>
+            <span class="s2">&quot;any client is accepted.&quot;</span>
+        <span class="p">),</span>
     <span class="p">)</span>
 
-    <span class="n">user_pool_client_secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+    <span class="n">jwks_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;OAuth2 Client Secret&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Explicit JWKS URL. If not set, it is discovered from &quot;</span>
+            <span class="s2">&quot;&#39;</span><span class="si">{issuer}</span><span class="s2">/.well-known/openid-configuration&#39; on first use.&quot;</span>
+        <span class="p">),</span>
     <span class="p">)</span>
 
-    <span class="n">jwks_url_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.</span><span class="si">{}</span><span class="s2">.amazonaws.com/</span><span class="si">{}</span><span class="s2">/.well-known/jwks.json&quot;</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;OAuth2 JWKS URL template&quot;</span><span class="p">,</span>
+    <span class="n">discovery_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Override for the OIDC discovery document URL. Defaults to &quot;</span>
+            <span class="s2">&quot;&#39;</span><span class="si">{issuer}</span><span class="s2">/.well-known/openid-configuration&#39;.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">algorithms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;JWS algorithms accepted when verifying the token signature&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">username_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;preferred_username&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Claim used as the user&#39;s display name&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">groups_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Claim containing the user&#39;s groups, if present in the token. &quot;</span>
+            <span class="s2">&quot;Set to None to disable extracting groups from the token claims &quot;</span>
+            <span class="s2">&quot;(e.g. when using a separate GroupsProvider instead).&quot;</span>
+        <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">jwks_cache_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
@@ -195,7 +224,7 @@
 
     <span class="n">jwks_cache_usages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Number of jwks signature verification before refresh&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Number of jwks signature verifications before refresh&quot;</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

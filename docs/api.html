@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; Auth Middleware 0.4.6 documentation</title>
+  <title>API Reference &mdash; Auth Middleware 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/api.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=03f3338f"></script>
+      <script src="_static/documentation_options.js?v=1dd76d02"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -61,7 +61,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
-<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -135,7 +135,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#authentication-providers">Authentication Providers</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
-<li class="toctree-l3"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a></li>
+<li class="toctree-l3"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#services">Services</a><ul>
@@ -268,13 +268,13 @@
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#module-auth_middleware.providers.azure.entra_id_provider">API Reference</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="jwt_auth_provider.html">JWT Authentication Provider</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#configuration">Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#token-structure">Token Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#integration-examples">Integration Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#best-practices">Best Practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jwt_auth_provider.html#module-auth_middleware.contracts.jwt_provider">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#example-authentik">Example: Authentik</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#example-keycloak">Example: Keycloak</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#building-your-own-provider">Building Your Own Provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#module-auth_middleware.providers.oidc.oidc_provider">API Reference</a></li>
 </ul>
 </li>
 </ul>
@@ -396,7 +396,8 @@
 <dt><strong>Providers</strong></dt><dd><ul class="simple">
 <li><p><a class="reference internal" href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider" title="auth_middleware.providers.aws.cognito_provider.CognitoProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.aws.cognito_provider.CognitoProvider</span></code></a> - AWS Cognito</p></li>
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.azure.entra_id_provider.EntraIdProvider</span></code> - Azure Entra ID</p></li>
-<li><p><a class="reference internal" href="jwt_auth_provider.html#auth_middleware.contracts.jwt_provider.JWTProvider" title="auth_middleware.contracts.jwt_provider.JWTProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.contracts.jwt_provider.JWTProvider</span></code></a> - Generic JWT</p></li>
+<li><p><a class="reference internal" href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider" title="auth_middleware.providers.oidc.oidc_provider.OidcProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.oidc.oidc_provider.OidcProvider</span></code></a> - Generic OIDC (Authentik, Keycloak, Auth0, Okta, …)</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.contracts.jwt_provider.JWTProvider</span></code> - Base contract for building custom providers</p></li>
 </ul>
 </dd>
 <dt><strong>Exceptions</strong></dt><dd><ul class="simple">
