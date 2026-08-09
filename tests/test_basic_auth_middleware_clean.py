@@ -264,6 +264,35 @@ class TestBasicAuthMiddleware:
         assert await user.groups == ["admin", "user"]
 
     @pytest.mark.asyncio
+    async def test_get_current_user_valid_credentials_pbkdf2_hash(
+        self, basic_auth_middleware, mock_request, valid_credentials
+    ):
+        """Credentials hashed with the current hash_password() (PBKDF2,
+        salted) must be accepted too, not just the legacy unsalted format."""
+        from auth_middleware.password_hasher import hash_password
+
+        username, password, encoded = valid_credentials
+        mock_request.headers = Headers({"authorization": f"Basic {encoded}"})
+
+        user_credentials = UserCredentials(
+            id=username,
+            name=username,
+            hashed_password=hash_password(password, iterations=1000),
+            groups=["admin", "user"],
+        )
+        basic_auth_middleware._credentials_repository.get_by_id = AsyncMock(
+            return_value=user_credentials
+        )
+
+        with patch(
+            "auth_middleware.guards.functions.settings.AUTH_MIDDLEWARE_DISABLED", False
+        ):
+            user = await basic_auth_middleware.get_current_user(mock_request)
+
+        assert user is not None
+        assert user.id == username
+
+    @pytest.mark.asyncio
     async def test_get_current_user_user_not_found(
         self, basic_auth_middleware, mock_request, valid_credentials
     ):
@@ -313,6 +342,23 @@ class TestBasicAuthMiddleware:
         ):
             with pytest.raises(InvalidAuthorizationException):
                 await basic_auth_middleware.get_current_user(mock_request)
+
+    @pytest.mark.asyncio
+    async def test_get_current_user_when_disabled_returns_synthetic(
+        self, basic_auth_middleware, mock_request
+    ):
+        """When AUTH_MIDDLEWARE_DISABLED is set, get_current_user must not
+        block the request — it should return a synthetic user, consistent
+        with JwtAuthMiddleware and the require_* guards, instead of raising
+        InvalidAuthorizationException for missing credentials."""
+        with patch(
+            "auth_middleware.basic_auth_middleware.settings.AUTH_MIDDLEWARE_DISABLED",
+            True,
+        ):
+            user = await basic_auth_middleware.get_current_user(mock_request)
+
+        assert user is not None
+        assert user.id == "synthetic"
 
     @pytest.mark.asyncio
     async def test_get_current_user_with_groups(

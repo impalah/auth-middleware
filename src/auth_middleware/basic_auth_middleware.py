@@ -1,5 +1,4 @@
 import base64
-import hashlib
 from typing import Any
 
 from fastapi import Request, status
@@ -16,6 +15,7 @@ from auth_middleware.exceptions.invalid_credentials_exception import (
     InvalidCredentialsException,
 )
 from auth_middleware.logging import logger
+from auth_middleware.password_hasher import verify_password
 from auth_middleware.settings import settings
 from auth_middleware.types.user import User
 from auth_middleware.types.user_credentials import UserCredentials
@@ -129,10 +129,11 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
 
         logger.debug("Get Current Active User ...")
 
+        if settings.AUTH_MIDDLEWARE_DISABLED:
+            return User.synthetic()
+
         # Recover credentials from the request
-        credentials: tuple[str, str] | None = self.get_credentials(
-            request=request
-        )
+        credentials: tuple[str, str] | None = self.get_credentials(request=request)
         if not credentials:
             raise InvalidAuthorizationException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -158,10 +159,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             )
 
         # Validate credentials
-        if (
-            hashlib.sha256(credentials[1].encode()).hexdigest()
-            != user_credentials.hashed_password
-        ):
+        if not verify_password(credentials[1], user_credentials.hashed_password):
             raise InvalidAuthorizationException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid User credentials",

@@ -63,6 +63,22 @@ Retrieves permissions from a SQL database using SQLAlchemy.
        permissions_provider=permissions_provider,
    )
 
+.. note::
+
+   ``SqlPermissionsProvider`` looks up the ``username`` column using the
+   ``"username"`` JWT claim by default (Cognito's convention). If you're
+   using it with :doc:`entra_id_provider` or :doc:`oidc_provider`, that
+   claim usually doesn't exist — pass ``id_claim`` to match what your
+   identity provider actually issues:
+
+   .. code-block:: python
+
+      # Entra ID / generic OIDC providers typically use "preferred_username"
+      permissions_provider = SqlPermissionsProvider(id_claim="preferred_username")
+
+      # Or use "sub" for a stable, provider-agnostic identifier
+      permissions_provider = SqlPermissionsProvider(id_claim="sub")
+
 **Managing Permissions:**
 
 Add permissions to users by inserting records:

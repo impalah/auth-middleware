@@ -47,25 +47,6 @@ def _resolve_provider(
 
 
 class CognitoProvider(JWTProvider):
-    _instances: dict[
-        type, CognitoProvider
-    ] = {}  # Dict to store separate instances per class
-
-    def __new__(
-        cls,
-        settings: CognitoAuthzProviderSettings | None = None,
-        permissions_provider: type[PermissionsProvider]
-        | PermissionsProvider
-        | None = None,
-        groups_provider: type[GroupsProvider] | GroupsProvider | None = None,
-        roles_provider: type[RolesProvider] | RolesProvider | None = None,
-    ) -> CognitoProvider:
-        logger.debug("Creating CognitoProvider instance")
-
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__new__(cls)
-        return cls._instances[cls]
-
     def __init__(
         self,
         settings: CognitoAuthzProviderSettings | None = None,
@@ -77,23 +58,21 @@ class CognitoProvider(JWTProvider):
     ) -> None:
         logger.debug("Initializing CognitoProvider instance")
 
-        if not getattr(self.__class__, "_initialized", False):  # Avoid reinitialization
-            if not settings:
-                raise ValueError("Settings must be provided")
+        if not settings:
+            raise ValueError("Settings must be provided")
 
-            super().__init__(
-                settings=settings,
-                permissions_provider=_resolve_provider(  # type: ignore[arg-type]
-                    permissions_provider, PermissionsProvider
-                ),
-                groups_provider=_resolve_provider(  # type: ignore[arg-type]
-                    groups_provider, GroupsProvider, allow_missing=True
-                ),
-                roles_provider=_resolve_provider(  # type: ignore[arg-type]
-                    roles_provider, RolesProvider, allow_missing=True
-                ),
-            )
-            self._initialized = True
+        super().__init__(
+            settings=settings,
+            permissions_provider=_resolve_provider(  # type: ignore[arg-type]
+                permissions_provider, PermissionsProvider
+            ),
+            groups_provider=_resolve_provider(  # type: ignore[arg-type]
+                groups_provider, GroupsProvider, allow_missing=True
+            ),
+            roles_provider=_resolve_provider(  # type: ignore[arg-type]
+                roles_provider, RolesProvider, allow_missing=True
+            ),
+        )
 
     async def get_keys(self) -> list[JWK]:
         """Get keys from AWS Cognito
@@ -190,8 +169,10 @@ class CognitoProvider(JWTProvider):
             )
 
         key = import_key(hmac_key_candidate)
+        leeway = self._settings.jwt_leeway if self._settings else 0
         try:
             joserfc_jwt.decode(token.jwt_token, key, algorithms=["RS256"])
+            self._validate_registered_claims(token.claims, leeway=leeway)
         except JoseError:
             return False
 

@@ -10,6 +10,7 @@ from auth_middleware.contracts.jwt_provider import JWTProvider
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.jwt_bearer_manager import JWTBearerManager
 from auth_middleware.logging import logger
+from auth_middleware.settings import settings
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
@@ -74,6 +75,9 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
         logger.debug("Get Current Active User ...")
 
         try:
+            if settings.AUTH_MIDDLEWARE_DISABLED:
+                return User.synthetic()
+
             if not self.__validate_credentials(request=request):
                 logger.debug("There are no credentials in the request")
                 return None
@@ -86,7 +90,7 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
             user: User = (
                 await self._auth_provider.create_user_from_token(token=token)
                 if token
-                else self.__create_synthetic_user()
+                else User.synthetic()
             )
             logger.debug("Returning {}", user)
             return user
@@ -109,16 +113,3 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
         authorization = request.headers.get("Authorization")
         scheme, credentials = get_authorization_scheme_param(authorization)
         return bool(authorization and scheme and credentials)
-
-    def __create_synthetic_user(self) -> User:
-        """Create a synthetic user for testing purposes
-
-        Returns:
-            User: Domain object.
-        """
-        return User(
-            id="synthetic",
-            name="synthetic",
-            groups=[],
-            email="synthetic@email.com",
-        )

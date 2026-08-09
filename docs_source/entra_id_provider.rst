@@ -351,4 +351,4 @@ API Reference
 For more information about other authentication providers, see:
 
 * :doc:`cognito_provider` - AWS Cognito integration
-* :doc:`jwt_auth_provider` - Generic JWT provider
+* :doc:`oidc_provider` - Generic OIDC provider (Authentik, Keycloak, Auth0, ...)

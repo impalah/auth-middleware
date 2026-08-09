@@ -1,6 +1,94 @@
 CHANGELOG
 =========
 
+Version 0.5.0 (2026-08-09)
+---------------------------
+
+Security Fixes
+~~~~~~~~~~~~~~~
+
+- **Token expiration (``exp``) is now validated.** Previously,
+  ``CognitoProvider``, ``IdentityPoolProvider``, and ``EntraIDProvider``
+  only verified the JWT signature — a correctly-signed but *expired* token
+  was still accepted, since ``joserfc.jwt.decode()`` does not check
+  registered claims like ``exp``/``nbf``/``iat`` on its own. All three
+  providers now reject tokens missing ``exp`` or past their expiration,
+  via a new shared ``JWTProvider._validate_registered_claims()`` helper.
+  A new ``jwt_leeway`` setting (default ``0``, seconds) is available on
+  ``JWTProviderSettings`` (Cognito) and as
+  ``AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY`` (Entra ID) to tolerate clock
+  skew between servers.
+
+  **Action required:** if your tests use hand-crafted tokens without an
+  ``exp`` claim, or your servers have significant clock drift from your
+  identity provider, add ``exp``/configure ``jwt_leeway`` before
+  upgrading.
+
+- **Basic Auth passwords are now hashed with PBKDF2-HMAC-SHA256** (salted,
+  600,000 iterations by default), via new ``hash_password()``/
+  ``verify_password()`` functions exported from ``auth_middleware``.
+  Previously ``BasicAuthMiddleware`` compared an unsalted raw SHA-256
+  digest with a non-constant-time comparison. Existing credentials stored
+  as unsalted SHA-256 hashes are still accepted for backward
+  compatibility, but any new credentials should be created with
+  ``hash_password()``.
+
+- **``EntraIDProvider.get_keys()``/``get_openid_config()`` now handle
+  errors properly.** Previously ``get_keys()`` had no error handling at
+  all, and ``get_openid_config()`` silently swallowed any exception and
+  returned ``{}``, which then surfaced as a confusing bare
+  ``KeyError: 'jwks_uri'`` in ``load_jwks()``. Both now raise a clean
+  ``InvalidTokenException`` (401) on HTTP errors, network errors, or
+  malformed responses, matching ``CognitoProvider``'s behavior.
+
+Breaking Changes
+~~~~~~~~~~~~~~~~~
+
+- **Removed the singleton pattern from ``CognitoProvider`` and
+  ``EntraIDProvider``.** Previously, a second call to
+  ``CognitoProvider(settings=...)`` (or ``EntraIDProvider(...)``) silently
+  reused the *first* instance and ignored the new settings/providers —
+  making it impossible to run two differently-configured instances (e.g.
+  two Cognito user pools) in the same process. Each instantiation is now
+  independent. ``Provider(settings=A) is Provider(settings=B)`` used to be
+  ``True`` and is now ``False``.
+
+- **``AUTH_MIDDLEWARE_DISABLED`` is now consistent across the whole
+  library.** With it set, ``require_user()`` used to always raise 401
+  (the opposite of "disabled"), and ``BasicAuthMiddleware`` used to always
+  raise "No credentials provided" — both now let requests through with a
+  synthetic user, consistent with ``JwtAuthMiddleware`` and
+  ``require_groups``/``require_roles``/``require_permissions``, which
+  already behaved this way.
+
+- **``SqlGroupsProvider``/``SqlPermissionsProvider`` raise ``ValueError``
+  instead of ``KeyError``** when a token is missing the identifier claim
+  (previously hardcoded to ``"username"``, Cognito's convention). Both
+  now accept a constructor argument ``id_claim`` (default ``"username"``,
+  unchanged) so they can be used with Entra ID/OIDC tokens, which
+  typically use ``"preferred_username"`` or ``"sub"`` instead.
+
+New Features
+~~~~~~~~~~~~
+
+- **``OidcProvider``**: a new JWT provider for any standards-compliant
+  OpenID Connect identity provider — Authentik, Keycloak, Auth0, Okta, or
+  any issuer exposing a ``.well-known/openid-configuration`` discovery
+  document. JWKS is discovered automatically (or configured explicitly),
+  and ``iss``/``aud``/``exp``/``nbf`` are all validated. Replaces the
+  previous "Generic JWT Provider" documentation page, which described
+  configuration fields and direct instantiation of the abstract
+  ``JWTProvider`` that never actually existed as working code.
+  Documented in the new Sphinx pages ``oidc_provider.rst``,
+  ``infrastructure/authentik-setup.rst``, and
+  ``infrastructure/keycloak-setup.rst``.
+
+Other Changes
+~~~~~~~~~~~~~
+
+- ``docs_source/jwt_auth_provider.rst`` renamed to ``docs_source/oidc_provider.rst``
+  to match the real, working provider it now documents.
+
 Version 0.4.6 (2026-08-09)
 ---------------------------
 

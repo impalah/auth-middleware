@@ -1,12 +1,17 @@
 """Tests for EntraIDProvider covering previously uncovered lines."""
 
+import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.providers.azure.azure_exception import AzureException
+from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
+
+_MOCK_REQUEST = httpx.Request("GET", "http://test")
 
 
 def _make_token(claims: dict) -> JWTAuthorizationCredentials:
@@ -19,49 +24,31 @@ def _make_token(claims: dict) -> JWTAuthorizationCredentials:
     )
 
 
-def _fresh_provider():
-    """Return a fresh EntraIDProvider, bypassing the singleton per test."""
-    from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-    # Reset singleton so __init__ runs again
-    if hasattr(EntraIDProvider, "instance"):
-        del EntraIDProvider.instance
-
-    provider = EntraIDProvider()
-    return provider
+def _fresh_provider(**kwargs):
+    """Return a new EntraIDProvider (no shared singleton state to reset)."""
+    return EntraIDProvider(**kwargs)
 
 
 # ---------------------------------------------------------------------------
-# __new__ / __init__ singleton behaviour
+# __init__
 # ---------------------------------------------------------------------------
 
 
 class TestEntraIDProviderInit:
-    def setup_method(self):
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
+    def test_creates_independent_instances(self):
+        """Each instantiation is independent — there is no shared singleton
+        state that could silently ignore a later call's providers (a real
+        bug this used to have: a second EntraIDProvider(...) call used to
+        reuse the first instance and drop the new arguments)."""
+        groups_a = MagicMock()
+        groups_b = MagicMock()
 
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
+        a = EntraIDProvider(groups_provider=groups_a)
+        b = EntraIDProvider(groups_provider=groups_b)
 
-    def test_singleton_returns_same_instance(self):
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
-
-        a = EntraIDProvider()
-        b = EntraIDProvider()
-        assert a is b
-
-    def test_initialized_flag_prevents_reinit(self):
-        provider = _fresh_provider()
-        original_id = id(provider._groups_provider)
-        # Second call with different provider should NOT reinit
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        p2 = EntraIDProvider(groups_provider=MagicMock())
-        assert p2 is provider
-        assert id(provider._groups_provider) == original_id
+        assert a is not b
+        assert a._groups_provider is groups_a
+        assert b._groups_provider is groups_b
 
 
 # ---------------------------------------------------------------------------
@@ -70,12 +57,6 @@ class TestEntraIDProviderInit:
 
 
 class TestGetKeys:
-    def setup_method(self):
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
-
     @pytest.mark.asyncio
     async def test_get_keys_returns_keys(self):
         provider = _fresh_provider()
@@ -92,6 +73,41 @@ class TestGetKeys:
 
         assert result == [{"kid": "k1"}]
 
+    @pytest.mark.asyncio
+    async def test_raises_invalid_token_exception_on_http_error(self):
+        provider = _fresh_provider()
+
+        with patch(
+            "auth_middleware.providers.azure.entra_id_provider.httpx.AsyncClient.get",
+            return_value=httpx.Response(500, request=_MOCK_REQUEST),
+        ):
+            with pytest.raises(InvalidTokenException):
+                await provider.get_keys("https://example.com/jwks")
+
+    @pytest.mark.asyncio
+    async def test_raises_invalid_token_exception_on_network_error(self):
+        provider = _fresh_provider()
+
+        with patch(
+            "auth_middleware.providers.azure.entra_id_provider.httpx.AsyncClient.get",
+            side_effect=httpx.ConnectError("connection refused"),
+        ):
+            with pytest.raises(InvalidTokenException):
+                await provider.get_keys("https://example.com/jwks")
+
+    @pytest.mark.asyncio
+    async def test_raises_invalid_token_exception_on_malformed_response(self):
+        provider = _fresh_provider()
+
+        with patch(
+            "auth_middleware.providers.azure.entra_id_provider.httpx.AsyncClient.get",
+            return_value=httpx.Response(
+                200, json={"no_keys_here": []}, request=_MOCK_REQUEST
+            ),
+        ):
+            with pytest.raises(InvalidTokenException):
+                await provider.get_keys("https://example.com/jwks")
+
 
 # ---------------------------------------------------------------------------
 # get_openid_config
@@ -99,12 +115,6 @@ class TestGetKeys:
 
 
 class TestGetOpenidConfig:
-    def setup_method(self):
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
-
     @pytest.mark.asyncio
     async def test_returns_config_dict(self):
         provider = _fresh_provider()
@@ -122,18 +132,39 @@ class TestGetOpenidConfig:
         assert result["jwks_uri"] == "https://example.com/jwks"
 
     @pytest.mark.asyncio
-    async def test_returns_empty_dict_on_exception(self):
+    async def test_raises_invalid_token_exception_on_http_error(self):
         provider = _fresh_provider()
 
-        mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-        mock_client.get = AsyncMock(side_effect=Exception("network error"))
+        with patch(
+            "auth_middleware.providers.azure.entra_id_provider.httpx.AsyncClient.get",
+            return_value=httpx.Response(500, request=_MOCK_REQUEST),
+        ):
+            with pytest.raises(InvalidTokenException):
+                await provider.get_openid_config()
 
-        with patch("httpx.AsyncClient", return_value=mock_client):
-            result = await provider.get_openid_config()
+    @pytest.mark.asyncio
+    async def test_raises_invalid_token_exception_on_network_error(self):
+        provider = _fresh_provider()
 
-        assert result == {}
+        with patch(
+            "auth_middleware.providers.azure.entra_id_provider.httpx.AsyncClient.get",
+            side_effect=httpx.ConnectError("connection refused"),
+        ):
+            with pytest.raises(InvalidTokenException):
+                await provider.get_openid_config()
+
+    @pytest.mark.asyncio
+    async def test_raises_invalid_token_exception_on_malformed_json(self):
+        provider = _fresh_provider()
+
+        with patch(
+            "auth_middleware.providers.azure.entra_id_provider.httpx.AsyncClient.get",
+            return_value=httpx.Response(
+                200, content=b"not json", request=_MOCK_REQUEST
+            ),
+        ):
+            with pytest.raises(InvalidTokenException):
+                await provider.get_openid_config()
 
 
 # ---------------------------------------------------------------------------
@@ -142,12 +173,6 @@ class TestGetOpenidConfig:
 
 
 class TestLoadJwks:
-    def setup_method(self):
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
-
     @pytest.mark.asyncio
     async def test_load_jwks_returns_jwks(self):
         provider = _fresh_provider()
@@ -173,6 +198,16 @@ class TestLoadJwks:
         jwks = await provider.load_jwks()
         assert jwks.keys[0] == {"kid": "k1"}
 
+    @pytest.mark.asyncio
+    async def test_raises_invalid_token_exception_when_jwks_uri_missing(self):
+        provider = _fresh_provider()
+        # Discovery document came back but doesn't have jwks_uri — must
+        # raise a clear error, not a bare KeyError.
+        provider.get_openid_config = AsyncMock(return_value={"issuer": "https://x"})
+
+        with pytest.raises(InvalidTokenException):
+            await provider.load_jwks()
+
 
 # ---------------------------------------------------------------------------
 # verify_token
@@ -180,12 +215,6 @@ class TestLoadJwks:
 
 
 class TestVerifyToken:
-    def setup_method(self):
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
-
     @pytest.mark.asyncio
     async def test_raises_when_no_key_found(self):
         provider = _fresh_provider()
@@ -202,7 +231,7 @@ class TestVerifyToken:
         provider._get_hmac_key = AsyncMock(return_value=hmac_key)
 
         mock_token_obj = MagicMock()
-        mock_token_obj.claims = {"sub": "user-123"}
+        mock_token_obj.claims = {"sub": "user-123", "exp": int(time.time()) + 3600}
 
         with (
             patch("auth_middleware.providers.azure.entra_id_provider.import_key"),
@@ -215,6 +244,7 @@ class TestVerifyToken:
             ) as mock_settings,
         ):
             mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID = None
+            mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY = 0
             token = _make_token({"sub": "user-123"})
             result = await provider.verify_token(token)
 
@@ -273,7 +303,11 @@ class TestVerifyToken:
         provider._get_hmac_key = AsyncMock(return_value=hmac_key)
 
         mock_token_obj = MagicMock()
-        mock_token_obj.claims = {"sub": "user-123", "aud": "my-audience"}
+        mock_token_obj.claims = {
+            "sub": "user-123",
+            "aud": "my-audience",
+            "exp": int(time.time()) + 3600,
+        }
 
         mock_registry = MagicMock()
 
@@ -292,6 +326,7 @@ class TestVerifyToken:
             ) as mock_settings,
         ):
             mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID = "my-audience"
+            mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY = 0
             token = _make_token({"sub": "user-123"})
             result = await provider.verify_token(token)
 
@@ -305,12 +340,6 @@ class TestVerifyToken:
 
 
 class TestCreateUserFromToken:
-    def setup_method(self):
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
-
     @pytest.mark.asyncio
     async def test_uses_username_claim_when_present(self):
         provider = _fresh_provider()
@@ -357,12 +386,7 @@ class TestCreateUserFromToken:
         groups_provider = MagicMock()
         groups_provider.fetch_groups = AsyncMock(return_value=["admin", "staff"])
 
-        from auth_middleware.providers.azure.entra_id_provider import EntraIDProvider
-
-        if hasattr(EntraIDProvider, "instance"):
-            del EntraIDProvider.instance
-
-        provider = EntraIDProvider(groups_provider=groups_provider)
+        provider = _fresh_provider(groups_provider=groups_provider)
         token = _make_token({"sub": "user-5", "username": "u5"})
         user = await provider.create_user_from_token(token)
         assert await user.groups == ["admin", "staff"]

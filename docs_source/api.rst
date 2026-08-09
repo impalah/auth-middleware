@@ -24,7 +24,7 @@ The library supports multiple authentication providers for different identity sy
 
    cognito_provider
    entra_id_provider
-   jwt_auth_provider
+   oidc_provider
 
 Services
 --------
@@ -66,7 +66,8 @@ Common Classes and Functions
 **Providers**
    - :class:`auth_middleware.providers.aws.cognito_provider.CognitoProvider` - AWS Cognito
    - :class:`auth_middleware.providers.azure.entra_id_provider.EntraIdProvider` - Azure Entra ID
-   - :class:`auth_middleware.contracts.jwt_provider.JWTProvider` - Generic JWT
+   - :class:`auth_middleware.providers.oidc.oidc_provider.OidcProvider` - Generic OIDC (Authentik, Keycloak, Auth0, Okta, ...)
+   - :class:`auth_middleware.contracts.jwt_provider.JWTProvider` - Base contract for building custom providers
 
 **Exceptions**
    - :exc:`auth_middleware.exceptions.invalid_token_exception.InvalidTokenException` - Token validation failures

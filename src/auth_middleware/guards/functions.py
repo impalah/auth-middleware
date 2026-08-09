@@ -138,8 +138,12 @@ def require_user() -> Callable[..., Any]:
 
     def _user_checker(request: Request) -> User:
         if settings.AUTH_MIDDLEWARE_DISABLED:
-            # Return a dummy user or raise an exception based on your needs
-            raise HTTPException(status_code=401, detail="Authentication required")
+            # Consistent with require_groups/require_roles/require_permissions:
+            # auth disabled means requests are never blocked. Prefer whatever
+            # user the middleware already set (which is User.synthetic() when
+            # disabled), falling back to it directly if state wasn't set at all.
+            current_user = getattr(request.state, "current_user", None)
+            return current_user or User.synthetic()
 
         if not hasattr(request.state, "current_user") or not request.state.current_user:
             raise HTTPException(status_code=401, detail="Authentication required")

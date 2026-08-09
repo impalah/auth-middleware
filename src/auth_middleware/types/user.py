@@ -110,6 +110,25 @@ class User(BaseModel):
         },
     )
 
+    @classmethod
+    def synthetic(cls) -> User:
+        """Placeholder user used when AUTH_MIDDLEWARE_DISABLED is set.
+
+        Ensures request.state.current_user is always a valid User (never
+        None) when authentication is disabled, so downstream guards see a
+        consistent, non-blocking identity instead of each middleware having
+        to invent its own ad-hoc placeholder.
+
+        Returns:
+            User: a synthetic, unauthenticated placeholder user.
+        """
+        return cls(
+            id="synthetic",
+            name="synthetic",
+            groups=[],
+            email="synthetic@email.com",
+        )
+
     @property
     async def groups(self) -> list[str]:
         """Async property to get the groups of the user.
@@ -204,4 +223,3 @@ class User(BaseModel):
 
         permissions = await self._permissions_provider.fetch_permissions(self._token)
         return permissions
-

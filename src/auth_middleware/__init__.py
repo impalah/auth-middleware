@@ -7,9 +7,10 @@ from .contracts import (
     RolesProvider,
 )
 from .jwt_auth_middleware import JwtAuthMiddleware
+from .password_hasher import hash_password, verify_password
 
 # Version info
-__version__ = "0.4.6"
+__version__ = "0.5.0"
 
 
 __all__ = [
@@ -21,4 +22,7 @@ __all__ = [
     "GroupsProvider",
     "RolesProvider",
     "PermissionsProvider",
+    # Basic Auth password hashing
+    "hash_password",
+    "verify_password",
 ]

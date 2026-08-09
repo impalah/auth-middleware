@@ -27,5 +27,14 @@ class ModuleSettings(Settings):
         default="https://login.microsoftonline.com/{}/v2.0/.well-known/openid-configuration",
     )
 
+    # Clock-skew allowance (seconds) applied when validating registered
+    # claims such as exp/nbf, to tolerate small time differences between
+    # servers.
+    AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY: int = config(
+        "AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY",
+        cast=int,
+        default=0,
+    )
+
 
 settings = ModuleSettings()

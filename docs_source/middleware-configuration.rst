@@ -437,7 +437,7 @@ For more specific provider configurations, see the individual provider documenta
 
 * :doc:`cognito_provider`
 * :doc:`entra_id_provider`
-* :doc:`jwt_auth_provider`
+* :doc:`oidc_provider`
    * - AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES
      - JWKS keys file refreshing interval
      - An integer value

@@ -116,3 +116,61 @@ class TestSqlPermissionsProviderFetchPermissions:
         ):
             with pytest.raises(RuntimeError, match="db down"):
                 await provider.get_permissions_from_db(username="dave")
+
+
+class TestSqlPermissionsProviderIdClaim:
+    @pytest.mark.asyncio
+    async def test_raises_clear_error_when_default_username_claim_missing(self):
+        # e.g. an Entra ID / OIDC token, which has no "username" claim
+        provider = SqlPermissionsProvider()
+        token = JWTAuthorizationCredentials(
+            jwt_token="h.p.s",
+            header={"alg": "RS256"},
+            claims={"sub": "u1", "preferred_username": "alice"},
+            signature="s",
+            message="h.p",
+        )
+
+        with pytest.raises(ValueError, match="username"):
+            await provider.fetch_permissions(token)
+
+    @pytest.mark.asyncio
+    async def test_uses_configured_id_claim(self):
+        provider = SqlPermissionsProvider(id_claim="preferred_username")
+        token = JWTAuthorizationCredentials(
+            jwt_token="h.p.s",
+            header={"alg": "RS256"},
+            claims={"sub": "u1", "preferred_username": "alice"},
+            signature="s",
+            message="h.p",
+        )
+
+        row = PermissionsModel()
+        row.permission = "read"
+
+        with patch(
+            "auth_middleware.providers.sqlalchemy.sql_permissions_provider.AsyncDatabase.get_session",
+            _mock_session([row]),
+        ):
+            result = await provider.fetch_permissions(token)
+
+        assert result == ["read"]
+
+    @pytest.mark.asyncio
+    async def test_configured_id_claim_looks_up_by_that_claims_value(self):
+        provider = SqlPermissionsProvider(id_claim="sub")
+        provider.get_permissions_from_db = AsyncMock(return_value=["read"])
+        token = JWTAuthorizationCredentials(
+            jwt_token="h.p.s",
+            header={"alg": "RS256"},
+            claims={"sub": "user-uuid-123", "preferred_username": "alice"},
+            signature="s",
+            message="h.p",
+        )
+
+        result = await provider.fetch_permissions(token)
+
+        provider.get_permissions_from_db.assert_awaited_once_with(
+            username="user-uuid-123"
+        )
+        assert result == ["read"]

@@ -16,7 +16,7 @@ Auth Middleware is a comprehensive, production-ready authentication and authoriz
 - **AWS Cognito** — Full integration with Amazon Cognito User Pools
 - **AWS Cognito Identity Pool** — Exchange User Pool tokens for temporary AWS credentials
 - **Azure Entra ID** — Microsoft Azure Active Directory authentication
-- **Generic JWT** — Support for any JWT-based identity provider
+- **Generic OIDC** — Any standards-compliant OpenID Connect provider (Authentik, Keycloak, Auth0, Okta, ...) via `OidcProvider`
 - **Basic Auth** — Username/password authentication via `BasicAuthMiddleware`
 - **Custom Providers** — Extensible architecture via the `JWTProvider` contract
 
@@ -115,16 +115,42 @@ app.add_middleware(
 )
 ```
 
+### Generic OIDC (Authentik, Keycloak, Auth0, Okta, ...)
+
+Works with any standards-compliant OpenID Connect identity provider — the JWKS is discovered automatically from the issuer's `.well-known/openid-configuration` document.
+
+```python
+from auth_middleware import JwtAuthMiddleware
+from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+from auth_middleware.providers.oidc.oidc_provider_settings import OidcProviderSettings
+
+auth_settings = OidcProviderSettings(
+    issuer="https://authentik.example.com/application/o/my-app/",
+    audience="your-oidc-client-id",  # recommended: rejects tokens from other clients
+)
+
+app.add_middleware(
+    JwtAuthMiddleware,
+    auth_provider=OidcProvider(settings=auth_settings),
+)
+```
+
 ### Basic Auth
 
 ```python
-from auth_middleware import BasicAuthMiddleware
+from auth_middleware import BasicAuthMiddleware, hash_password
 from auth_middleware.contracts import CredentialsRepository
+from auth_middleware.types.user_credentials import UserCredentials
+
+# When creating a user, hash their password once and store the result
+# (e.g. hashed_password column) — never store the plaintext password.
+stored_hash = hash_password("their-password")
 
 class MyCredentialsRepository(CredentialsRepository):
-    async def get_credentials(self, username: str):
-        # Return stored credentials for the given username
-        ...
+    async def get_by_id(self, *, id: str) -> UserCredentials | None:
+        # Look up the user and return their stored credentials, including
+        # the hash produced by hash_password() above
+        return UserCredentials(id=id, name="Jane Doe", hashed_password=stored_hash)
 
 app.add_middleware(
     BasicAuthMiddleware,
@@ -257,6 +283,9 @@ auth_middleware/
 │   ├── azure/                   # Azure Entra ID
 │   │   ├── entra_id_provider.py
 │   │   └── settings.py
+│   ├── oidc/                    # Generic OIDC (Authentik, Keycloak, Auth0, ...)
+│   │   ├── oidc_provider.py
+│   │   └── oidc_provider_settings.py
 │   └── sqlalchemy/              # SQL-backed authorization
 │       ├── sql_groups_provider.py
 │       ├── sql_permissions_provider.py
@@ -271,8 +300,8 @@ auth_middleware/
 graph TD
     A[HTTP Request] --> B[JwtAuthMiddleware\nor BasicAuthMiddleware]
     B --> C[JWTBearerManager]
-    C --> D[JWTProvider\nCognitoProvider · EntraIdProvider · IdentityPoolProvider]
-    D --> E[Token Validation\nJWKS cache]
+    C --> D[JWTProvider\nCognitoProvider · EntraIdProvider · IdentityPoolProvider · OidcProvider]
+    D --> E[Token Validation\nJWKS cache + exp/iss/aud]
     E --> F[User object]
     F --> G[GroupsProvider\nCognitoGroupsProvider · SqlGroupsProvider]
     F --> H[PermissionsProvider\nSqlPermissionsProvider]
@@ -304,6 +333,7 @@ graph TD
 | `CognitoGroupsAsRolesProvider` | `auth_middleware.providers.aws.cognito_groups_as_roles_provider` | Cognito groups mapped as roles |
 | `IdentityPoolProvider` | `auth_middleware.providers.aws.identity_pool_provider` | Cognito + Identity Pool |
 | `EntraIDProvider` | `auth_middleware.providers.azure.entra_id_provider` | Azure Entra ID JWT provider |
+| `OidcProvider` | `auth_middleware.providers.oidc.oidc_provider` | Generic OIDC JWT provider (Authentik, Keycloak, Auth0, ...) |
 | `SqlGroupsProvider` | `auth_middleware.providers.sqlalchemy.sql_groups_provider` | DB-backed groups |
 | `SqlPermissionsProvider` | `auth_middleware.providers.sqlalchemy.sql_permissions_provider` | DB-backed permissions |
 

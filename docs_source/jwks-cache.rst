@@ -456,7 +456,7 @@ Performance Comparison
 See Also
 ========
 
-* :doc:`jwt_auth_provider` - JWT provider documentation
+* :doc:`oidc_provider` - Generic OIDC provider documentation
 * :doc:`cognito_provider` - Cognito provider specifics
 * :doc:`services` - Metrics collection for monitoring
 

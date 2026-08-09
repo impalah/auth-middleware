@@ -5,6 +5,9 @@ Comprehensive tests for auth_middleware.providers.aws.jwt_provider_settings modu
 import os
 from unittest.mock import patch
 
+import pytest
+from pydantic import ValidationError
+
 from auth_middleware.providers.aws.jwt_provider_settings import JWTProviderSettings
 
 
@@ -18,6 +21,7 @@ class TestJWTProviderSettings:
         assert settings.jwt_secret_key is None
         assert settings.jwt_algorithm == "HS256"
         assert settings.jwt_token_verification_disabled is False
+        assert settings.jwt_leeway == 0
 
     def test_jwt_provider_settings_explicit_values(self):
         """Test JWTProviderSettings with explicit values."""
@@ -25,11 +29,18 @@ class TestJWTProviderSettings:
             jwt_secret_key="test-secret-key",
             jwt_algorithm="RS256",
             jwt_token_verification_disabled=True,
+            jwt_leeway=30,
         )
 
         assert settings.jwt_secret_key == "test-secret-key"
         assert settings.jwt_algorithm == "RS256"
         assert settings.jwt_token_verification_disabled is True
+        assert settings.jwt_leeway == 30
+
+    def test_jwt_provider_settings_leeway_rejects_negative_values(self):
+        """Test JWTProviderSettings rejects a negative jwt_leeway."""
+        with pytest.raises(ValidationError):
+            JWTProviderSettings(jwt_leeway=-1)
 
     def test_jwt_provider_settings_partial_values(self):
         """Test JWTProviderSettings with partial explicit values."""

@@ -1,7 +1,9 @@
 import asyncio
 from abc import ABCMeta, abstractmethod
 from time import time_ns
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+from joserfc.jwt import JWTClaimsRegistry
 
 from auth_middleware.logging import logger
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
@@ -181,6 +183,33 @@ class JWTProvider(metaclass=ABCMeta):
                 if key["kid"] == token.header["kid"]:
                     return key
         return None
+
+    def _validate_registered_claims(
+        self, claims: dict[str, Any], leeway: int = 0
+    ) -> None:
+        """Validate standard registered JWT claims that signature
+        verification alone does not check.
+
+        A verified signature only proves the token was not tampered with —
+        it says nothing about whether the token has expired. This must be
+        called by every concrete provider's ``verify_token`` after a
+        successful signature check, so an expired-but-validly-signed token
+        is never accepted.
+
+        ``exp`` is required (raises if absent); ``nbf``/``iat`` are also
+        validated automatically by :class:`JWTClaimsRegistry` if present in
+        ``claims``.
+
+        Args:
+            claims (dict[str, Any]): The token's decoded claims.
+            leeway (int): Clock-skew allowance in seconds. Defaults to 0.
+
+        Raises:
+            joserfc.errors.JoseError: if ``exp`` is missing, the token has
+                expired, or ``nbf``/``iat`` are invalid.
+        """
+        registry = JWTClaimsRegistry(exp={"essential": True}, leeway=leeway)
+        registry.validate(claims)
 
     @abstractmethod
     async def load_jwks(

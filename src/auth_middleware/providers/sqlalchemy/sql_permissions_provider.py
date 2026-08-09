@@ -35,11 +35,21 @@ class PermissionsModel(Base):  # type: ignore[misc]
 
 
 class SqlPermissionsProvider(PermissionsProvider):
-    """Recovers groups from AWS Cognito using the token provided
+    """Recovers permissions from a SQL database, keyed by an identifier
+    claim from the JWT.
 
     Args:
-        metaclass (_type_, optional): _description_. Defaults to ABCMeta.
+        id_claim (str): name of the JWT claim used as the lookup key when
+            ``fetch_permissions`` is called with a
+            ``JWTAuthorizationCredentials``. Defaults to ``"username"``
+            (Cognito's convention) for backward compatibility. Identity
+            providers name this claim differently — e.g. Entra ID/OIDC
+            providers typically use ``"preferred_username"`` (or the
+            always-present, provider-agnostic ``"sub"``) instead.
     """
+
+    def __init__(self, *, id_claim: str = "username") -> None:
+        self._id_claim = id_claim
 
     async def fetch_permissions(
         self, token: str | JWTAuthorizationCredentials
@@ -50,23 +60,31 @@ class SqlPermissionsProvider(PermissionsProvider):
             token (JWTAuthorizationCredentials | str): The token containing the claims.
 
         Raises:
-            NotImplementedError: _description_
+            ValueError: If a JWTAuthorizationCredentials token is missing
+                the configured id_claim.
 
         Returns:
             List[str]: _description_
         """
 
-        # 1. Get the username from the token
-        username: str = (
-            token.claims["username"]
-            if isinstance(token, JWTAuthorizationCredentials)
-            else token
-        )
+        # 1. Get the lookup identifier from the token
+        if isinstance(token, JWTAuthorizationCredentials):
+            identifier = token.claims.get(self._id_claim)
+            if identifier is None:
+                raise ValueError(
+                    f"Token is missing the '{self._id_claim}' claim required "
+                    "to look up permissions. Pass a different id_claim to "
+                    "SqlPermissionsProvider matching a claim your identity "
+                    "provider actually issues (e.g. 'preferred_username' or "
+                    "'sub')."
+                )
+        else:
+            identifier = token
 
         # 2. Check if permissions are in the cache
 
         # 3. If not in cache, fetch from the database
-        permissions: list[str] = await self.get_permissions_from_db(username=username)
+        permissions: list[str] = await self.get_permissions_from_db(username=identifier)
 
         # 4. Return the permissions
         return permissions

@@ -269,14 +269,31 @@ class TestRequireUser:
     def test_require_user_with_disabled_middleware(
         self, mock_request_without_user, mock_disabled_middleware
     ):
-        """Test require_user with disabled middleware."""
+        """Test require_user with disabled middleware.
+
+        Consistent with require_groups/require_roles/require_permissions:
+        AUTH_MIDDLEWARE_DISABLED means requests are never blocked, so this
+        must return a placeholder user instead of raising.
+        """
         user_checker = require_user()
         checker_func = user_checker
 
-        # Should raise exception even when middleware is disabled
-        with pytest.raises(HTTPException) as exc_info:
-            checker_func(mock_request_without_user)
-        assert exc_info.value.status_code == 401
+        user = checker_func(mock_request_without_user)
+
+        assert user.id == "synthetic"
+
+    def test_require_user_with_disabled_middleware_uses_existing_current_user(
+        self, mock_request_with_user, mock_disabled_middleware
+    ):
+        """When disabled, prefer whatever current_user the middleware already
+        set over the synthetic placeholder."""
+        user_checker = require_user()
+        checker_func = user_checker
+
+        user = checker_func(mock_request_with_user)
+
+        assert user is mock_request_with_user.state.current_user
+        assert user.id != "synthetic"
 
     def test_require_user_returns_callable(self):
         """Test that require_user returns a callable."""

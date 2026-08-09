@@ -160,6 +160,28 @@ class TestJwtAuthMiddleware:
         assert result is None
 
     @pytest.mark.asyncio
+    async def test_get_current_user_without_credentials_when_disabled_returns_synthetic(
+        self, mock_auth_provider
+    ):
+        """When AUTH_MIDDLEWARE_DISABLED is set, even a request with no
+        Authorization header at all must get a synthetic user, not None —
+        disabled auth should never block a request."""
+        app = Mock(spec=ASGIApp)
+        middleware = JwtAuthMiddleware(app, auth_provider=mock_auth_provider)
+
+        request = Mock(spec=Request)
+        request.headers = Headers({})
+
+        with patch(
+            "auth_middleware.jwt_auth_middleware.settings.AUTH_MIDDLEWARE_DISABLED",
+            True,
+        ):
+            result = await middleware.get_current_user(request)
+
+        assert result is not None
+        assert result.id == "synthetic"
+
+    @pytest.mark.asyncio
     async def test_get_current_user_with_invalid_token(self, mock_auth_provider):
         """Test get_current_user with invalid token raising exception."""
         app = Mock(spec=ASGIApp)
@@ -273,12 +295,9 @@ class TestJwtAuthMiddleware:
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_create_synthetic_user(self, mock_auth_provider):
-        """Test __create_synthetic_user method."""
-        app = Mock(spec=ASGIApp)
-        middleware = JwtAuthMiddleware(app, auth_provider=mock_auth_provider)
-
-        synthetic_user = middleware._JwtAuthMiddleware__create_synthetic_user()
+    async def test_create_synthetic_user(self):
+        """Test User.synthetic() factory used when auth is disabled."""
+        synthetic_user = User.synthetic()
 
         assert isinstance(synthetic_user, User)
         assert synthetic_user.id == "synthetic"

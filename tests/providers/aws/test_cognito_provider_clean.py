@@ -1,5 +1,6 @@
 """Tests for _resolve_provider helper and uncovered CognitoProvider branches."""
 
+import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -33,8 +34,7 @@ def _settings(**kwargs):
 
 
 def _fresh_provider(**kwargs):
-    """Return a CognitoProvider, resetting the per-class singleton first."""
-    CognitoProvider._instances.pop(CognitoProvider, None)
+    """Return a new CognitoProvider (no shared singleton state to reset)."""
     return CognitoProvider(settings=_settings(), **kwargs)
 
 
@@ -46,6 +46,11 @@ def _make_token(claims: dict) -> JWTAuthorizationCredentials:
         signature="s",
         message="h.p",
     )
+
+
+def _unexpired_claims(**extra) -> dict:
+    """Claims with a non-expired 'exp', for tests that aren't about expiration."""
+    return {"exp": int(time.time()) + 3600, **extra}
 
 
 # ---------------------------------------------------------------------------
@@ -82,22 +87,21 @@ class TestResolveProvider:
 
 
 class TestCognitoProviderInit:
-    def setup_method(self):
-        CognitoProvider._instances.pop(CognitoProvider, None)
-
     def test_raises_when_settings_is_none(self):
         with pytest.raises(ValueError, match="Settings must be provided"):
             CognitoProvider(settings=None)
 
-    def test_singleton_reuses_instance(self):
-        p1 = _fresh_provider()
-        # Second call returns the same object, even with different args
-        p2 = CognitoProvider(settings=_settings())
-        assert p1 is p2
+    def test_creates_independent_instances(self):
+        """Each instantiation is independent — there is no shared singleton
+        state that could silently ignore a later call's settings (a real
+        bug this used to have: a second CognitoProvider(settings=...) call
+        used to reuse the first instance and drop the new settings)."""
+        p1 = CognitoProvider(settings=_settings(user_pool_id="pool-a"))
+        p2 = CognitoProvider(settings=_settings(user_pool_id="pool-b"))
 
-    def test_initialised_flag_set(self):
-        provider = _fresh_provider()
-        assert provider._initialized is True
+        assert p1 is not p2
+        assert p1._settings.user_pool_id == "pool-a"
+        assert p2._settings.user_pool_id == "pool-b"
 
 
 # ---------------------------------------------------------------------------
@@ -106,9 +110,6 @@ class TestCognitoProviderInit:
 
 
 class TestGetKeys:
-    def setup_method(self):
-        CognitoProvider._instances.pop(CognitoProvider, None)
-
     @pytest.mark.asyncio
     async def test_raises_when_jwks_url_template_is_none(self):
         settings = CognitoAuthzProviderSettings(
@@ -116,7 +117,6 @@ class TestGetKeys:
             user_pool_id="us-east-1_Test",
             jwks_url_template=None,
         )
-        CognitoProvider._instances.pop(CognitoProvider, None)
         provider = CognitoProvider(settings=settings)
         with pytest.raises(ValueError, match="jwks_url_template"):
             await provider.get_keys()
@@ -128,13 +128,9 @@ class TestGetKeys:
 
 
 class TestVerifyTokenDisabled:
-    def setup_method(self):
-        CognitoProvider._instances.pop(CognitoProvider, None)
-
     @pytest.mark.asyncio
     async def test_returns_true_when_verification_disabled(self):
         settings = _settings(jwt_token_verification_disabled=True)
-        CognitoProvider._instances.pop(CognitoProvider, None)
         provider = CognitoProvider(settings=settings)
         token = _make_token({"sub": "u1"})
         result = await provider.verify_token(token)
@@ -149,14 +145,10 @@ class TestVerifyTokenDisabled:
 
 
 class TestVerifyTokenClientId:
-    def setup_method(self):
-        CognitoProvider._instances.pop(CognitoProvider, None)
-
     @staticmethod
     def _provider_with_signature_ok(**settings_kwargs):
         """A CognitoProvider whose signature check always succeeds, so tests
         only exercise the client_id/aud branch."""
-        CognitoProvider._instances.pop(CognitoProvider, None)
         provider = CognitoProvider(settings=_settings(**settings_kwargs))
         provider._get_hmac_key = AsyncMock(return_value={"kid": "k1"})
         return provider
@@ -166,7 +158,7 @@ class TestVerifyTokenClientId:
         provider = self._provider_with_signature_ok(
             user_pool_client_id="expected_client_id"
         )
-        token = _make_token({"sub": "u1", "aud": "other_client_id"})
+        token = _make_token(_unexpired_claims(sub="u1", aud="other_client_id"))
 
         with (
             patch(
@@ -189,7 +181,7 @@ class TestVerifyTokenClientId:
             user_pool_client_id="expected_client_id"
         )
         token = _make_token(
-            {"sub": "u1", "token_use": "access", "client_id": "other_client_id"}
+            _unexpired_claims(sub="u1", token_use="access", client_id="other_client_id")
         )
 
         with (
@@ -211,7 +203,7 @@ class TestVerifyTokenClientId:
         provider = self._provider_with_signature_ok(
             user_pool_client_id="expected_client_id"
         )
-        token = _make_token({"sub": "u1", "aud": "expected_client_id"})
+        token = _make_token(_unexpired_claims(sub="u1", aud="expected_client_id"))
 
         with (
             patch(
@@ -233,7 +225,9 @@ class TestVerifyTokenClientId:
             user_pool_client_id="expected_client_id"
         )
         token = _make_token(
-            {"sub": "u1", "token_use": "access", "client_id": "expected_client_id"}
+            _unexpired_claims(
+                sub="u1", token_use="access", client_id="expected_client_id"
+            )
         )
 
         with (
@@ -255,7 +249,7 @@ class TestVerifyTokenClientId:
         # Backward compatibility: if the app didn't configure
         # user_pool_client_id, signature validation alone still governs.
         provider = self._provider_with_signature_ok()
-        token = _make_token({"sub": "u1", "aud": "whatever_client_id"})
+        token = _make_token(_unexpired_claims(sub="u1", aud="whatever_client_id"))
 
         with (
             patch(
@@ -273,20 +267,145 @@ class TestVerifyTokenClientId:
 
 
 # ---------------------------------------------------------------------------
+# verify_token — exp validation (a verified signature alone does not prove
+# the token hasn't expired; joserfc's decode() never checks registered
+# claims like exp/nbf/iat unless told to)
+# ---------------------------------------------------------------------------
+
+
+class TestVerifyTokenExpiration:
+    @staticmethod
+    def _provider_with_signature_ok(**settings_kwargs):
+        provider = CognitoProvider(settings=_settings(**settings_kwargs))
+        provider._get_hmac_key = AsyncMock(return_value={"kid": "k1"})
+        return provider
+
+    @pytest.mark.asyncio
+    async def test_rejects_expired_token(self):
+        provider = self._provider_with_signature_ok()
+        token = _make_token({"sub": "u1", "exp": int(time.time()) - 3600})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_rejects_token_missing_exp_claim(self):
+        provider = self._provider_with_signature_ok()
+        token = _make_token({"sub": "u1"})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_accepts_token_with_future_exp(self):
+        provider = self._provider_with_signature_ok()
+        token = _make_token(_unexpired_claims(sub="u1"))
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_rejects_recently_expired_token_with_no_leeway(self):
+        provider = self._provider_with_signature_ok(jwt_leeway=0)
+        token = _make_token({"sub": "u1", "exp": int(time.time()) - 10})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_accepts_recently_expired_token_within_leeway(self):
+        provider = self._provider_with_signature_ok(jwt_leeway=30)
+        token = _make_token({"sub": "u1", "exp": int(time.time()) - 10})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_still_rejects_token_expired_beyond_leeway(self):
+        provider = self._provider_with_signature_ok(jwt_leeway=30)
+        token = _make_token({"sub": "u1", "exp": int(time.time()) - 3600})
+
+        with (
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.aws.cognito_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            result = await provider.verify_token(token)
+
+        assert result is False
+
+
+# ---------------------------------------------------------------------------
 # create_user_from_token — groups_provider and roles_provider branches
 # ---------------------------------------------------------------------------
 
 
 class TestCreateUserFromTokenProviders:
-    def setup_method(self):
-        CognitoProvider._instances.pop(CognitoProvider, None)
-
     @pytest.mark.asyncio
     async def test_fetches_groups_for_non_m2m_token(self):
         mock_groups = MagicMock(spec=GroupsProvider)
         mock_groups.fetch_groups = AsyncMock(return_value=["admin"])
 
-        CognitoProvider._instances.pop(CognitoProvider, None)
         provider = CognitoProvider(settings=_settings(), groups_provider=mock_groups)
 
         token = _make_token(
@@ -307,7 +426,6 @@ class TestCreateUserFromTokenProviders:
         mock_groups = MagicMock(spec=GroupsProvider)
         mock_groups.fetch_groups = AsyncMock(return_value=["admin"])
 
-        CognitoProvider._instances.pop(CognitoProvider, None)
         provider = CognitoProvider(settings=_settings(), groups_provider=mock_groups)
 
         # M2M tokens have client_credentials grant / "client_id" claim
@@ -327,7 +445,6 @@ class TestCreateUserFromTokenProviders:
 
     @pytest.mark.asyncio
     async def test_creates_user_with_email_and_cognito_username_claim(self):
-        CognitoProvider._instances.pop(CognitoProvider, None)
         provider = CognitoProvider(settings=_settings())
 
         token = _make_token(
@@ -344,7 +461,6 @@ class TestCreateUserFromTokenProviders:
 
     @pytest.mark.asyncio
     async def test_falls_back_to_sub_when_no_name_claim(self):
-        CognitoProvider._instances.pop(CognitoProvider, None)
         provider = CognitoProvider(settings=_settings())
 
         token = _make_token({"sub": "u3"})

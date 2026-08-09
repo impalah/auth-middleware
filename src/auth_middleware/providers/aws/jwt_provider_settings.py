@@ -25,6 +25,16 @@ class JWTProviderSettings(BaseSettings):
         description="Disabled JWT verification Token",
     )
 
+    jwt_leeway: int = Field(
+        default=0,
+        description=(
+            "Clock-skew allowance (seconds) applied when validating registered "
+            "claims such as exp/nbf, to tolerate small time differences "
+            "between servers"
+        ),
+        ge=0,
+    )
+
     # JWKS cache strategy settings
     jwks_cache_strategy: Literal["time", "usage", "both"] = Field(
         default="both",

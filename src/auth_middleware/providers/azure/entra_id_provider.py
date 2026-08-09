@@ -15,63 +15,108 @@ from auth_middleware.exceptions.invalid_token_exception import InvalidTokenExcep
 from auth_middleware.logging import logger
 from auth_middleware.providers.azure.azure_exception import AzureException
 from auth_middleware.providers.azure.settings import settings
-from auth_middleware.types.jwt import JWKS, JWTAuthorizationCredentials
+from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
 
 class EntraIDProvider(JWTProvider):
-    def __new__(
-        cls,
-        permissions_provider: PermissionsProvider | None = None,
-        groups_provider: GroupsProvider | None = None,
-    ) -> EntraIDProvider:
-        if not hasattr(cls, "instance"):
-            cls.instance = super().__new__(cls)
-        return cls.instance
-
     def __init__(
         self,
         permissions_provider: PermissionsProvider | None = None,
         groups_provider: GroupsProvider | None = None,
     ) -> None:
-        if not hasattr(self, "_initialized"):  # Avoid reinitialization
-            super().__init__(
-                permissions_provider=permissions_provider,
-                groups_provider=groups_provider,
+        super().__init__(
+            permissions_provider=permissions_provider,
+            groups_provider=groups_provider,
+        )
+
+    async def get_keys(self, jwks_uri: str) -> list[JWK]:
+        """Get keys from the Entra ID JWKS endpoint.
+
+        Args:
+            jwks_uri: The JWKS endpoint URL, as returned by the OIDC
+                discovery document.
+
+        Returns:
+            List[JWK]: a list of JWK keys
+        """
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(jwks_uri)
+                response.raise_for_status()
+                keys: list[JWK] = response.json()["keys"]
+        except httpx.HTTPStatusError as exc:
+            logger.error(
+                "Entra ID JWKS endpoint returned {}: {}",
+                exc.response.status_code,
+                jwks_uri,
             )
-            self._initialized = True
+            raise InvalidTokenException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unable to retrieve public keys from identity provider",
+            ) from exc
+        except httpx.RequestError as exc:
+            logger.error(
+                "Network error fetching Entra ID JWKS from {}: {}", jwks_uri, exc
+            )
+            raise InvalidTokenException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unable to reach identity provider",
+            ) from exc
+        except (KeyError, ValueError) as exc:
+            logger.error("Unexpected JWKS response format from {}: {}", jwks_uri, exc)
+            raise InvalidTokenException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid JWKS response from identity provider",
+            ) from exc
 
-    # TODO: implement correct types
-    async def get_keys(self, jwks_uri: str) -> Any:
-        """Get keys
+        return keys
+
+    async def get_openid_config(self) -> dict[str, Any]:
+        """Get the OIDC discovery document for the configured Entra ID tenant.
 
         Returns:
-            TODO: List[JWK]: a list of JWK
+            dict[str, Any]: the discovery document.
         """
-        # TODO: Control errors
-        async with httpx.AsyncClient() as client:
-            response = await client.get(jwks_uri)
-            keys_data: dict[str, str] = response.json()["keys"]
-        return keys_data
+        discovery_url = settings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
+            settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
+        )
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(discovery_url)
+                response.raise_for_status()
+                config_data: dict[str, Any] = response.json()
+        except httpx.HTTPStatusError as exc:
+            logger.error(
+                "Entra ID discovery endpoint returned {}: {}",
+                exc.response.status_code,
+                discovery_url,
+            )
+            raise InvalidTokenException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unable to retrieve OIDC discovery document",
+            ) from exc
+        except httpx.RequestError as exc:
+            logger.error(
+                "Network error fetching Entra ID discovery document from {}: {}",
+                discovery_url,
+                exc,
+            )
+            raise InvalidTokenException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unable to reach identity provider",
+            ) from exc
+        except ValueError as exc:
+            logger.error(
+                "Invalid JSON in Entra ID discovery document from {}: {}",
+                discovery_url,
+                exc,
+            )
+            raise InvalidTokenException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid OIDC discovery response from identity provider",
+            ) from exc
 
-    async def get_openid_config(self) -> dict[str, str]:
-        """Get openid config from entradid
-
-        Returns:
-            List[JWK]: a list of JWK
-        """
-        # TODO: Control errors
-        async with httpx.AsyncClient() as client:
-            try:
-                response = await client.get(
-                    settings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE.format(
-                        settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID,
-                    )
-                )
-                config_data: dict[str, str] = response.json()
-            except Exception as e:
-                logger.error("Error in get_openid_config: {}", str(e))
-                return {}
         return config_data
 
     async def load_jwks(
@@ -80,14 +125,18 @@ class EntraIDProvider(JWTProvider):
         """Load JWKS credentials from remote Identity Provider
 
         Returns:
-            JWKS: _description_
+            JWKS: cached key set with refresh metadata.
         """
-
-        # TODO: Control errors
 
         openid_config = await self.get_openid_config()
 
-        jwks_uri = openid_config["jwks_uri"]
+        jwks_uri = openid_config.get("jwks_uri")
+        if not jwks_uri:
+            logger.error("Entra ID discovery document has no 'jwks_uri'")
+            raise InvalidTokenException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid OIDC discovery response from identity provider",
+            )
 
         keys = await self.get_keys(jwks_uri)
 
@@ -147,9 +196,14 @@ class EntraIDProvider(JWTProvider):
                 key,
                 algorithms=["RS256"],
             )
+            self._validate_registered_claims(
+                token_obj.claims,
+                leeway=settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY,
+            )
             if audience:
                 claims_registry = JWTClaimsRegistry(
-                    aud={"essential": True, "value": audience}
+                    aud={"essential": True, "value": audience},
+                    leeway=settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY,
                 )
                 claims_registry.validate(token_obj.claims)
             return bool(token_obj.claims.get("sub"))
