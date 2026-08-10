@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.aws.cognito_groups_provider &mdash; Auth Middleware 0.5.0 documentation</title>
+  <title>auth_middleware.providers.aws.cognito_groups_provider &mdash; Auth Middleware 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/aws/cognito_groups_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -56,7 +56,6 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
@@ -164,8 +163,16 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recovers groups from AWS Cognito using the token provided</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        metaclass (_type_, optional): _description_. Defaults to ABCMeta.</span>
+<span class="sd">        groups_claim (str): name of the claim carrying the user&#39;s groups</span>
+<span class="sd">            (a list of group names on ID tokens). Defaults to</span>
+<span class="sd">            ``COGNITO_GROUPS_CLAIM`` (``&quot;cognito:groups&quot;``).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CognitoGroupsProvider.__init__">
+<a class="viewcode-back" href="../../../../groups-provider.html#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">groups_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">COGNITO_GROUPS_CLAIM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_groups_claim</span> <span class="o">=</span> <span class="n">groups_claim</span></div>
+
 
 <div class="viewcode-block" id="CognitoGroupsProvider.fetch_groups">
 <a class="viewcode-back" href="../../../../groups-provider.html#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.fetch_groups">[docs]</a>
@@ -185,7 +192,7 @@
         <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__get_groups_from_claims</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="p">(</span><span class="n">COGNITO_GROUPS_CLAIM</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="ow">or</span> <span class="s2">&quot;scope&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_groups_claim</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="ow">or</span> <span class="s2">&quot;scope&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span>
             <span class="k">else</span> <span class="p">[]</span>
         <span class="p">)</span>
 
@@ -202,14 +209,20 @@
 <span class="sd">            List[str]: List of groups.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># cognito:groups is a list of groups</span>
-        <span class="c1"># scope is only ONE scope</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_claim</span> <span class="ow">in</span> <span class="n">claims</span><span class="p">:</span>
+            <span class="c1"># the groups claim is a list of groups</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">claims</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_groups_claim</span><span class="p">])</span>
 
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">claims</span><span class="p">[</span><span class="n">COGNITO_GROUPS_CLAIM</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">COGNITO_GROUPS_CLAIM</span> <span class="ow">in</span> <span class="n">claims</span>
-            <span class="k">else</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;scope&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-        <span class="p">)</span></div>
+        <span class="c1"># &#39;scope&#39; is a space-separated list of OAuth2 scopes. Only a</span>
+        <span class="c1"># single custom scope in the Cognito &#39;resourceServer/scopeName&#39;</span>
+        <span class="c1"># format can be mapped to one group name; a real user access</span>
+        <span class="c1"># token&#39;s standard multi-scope claim (e.g. &quot;openid profile</span>
+        <span class="c1"># email&quot;) carries no group information and must not be</span>
+        <span class="c1"># misread as a single group.</span>
+        <span class="n">scopes</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;scope&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">scopes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">scopes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span></div>
 
 </pre></div>
 

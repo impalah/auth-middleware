@@ -39,34 +39,33 @@ Installation::
 
    pip install auth-middleware
 
-Basic usage with AWS Cognito:
+Basic usage with a generic OIDC issuer (works with AWS Cognito, Authentik,
+Keycloak, Auth0, Okta, ...):
 
 .. code-block:: python
 
    from fastapi import FastAPI, Depends
    from auth_middleware import JwtAuthMiddleware
    from auth_middleware.guards import require_user
-   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
-   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-       CognitoAuthzProviderSettings,
-   )
-   from auth_middleware.providers.aws.cognito_groups_provider import (
-       CognitoGroupsProvider,
+   from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+   from auth_middleware.providers.oidc.oidc_provider_settings import (
+       OidcProviderSettings,
    )
 
    app = FastAPI(title="My Secure API")
 
-   # Configure Cognito authentication
-   auth_settings = CognitoAuthzProviderSettings(
-       user_pool_id="your_user_pool_id",
-       user_pool_region="your_aws_region",
+   # Configure OIDC authentication. For AWS Cognito, the issuer is
+   # https://cognito-idp.{region}.amazonaws.com/{user_pool_id}
+   auth_settings = OidcProviderSettings(
+       issuer="https://your-issuer.example.com",
+       audience="your-client-id",
        jwt_token_verification_disabled=False,
    )
 
    # Add authentication middleware
    app.add_middleware(
        JwtAuthMiddleware,
-       auth_provider=CognitoProvider(settings=auth_settings),
+       auth_provider=OidcProvider(settings=auth_settings),
    )
 
    @app.get("/protected", dependencies=[Depends(require_user())])
@@ -92,7 +91,6 @@ Basic usage with AWS Cognito:
    :maxdepth: 2
    :caption: Authentication Providers:
 
-   cognito_provider
    entra_id_provider
    oidc_provider
 

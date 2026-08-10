@@ -2,11 +2,12 @@ Generic OIDC Provider
 ======================
 
 ``OidcProvider`` is a JWT authentication provider for any standards-compliant
-OpenID Connect identity provider — `Authentik <https://goauthentik.io/>`_,
+OpenID Connect identity provider — AWS Cognito (see
+:doc:`infrastructure/cognito-setup`), `Authentik <https://goauthentik.io/>`_,
 `Keycloak <https://www.keycloak.org/>`_, Auth0, Okta, or any other issuer
 that exposes a ``.well-known/openid-configuration`` discovery document and a
-JWKS endpoint. Unlike :doc:`cognito_provider` and :doc:`entra_id_provider`,
-it is not tied to a specific cloud vendor.
+JWKS endpoint. Unlike :doc:`entra_id_provider`, it is not tied to a specific
+cloud vendor.
 
 Overview
 --------
@@ -92,10 +93,12 @@ display name and group memberships. Configure them to match your IdP:
        groups_claim="roles",       # default: "groups"
    )
 
-Set ``groups_claim=None`` to disable reading groups from the token claims
-entirely — useful if groups should come from a separate
-:class:`~auth_middleware.contracts.groups_provider.GroupsProvider` instead
-(e.g. :doc:`groups-provider` backed by SQL).
+If you pass a :class:`~auth_middleware.contracts.groups_provider.GroupsProvider`
+(e.g. :doc:`groups-provider` backed by SQL) to ``OidcProvider``, it takes
+precedence over ``groups_claim`` — the claim is only consulted as a fallback
+when no ``GroupsProvider`` is configured (or for machine-to-machine tokens,
+which never consult a ``GroupsProvider``). Set ``groups_claim=None`` to
+disable reading groups from the token claims entirely.
 
 Clock-Skew Leeway
 ~~~~~~~~~~~~~~~~~~
@@ -197,8 +200,8 @@ If your identity provider isn't OIDC-compliant, or you need behavior
 ``OidcProvider`` doesn't cover, subclass the
 :class:`~auth_middleware.contracts.jwt_provider.JWTProvider` contract
 directly and implement ``load_jwks``, ``verify_token``, and
-``create_user_from_token`` — this is exactly how ``CognitoProvider``,
-``EntraIDProvider``, and ``OidcProvider`` itself are built. See
+``create_user_from_token`` — this is exactly how ``EntraIDProvider`` and
+``OidcProvider`` itself are built. See
 :doc:`extending-authz-providers` for the equivalent pattern on the
 authorization side (groups/roles/permissions providers).
 
@@ -216,5 +219,5 @@ authentication providers, see:
 
 * :doc:`infrastructure/authentik-setup` - Authentik OAuth2/OIDC provider setup
 * :doc:`infrastructure/keycloak-setup` - Keycloak realm and client setup
-* :doc:`cognito_provider` - AWS Cognito integration
+* :doc:`infrastructure/cognito-setup` - AWS Cognito user pool setup
 * :doc:`entra_id_provider` - Azure Entra ID integration

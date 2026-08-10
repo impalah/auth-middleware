@@ -25,7 +25,8 @@ The basic setup involves three steps:
 AWS Cognito Example
 -------------------
 
-Here's a complete example using AWS Cognito as the authentication provider:
+Here's a complete example using AWS Cognito as the authentication provider,
+via the generic :doc:`oidc_provider`:
 
 .. code-block:: python
 
@@ -33,9 +34,9 @@ Here's a complete example using AWS Cognito as the authentication provider:
    from starlette.requests import Request
    from auth_middleware import JwtAuthMiddleware
    from auth_middleware.guards import require_user, require_groups
-   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
-   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-       CognitoAuthzProviderSettings,
+   from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+   from auth_middleware.providers.oidc.oidc_provider_settings import (
+       OidcProviderSettings,
    )
    from auth_middleware.providers.aws.cognito_groups_provider import (
        CognitoGroupsProvider,
@@ -45,18 +46,18 @@ Here's a complete example using AWS Cognito as the authentication provider:
    app = FastAPI(title="My Secure API", version="1.0.0")
 
    # Configure Cognito authentication settings
-   auth_settings = CognitoAuthzProviderSettings(
-       user_pool_id="your_user_pool_id",
-       user_pool_region="your_aws_region",
+   auth_settings = OidcProviderSettings(
+       issuer="https://cognito-idp.your_aws_region.amazonaws.com/your_user_pool_id",
+       audience="your_app_client_id",
        jwt_token_verification_disabled=False,  # Set to True for development only
    )
 
    # Add authentication middleware
    app.add_middleware(
        JwtAuthMiddleware,
-       auth_provider=CognitoProvider(
+       auth_provider=OidcProvider(
            settings=auth_settings,
-           groups_provider=CognitoGroupsProvider,
+           groups_provider=CognitoGroupsProvider(),
        ),
    )
 
@@ -95,8 +96,8 @@ Set the required environment variables for your authentication provider:
 .. code-block:: bash
 
    # .env file or environment variables
-   AWS_COGNITO_USER_POOL_ID=your_user_pool_id
-   AWS_COGNITO_USER_POOL_REGION=your_aws_region
+   OIDC_ISSUER=https://cognito-idp.your_aws_region.amazonaws.com/your_user_pool_id
+   OIDC_AUDIENCE=your_app_client_id
    TOKEN_VERIFICATION_DISABLED=false
 
 **Environment-based configuration**:
@@ -104,14 +105,14 @@ Set the required environment variables for your authentication provider:
 .. code-block:: python
 
    import os
-   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-       CognitoAuthzProviderSettings,
+   from auth_middleware.providers.oidc.oidc_provider_settings import (
+       OidcProviderSettings,
    )
 
    # Load from environment variables
-   auth_settings = CognitoAuthzProviderSettings(
-       user_pool_id=os.getenv("AWS_COGNITO_USER_POOL_ID"),
-       user_pool_region=os.getenv("AWS_COGNITO_USER_POOL_REGION"),
+   auth_settings = OidcProviderSettings(
+       issuer=os.getenv("OIDC_ISSUER"),
+       audience=os.getenv("OIDC_AUDIENCE"),
        jwt_token_verification_disabled=os.getenv("TOKEN_VERIFICATION_DISABLED", "false").lower() == "true",
    )
 
@@ -244,9 +245,8 @@ Development Tips
 .. code-block:: python
 
    # Only for development/testing
-   auth_settings = CognitoAuthzProviderSettings(
-       user_pool_id="your_user_pool_id",
-       user_pool_region="your_aws_region",
+   auth_settings = OidcProviderSettings(
+       issuer="https://your-issuer.example.com",
        jwt_token_verification_disabled=True,  # Skip signature verification
    )
 
@@ -280,5 +280,5 @@ Next Steps
 ----------
 
 * Learn about :doc:`middleware-configuration` for advanced settings
-* Explore other :doc:`cognito_provider` for different identity providers
+* Explore :doc:`entra_id_provider` for other identity providers
 * Check the :doc:`api` reference for detailed API documentation

@@ -33,10 +33,11 @@ Extracts groups directly from AWS Cognito JWT tokens.
 
    from auth_middleware.providers.aws.cognito_groups_provider import CognitoGroupsProvider
    from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.oidc.oidc_provider import OidcProvider
 
-   # Configure the authentication provider
-   auth_provider = CognitoProvider(settings=auth_settings)
+   # Configure the authentication provider (e.g. pointed at AWS Cognito's
+   # OIDC issuer — see :doc:`oidc_provider`)
+   auth_provider = OidcProvider(settings=auth_settings)
    
    # Configure the groups provider
    groups_provider = CognitoGroupsProvider()

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; Auth Middleware 0.5.0 documentation</title>
+  <title>API Reference &mdash; Auth Middleware 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/api.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -59,7 +59,6 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
@@ -133,7 +132,6 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#authentication-providers">Authentication Providers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l3"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
@@ -247,13 +245,6 @@
 <p>The library supports multiple authentication providers for different identity systems:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#configuration">Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#example-application">Example Application</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito_provider.html#module-auth_middleware.providers.aws.cognito_provider">API Reference</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra_id_provider.html#configuration">Configuration</a></li>
@@ -394,9 +385,8 @@
 </ul>
 </dd>
 <dt><strong>Providers</strong></dt><dd><ul class="simple">
-<li><p><a class="reference internal" href="cognito_provider.html#auth_middleware.providers.aws.cognito_provider.CognitoProvider" title="auth_middleware.providers.aws.cognito_provider.CognitoProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.aws.cognito_provider.CognitoProvider</span></code></a> - AWS Cognito</p></li>
+<li><p><a class="reference internal" href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider" title="auth_middleware.providers.oidc.oidc_provider.OidcProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.oidc.oidc_provider.OidcProvider</span></code></a> - Generic OIDC (AWS Cognito, Authentik, Keycloak, Auth0, Okta, …)</p></li>
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.azure.entra_id_provider.EntraIdProvider</span></code> - Azure Entra ID</p></li>
-<li><p><a class="reference internal" href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider" title="auth_middleware.providers.oidc.oidc_provider.OidcProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.providers.oidc.oidc_provider.OidcProvider</span></code></a> - Generic OIDC (Authentik, Keycloak, Auth0, Okta, …)</p></li>
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">auth_middleware.contracts.jwt_provider.JWTProvider</span></code> - Base contract for building custom providers</p></li>
 </ul>
 </dd>
@@ -417,20 +407,20 @@
 <h3>Basic Setup<a class="headerlink" href="#basic-setup" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">OidcProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">OidcProviderSettings</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
-<span class="c1"># Setup authentication</span>
-<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
-    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;your-user-pool-id&quot;</span><span class="p">,</span>
-    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
-    <span class="n">user_pool_client_id</span><span class="o">=</span><span class="s2">&quot;your-app-client-id&quot;</span><span class="p">,</span>  <span class="c1"># recommended: rejects tokens from other app clients</span>
+<span class="c1"># Setup authentication. For AWS Cognito, issuer is</span>
+<span class="c1"># https://cognito-idp.{region}.amazonaws.com/{user_pool_id}</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://your-issuer.example.com&quot;</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>  <span class="c1"># recommended: rejects tokens issued for other clients</span>
 <span class="p">)</span>
-<span class="n">auth_provider</span> <span class="o">=</span> <span class="n">CognitoProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">)</span>
+<span class="n">auth_provider</span> <span class="o">=</span> <span class="n">OidcProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">)</span>
 
 <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">JwtAuthMiddleware</span><span class="p">,</span> <span class="n">auth_provider</span><span class="o">=</span><span class="n">auth_provider</span><span class="p">)</span>
 </pre></div>

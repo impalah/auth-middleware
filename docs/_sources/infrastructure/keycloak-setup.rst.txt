@@ -169,7 +169,7 @@ Troubleshooting
 
    - Confirm the **Group Membership** mapper (Step 3) is attached to a scope the client actually requests
    - Check whether your token is an access token or ID token, and that the mapper is enabled for the one you're verifying
-   - As a fallback, use a dedicated :class:`~auth_middleware.contracts.groups_provider.GroupsProvider` instead of ``groups_claim``
+   - Alternatively, use a dedicated :class:`~auth_middleware.contracts.groups_provider.GroupsProvider` — it takes precedence over ``groups_claim`` when both are configured, so it's the more robust option if you'd rather not maintain the mapper
 
 3. **"aud" mismatch / token rejected**
 

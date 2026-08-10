@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Guide &mdash; Auth Middleware 0.5.0 documentation</title>
+  <title>User Guide &mdash; Auth Middleware 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/user-guide.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -71,7 +71,6 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
@@ -189,14 +188,15 @@
 </section>
 <section id="aws-cognito-example">
 <h2>AWS Cognito Example<a class="headerlink" href="#aws-cognito-example" title="Link to this heading"></a></h2>
-<p>Here’s a complete example using AWS Cognito as the authentication provider:</p>
+<p>Here’s a complete example using AWS Cognito as the authentication provider,
+via the generic <a class="reference internal" href="oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">Depends</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">starlette.requests</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards</span><span class="w"> </span><span class="kn">import</span> <span class="n">require_user</span><span class="p">,</span> <span class="n">require_groups</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">OidcProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">OidcProviderSettings</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">CognitoGroupsProvider</span><span class="p">,</span>
@@ -206,18 +206,18 @@
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Secure API&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;1.0.0&quot;</span><span class="p">)</span>
 
 <span class="c1"># Configure Cognito authentication settings</span>
-<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
-    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;your_user_pool_id&quot;</span><span class="p">,</span>
-    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;your_aws_region&quot;</span><span class="p">,</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.your_aws_region.amazonaws.com/your_user_pool_id&quot;</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your_app_client_id&quot;</span><span class="p">,</span>
     <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Set to True for development only</span>
 <span class="p">)</span>
 
 <span class="c1"># Add authentication middleware</span>
 <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
     <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
-    <span class="n">auth_provider</span><span class="o">=</span><span class="n">CognitoProvider</span><span class="p">(</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">OidcProvider</span><span class="p">(</span>
         <span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">,</span>
-        <span class="n">groups_provider</span><span class="o">=</span><span class="n">CognitoGroupsProvider</span><span class="p">,</span>
+        <span class="n">groups_provider</span><span class="o">=</span><span class="n">CognitoGroupsProvider</span><span class="p">(),</span>
     <span class="p">),</span>
 <span class="p">)</span>
 
@@ -253,21 +253,21 @@
 <p>Set the required environment variables for your authentication provider:</p>
 <p><strong>AWS Cognito</strong> (alternative to hardcoded settings):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># .env file or environment variables</span>
-<span class="nv">AWS_COGNITO_USER_POOL_ID</span><span class="o">=</span>your_user_pool_id
-<span class="nv">AWS_COGNITO_USER_POOL_REGION</span><span class="o">=</span>your_aws_region
+<span class="nv">OIDC_ISSUER</span><span class="o">=</span>https://cognito-idp.your_aws_region.amazonaws.com/your_user_pool_id
+<span class="nv">OIDC_AUDIENCE</span><span class="o">=</span>your_app_client_id
 <span class="nv">TOKEN_VERIFICATION_DISABLED</span><span class="o">=</span><span class="nb">false</span>
 </pre></div>
 </div>
 <p><strong>Environment-based configuration</strong>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_authz_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">CognitoAuthzProviderSettings</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">OidcProviderSettings</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Load from environment variables</span>
-<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
-    <span class="n">user_pool_id</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AWS_COGNITO_USER_POOL_ID&quot;</span><span class="p">),</span>
-    <span class="n">user_pool_region</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;AWS_COGNITO_USER_POOL_REGION&quot;</span><span class="p">),</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OIDC_ISSUER&quot;</span><span class="p">),</span>
+    <span class="n">audience</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OIDC_AUDIENCE&quot;</span><span class="p">),</span>
     <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;TOKEN_VERIFICATION_DISABLED&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -387,9 +387,8 @@ curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span
 <h2>Development Tips<a class="headerlink" href="#development-tips" title="Link to this heading"></a></h2>
 <p><strong>Disable Token Verification for Development</strong>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Only for development/testing</span>
-<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">CognitoAuthzProviderSettings</span><span class="p">(</span>
-    <span class="n">user_pool_id</span><span class="o">=</span><span class="s2">&quot;your_user_pool_id&quot;</span><span class="p">,</span>
-    <span class="n">user_pool_region</span><span class="o">=</span><span class="s2">&quot;your_aws_region&quot;</span><span class="p">,</span>
+<span class="n">auth_settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://your-issuer.example.com&quot;</span><span class="p">,</span>
     <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Skip signature verification</span>
 <span class="p">)</span>
 </pre></div>
@@ -421,7 +420,7 @@ curl<span class="w"> </span>-X<span class="w"> </span>GET<span class="w"> </span
 <h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Learn about <a class="reference internal" href="middleware-configuration.html"><span class="doc">Middleware Configuration</span></a> for advanced settings</p></li>
-<li><p>Explore other <a class="reference internal" href="cognito_provider.html"><span class="doc">AWS Cognito Provider</span></a> for different identity providers</p></li>
+<li><p>Explore <a class="reference internal" href="entra_id_provider.html"><span class="doc">Azure Entra ID Authentication Provider</span></a> for other identity providers</p></li>
 <li><p>Check the <a class="reference internal" href="api.html"><span class="doc">API Reference</span></a> reference for detailed API documentation</p></li>
 </ul>
 </section>

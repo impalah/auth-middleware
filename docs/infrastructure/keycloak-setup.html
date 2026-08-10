@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Keycloak Infrastructure Setup &mdash; Auth Middleware 0.5.0 documentation</title>
+  <title>Keycloak Infrastructure Setup &mdash; Auth Middleware 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/infrastructure/keycloak-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -65,7 +65,6 @@
 <li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#configuration-summary">Configuration Summary</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#security-best-practices">Security Best Practices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-8-create-identity-pool-optional">Step 8: Create Identity Pool (Optional)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#next-steps">Next Steps</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html">Azure Entra ID Infrastructure Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#overview">Overview</a></li>
@@ -105,7 +104,6 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
@@ -371,7 +369,7 @@
 <ul class="simple">
 <li><p>Confirm the <strong>Group Membership</strong> mapper (Step 3) is attached to a scope the client actually requests</p></li>
 <li><p>Check whether your token is an access token or ID token, and that the mapper is enabled for the one you’re verifying</p></li>
-<li><p>As a fallback, use a dedicated <a class="reference internal" href="../groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a> instead of <code class="docutils literal notranslate"><span class="pre">groups_claim</span></code></p></li>
+<li><p>Alternatively, use a dedicated <a class="reference internal" href="../groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a> — it takes precedence over <code class="docutils literal notranslate"><span class="pre">groups_claim</span></code> when both are configured, so it’s the more robust option if you’d rather not maintain the mapper</p></li>
 </ul>
 </li>
 <li><p><strong>“aud” mismatch / token rejected</strong></p>

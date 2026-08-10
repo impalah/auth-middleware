@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.oidc.oidc_provider_settings &mdash; Auth Middleware 0.5.0 documentation</title>
+  <title>auth_middleware.providers.oidc.oidc_provider_settings &mdash; Auth Middleware 0.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/oidc/oidc_provider_settings.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/documentation_options.js?v=8fa8b3e9"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -56,7 +56,6 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../cognito_provider.html">AWS Cognito Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
 </ul>
@@ -208,12 +207,73 @@
         <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Claim used as the user&#39;s display name&quot;</span><span class="p">,</span>
     <span class="p">)</span>
 
+    <span class="n">username_claim_fallbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Additional claims tried, in order, if &#39;username_claim&#39; is &quot;</span>
+            <span class="s2">&quot;absent from the token. Useful for issuers whose ID and access &quot;</span>
+            <span class="s2">&quot;tokens carry the display name under different claims (e.g. &quot;</span>
+            <span class="s2">&quot;Cognito: &#39;username&#39; on access tokens, &#39;cognito:username&#39; on ID &quot;</span>
+            <span class="s2">&quot;tokens).&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
     <span class="n">groups_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
             <span class="s2">&quot;Claim containing the user&#39;s groups, if present in the token. &quot;</span>
-            <span class="s2">&quot;Set to None to disable extracting groups from the token claims &quot;</span>
-            <span class="s2">&quot;(e.g. when using a separate GroupsProvider instead).&quot;</span>
+            <span class="s2">&quot;Used as a fallback only when OidcProvider is constructed &quot;</span>
+            <span class="s2">&quot;without a GroupsProvider (or for machine-to-machine tokens, &quot;</span>
+            <span class="s2">&quot;which never consult a GroupsProvider) — an explicitly &quot;</span>
+            <span class="s2">&quot;configured GroupsProvider always takes precedence over this &quot;</span>
+            <span class="s2">&quot;claim. Set to None to disable extracting groups from the &quot;</span>
+            <span class="s2">&quot;token claims entirely.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">token_use_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;token_use&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Claim carrying an explicit token type marker, as Cognito sets &quot;</span>
+            <span class="s2">&quot;it (values &#39;id&#39;/&#39;access&#39;/&#39;refresh&#39;). Most generic OIDC &quot;</span>
+            <span class="s2">&quot;providers (Authentik, Keycloak, ...) don&#39;t set this, in which &quot;</span>
+            <span class="s2">&quot;case the token type falls back to the identity_claims/&quot;</span>
+            <span class="s2">&quot;client_id_claims heuristic below. Set to None to always use &quot;</span>
+            <span class="s2">&quot;the heuristic, even for issuers that happen to set this claim.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">identity_claims</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;username&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Claims whose presence indicates a token represents a real &quot;</span>
+            <span class="s2">&quot;user rather than a service/client (used, together with &quot;</span>
+            <span class="s2">&quot;username_claim, as the id/access token-type heuristic and for &quot;</span>
+            <span class="s2">&quot;machine-to-machine detection when token_use_claim is absent &quot;</span>
+            <span class="s2">&quot;or not set on the token). Includes &#39;username&#39; by default so &quot;</span>
+            <span class="s2">&quot;Cognito *access* tokens - which carry &#39;username&#39; but not &quot;</span>
+            <span class="s2">&quot;&#39;preferred_username&#39;/&#39;email&#39; - aren&#39;t misclassified as &quot;</span>
+            <span class="s2">&quot;machine-to-machine.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">client_id_claims</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span> <span class="s2">&quot;azp&quot;</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Claims that identify the OAuth client a token was issued to. &quot;</span>
+            <span class="s2">&quot;Used as a fallback audience check for access tokens that &quot;</span>
+            <span class="s2">&quot;carry no &#39;aud&#39; claim at all (e.g. Cognito access tokens use &quot;</span>
+            <span class="s2">&quot;&#39;client_id&#39; instead), and to detect machine-to-machine &quot;</span>
+            <span class="s2">&quot;tokens and populate User.client_id.&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">detect_m2m_tokens</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Whether to detect machine-to-machine (client_credentials) &quot;</span>
+            <span class="s2">&quot;tokens heuristically and skip groups/roles-provider lookups &quot;</span>
+            <span class="s2">&quot;for them. Disable if it misclassifies your provider&#39;s tokens.&quot;</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
