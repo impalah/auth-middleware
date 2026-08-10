@@ -8,59 +8,55 @@ for optimizing public key retrieval and validation performance.
 from fastapi import FastAPI
 
 from auth_middleware import JwtAuthMiddleware
-from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-    CognitoAuthzProviderSettings,
+from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+from auth_middleware.providers.oidc.oidc_provider_settings import (
+    OidcProviderSettings,
 )
-from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 
 app = FastAPI(title="JWKS Cache Example")
 
 
 # Example 1: Time-based caching only
-time_based_settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_example",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-client-id",
+time_based_settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+    audience="your-client-id",
     jwks_cache_strategy="time",  # Only time-based refresh
     jwks_cache_interval=20,  # Refresh every 20 minutes
     jwks_background_refresh=False,  # No background refresh
 )
 
-time_based_provider = CognitoProvider(settings=time_based_settings)
+time_based_provider = OidcProvider(settings=time_based_settings)
 
 
 # Example 2: Usage-based caching only
-usage_based_settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_example",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-client-id",
+usage_based_settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+    audience="your-client-id",
     jwks_cache_strategy="usage",  # Only usage-based refresh
     jwks_cache_usages=1000,  # Refresh after 1000 validations
     jwks_background_refresh=False,
 )
 
-usage_based_provider = CognitoProvider(settings=usage_based_settings)
+usage_based_provider = OidcProvider(settings=usage_based_settings)
 
 
 # Example 3: Combined strategy (default)
-combined_settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_example",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-client-id",
+combined_settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+    audience="your-client-id",
     jwks_cache_strategy="both",  # Both time AND usage
     jwks_cache_interval=20,  # Refresh after 20 minutes OR
     jwks_cache_usages=1000,  # 1000 validations (whichever comes first)
     jwks_background_refresh=False,
 )
 
-combined_provider = CognitoProvider(settings=combined_settings)
+combined_provider = OidcProvider(settings=combined_settings)
 
 
 # Example 4: Background refresh enabled (recommended)
-background_settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_example",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-client-id",
+background_settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+    audience="your-client-id",
     jwks_cache_strategy="both",
     jwks_cache_interval=20,
     jwks_cache_usages=1000,
@@ -68,14 +64,13 @@ background_settings = CognitoAuthzProviderSettings(
     jwks_background_refresh_threshold=0.8,  # Refresh at 80% of cache lifetime
 )
 
-background_provider = CognitoProvider(settings=background_settings)
+background_provider = OidcProvider(settings=background_settings)
 
 
 # Example 5: High-traffic configuration
-high_traffic_settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_example",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-client-id",
+high_traffic_settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+    audience="your-client-id",
     jwks_cache_strategy="both",
     jwks_cache_interval=30,  # Longer cache time
     jwks_cache_usages=10000,  # Higher usage threshold
@@ -83,21 +78,20 @@ high_traffic_settings = CognitoAuthzProviderSettings(
     jwks_background_refresh_threshold=0.9,  # Aggressive background refresh
 )
 
-high_traffic_provider = CognitoProvider(settings=high_traffic_settings)
+high_traffic_provider = OidcProvider(settings=high_traffic_settings)
 
 
 # Example 6: Low-traffic / high-security configuration
-secure_settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_example",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-client-id",
+secure_settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+    audience="your-client-id",
     jwks_cache_strategy="time",  # Only time-based
     jwks_cache_interval=5,  # Refresh every 5 minutes
     jwks_background_refresh=True,
     jwks_background_refresh_threshold=0.5,  # Early refresh
 )
 
-secure_provider = CognitoProvider(settings=secure_settings)
+secure_provider = OidcProvider(settings=secure_settings)
 
 
 # Choose provider based on your needs

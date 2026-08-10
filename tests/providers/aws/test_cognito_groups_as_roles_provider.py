@@ -84,10 +84,35 @@ class TestFetchRolesFromScope:
         assert result == ["admin"]
 
 
+class TestGroupsClaimOverride:
+    @pytest.mark.asyncio
+    async def test_uses_configured_groups_claim(self):
+        provider = CognitoGroupsAsRolesProvider(groups_claim="custom:groups")
+        token = _make_token(**{"custom:groups": ["admin"]})
+        result = await provider.fetch_roles(token)
+        assert result == ["admin"]
+
+    @pytest.mark.asyncio
+    async def test_default_groups_claim_ignored_when_custom_configured(self):
+        provider = CognitoGroupsAsRolesProvider(groups_claim="custom:groups")
+        token = _make_token(**{COGNITO_GROUPS_CLAIM: ["admin"]}, scope="pool/student")
+        result = await provider.fetch_roles(token)
+        assert result == ["student"]
+
+
 class TestFetchRolesEdgeCases:
     @pytest.mark.asyncio
     async def test_returns_empty_list_when_no_groups_or_scope(self, provider):
         token = _make_token(sub="user-1", email="user@example.com")
+        result = await provider.fetch_roles(token)
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_returns_empty_list_for_multi_scope_user_token(self, provider):
+        # A real user access token's standard OAuth2 scope claim is a
+        # space-separated list, not a single custom scope — it must not
+        # be misread as one role.
+        token = _make_token(scope="aws.cognito.signin.user.admin openid profile")
         result = await provider.fetch_roles(token)
         assert result == []
 

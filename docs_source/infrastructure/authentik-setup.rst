@@ -173,7 +173,7 @@ Troubleshooting
 
    - Confirm the ``groups`` scope mapping (Step 3) is attached to the provider, not just created
    - Confirm the client actually requests the ``groups`` scope when obtaining tokens
-   - As a fallback, use a dedicated :class:`~auth_middleware.contracts.groups_provider.GroupsProvider` instead of ``groups_claim``
+   - Alternatively, use a dedicated :class:`~auth_middleware.contracts.groups_provider.GroupsProvider` — it takes precedence over ``groups_claim`` when both are configured, so it's the more robust option if you'd rather not maintain the scope mapping
 
 3. **"aud" mismatch / token rejected**
 

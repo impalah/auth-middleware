@@ -20,6 +20,7 @@ class TestOidcProviderSettings:
         assert settings.discovery_url is None
         assert settings.algorithms == ["RS256"]
         assert settings.username_claim == "preferred_username"
+        assert settings.username_claim_fallbacks == []
         assert settings.groups_claim == "groups"
         assert settings.jwks_cache_interval == 20
         assert settings.jwks_cache_usages == 1000
@@ -33,6 +34,7 @@ class TestOidcProviderSettings:
             discovery_url="https://idp.example.com/custom-discovery",
             algorithms=["RS256", "ES256"],
             username_claim="upn",
+            username_claim_fallbacks=["cognito:username", "username"],
             groups_claim=None,
             jwt_leeway=30,
         )
@@ -42,5 +44,6 @@ class TestOidcProviderSettings:
         assert settings.discovery_url == "https://idp.example.com/custom-discovery"
         assert settings.algorithms == ["RS256", "ES256"]
         assert settings.username_claim == "upn"
+        assert settings.username_claim_fallbacks == ["cognito:username", "username"]
         assert settings.groups_claim is None
         assert settings.jwt_leeway == 30

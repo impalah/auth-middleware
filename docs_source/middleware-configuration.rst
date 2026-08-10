@@ -12,7 +12,7 @@ The Auth Middleware is added to your FastAPI or Starlette application using the 
 
    from fastapi import FastAPI
    from auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.oidc.oidc_provider import OidcProvider
 
    app = FastAPI()
 
@@ -69,7 +69,7 @@ You can exclude specific paths from authentication requirements:
 
    app.add_middleware(
        JwtAuthMiddleware,
-       auth_provider=cognito_provider,
+       auth_provider=auth_provider,
        exclude_paths=[
            "/",                    # Public homepage
            "/health",              # Health check endpoint
@@ -90,7 +90,7 @@ Alternatively, you can specify only the paths that require authentication:
 
    app.add_middleware(
        JwtAuthMiddleware,
-       auth_provider=cognito_provider,
+       auth_provider=auth_provider,
        include_paths=[
            "/api/*",               # All API endpoints
            "/admin/*",             # Admin interface
@@ -245,12 +245,12 @@ Performance Configuration
 Connection Pooling
 ~~~~~~~~~~~~~~~~~
 
-For providers that make HTTP requests (like Cognito), configure connection pooling:
+For providers that make HTTP requests (like any OIDC-based provider), configure connection pooling:
 
 .. code-block:: python
 
    import httpx
-   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.oidc.oidc_provider import OidcProvider
 
    # Custom HTTP client with connection pooling
    http_client = httpx.AsyncClient(
@@ -262,7 +262,7 @@ For providers that make HTTP requests (like Cognito), configure connection pooli
    )
 
    # Note: This is conceptual - actual implementation may vary
-   cognito_provider = CognitoProvider(
+   auth_provider = OidcProvider(
        settings=auth_settings,
        http_client=http_client,
    )
@@ -270,17 +270,9 @@ For providers that make HTTP requests (like Cognito), configure connection pooli
 Caching Configuration
 ~~~~~~~~~~~~~~~~~~~
 
-Token validation results can be cached to improve performance:
-
-.. code-block:: python
-
-   # This is conceptual - check actual provider documentation
-   auth_settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_abcdef123",
-       user_pool_region="us-east-1",
-       cache_jwks=True,              # Cache JSON Web Key Sets
-       cache_ttl=3600,               # Cache TTL in seconds
-   )
+JWKS lookups are cached automatically — see :doc:`jwks-cache` for the real,
+supported configuration (``jwks_cache_strategy``, ``jwks_cache_interval``,
+``jwks_cache_usages``, background refresh).
 
 Logging Configuration
 --------------------
@@ -387,9 +379,9 @@ For development and testing environments:
    import os
 
    # Development-friendly configuration
-   auth_settings = CognitoAuthzProviderSettings(
-       user_pool_id=os.getenv("AWS_COGNITO_USER_POOL_ID"),
-       user_pool_region=os.getenv("AWS_COGNITO_USER_POOL_REGION"),
+   auth_settings = OidcProviderSettings(
+       issuer=os.getenv("OIDC_ISSUER"),
+       audience=os.getenv("OIDC_AUDIENCE"),
        jwt_token_verification_disabled=os.getenv("ENVIRONMENT") == "development",
    )
 
@@ -435,7 +427,6 @@ Testing Configuration
 
 For more specific provider configurations, see the individual provider documentation:
 
-* :doc:`cognito_provider`
 * :doc:`entra_id_provider`
 * :doc:`oidc_provider`
    * - AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES

@@ -10,19 +10,18 @@ from fastapi.openapi.utils import get_openapi
 
 from auth_middleware.guards.functions import require_groups, require_user
 from auth_middleware.jwt_auth_middleware import JwtAuthMiddleware
-from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-    CognitoAuthzProviderSettings,
-)
 from auth_middleware.providers.aws.cognito_groups_provider import (
     CognitoGroupsProvider,
 )
-from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+from auth_middleware.providers.oidc.oidc_provider_settings import (
+    OidcProviderSettings,
+)
 
-# Configuration for Cognito provider
+# Configuration for AWS Cognito, accessed via the generic OIDC provider
 # TODO: Set your own parameters
 configuration: dict[str, object] = {
-    "USER_POOL_ID": "your_user_pool_id",
-    "AWS_REGION": "your_aws_region",
+    "OIDC_ISSUER": "https://cognito-idp.your_aws_region.amazonaws.com/your_user_pool_id",
     "TOKEN_VERIFICATION_DISABLED": False,  # or "True" based on your needs
 }
 
@@ -61,18 +60,17 @@ def create_app_with_cognito():
 
     app = FastAPI(title="App - Cognito")
 
-    auth_provider_settings: CognitoAuthzProviderSettings = CognitoAuthzProviderSettings(
-        user_pool_id=configuration["USER_POOL_ID"],
-        user_pool_region=configuration["AWS_REGION"],
+    auth_provider_settings: OidcProviderSettings = OidcProviderSettings(
+        issuer=configuration["OIDC_ISSUER"],
         jwt_token_verification_disabled=configuration["TOKEN_VERIFICATION_DISABLED"],
     )
 
     app.add_middleware(
         JwtAuthMiddleware,
-        auth_provider=CognitoProvider(
+        auth_provider=OidcProvider(
             settings=auth_provider_settings,
-            groups_provider=CognitoGroupsProvider,
-            # permissions_provider=SqlPermissionsProvider,
+            groups_provider=CognitoGroupsProvider(),
+            # permissions_provider=SqlPermissionsProvider(),
         ),
     )
 

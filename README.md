@@ -13,10 +13,8 @@ Auth Middleware is a comprehensive, production-ready authentication and authoriz
 
 ### **Authentication Providers**
 
-- **AWS Cognito** — Full integration with Amazon Cognito User Pools
-- **AWS Cognito Identity Pool** — Exchange User Pool tokens for temporary AWS credentials
+- **Generic OIDC** — Any standards-compliant OpenID Connect provider — AWS Cognito, Authentik, Keycloak, Auth0, Okta, ... — via `OidcProvider`
 - **Azure Entra ID** — Microsoft Azure Active Directory authentication
-- **Generic OIDC** — Any standards-compliant OpenID Connect provider (Authentik, Keycloak, Auth0, Okta, ...) via `OidcProvider`
 - **Basic Auth** — Username/password authentication via `BasicAuthMiddleware`
 - **Custom Providers** — Extensible architecture via the `JWTProvider` contract
 
@@ -61,27 +59,26 @@ uv add auth-middleware
 
 ## Quick Start
 
-### JWT Authentication with AWS Cognito
+### JWT Authentication with AWS Cognito (via generic OIDC)
 
 ```python
 from fastapi import FastAPI, Depends, Request
 from auth_middleware import JwtAuthMiddleware
 from auth_middleware.guards import require_user, require_groups
-from auth_middleware.providers.aws.cognito_provider import CognitoProvider
-from auth_middleware.providers.aws.cognito_authz_provider_settings import CognitoAuthzProviderSettings
+from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+from auth_middleware.providers.oidc.oidc_provider_settings import OidcProviderSettings
 
 app = FastAPI()
 
-auth_settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_abcdef123",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-app-client-id",  # recommended: rejects tokens from other app clients
+auth_settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_abcdef123",
+    audience="your-app-client-id",  # recommended: rejects tokens issued for other clients
     jwt_token_verification_disabled=False,
 )
 
 app.add_middleware(
     JwtAuthMiddleware,
-    auth_provider=CognitoProvider(settings=auth_settings),
+    auth_provider=OidcProvider(settings=auth_settings),
 )
 
 # Requires valid authentication
@@ -171,9 +168,9 @@ AUTH_MIDDLEWARE_LOG_LEVEL=INFO
 AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID=your-tenant-id
 AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID=your-client-id
 
-# AWS Cognito — optional; alternative to passing values programmatically to CognitoAuthzProviderSettings
-# USER_POOL_ID=us-east-1_abcdef123
-# USER_POOL_REGION=us-east-1
+# Generic OIDC (e.g. AWS Cognito) — optional; alternative to passing values programmatically to OidcProviderSettings
+# OIDC_ISSUER=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_abcdef123
+# OIDC_AUDIENCE=your-app-client-id
 # JWKS_CACHE_INTERVAL=20      # minutes, default 20
 # JWKS_CACHE_USAGES=1000      # verifications before refresh, default 1000
 ```
@@ -181,7 +178,7 @@ AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID=your-client-id
 ### SQL-backed Groups and Permissions
 
 ```python
-from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+from auth_middleware.providers.oidc.oidc_provider import OidcProvider
 from auth_middleware.providers.sqlalchemy.sql_groups_provider import SqlGroupsProvider
 from auth_middleware.providers.sqlalchemy.sql_permissions_provider import SqlPermissionsProvider
 from auth_middleware.providers.sqlalchemy.async_database import AsyncDatabase
@@ -191,7 +188,7 @@ AsyncDatabase.configure(AsyncDatabaseSettings(
     database_url="postgresql+asyncpg://user:pass@localhost/mydb"
 ))
 
-auth_provider = CognitoProvider(
+auth_provider = OidcProvider(
     settings=auth_settings,
     groups_provider=SqlGroupsProvider(),
     permissions_provider=SqlPermissionsProvider(),
@@ -203,13 +200,13 @@ app.add_middleware(JwtAuthMiddleware, auth_provider=auth_provider)
 ### Cognito Groups Provider
 
 ```python
-from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+from auth_middleware.providers.oidc.oidc_provider import OidcProvider
 from auth_middleware.providers.aws.cognito_groups_provider import CognitoGroupsProvider
 
 # Groups extracted directly from the cognito:groups JWT claim
-auth_provider = CognitoProvider(
+auth_provider = OidcProvider(
     settings=auth_settings,
-    groups_provider=CognitoGroupsProvider,
+    groups_provider=CognitoGroupsProvider(),
 )
 ```
 
@@ -272,18 +269,15 @@ auth_middleware/
 │   ├── role_checker.py          #   RoleChecker
 │   └── permissions_checker.py   #   PermissionsChecker
 ├── providers/
-│   ├── aws/                     # AWS Cognito & Identity Pool
-│   │   ├── cognito_provider.py
+│   ├── aws/                     # AWS Cognito groups/roles + auth service (pair with OidcProvider)
 │   │   ├── cognito_groups_provider.py
 │   │   ├── cognito_groups_as_roles_provider.py
 │   │   ├── cognito_profile_provider.py
-│   │   ├── cognito_authz_provider_settings.py
-│   │   ├── identity_pool_provider.py
 │   │   └── services/            #   Cognito auth service, M2M detector
 │   ├── azure/                   # Azure Entra ID
 │   │   ├── entra_id_provider.py
 │   │   └── settings.py
-│   ├── oidc/                    # Generic OIDC (Authentik, Keycloak, Auth0, ...)
+│   ├── oidc/                    # Generic OIDC (AWS Cognito, Authentik, Keycloak, Auth0, ...)
 │   │   ├── oidc_provider.py
 │   │   └── oidc_provider_settings.py
 │   └── sqlalchemy/              # SQL-backed authorization
@@ -300,7 +294,7 @@ auth_middleware/
 graph TD
     A[HTTP Request] --> B[JwtAuthMiddleware\nor BasicAuthMiddleware]
     B --> C[JWTBearerManager]
-    C --> D[JWTProvider\nCognitoProvider · EntraIdProvider · IdentityPoolProvider · OidcProvider]
+    C --> D[JWTProvider\nOidcProvider · EntraIdProvider]
     D --> E[Token Validation\nJWKS cache + exp/iss/aud]
     E --> F[User object]
     F --> G[GroupsProvider\nCognitoGroupsProvider · SqlGroupsProvider]
@@ -328,12 +322,10 @@ graph TD
 | `require_roles` | `auth_middleware.guards` | Guard: requires role membership |
 | `require_permissions` | `auth_middleware.guards` | Guard: requires specific permissions |
 | `get_current_user` | `auth_middleware.guards` | Dependency: returns current user or `None` |
-| `CognitoProvider` | `auth_middleware.providers.aws.cognito_provider` | AWS Cognito JWT provider |
 | `CognitoGroupsProvider` | `auth_middleware.providers.aws.cognito_groups_provider` | Groups from `cognito:groups` claim |
 | `CognitoGroupsAsRolesProvider` | `auth_middleware.providers.aws.cognito_groups_as_roles_provider` | Cognito groups mapped as roles |
-| `IdentityPoolProvider` | `auth_middleware.providers.aws.identity_pool_provider` | Cognito + Identity Pool |
 | `EntraIDProvider` | `auth_middleware.providers.azure.entra_id_provider` | Azure Entra ID JWT provider |
-| `OidcProvider` | `auth_middleware.providers.oidc.oidc_provider` | Generic OIDC JWT provider (Authentik, Keycloak, Auth0, ...) |
+| `OidcProvider` | `auth_middleware.providers.oidc.oidc_provider` | Generic OIDC JWT provider (AWS Cognito, Authentik, Keycloak, Auth0, ...) |
 | `SqlGroupsProvider` | `auth_middleware.providers.sqlalchemy.sql_groups_provider` | DB-backed groups |
 | `SqlPermissionsProvider` | `auth_middleware.providers.sqlalchemy.sql_permissions_provider` | DB-backed permissions |
 

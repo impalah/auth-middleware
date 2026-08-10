@@ -1,6 +1,52 @@
 CHANGELOG
 =========
 
+Version 0.6.0 (2026-08-10)
+---------------------------
+
+Breaking Changes
+~~~~~~~~~~~~~~~~~
+
+- **Removed ``CognitoProvider``, ``IdentityPoolProvider``, ``IdentityPoolClient``,
+  ``IdentityPoolSettings``, ``AWSCredentials``, and ``CognitoAuthzProviderSettings``.**
+  ``OidcProvider`` now handles Cognito User Pool tokens directly (see below), so the
+  dedicated Cognito provider is no longer needed. Identity Pool support (exchanging
+  User Pool tokens for temporary AWS credentials) is removed with no replacement in
+  this library — use the AWS SDK directly if you need it.
+
+  **Migration:** replace ``CognitoProvider(settings=CognitoAuthzProviderSettings(...))``
+  with ``OidcProvider(settings=OidcProviderSettings(issuer="https://cognito-idp.{region}.amazonaws.com/{user_pool_id}", audience="{app_client_id}"))``.
+  ``CognitoGroupsProvider``/``CognitoGroupsAsRolesProvider`` are unchanged and still
+  pair with the new provider. ``docs_source/cognito_provider.rst`` is removed;
+  Cognito setup is now documented in ``oidc_provider.rst`` and
+  ``infrastructure/cognito-setup.rst``.
+
+New Features
+~~~~~~~~~~~~
+
+- **``OidcProvider`` generalized to handle ID tokens, access tokens
+  (``client_credentials``/M2M), and refresh tokens across any OIDC issuer** —
+  including ones that label token type explicitly (Cognito's ``token_use`` claim)
+  and ones that don't (Authentik, Keycloak, and other standards-compliant
+  providers), via a new heuristic fallback. A new ``TokenType`` enum
+  (``auth_middleware.providers.oidc.token_type``) classifies tokens as
+  ``ID``/``ACCESS``/``REFRESH``/``UNKNOWN``. Refresh tokens presented as bearer
+  credentials are now rejected.
+- **Audience verification generalized**: in addition to the standard ``aud``
+  claim, ``OidcProvider`` now also accepts a match on any of
+  ``client_id_claims`` (``client_id``, ``azp`` by default) — needed because
+  Cognito access tokens carry ``client_id`` instead of ``aud``.
+- **Machine-to-machine (M2M) detection is now built into ``OidcProvider``**,
+  generalizing the Cognito-only ``M2MTokenDetector``. M2M tokens populate
+  ``User.is_m2m``/``User.client_id`` and skip ``GroupsProvider``/``RolesProvider``
+  lookups. Configurable via new ``OidcProviderSettings`` fields:
+  ``token_use_claim``, ``identity_claims``, ``client_id_claims``, and
+  ``detect_m2m_tokens`` (set to ``False`` to disable detection entirely).
+- **``CognitoGroupsProvider``/``CognitoGroupsAsRolesProvider`` accept a
+  ``groups_claim`` constructor parameter** (default ``"cognito:groups"``),
+  matching the ``SqlGroupsProvider``/``SqlPermissionsProvider`` ``id_claim``
+  pattern, so a custom claim name no longer requires subclassing.
+
 Version 0.5.0 (2026-08-09)
 ---------------------------
 

@@ -9,8 +9,13 @@ class CognitoGroupsProvider(GroupsProvider):
     """Recovers groups from AWS Cognito using the token provided
 
     Args:
-        metaclass (_type_, optional): _description_. Defaults to ABCMeta.
+        groups_claim (str): name of the claim carrying the user's groups
+            (a list of group names on ID tokens). Defaults to
+            ``COGNITO_GROUPS_CLAIM`` (``"cognito:groups"``).
     """
+
+    def __init__(self, *, groups_claim: str = COGNITO_GROUPS_CLAIM) -> None:
+        self._groups_claim = groups_claim
 
     async def fetch_groups(self, token: str | JWTAuthorizationCredentials) -> list[str]:
         """Get groups using the token provided
@@ -28,7 +33,7 @@ class CognitoGroupsProvider(GroupsProvider):
         groups: list[str] = (
             self.__get_groups_from_claims(token.claims)
             if isinstance(token, JWTAuthorizationCredentials)
-            and (COGNITO_GROUPS_CLAIM in token.claims or "scope" in token.claims)
+            and (self._groups_claim in token.claims or "scope" in token.claims)
             else []
         )
 
@@ -44,11 +49,17 @@ class CognitoGroupsProvider(GroupsProvider):
             List[str]: List of groups.
         """
 
-        # cognito:groups is a list of groups
-        # scope is only ONE scope
+        if self._groups_claim in claims:
+            # the groups claim is a list of groups
+            return list(claims[self._groups_claim])
 
-        return (
-            claims[COGNITO_GROUPS_CLAIM]
-            if COGNITO_GROUPS_CLAIM in claims
-            else [str(claims["scope"]).split("/")[-1]]
-        )
+        # 'scope' is a space-separated list of OAuth2 scopes. Only a
+        # single custom scope in the Cognito 'resourceServer/scopeName'
+        # format can be mapped to one group name; a real user access
+        # token's standard multi-scope claim (e.g. "openid profile
+        # email") carries no group information and must not be
+        # misread as a single group.
+        scopes = str(claims["scope"]).split()
+        if len(scopes) != 1:
+            return []
+        return [scopes[0].split("/")[-1]]

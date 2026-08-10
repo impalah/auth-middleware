@@ -35,14 +35,13 @@ Refresh cache after a specified time interval.
 
 .. code-block:: python
 
-   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-       CognitoAuthzProviderSettings
+   from auth_middleware.providers.oidc.oidc_provider_settings import (
+       OidcProviderSettings
    )
 
-   settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_example",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-client-id",
+   settings = OidcProviderSettings(
+       issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+       audience="your-client-id",
        jwks_cache_strategy="time",
        jwks_cache_interval=20,  # Refresh every 20 minutes
    )
@@ -69,10 +68,9 @@ Refresh cache after a specified number of token validations.
 
 .. code-block:: python
 
-   settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_example",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-client-id",
+   settings = OidcProviderSettings(
+       issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+       audience="your-client-id",
        jwks_cache_strategy="usage",
        jwks_cache_usages=1000,  # Refresh after 1000 validations
    )
@@ -99,10 +97,9 @@ Refresh cache when either time OR usage threshold is reached (whichever comes fi
 
 .. code-block:: python
 
-   settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_example",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-client-id",
+   settings = OidcProviderSettings(
+       issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+       audience="your-client-id",
        jwks_cache_strategy="both",  # Default
        jwks_cache_interval=20,      # 20 minutes OR
        jwks_cache_usages=1000,      # 1000 validations
@@ -138,10 +135,9 @@ Configuration
 
 .. code-block:: python
 
-   settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_example",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-client-id",
+   settings = OidcProviderSettings(
+       issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+       audience="your-client-id",
        jwks_cache_strategy="both",
        jwks_cache_interval=20,
        jwks_background_refresh=True,          # Enable background refresh
@@ -200,10 +196,9 @@ For applications with thousands of requests per minute:
 
 .. code-block:: python
 
-   settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_example",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-client-id",
+   settings = OidcProviderSettings(
+       issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+       audience="your-client-id",
        
        # Use both strategies for reliability
        jwks_cache_strategy="both",
@@ -226,10 +221,9 @@ For applications requiring frequent key rotation:
 
 .. code-block:: python
 
-   settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_example",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-client-id",
+   settings = OidcProviderSettings(
+       issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+       audience="your-client-id",
        
        # Time-based only for predictability
        jwks_cache_strategy="time",
@@ -249,10 +243,9 @@ For local development and testing:
 
 .. code-block:: python
 
-   settings = CognitoAuthzProviderSettings(
-       user_pool_id="us-east-1_example",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-client-id",
+   settings = OidcProviderSettings(
+       issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+       audience="your-client-id",
        
        # Usage-based for variable dev traffic
        jwks_cache_strategy="usage",
@@ -272,14 +265,14 @@ Track cache effectiveness:
 
 .. code-block:: python
 
-   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
+   from auth_middleware.providers.oidc.oidc_provider import OidcProvider
    from auth_middleware.services import MetricsCollector
-   
-   provider = CognitoProvider(settings=settings)
+
+   provider = OidcProvider(settings=settings)
    metrics = MetricsCollector()
-   
+
    # Track JWKS refresh events
-   class MonitoredProvider(CognitoProvider):
+   class MonitoredProvider(OidcProvider):
        async def load_jwks(self):
            start = time.time()
            try:
@@ -457,7 +450,6 @@ See Also
 ========
 
 * :doc:`oidc_provider` - Generic OIDC provider documentation
-* :doc:`cognito_provider` - Cognito provider specifics
 * :doc:`services` - Metrics collection for monitoring
 
 Example Code

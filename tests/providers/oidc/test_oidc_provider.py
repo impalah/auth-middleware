@@ -13,6 +13,7 @@ from auth_middleware.exceptions.invalid_token_exception import InvalidTokenExcep
 from auth_middleware.providers.oidc.oidc_exception import OidcException
 from auth_middleware.providers.oidc.oidc_provider import OidcProvider
 from auth_middleware.providers.oidc.oidc_provider_settings import OidcProviderSettings
+from auth_middleware.providers.oidc.token_type import TokenType
 from auth_middleware.types.jwt import JWKS, JWTAuthorizationCredentials
 
 _MOCK_REQUEST = httpx.Request("GET", "http://test")
@@ -390,7 +391,7 @@ class TestCreateUserFromToken:
         assert await user.groups == ["admins", "devs"]
 
     @pytest.mark.asyncio
-    async def test_falls_back_to_groups_provider_when_claim_absent(self):
+    async def test_uses_groups_provider_when_claim_absent(self):
         mock_groups = MagicMock(spec=GroupsProvider)
         mock_groups.fetch_groups = AsyncMock(return_value=["from-db"])
         provider = OidcProvider(settings=_settings(), groups_provider=mock_groups)
@@ -402,13 +403,28 @@ class TestCreateUserFromToken:
         assert await user.groups == ["from-db"]
 
     @pytest.mark.asyncio
-    async def test_ignores_groups_provider_when_groups_claim_disabled_and_absent(self):
+    async def test_groups_provider_takes_precedence_over_claim_when_both_present(self):
+        # An explicitly configured GroupsProvider is authoritative, even if
+        # the token also carries a (possibly stale) groups claim.
+        mock_groups = MagicMock(spec=GroupsProvider)
+        mock_groups.fetch_groups = AsyncMock(return_value=["from-db"])
+        provider = OidcProvider(settings=_settings(), groups_provider=mock_groups)
+        token = _make_token(_unexpired_claims(sub="u1", groups=["from-claim"]))
+
+        user = await provider.create_user_from_token(token)
+
+        mock_groups.fetch_groups.assert_awaited_once_with(token)
+        assert await user.groups == ["from-db"]
+
+    @pytest.mark.asyncio
+    async def test_groups_claim_none_disables_claim_reading_without_provider(self):
         provider = OidcProvider(settings=_settings(groups_claim=None))
         token = _make_token(_unexpired_claims(sub="u1", groups=["ignored"]))
 
         user = await provider.create_user_from_token(token)
 
-        # groups_claim=None means "don't read groups from the token claims"
+        # groups_claim=None means "don't read groups from the token claims";
+        # no groups_provider was configured either, so groups stay empty.
         assert await user.groups == []
 
     @pytest.mark.asyncio
@@ -429,3 +445,259 @@ class TestCreateUserFromToken:
         user = await provider.create_user_from_token(token)
 
         assert user.name == "jdoe@corp.example.com"
+
+    @pytest.mark.asyncio
+    async def test_uses_username_claim_fallback_when_primary_absent(self):
+        provider = OidcProvider(
+            settings=_settings(
+                username_claim="username", username_claim_fallbacks=["cognito:username"]
+            )
+        )
+        token = _make_token(_unexpired_claims(sub="u1", **{"cognito:username": "jdoe"}))
+
+        user = await provider.create_user_from_token(token)
+
+        assert user.name == "jdoe"
+
+    @pytest.mark.asyncio
+    async def test_prefers_primary_username_claim_over_fallback(self):
+        provider = OidcProvider(
+            settings=_settings(
+                username_claim="username", username_claim_fallbacks=["cognito:username"]
+            )
+        )
+        token = _make_token(
+            _unexpired_claims(
+                sub="u1", username="jdoe-access", **{"cognito:username": "jdoe-id"}
+            )
+        )
+
+        user = await provider.create_user_from_token(token)
+
+        assert user.name == "jdoe-access"
+
+    @pytest.mark.asyncio
+    async def test_falls_back_to_email_when_all_username_claims_absent(self):
+        provider = OidcProvider(
+            settings=_settings(
+                username_claim="username", username_claim_fallbacks=["cognito:username"]
+            )
+        )
+        token = _make_token(_unexpired_claims(sub="u1", email="jdoe@example.com"))
+
+        user = await provider.create_user_from_token(token)
+
+        assert user.name == "jdoe@example.com"
+
+
+# ---------------------------------------------------------------------------
+# Token type detection
+# ---------------------------------------------------------------------------
+
+
+class TestDetectTokenType:
+    def test_explicit_token_use_claim_id(self):
+        provider = OidcProvider(settings=_settings())
+        assert provider._detect_token_type({"token_use": "id"}) == TokenType.ID
+
+    def test_explicit_token_use_claim_access(self):
+        provider = OidcProvider(settings=_settings())
+        assert provider._detect_token_type({"token_use": "access"}) == TokenType.ACCESS
+
+    def test_explicit_token_use_claim_refresh(self):
+        provider = OidcProvider(settings=_settings())
+        assert (
+            provider._detect_token_type({"token_use": "refresh"}) == TokenType.REFRESH
+        )
+
+    def test_unrecognized_token_use_falls_back_to_heuristic(self):
+        provider = OidcProvider(settings=_settings())
+        claims = {"token_use": "something-weird", "email": "jdoe@example.com"}
+        assert provider._detect_token_type(claims) == TokenType.ID
+
+    def test_heuristic_identity_claim_means_id_token(self):
+        provider = OidcProvider(settings=_settings())
+        claims = {"sub": "u1", "preferred_username": "jdoe"}
+        assert provider._detect_token_type(claims) == TokenType.ID
+
+    def test_heuristic_client_id_without_identity_means_access_token(self):
+        provider = OidcProvider(settings=_settings())
+        claims = {"sub": "u1", "client_id": "svc-account"}
+        assert provider._detect_token_type(claims) == TokenType.ACCESS
+
+    def test_heuristic_no_signal_means_unknown(self):
+        provider = OidcProvider(settings=_settings())
+        claims = {"sub": "u1"}
+        assert provider._detect_token_type(claims) == TokenType.UNKNOWN
+
+    def test_token_use_claim_disabled_always_uses_heuristic(self):
+        provider = OidcProvider(settings=_settings(token_use_claim=None))
+        claims = {"token_use": "id", "sub": "u1", "client_id": "svc-account"}
+        assert provider._detect_token_type(claims) == TokenType.ACCESS
+
+    def test_cognito_style_access_token_detected_via_username_identity_claim(self):
+        # Real Cognito access token: token_use="access" but carries
+        # "username" (not "preferred_username"/"email") for real users.
+        provider = OidcProvider(settings=_settings())
+        claims = {
+            "sub": "u1",
+            "token_use": "access",
+            "client_id": "cognito-client",
+            "username": "jdoe",
+        }
+        assert provider._detect_token_type(claims) == TokenType.ACCESS
+        assert not provider._is_m2m_token(claims, TokenType.ACCESS)
+
+
+class TestM2mDetection:
+    def test_access_token_without_identity_claims_is_m2m(self):
+        provider = OidcProvider(settings=_settings())
+        claims = {"sub": "svc-account", "client_id": "svc-account"}
+        token_type = provider._detect_token_type(claims)
+        assert token_type == TokenType.ACCESS
+        assert provider._is_m2m_token(claims, token_type) is True
+
+    def test_access_token_with_identity_claim_is_not_m2m(self):
+        provider = OidcProvider(settings=_settings())
+        claims = {
+            "sub": "u1",
+            "token_use": "access",
+            "client_id": "app",
+            "email": "jdoe@example.com",
+        }
+        token_type = provider._detect_token_type(claims)
+        assert provider._is_m2m_token(claims, token_type) is False
+
+    def test_id_token_is_never_m2m(self):
+        provider = OidcProvider(settings=_settings())
+        claims = {"sub": "u1", "preferred_username": "jdoe"}
+        token_type = provider._detect_token_type(claims)
+        assert provider._is_m2m_token(claims, token_type) is False
+
+    def test_m2m_detection_can_be_disabled(self):
+        provider = OidcProvider(settings=_settings(detect_m2m_tokens=False))
+        claims = {"sub": "svc-account", "client_id": "svc-account"}
+        token_type = provider._detect_token_type(claims)
+        assert provider._is_m2m_token(claims, token_type) is False
+
+    @pytest.mark.asyncio
+    async def test_m2m_token_skips_groups_and_roles_providers(self):
+        mock_groups = MagicMock(spec=GroupsProvider)
+        mock_groups.fetch_groups = AsyncMock(return_value=["should-not-be-called"])
+        provider = OidcProvider(settings=_settings(), groups_provider=mock_groups)
+        token = _make_token(
+            _unexpired_claims(sub="svc-account", client_id="svc-account")
+        )
+
+        user = await provider.create_user_from_token(token)
+
+        mock_groups.fetch_groups.assert_not_called()
+        assert user.is_m2m is True
+        assert user.client_id == "svc-account"
+        assert await user.groups == []
+
+    @pytest.mark.asyncio
+    async def test_regular_user_token_is_not_flagged_as_m2m(self):
+        provider = OidcProvider(settings=_settings())
+        token = _make_token(_unexpired_claims(sub="u1", preferred_username="jdoe"))
+
+        user = await provider.create_user_from_token(token)
+
+        assert user.is_m2m is False
+        assert user.client_id is None
+
+    @pytest.mark.asyncio
+    async def test_m2m_token_without_sub_falls_back_to_client_id_as_user_id(self):
+        provider = OidcProvider(settings=_settings())
+        token = _make_token(
+            {
+                "iss": _ISSUER,
+                "exp": int(time.time()) + 3600,
+                "client_id": "svc-account",
+            }
+        )
+
+        user = await provider.create_user_from_token(token)
+
+        assert user.id == "svc-account"
+        assert user.is_m2m is True
+
+    @pytest.mark.asyncio
+    async def test_raises_when_no_sub_and_no_client_id(self):
+        provider = OidcProvider(settings=_settings())
+        token = _make_token(_unexpired_claims())
+
+        with pytest.raises(OidcException, match="sub"):
+            await provider.create_user_from_token(token)
+
+
+# ---------------------------------------------------------------------------
+# Cognito-style tokens through OidcProvider (no 'aud', 'client_id' instead)
+# ---------------------------------------------------------------------------
+
+
+class TestCognitoStyleTokensViaOidcProvider:
+    @pytest.mark.asyncio
+    async def test_accepts_access_token_with_client_id_instead_of_aud(self):
+        provider = OidcProvider(settings=_settings(audience="my-app-client"))
+        provider._get_hmac_key = AsyncMock(return_value={"kid": "k1"})
+        token = _make_token(
+            _unexpired_claims(
+                sub="u1",
+                token_use="access",
+                client_id="my-app-client",
+                username="jdoe",
+            )
+        )
+
+        with (
+            patch(
+                "auth_middleware.providers.oidc.oidc_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.oidc.oidc_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            assert await provider.verify_token(token) is True
+
+    @pytest.mark.asyncio
+    async def test_rejects_access_token_with_wrong_client_id(self):
+        provider = OidcProvider(settings=_settings(audience="my-app-client"))
+        provider._get_hmac_key = AsyncMock(return_value={"kid": "k1"})
+        token = _make_token(
+            _unexpired_claims(
+                sub="u1", token_use="access", client_id="someone-elses-client"
+            )
+        )
+
+        with (
+            patch(
+                "auth_middleware.providers.oidc.oidc_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.oidc.oidc_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            assert await provider.verify_token(token) is False
+
+    @pytest.mark.asyncio
+    async def test_rejects_refresh_token_used_as_bearer_credential(self):
+        provider = OidcProvider(settings=_settings())
+        provider._get_hmac_key = AsyncMock(return_value={"kid": "k1"})
+        token = _make_token(_unexpired_claims(sub="u1", token_use="refresh"))
+
+        with (
+            patch(
+                "auth_middleware.providers.oidc.oidc_provider.import_key",
+                return_value=MagicMock(),
+            ),
+            patch(
+                "auth_middleware.providers.oidc.oidc_provider.joserfc_jwt.decode",
+                return_value=MagicMock(),
+            ),
+        ):
+            assert await provider.verify_token(token) is False

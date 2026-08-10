@@ -22,7 +22,6 @@ The library supports multiple authentication providers for different identity sy
 .. toctree::
    :maxdepth: 2
 
-   cognito_provider
    entra_id_provider
    oidc_provider
 
@@ -64,9 +63,8 @@ Common Classes and Functions
    - :func:`auth_middleware.guards.functions.get_current_user` - Get current user from request
 
 **Providers**
-   - :class:`auth_middleware.providers.aws.cognito_provider.CognitoProvider` - AWS Cognito
+   - :class:`auth_middleware.providers.oidc.oidc_provider.OidcProvider` - Generic OIDC (AWS Cognito, Authentik, Keycloak, Auth0, Okta, ...)
    - :class:`auth_middleware.providers.azure.entra_id_provider.EntraIdProvider` - Azure Entra ID
-   - :class:`auth_middleware.providers.oidc.oidc_provider.OidcProvider` - Generic OIDC (Authentik, Keycloak, Auth0, Okta, ...)
    - :class:`auth_middleware.contracts.jwt_provider.JWTProvider` - Base contract for building custom providers
 
 **Exceptions**
@@ -85,20 +83,20 @@ Basic Setup
 
    from fastapi import FastAPI
    from auth_middleware import JwtAuthMiddleware
-   from auth_middleware.providers.aws.cognito_provider import CognitoProvider
-   from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-       CognitoAuthzProviderSettings,
+   from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+   from auth_middleware.providers.oidc.oidc_provider_settings import (
+       OidcProviderSettings,
    )
 
    app = FastAPI()
 
-   # Setup authentication
-   auth_settings = CognitoAuthzProviderSettings(
-       user_pool_id="your-user-pool-id",
-       user_pool_region="us-east-1",
-       user_pool_client_id="your-app-client-id",  # recommended: rejects tokens from other app clients
+   # Setup authentication. For AWS Cognito, issuer is
+   # https://cognito-idp.{region}.amazonaws.com/{user_pool_id}
+   auth_settings = OidcProviderSettings(
+       issuer="https://your-issuer.example.com",
+       audience="your-client-id",  # recommended: rejects tokens issued for other clients
    )
-   auth_provider = CognitoProvider(settings=auth_settings)
+   auth_provider = OidcProvider(settings=auth_settings)
 
    app.add_middleware(JwtAuthMiddleware, auth_provider=auth_provider)
 

@@ -9,23 +9,23 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 
 from auth_middleware import JwtAuthMiddleware
 from auth_middleware.guards.functions import require_user
-from auth_middleware.providers.aws.cognito_authz_provider_settings import (
-    CognitoAuthzProviderSettings,
+from auth_middleware.providers.oidc.oidc_provider import OidcProvider
+from auth_middleware.providers.oidc.oidc_provider_settings import (
+    OidcProviderSettings,
 )
-from auth_middleware.providers.aws.cognito_provider import CognitoProvider
 from auth_middleware.services import M2MTokenDetector
 
 # Initialize FastAPI
 app = FastAPI(title="M2M Detection Example")
 
-# Configure Cognito provider
-settings = CognitoAuthzProviderSettings(
-    user_pool_id="us-east-1_example",
-    user_pool_region="us-east-1",
-    user_pool_client_id="your-client-id",
+# Configure OIDC provider (issuer shown is AWS Cognito's; OidcProvider has
+# its own built-in M2M detection too — see OidcProvider._is_m2m_token)
+settings = OidcProviderSettings(
+    issuer="https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example",
+    audience="your-client-id",
 )
 
-auth_provider = CognitoProvider(settings=settings)
+auth_provider = OidcProvider(settings=settings)
 
 # Add authentication middleware
 app.add_middleware(JwtAuthMiddleware, auth_provider=auth_provider)
