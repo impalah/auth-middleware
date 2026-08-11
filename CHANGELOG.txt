@@ -1,6 +1,19 @@
 CHANGELOG
 =========
 
+Version 0.6.1 (2026-08-11)
+---------------------------
+
+Bug Fixes
+~~~~~~~~~
+
+- **``User.email`` no longer rejects a blank ``email`` claim.** Some OIDC providers
+  (e.g. Authentik) send ``email: ""`` for a user with none configured, instead of
+  omitting the claim. ``EmailStr`` validated that as an invalid address and raised
+  ``ValidationError`` from inside ``create_user_from_token``, turning a user with no
+  email into an unhandled 500 for any caller. A blank/whitespace-only ``email`` is now
+  normalized to ``None`` before validation, matching the field's documented optionality.
+
 Version 0.6.0 (2026-08-10)
 ---------------------------
 

@@ -1,7 +1,14 @@
 import asyncio
 from typing import TYPE_CHECKING, Any
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, PrivateAttr
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    PrivateAttr,
+    field_validator,
+)
 
 from auth_middleware.contracts.roles_provider import RolesProvider
 
@@ -92,6 +99,26 @@ class User(BaseModel):
             "example": "useradmin@user.com",
         },
     )
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def _blank_email_to_none(cls, value: Any) -> Any:
+        """Treat a blank/whitespace-only email claim as absent.
+
+        Some OIDC providers (e.g. Authentik) include the `email` claim as an
+        empty string when the user has none configured, instead of omitting
+        it entirely. `EmailStr` rejects that as an invalid address, which
+        would otherwise fail user construction for an optional field.
+
+        Args:
+            value: The raw value assigned to `email`, before validation.
+
+        Returns:
+            Any: `None` if `value` is a blank string, `value` unchanged otherwise.
+        """
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     is_m2m: bool = Field(
         default=False,
