@@ -6,7 +6,7 @@ Auth Middleware can be installed using various Python package managers. Choose t
 Requirements
 ------------
 
-* **Python**: 3.14 or higher
+* **Python**: 3.12 or higher
 * **FastAPI**: 0.128.0 or higher (for FastAPI applications)
 * **Starlette**: Compatible with Starlette-based applications
 
