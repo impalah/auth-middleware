@@ -1,0 +1,32 @@
+name: tests
+
+# Runs the suite on every supported Python so the lowest version cannot silently regress
+# (the release workflow only tests the interpreter picked from pyproject.toml).
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --python ${{ matrix.python-version }} --all-extras --group dev
+
+      - name: Type check
+        run: uv run mypy src
+
+      - name: Lint
+        run: uv run ruff check src tests
+
+      - name: Run tests
+        run: uv run pytest tests/ -q

@@ -1,6 +1,48 @@
 CHANGELOG
 =========
 
+Version 0.6.2 (2026-10-09)
+---------------------------
+
+Compatibility
+~~~~~~~~~~~~~
+
+- **Python 3.12 and 3.13 are supported again (``requires-python = ">=3.12"``).** The code
+  never needed anything specific to 3.14, but a few modules annotated with names that only exist
+  under ``TYPE_CHECKING`` (``types/user.py``, ``contracts/jwt_provider.py``,
+  ``providers/sqlalchemy/async_database.py``). That is lazy on 3.14 (PEP 649) but raised
+  ``NameError`` at import time on 3.12/3.13. They now use ``from __future__ import annotations``.
+  The full suite, ``mypy --strict`` and ``ruff`` pass on 3.12.
+
+Bug Fixes
+~~~~~~~~~
+
+- **``JwtAuthMiddleware`` answered 500 to a non-Bearer ``Authorization`` scheme** (for example
+  ``Basic``). The ``HTTPException`` raised by ``HTTPBearer`` was not handled, so it fell into the
+  generic ``except Exception`` branch. It is now returned with its own status and headers (401).
+- **A JWT without a ``kid`` header answered 500** (``KeyError: 'kid'`` from key matching), as did a
+  JWKS entry without one. Both are now a bad token: 401, like any other token that cannot be matched
+  to a signing key.
+- **The 500 responses of ``JwtAuthMiddleware`` and ``BasicAuthMiddleware`` no longer include the
+  exception text** (``{"detail": "Server error: <message>"}``), which could reveal internals
+  (connection strings, paths, SQL). The cause is still logged; the client gets
+  ``{"detail": "Internal server error"}``.
+- **``BasicAuthMiddleware`` could not be registered with ``add_middleware``** as its README shows:
+  ``__init__`` took ``credentials_repository`` before ``app``, so Starlette's ``cls(app, **options)``
+  raised ``TypeError``. The signature is now ``(app, credentials_repository, ...)``. Code that passed
+  both by keyword is unaffected; code that passed the repository as the first positional argument must
+  swap the order.
+- **A token whose ``email`` claim is in a special-use domain** (``.local``, ``.localhost``,
+  ``.invalid``; typical in homelabs) made ``User`` construction fail and the request answer 500.
+  Such addresses are now accepted; malformed ones are still rejected. ``User.email`` is now typed
+  ``str | None`` (validated and normalized) instead of ``EmailStr | None``.
+
+Packaging
+~~~~~~~~~
+
+- **Ship the ``py.typed`` marker** (PEP 561), so type checkers use the library's annotations
+  instead of treating the package as untyped.
+
 Version 0.6.1 (2026-08-11)
 ---------------------------
 

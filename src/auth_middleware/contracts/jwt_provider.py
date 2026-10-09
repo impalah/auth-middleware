@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from abc import ABCMeta, abstractmethod
 from time import time_ns
@@ -177,10 +179,15 @@ class JWTProvider(metaclass=ABCMeta):
             logger.warning(f"Background JWKS refresh failed: {e}")
 
     async def _get_hmac_key(self, token: JWTAuthorizationCredentials) -> JWK | None:
+        # A token without a "kid" header cannot be matched to a key: that is a bad
+        # token (the caller answers 401), not a server error.
+        token_kid = token.header.get("kid")
+        if token_kid is None:
+            return None
         jwks: JWKS | None = await self._get_jwks()
         if jwks is not None and jwks.keys is not None:
             for key in jwks.keys:
-                if key["kid"] == token.header["kid"]:
+                if key.get("kid") == token_kid:
                     return key
         return None
 

@@ -69,5 +69,5 @@ This approach provides maximum reliability and easy debugging.
 
 ### Dependencies
 
-- Python 3.14+ (uses built-in `tomllib`)
+- Python 3.11+ (uses built-in `tomllib`)
 - Python 3.12 and below: requires `tomli` package (included in project dependencies)

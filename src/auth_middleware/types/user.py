@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import asyncio
+import re
 from typing import TYPE_CHECKING, Any
 
+from email_validator import EmailNotValidError, validate_email
 from pydantic import (
     BaseModel,
     ConfigDict,
-    EmailStr,
     Field,
     PrivateAttr,
     field_validator,
@@ -16,6 +19,12 @@ if TYPE_CHECKING:
     from auth_middleware.contracts.groups_provider import GroupsProvider
     from auth_middleware.contracts.permissions_provider import PermissionsProvider
     from auth_middleware.types.jwt import JWTAuthorizationCredentials
+
+
+_HOSTNAME = re.compile(
+    r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?",
+    re.IGNORECASE,
+)
 
 
 class User(BaseModel):
@@ -91,7 +100,7 @@ class User(BaseModel):
         },
     )
 
-    email: EmailStr | None = Field(
+    email: str | None = Field(
         default=None,
         max_length=500,
         json_schema_extra={
@@ -102,23 +111,38 @@ class User(BaseModel):
 
     @field_validator("email", mode="before")
     @classmethod
-    def _blank_email_to_none(cls, value: Any) -> Any:
-        """Treat a blank/whitespace-only email claim as absent.
+    def _normalize_email(cls, value: Any) -> Any:
+        """Normalize the optional `email` claim.
 
-        Some OIDC providers (e.g. Authentik) include the `email` claim as an
-        empty string when the user has none configured, instead of omitting
-        it entirely. `EmailStr` rejects that as an invalid address, which
-        would otherwise fail user construction for an optional field.
+        Blank strings (sent by e.g. Authentik when a user has no email) become
+        `None`. Malformed addresses are rejected. Addresses in special-use domains
+        (`.local`, `.localhost`, `.invalid`...) are accepted: they are common in
+        homelabs and internal networks, and `EmailStr` refuses them, which turned
+        otherwise valid logins into server errors.
 
         Args:
             value: The raw value assigned to `email`, before validation.
 
         Returns:
-            Any: `None` if `value` is a blank string, `value` unchanged otherwise.
+            Any: The normalized address, or `None` if blank.
+
+        Raises:
+            ValueError: If the address is syntactically invalid.
         """
-        if isinstance(value, str) and not value.strip():
+        if not isinstance(value, str):
+            return value
+        value = value.strip()
+        if not value:
             return None
-        return value
+        try:
+            return validate_email(value, check_deliverability=False).normalized
+        except EmailNotValidError as error:
+            local, _, domain = value.rpartition("@")
+            if "special-use" not in str(error) or not _HOSTNAME.fullmatch(domain):
+                raise ValueError(str(error)) from error
+            # Same syntax rules for the local part, with a domain that is allowed.
+            validate_email(f"{local}@example.com", check_deliverability=False)
+            return f"{local}@{domain.lower()}"
 
     is_m2m: bool = Field(
         default=False,

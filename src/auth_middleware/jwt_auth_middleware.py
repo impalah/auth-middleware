@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import Request, status
+from fastapi import HTTPException, Request, status
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
@@ -51,11 +51,22 @@ class JwtAuthMiddleware(BaseHTTPMiddleware):
                 content={"detail": "Invalid token"},
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        except HTTPException as http_exc:
+            # e.g. an Authorization scheme other than Bearer, rejected by
+            # HTTPBearer. It is a client error: answer with its own status,
+            # not a 500.
+            logger.error("Authentication rejected: {}", str(http_exc))
+            return JSONResponse(
+                status_code=http_exc.status_code,
+                content={"detail": http_exc.detail},
+                headers=http_exc.headers,
+            )
         except Exception as e:
+            # Log the cause; never send it to the client (it can reveal internals).
             logger.error("Error in AuthMiddleware: {}", str(e))
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": f"Server error: {str(e)}"},
+                content={"detail": "Internal server error"},
             )
 
         response = await call_next(request)

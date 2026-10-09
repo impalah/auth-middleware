@@ -5,6 +5,7 @@ from fastapi import Request, status
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
+from starlette.types import ASGIApp
 
 from auth_middleware.constants import AUTH_SCHEME_BASIC
 from auth_middleware.contracts.credentials_repository import CredentialsRepository
@@ -33,11 +34,14 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
 
     def __init__(
         self,
+        app: ASGIApp,
         credentials_repository: CredentialsRepository,
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(*args, **kwargs)
+        # `app` comes first because Starlette's `add_middleware` instantiates
+        # `cls(app, **options)`.
+        super().__init__(app, *args, **kwargs)
         self._credentials_repository = credentials_repository
 
     async def dispatch(
@@ -56,7 +60,7 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
             logger.error("Error in AuthMiddleware: {}", str(e))
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content={"detail": f"Server error: {str(e)}"},
+                content={"detail": "Internal server error"},
             )
 
         response = await call_next(request)
