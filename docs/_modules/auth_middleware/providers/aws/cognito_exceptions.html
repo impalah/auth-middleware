@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.aws.cognito_exceptions &mdash; Auth Middleware 0.6.2 documentation</title>
+  <title>auth_middleware.providers.aws.cognito_exceptions &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/aws/cognito_exceptions.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=1c28bd9a"></script>
+      <script src="../../../../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -54,10 +54,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -150,7 +162,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for auth_middleware.providers.aws.cognito_exceptions</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Cognito-specific exceptions for challenge and MFA flows.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Cognito-specific exceptions for challenge and MFA flows."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">starlette.status</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTP_400_BAD_REQUEST</span>
@@ -159,11 +171,11 @@
 <div class="viewcode-block" id="ChallengeRequiredError">
 <a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.ChallengeRequiredError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ChallengeRequiredError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal signal: Cognito returned a challenge instead of tokens.</span>
+<span class="w">    </span><span class="sd">"""Internal signal: Cognito returned a challenge instead of tokens.</span>
 
 <span class="sd">    Not raised directly to the HTTP layer — caught by the service and</span>
 <span class="sd">    converted to a ChallengeResponse.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
 <div class="viewcode-block" id="ChallengeRequiredError.__init__">
 <a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.ChallengeRequiredError.__init__">[docs]</a>
@@ -177,11 +189,11 @@
 <div class="viewcode-block" id="InvalidChallengeError">
 <a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.InvalidChallengeError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InvalidChallengeError</span><span class="p">(</span><span class="n">HTTPException</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when the challenge response is incorrect or the session is expired.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raised when the challenge response is incorrect or the session is expired."""</span>
 
 <div class="viewcode-block" id="InvalidChallengeError.__init__">
 <a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.InvalidChallengeError.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Invalid or expired challenge&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Invalid or expired challenge"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_400_BAD_REQUEST</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="n">detail</span><span class="p">)</span></div>
 </div>
 
@@ -190,11 +202,11 @@
 <div class="viewcode-block" id="MfaSetupError">
 <a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.MfaSetupError">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MfaSetupError</span><span class="p">(</span><span class="n">HTTPException</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a TOTP setup or verification operation fails.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Raised when a TOTP setup or verification operation fails."""</span>
 
 <div class="viewcode-block" id="MfaSetupError.__init__">
 <a class="viewcode-back" href="../../../../exceptions.html#auth_middleware.exceptions.MfaSetupError.__init__">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;MFA setup failed&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"MFA setup failed"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="n">HTTP_400_BAD_REQUEST</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="n">detail</span><span class="p">)</span></div>
 </div>
 
