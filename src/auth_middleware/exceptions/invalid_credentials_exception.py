@@ -7,5 +7,3 @@ class InvalidCredentialsException(HTTPException):
     Args:
         HTTPException (_type_): _description_
     """
-
-    ...

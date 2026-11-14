@@ -11,6 +11,10 @@ from joserfc.jwt import JWTClaimsRegistry
 from auth_middleware.contracts.groups_provider import GroupsProvider
 from auth_middleware.contracts.jwt_provider import JWTProvider
 from auth_middleware.contracts.permissions_provider import PermissionsProvider
+from auth_middleware.contracts.roles_provider import RolesProvider
+from auth_middleware.exceptions.identity_provider_unavailable_exception import (
+    IdentityProviderUnavailableException,
+)
 from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.logging import logger
 from auth_middleware.providers.azure.azure_exception import AzureException
@@ -18,16 +22,21 @@ from auth_middleware.providers.azure.settings import settings
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
 
+#: Tenant ids that mean "any tenant": the ``tid`` claim cannot be pinned.
+_MULTI_TENANT_ALIASES = frozenset({"common", "organizations", "consumers"})
+
 
 class EntraIDProvider(JWTProvider):
     def __init__(
         self,
         permissions_provider: PermissionsProvider | None = None,
         groups_provider: GroupsProvider | None = None,
+        roles_provider: RolesProvider | None = None,
     ) -> None:
         super().__init__(
             permissions_provider=permissions_provider,
             groups_provider=groups_provider,
+            roles_provider=roles_provider,
         )
 
     async def get_keys(self, jwks_uri: str) -> list[JWK]:
@@ -51,22 +60,22 @@ class EntraIDProvider(JWTProvider):
                 exc.response.status_code,
                 jwks_uri,
             )
-            raise InvalidTokenException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise IdentityProviderUnavailableException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Unable to retrieve public keys from identity provider",
             ) from exc
         except httpx.RequestError as exc:
             logger.error(
                 "Network error fetching Entra ID JWKS from {}: {}", jwks_uri, exc
             )
-            raise InvalidTokenException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise IdentityProviderUnavailableException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Unable to reach identity provider",
             ) from exc
         except (KeyError, ValueError) as exc:
             logger.error("Unexpected JWKS response format from {}: {}", jwks_uri, exc)
-            raise InvalidTokenException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise IdentityProviderUnavailableException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Invalid JWKS response from identity provider",
             ) from exc
 
@@ -92,8 +101,8 @@ class EntraIDProvider(JWTProvider):
                 exc.response.status_code,
                 discovery_url,
             )
-            raise InvalidTokenException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise IdentityProviderUnavailableException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Unable to retrieve OIDC discovery document",
             ) from exc
         except httpx.RequestError as exc:
@@ -102,8 +111,8 @@ class EntraIDProvider(JWTProvider):
                 discovery_url,
                 exc,
             )
-            raise InvalidTokenException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise IdentityProviderUnavailableException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Unable to reach identity provider",
             ) from exc
         except ValueError as exc:
@@ -112,8 +121,8 @@ class EntraIDProvider(JWTProvider):
                 discovery_url,
                 exc,
             )
-            raise InvalidTokenException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise IdentityProviderUnavailableException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Invalid OIDC discovery response from identity provider",
             ) from exc
 
@@ -133,8 +142,8 @@ class EntraIDProvider(JWTProvider):
         jwks_uri = openid_config.get("jwks_uri")
         if not jwks_uri:
             logger.error("Entra ID discovery document has no 'jwks_uri'")
-            raise InvalidTokenException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise IdentityProviderUnavailableException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Invalid OIDC discovery response from identity provider",
             )
 
@@ -147,13 +156,9 @@ class EntraIDProvider(JWTProvider):
 
         timestamp: int = (
             time_ns()
-            + getattr(settings, "AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES", 20)
-            * 60
-            * 1000000000
+            + settings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES * 60 * 1_000_000_000
         )
-        usage_counter: int = getattr(
-            settings, "AUTH_MIDDLEWARE_JWKS_CACHE_USAGES", 1000
-        )
+        usage_counter: int = settings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES
         jks: JWKS = JWKS(keys=keys, timestamp=timestamp, usage_counter=usage_counter)
         return jks
 
@@ -182,10 +187,10 @@ class EntraIDProvider(JWTProvider):
             )
 
         try:
+            # "use" is optional in a JWK (RFC 7517) and not needed to verify.
             rsa_key_dict = {
                 "kty": hmac_key_candidate["kty"],
                 "kid": hmac_key_candidate["kid"],
-                "use": hmac_key_candidate["use"],
                 "n": hmac_key_candidate["n"],
                 "e": hmac_key_candidate["e"],
             }
@@ -200,6 +205,19 @@ class EntraIDProvider(JWTProvider):
                 token_obj.claims,
                 leeway=settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY,
             )
+            if not audience:
+                # Microsoft signs tokens of every tenant and app with the same keys:
+                # without an audience any of them would be accepted.
+                logger.warning(
+                    "AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID is not set: tokens "
+                    "issued for any application are accepted. Set it."
+                )
+            tenant = settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID
+            if tenant and tenant.lower() not in _MULTI_TENANT_ALIASES:
+                # Keys are shared across tenants: pin the tenant explicitly.
+                if token_obj.claims.get("tid") != tenant:
+                    logger.error("Token issued by another Entra ID tenant")
+                    return False
             if audience:
                 claims_registry = JWTClaimsRegistry(
                     aud={"essential": True, "value": audience},
@@ -235,6 +253,10 @@ class EntraIDProvider(JWTProvider):
         )
 
         return User(
+            token=token.jwt_token,
+            jwt_credentials=token,
+            permissions_provider=self._permissions_provider,
+            roles_provider=self._roles_provider,
             id=token.claims["sub"],
             name=(
                 token.claims[name_property]

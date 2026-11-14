@@ -4,6 +4,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
 
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -14,6 +15,14 @@ from sqlalchemy.ext.asyncio import (
 from auth_middleware.logging import logger
 
 from .async_database_settings import settings
+
+
+def _safe_url(url: str) -> str:
+    """The URL with its password masked, for logs."""
+    try:
+        return make_url(url).render_as_string(hide_password=True)
+    except Exception:  # an unparsable URL must not be echoed back raw
+        return "<unparsable database url>"
 
 
 class AsyncDatabase:
@@ -38,7 +47,7 @@ class AsyncDatabase:
             database_url (str): _description_
         """
 
-        logger.debug(f"Initializing database connection to {database_url}")
+        logger.debug("Initializing database connection to {}", _safe_url(database_url))
 
         if cls._engine is None:
             logger.debug("Creating a new engine")
@@ -59,14 +68,14 @@ class AsyncDatabase:
         logger.debug("*** Initializing database engine from settings")
         if self._engine is None:
             logger.debug(
-                f"*** Creating a new engine from settings. Database URI: "
-                f"{settings.AUTHZ_SQLALCHEMY_DATABASE_URI}"
+                "*** Creating a new engine from settings. Database URI: {}",
+                _safe_url(settings.AUTHZ_SQLALCHEMY_DATABASE_URI),
             )
             self._engine = create_async_engine(
                 settings.AUTHZ_SQLALCHEMY_DATABASE_URI,
                 pool_pre_ping=settings.AUTHZ_POOL_PRE_PING,
                 pool_size=settings.AUTHZ_POOL_SIZE,
-                echo=settings.AUTHZ_ECHO_POOL,
+                echo=settings.AUTHZ_ECHO,
                 max_overflow=settings.AUTHZ_MAX_OVERFLOW,
                 pool_recycle=settings.AUTHZ_POOL_RECYCLE_IN_SECONDS,
                 echo_pool=settings.AUTHZ_ECHO_POOL,

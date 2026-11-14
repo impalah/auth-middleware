@@ -8,10 +8,11 @@ from auth_middleware.types.user import User
 class PermissionsChecker:
     """Controls if user has the required permissions (user_type)"""
 
-    __allowed_permissions: list[str] = []
-
-    def __init__(self, allowed_permissions: list[str]) -> None:
+    def __init__(self, allowed_permissions: list[str], *, match: str = "any") -> None:
+        if match not in ("any", "all"):
+            raise ValueError("match must be 'any' or 'all'")
         self.__allowed_permissions = allowed_permissions
+        self.__match_all = match == "all"
 
     async def __call__(self, request: Request) -> None:
         if settings.AUTH_MIDDLEWARE_DISABLED:
@@ -21,11 +22,16 @@ class PermissionsChecker:
             raise HTTPException(status_code=401, detail="Authentication required")
 
         user: User = request.state.current_user
-        permissions: list[str] = await user.permissions
+        # A provider returning None must not mean "no restriction": fail closed.
+        permissions: list[str] = (await user.permissions) or []
 
-        if permissions is not None and not any(
-            permissions in self.__allowed_permissions for permissions in permissions
-        ):
+        held = set(permissions)
+        satisfied = (
+            all(item in held for item in self.__allowed_permissions)
+            if self.__match_all
+            else any(item in held for item in self.__allowed_permissions)
+        )
+        if not satisfied:
             logger.debug(
                 f"User with permissions {permissions} not in "
                 f"{self.__allowed_permissions}"

@@ -71,6 +71,7 @@ class TestAsyncDatabase:
         mock_settings.AUTHZ_POOL_PRE_PING = True
         mock_settings.AUTHZ_POOL_SIZE = 5
         mock_settings.AUTHZ_ECHO_POOL = False
+        mock_settings.AUTHZ_ECHO = False
         mock_settings.AUTHZ_MAX_OVERFLOW = 10
         mock_settings.AUTHZ_POOL_RECYCLE_IN_SECONDS = 3600
         mock_settings.AUTHZ_POOL_RESET_ON_RETURN = "commit"

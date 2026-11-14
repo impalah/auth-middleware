@@ -49,6 +49,7 @@ class JsonCredentialsRepository(CredentialsRepository):
             id=id,
             name=user_data["name"],
             hashed_password=user_data["hashed_pwd"],
-            _groups=user_data["groups"] if "groups" in user_data else [],
-            email=user_data["email"] if "email" in user_data else None,
+            # `groups=` (not `_groups=`): User only honours the public kwarg.
+            **{"groups": user_data.get("groups", [])},
+            email=user_data.get("email"),
         )

@@ -1,8 +1,10 @@
 from auth_middleware.guards.functions import (
     get_current_user,
+    get_identity,
     has_groups,
     has_permissions,
     has_roles,
+    require_authenticated,
     require_groups,
     require_permissions,
     require_roles,
@@ -14,9 +16,11 @@ from auth_middleware.guards.role_checker import RoleChecker
 
 __all__ = [
     "get_current_user",
+    "get_identity",
     "has_groups",
     "has_permissions",
     "has_roles",
+    "require_authenticated",
     "require_groups",
     "require_permissions",
     "require_roles",

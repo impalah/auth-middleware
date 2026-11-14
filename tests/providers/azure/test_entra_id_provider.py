@@ -244,6 +244,7 @@ class TestVerifyToken:
             ) as mock_settings,
         ):
             mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID = None
+            mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID = None
             mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY = 0
             token = _make_token({"sub": "user-123"})
             result = await provider.verify_token(token)
@@ -326,6 +327,7 @@ class TestVerifyToken:
             ) as mock_settings,
         ):
             mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID = "my-audience"
+            mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID = None
             mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY = 0
             token = _make_token({"sub": "user-123"})
             result = await provider.verify_token(token)
@@ -397,3 +399,48 @@ class TestCreateUserFromToken:
         token = _make_token({"sub": "user-6", "username": "u6"})
         user = await provider.create_user_from_token(token)
         assert await user.groups == []
+
+
+class TestTenantPinning:
+    """Entra signs every tenant's tokens with the same keys: the tid must be pinned."""
+
+    @staticmethod
+    async def _verify(tenant, tid):
+        provider = _fresh_provider()
+        provider._get_hmac_key = AsyncMock(
+            return_value={"kty": "RSA", "kid": "k1", "n": "abc", "e": "AQAB"}
+        )
+        decoded = MagicMock()
+        decoded.claims = {"sub": "u", "tid": tid, "exp": int(time.time()) + 3600}
+        with (
+            patch("auth_middleware.providers.azure.entra_id_provider.import_key"),
+            patch(
+                "auth_middleware.providers.azure.entra_id_provider.joserfc_jwt.decode",
+                return_value=decoded,
+            ),
+            patch(
+                "auth_middleware.providers.azure.entra_id_provider.settings"
+            ) as mock_settings,
+        ):
+            mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID = None
+            mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID = tenant
+            mock_settings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY = 0
+            return await provider.verify_token(_make_token({"sub": "u"}))
+
+    @pytest.mark.asyncio
+    async def test_token_of_another_tenant_is_rejected(self):
+        assert await self._verify("my-tenant", "someone-elses-tenant") is False
+
+    @pytest.mark.asyncio
+    async def test_token_of_the_configured_tenant_is_accepted(self):
+        assert await self._verify("my-tenant", "my-tenant") is True
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("alias", ["common", "organizations", "consumers"])
+    async def test_multi_tenant_aliases_do_not_pin(self, alias):
+        assert await self._verify(alias, "any-tenant") is True
+
+    @pytest.mark.asyncio
+    async def test_key_without_use_is_accepted(self):
+        # "use" is optional in a JWK; it used to raise KeyError -> AzureException
+        assert await self._verify(None, "t") is True

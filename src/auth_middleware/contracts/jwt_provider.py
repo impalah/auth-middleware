@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from joserfc.jwt import JWTClaimsRegistry
 
+from auth_middleware.exceptions.invalid_token_exception import InvalidTokenException
 from auth_middleware.logging import logger
 from auth_middleware.types.jwt import JWK, JWKS, JWTAuthorizationCredentials
 from auth_middleware.types.user import User
@@ -18,6 +19,10 @@ if TYPE_CHECKING:
     from auth_middleware.providers.aws.jwt_provider_settings import (
         JWTProviderSettings,
     )
+
+
+#: Back-off before retrying a failed JWKS refresh while stale keys are served.
+_JWKS_RETRY_SECONDS = 30
 
 
 class JWTProvider(metaclass=ABCMeta):
@@ -47,6 +52,45 @@ class JWTProvider(metaclass=ABCMeta):
         self._groups_provider = groups_provider
         self._roles_provider = roles_provider
         self._background_refresh_task = None
+        # Serialises reloads: when the cache expires, concurrent requests must not
+        # each hit the identity provider (thundering herd).
+        self._jwks_lock = asyncio.Lock()
+
+    async def _reload_jwks_locked(self) -> None:
+        """Reload the JWKS once, however many requests noticed the expiry.
+
+        If the identity provider is unreachable and keys are already cached, keep
+        serving them (stale keys beat locking every user out) and retry only after
+        a short back-off instead of on every request.
+        """
+        lock = getattr(self, "_jwks_lock", None)
+        if lock is None:  # subclasses that skip super().__init__
+            lock = self._jwks_lock = asyncio.Lock()
+        async with lock:
+            if hasattr(self, "jks") and not self._needs_jwks_refresh():
+                return  # another request reloaded while we waited for the lock
+            try:
+                self.jks = await self.load_jwks()
+            except InvalidTokenException:
+                if not hasattr(self, "jks"):
+                    raise
+                logger.warning(
+                    "JWKS refresh failed; serving cached keys, retry in {}s",
+                    _JWKS_RETRY_SECONDS,
+                )
+                self.jks.timestamp = time_ns() + _JWKS_RETRY_SECONDS * 1_000_000_000
+                self.jks.usage_counter = max(self.jks.usage_counter or 0, 100)
+
+    async def aclose(self) -> None:
+        """Cancel the background JWKS refresh task (call it on application shutdown)."""
+        task = self._background_refresh_task
+        if task is not None and not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+        self._background_refresh_task = None
 
     async def _get_jwks(self) -> JWKS | None:
         """
@@ -55,24 +99,9 @@ class JWTProvider(metaclass=ABCMeta):
         Cache is refreshed after a settable time or number of reads (usages)
         based on the configured strategy.
         """
-        reload_cache = False
         try:
-            if (
-                not hasattr(self, "jks")
-                or self.jks.timestamp is None
-                or self.jks.usage_counter is None
-            ):
-                reload_cache = True
-            else:
-                # Use new strategy-based refresh logic
-                reload_cache = self._needs_jwks_refresh()
-        except AttributeError:
-            # the first time after application startup, self.jks is NOT defined
-            reload_cache = True
-
-        try:
-            if reload_cache:
-                self.jks: JWKS = await self.load_jwks()
+            if self._cache_is_unusable() or self._needs_jwks_refresh():
+                await self._reload_jwks_locked()
                 logger.debug("JWKS loaded")
 
                 # Schedule background refresh if enabled
@@ -90,6 +119,20 @@ class JWTProvider(metaclass=ABCMeta):
 
         return self.jks
 
+    def _cache_is_unusable(self) -> bool:
+        """True when there is no cached JWKS (first use) or it has no metadata."""
+        return (
+            not hasattr(self, "jks")
+            or self.jks.timestamp is None
+            or self.jks.usage_counter is None
+        )
+
+    def _time_expired(self) -> bool:
+        return self.jks.timestamp is not None and self.jks.timestamp < time_ns()
+
+    def _usage_exhausted(self) -> bool:
+        return self.jks.usage_counter is not None and self.jks.usage_counter <= 0
+
     def _needs_jwks_refresh(self) -> bool:
         """
         Determines if JWKS cache needs refresh based on configured strategy.
@@ -104,26 +147,12 @@ class JWTProvider(metaclass=ABCMeta):
             # Fallback to original behavior (both time and usage)
             if self.jks.timestamp is None or self.jks.usage_counter is None:
                 return True
-            time_expired = self.jks.timestamp < time_ns()
-            usage_exhausted = self.jks.usage_counter <= 0
-            return time_expired or usage_exhausted
+            return self._time_expired() or self._usage_exhausted()
 
         strategy = getattr(self._settings, "jwks_cache_strategy", "both")
-
-        # Check time-based refresh
-        if strategy in ["time", "both"]:
-            if self.jks.timestamp is not None and self.jks.timestamp < time_ns():
-                return True
-
-        # Check usage-based refresh
-        if (
-            strategy in ["usage", "both"]
-            and self.jks.usage_counter is not None
-            and self.jks.usage_counter <= 0
-        ):
-            return True
-
-        return False
+        by_time = strategy in ("time", "both") and self._time_expired()
+        by_usage = strategy in ("usage", "both") and self._usage_exhausted()
+        return by_time or by_usage
 
     def _schedule_background_refresh(self) -> None:
         """Schedules JWKS refresh in background before cache expires."""

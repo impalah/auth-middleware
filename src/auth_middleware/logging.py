@@ -28,27 +28,25 @@ def configure_logger(settings: dict[str, Any]) -> None:
     logger.remove()  # Remove the default logger
     print("Configuring logger with settings:", settings)
 
-    logger.add(  # type: ignore[misc]
+    logger.add(
         sink=sys.stderr,
-        level=settings["LOG_LEVEL"] if "LOG_LEVEL" in settings else "INFO",
-        format=(
-            settings["LOG_FORMAT"]
-            if "LOG_FORMAT" in settings
-            else (
-                "<green>{time:YYYY-MM-DD HH:mm:ss}</green> "
-                "| <level>{level: <8}</level> | trace_id={extra[trace_id]} "
-                "| <cyan>{name}</cyan>:<cyan>{function}</cyan>:"
-                "<cyan>{line}</cyan> - <level>{message}</level>"
-            )
+        level=settings.get("LOG_LEVEL", "INFO"),
+        format=settings.get(
+            "LOG_FORMAT",
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> "
+            "| <level>{level: <8}</level> | trace_id={extra[trace_id]} "
+            "| <cyan>{name}</cyan>:<cyan>{function}</cyan>:"
+            "<cyan>{line}</cyan> - <level>{message}</level>",
         ),
         filter=add_trace_id,  # type: ignore[arg-type]
-        colorize=settings["LOG_COLORIZE"] if "LOG_COLORIZE" in settings else False,
+        colorize=settings.get("LOG_COLORIZE", False),
         serialize=False,
         backtrace=True,
-        diagnose=True,
-        enqueue=(
-            settings["LOG_ENQUEUE"] if "LOG_ENQUEUE" in settings else False
-        ),  # Do not uses multiprocesing for the logs (aws lambda)
+        # diagnose=True prints the values of local variables in tracebacks, which
+        # can leak tokens and passwords into the logs: opt in explicitly.
+        diagnose=settings.get("LOG_DIAGNOSE", False),
+        # Do not use multiprocessing for the logs (AWS Lambda)
+        enqueue=settings.get("LOG_ENQUEUE", False),
     )
 
 

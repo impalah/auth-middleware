@@ -56,32 +56,44 @@ class TestFetchRolesFromCognitoGroups:
 
 
 class TestFetchRolesFromScope:
+    """The scope claim maps only when the application says which scopes count."""
+
     @pytest.mark.asyncio
-    async def test_extracts_role_from_scope_when_no_groups_claim(self, provider):
+    async def test_scope_is_ignored_by_default(self, provider):
         token = _make_token(scope="server-rsid/administrator")
-        result = await provider.fetch_roles(token)
-        assert result == ["administrator"]
+        assert await provider.fetch_roles(token) == []
 
     @pytest.mark.asyncio
-    async def test_extracts_role_from_scope_simple(self, provider):
-        token = _make_token(scope="mypool/student")
-        result = await provider.fetch_roles(token)
-        assert result == ["student"]
+    async def test_resource_server_maps_its_own_scope(self):
+        provider = CognitoGroupsAsRolesProvider(resource_server="server-rsid")
+        token = _make_token(scope="server-rsid/administrator")
+        assert await provider.fetch_roles(token) == ["administrator"]
 
     @pytest.mark.asyncio
-    async def test_scope_without_slash_returns_whole_value(self, provider):
-        token = _make_token(scope="teacher")
-        result = await provider.fetch_roles(token)
-        assert result == ["teacher"]
+    async def test_another_resource_servers_scope_never_becomes_a_role(self):
+        provider = CognitoGroupsAsRolesProvider(resource_server="server-rsid")
+        assert await provider.fetch_roles(_make_token(scope="other-api/admin")) == []
+        assert await provider.fetch_roles(_make_token(scope="server-rsidX/admin")) == []
+        assert await provider.fetch_roles(_make_token(scope="admin")) == []
 
     @pytest.mark.asyncio
-    async def test_cognito_groups_takes_precedence_over_scope(self, provider):
+    async def test_scope_map_is_exact(self):
+        provider = CognitoGroupsAsRolesProvider(
+            scope_map={"server-rsid/read": "reader"}
+        )
+        assert await provider.fetch_roles(_make_token(scope="server-rsid/read")) == [
+            "reader"
+        ]
+        assert await provider.fetch_roles(_make_token(scope="server-rsid/write")) == []
+
+    @pytest.mark.asyncio
+    async def test_cognito_groups_takes_precedence_over_scope(self):
+        provider = CognitoGroupsAsRolesProvider(resource_server="server-rsid")
         token = _make_token(
             **{COGNITO_GROUPS_CLAIM: ["admin"]},
             scope="server-rsid/student",
         )
-        result = await provider.fetch_roles(token)
-        assert result == ["admin"]
+        assert await provider.fetch_roles(token) == ["admin"]
 
 
 class TestGroupsClaimOverride:
@@ -94,7 +106,9 @@ class TestGroupsClaimOverride:
 
     @pytest.mark.asyncio
     async def test_default_groups_claim_ignored_when_custom_configured(self):
-        provider = CognitoGroupsAsRolesProvider(groups_claim="custom:groups")
+        provider = CognitoGroupsAsRolesProvider(
+            groups_claim="custom:groups", resource_server="pool"
+        )
         token = _make_token(**{COGNITO_GROUPS_CLAIM: ["admin"]}, scope="pool/student")
         result = await provider.fetch_roles(token)
         assert result == ["student"]

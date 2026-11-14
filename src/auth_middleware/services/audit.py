@@ -297,8 +297,9 @@ class AuditMiddleware(BaseHTTPMiddleware):
         client_id = None
         is_m2m = False
 
-        if hasattr(request.state, "current_user"):
-            user = request.state.current_user
+        # current_user is None when the request carried no credentials.
+        user = getattr(request.state, "current_user", None)
+        if user is not None:
             user_id = user.id
             is_m2m = getattr(user, "is_m2m", False)
             client_id = getattr(user, "client_id", None)

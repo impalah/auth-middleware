@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Any
 
 from auth_middleware.types.user import User
 
@@ -11,12 +12,7 @@ class AuthProvider(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    async def validate_credentials[TCredentials](
-        self, credentials: TCredentials
-    ) -> User: ...
+    async def validate_credentials(self, credentials: Any) -> User: ...
 
     @abstractmethod
-    def create_user_from_credentials[TCredentials](
-        self,
-        credentials: TCredentials,
-    ) -> User: ...
+    def create_user_from_credentials(self, credentials: Any) -> User: ...

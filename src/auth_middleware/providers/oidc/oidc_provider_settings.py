@@ -1,6 +1,7 @@
 from pydantic import Field
 
 from auth_middleware.providers.aws.jwt_provider_settings import JWTProviderSettings
+from auth_middleware.providers.oidc.token_type import TokenType
 
 
 class OidcProviderSettings(JWTProviderSettings):
@@ -131,4 +132,40 @@ class OidcProviderSettings(JWTProviderSettings):
     jwks_cache_usages: int | None = Field(
         default=1000,
         description="Number of jwks signature verifications before refresh",
+    )
+
+    require_audience: bool = Field(
+        default=True,
+        description=(
+            "When True (the default), constructing the provider without an "
+            "'audience' raises ValueError, and the audience check can never "
+            "pass without an expected value: otherwise any token signed by "
+            "the issuer, for any client, would be accepted. Set to False only "
+            "if you deliberately accept tokens of every client of the issuer "
+            "(a warning is logged)."
+        ),
+    )
+
+    accepted_token_types: frozenset[TokenType] | None = Field(
+        default=None,
+        description=(
+            "Hardening: token types accepted as a bearer credential. None "
+            "keeps the historical behaviour (only refresh tokens are "
+            "rejected). {TokenType.ACCESS} accepts access tokens only: an ID "
+            "token signed by the same key and issuer (Cognito does this) is "
+            "rejected, and so is a token whose type cannot be determined."
+        ),
+    )
+
+    forced_jwks_refresh_min_interval_seconds: float | None = Field(
+        default=None,
+        gt=0,
+        description=(
+            "Hardening: when a token carries a 'kid' that is not in the "
+            "cached JWKS, refresh the JWKS once, at most every this many "
+            "seconds, so an identity-provider key rotation works without a "
+            "restart while forged 'kid's cannot flood the provider. None "
+            "keeps the historical behaviour (refresh only by cache "
+            "interval/usages). 30 is a good value."
+        ),
     )

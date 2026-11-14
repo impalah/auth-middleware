@@ -36,10 +36,18 @@ class TestFetchGroupsFromCognitoGroups:
         assert result == ["admin", "teachers"]
 
     @pytest.mark.asyncio
-    async def test_extracts_group_from_scope_when_no_groups_claim(self, provider):
+    async def test_scope_is_ignored_by_default(self, provider):
         token = _make_token(scope="server-rsid/administrator")
-        result = await provider.fetch_groups(token)
-        assert result == ["administrator"]
+        assert await provider.fetch_groups(token) == []
+
+    @pytest.mark.asyncio
+    async def test_extracts_group_from_the_configured_resource_servers_scope(self):
+        provider = CognitoGroupsProvider(resource_server="server-rsid")
+        token = _make_token(scope="server-rsid/administrator")
+        assert await provider.fetch_groups(token) == ["administrator"]
+        assert (
+            await provider.fetch_groups(_make_token(scope="other/administrator")) == []
+        )
 
     @pytest.mark.asyncio
     async def test_returns_empty_list_when_no_groups_or_scope(self, provider):
@@ -72,7 +80,9 @@ class TestGroupsClaimOverride:
 
     @pytest.mark.asyncio
     async def test_default_groups_claim_ignored_when_custom_configured(self):
-        provider = CognitoGroupsProvider(groups_claim="custom:groups")
+        provider = CognitoGroupsProvider(
+            groups_claim="custom:groups", resource_server="pool"
+        )
         token = _make_token(**{COGNITO_GROUPS_CLAIM: ["admin"]}, scope="pool/student")
         result = await provider.fetch_groups(token)
         assert result == ["student"]

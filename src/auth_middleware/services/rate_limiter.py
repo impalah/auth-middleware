@@ -18,6 +18,10 @@ from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 logger = logging.getLogger(__name__)
 
 
+#: Above this many tracked identifiers, expired ones are swept on the next request.
+_SWEEP_THRESHOLD = 10_000
+
+
 class RateLimiter:
     """In-memory rate limiter using sliding window counter algorithm.
 
@@ -79,25 +83,41 @@ class RateLimiter:
         now = time.time()
         cutoff = now - self.window_seconds
 
+        if len(self._requests) > _SWEEP_THRESHOLD:
+            self._sweep(cutoff)
+
         # Clean up old entries
-        self._requests[identifier] = [
-            timestamp for timestamp in self._requests[identifier] if timestamp > cutoff
-        ]
+        recent = [t for t in self._requests.get(identifier, ()) if t > cutoff]
 
         # Check if under limit
-        if len(self._requests[identifier]) < self.max_requests:
-            self._requests[identifier].append(now)
+        if len(recent) < self.max_requests:
+            recent.append(now)
+            self._requests[identifier] = recent
             logger.debug(
-                f"Request allowed for {identifier}: "
-                f"{len(self._requests[identifier])}/{self.max_requests}"
+                "Request allowed for %s: %d/%d",
+                identifier,
+                len(recent),
+                self.max_requests,
             )
             return True
 
+        self._requests[identifier] = recent
         logger.warning(
-            f"Rate limit exceeded for {identifier}: "
-            f"{len(self._requests[identifier])}/{self.max_requests}"
+            "Rate limit exceeded for %s: %d/%d",
+            identifier,
+            len(recent),
+            self.max_requests,
         )
         return False
+
+    def _sweep(self, cutoff: float) -> None:
+        """Drop identifiers with no request inside the window (bounds memory)."""
+        for key in [
+            k
+            for k, stamps in self._requests.items()
+            if not stamps or stamps[-1] <= cutoff
+        ]:
+            del self._requests[key]
 
     def get_remaining(self, identifier: str) -> int:
         """Get remaining requests for identifier.
@@ -117,15 +137,15 @@ class RateLimiter:
         now = time.time()
         cutoff = now - self.window_seconds
 
-        # Clean up old entries
-        self._requests[identifier] = [
-            timestamp for timestamp in self._requests[identifier] if timestamp > cutoff
-        ]
+        # Clean up old entries; never create (or keep) an empty key: identifiers can be
+        # attacker-chosen, so empty lists would grow the dict without bound.
+        recent = [t for t in self._requests.get(identifier, ()) if t > cutoff]
+        if recent:
+            self._requests[identifier] = recent
+        else:
+            self._requests.pop(identifier, None)
 
-        current = len(self._requests[identifier])
-        remaining = max(0, self.max_requests - current)
-
-        return remaining
+        return max(0, self.max_requests - len(recent))
 
     def reset(self, identifier: str) -> None:
         """Reset rate limit for identifier.
@@ -141,7 +161,7 @@ class RateLimiter:
         """
         if identifier in self._requests:
             del self._requests[identifier]
-            logger.debug(f"Rate limit reset for {identifier}")
+            logger.debug("Rate limit reset for %s", identifier)
 
     def clear_all(self) -> None:
         """Clear all rate limit data.
@@ -162,8 +182,10 @@ def _resolve_identifier(
     """Extract a rate-limit identifier from the request."""
     if identifier_fn:
         return identifier_fn(request)
-    if hasattr(request.state, "current_user"):
-        return str(request.state.current_user.id)
+    # current_user is None for anonymous requests: fall back to the client address.
+    user = getattr(request.state, "current_user", None)
+    if user is not None:
+        return str(user.id)
     return request.client.host if request.client else "unknown"
 
 
@@ -198,11 +220,12 @@ def _apply_rate_limit_headers(
     window_seconds: int,
 ) -> None:
     """Attach X-RateLimit-* headers to *response* if it supports them."""
-    if hasattr(response, "headers"):
+    headers = getattr(response, "headers", None)
+    if headers is not None:
         remaining = limiter.get_remaining(identifier)
-        response.headers["X-RateLimit-Limit"] = str(max_requests)
-        response.headers["X-RateLimit-Remaining"] = str(remaining)
-        response.headers["X-RateLimit-Reset"] = str(int(time.time() + window_seconds))
+        headers["X-RateLimit-Limit"] = str(max_requests)
+        headers["X-RateLimit-Remaining"] = str(remaining)
+        headers["X-RateLimit-Reset"] = str(int(time.time() + window_seconds))
 
 
 def rate_limit(

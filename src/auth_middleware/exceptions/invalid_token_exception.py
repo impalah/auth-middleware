@@ -7,5 +7,3 @@ class InvalidTokenException(HTTPException):
     Args:
         HTTPException (_type_): _description_
     """
-
-    ...

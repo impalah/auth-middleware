@@ -201,29 +201,19 @@ class TestJwtAuthMiddleware:
             await middleware.get_current_user(request)
 
     @pytest.mark.asyncio
-    async def test_get_current_user_with_no_token_returns_synthetic(
+    async def test_get_current_user_with_no_token_is_rejected_not_synthetic(
         self, mock_auth_provider
     ):
-        """Test get_current_user returns synthetic user when no token."""
+        """Credentials present but no token must never mint a (fail-open) user."""
         app = Mock(spec=ASGIApp)
         middleware = JwtAuthMiddleware(app, auth_provider=mock_auth_provider)
 
-        # Setup request with authorization header but no token returned
         request = Mock(spec=Request)
         request.headers = Headers({"authorization": "Bearer some-token"})
-
-        # Mock JWT bearer manager to return None
         middleware._jwt_bearer_manager.get_credentials = AsyncMock(return_value=None)
 
-        # Execute
-        result = await middleware.get_current_user(request)
-
-        # Verify synthetic user is returned
-        assert result is not None
-        assert result.id == "synthetic"
-        assert result.name == "synthetic"
-        assert result.email == "synthetic@email.com"
-        assert await result.groups == []
+        with pytest.raises(InvalidTokenException):
+            await middleware.get_current_user(request)
 
     @pytest.mark.asyncio
     async def test_get_current_user_with_general_exception(self, mock_auth_provider):

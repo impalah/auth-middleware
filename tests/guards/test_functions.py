@@ -2,7 +2,7 @@
 Comprehensive tests for auth_middleware.functions module.
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from fastapi import HTTPException, Request
@@ -45,7 +45,7 @@ class TestRequirePermissions:
             await checker_func(mock_request_with_user)
 
             # Verify
-            mock_checker.assert_called_once_with(["read"])
+            mock_checker.assert_called_once_with(["read"], match="any")
             mock_checker_instance.assert_called_once_with(mock_request_with_user)
 
     @pytest.mark.asyncio
@@ -151,7 +151,7 @@ class TestRequireGroups:
             await checker_func(mock_request_with_user)
 
             # Verify
-            mock_checker.assert_called_once_with(["admin"])
+            mock_checker.assert_called_once_with(["admin"], match="any")
             mock_checker_instance.assert_called_once_with(mock_request_with_user)
 
     @pytest.mark.asyncio
@@ -469,3 +469,60 @@ class TestHasRoles:
         ):
             result = await has_roles(mock_request_without_user, ["admin"])
             assert result is False
+
+
+class TestMatchAll:
+    """``match="all"`` requires every listed group/role/permission."""
+
+    @staticmethod
+    def _request(**values):
+        class FakeUser:
+            def __init__(self):
+                self._values = values
+
+            @property
+            async def groups(self):
+                return self._values.get("groups", [])
+
+            @property
+            async def roles(self):
+                return self._values.get("roles", [])
+
+            @property
+            async def permissions(self):
+                return self._values.get("permissions", [])
+
+        request = MagicMock()
+        request.state.current_user = FakeUser()
+        return request
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "factory,prop",
+        [
+            (require_groups, "groups"),
+            (require_roles, "roles"),
+            (require_permissions, "permissions"),
+        ],
+    )
+    async def test_all_vs_any(self, factory, prop):
+        from fastapi import HTTPException
+
+        request = self._request(**{prop: ["a"]})
+        with (
+            patch("auth_middleware.guards.group_checker.settings") as s1,
+            patch("auth_middleware.guards.role_checker.settings") as s2,
+            patch("auth_middleware.guards.permissions_checker.settings") as s3,
+        ):
+            s1.AUTH_MIDDLEWARE_DISABLED = s2.AUTH_MIDDLEWARE_DISABLED = False
+            s3.AUTH_MIDDLEWARE_DISABLED = False
+            await factory(["a", "b"])(request)  # any: holding "a" is enough
+            with pytest.raises(HTTPException) as exc:
+                await factory(["a", "b"], match="all")(request)
+            assert exc.value.status_code == 403
+            full = self._request(**{prop: ["a", "b", "c"]})
+            await factory(["a", "b"], match="all")(full)
+
+    def test_invalid_match_is_refused(self):
+        with pytest.raises(ValueError):
+            require_groups(["a"], match="some")

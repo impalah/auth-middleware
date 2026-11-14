@@ -7,5 +7,3 @@ class InvalidAuthorizationException(HTTPException):
     Args:
         HTTPException (_type_): _description_
     """
-
-    ...

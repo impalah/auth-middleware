@@ -40,6 +40,13 @@ class M2MTokenDetector:
     """
 
     @staticmethod
+    def _has_user_profile_claims(claims: dict[str, Any]) -> bool:
+        """E-mail or name claims only a real user token carries."""
+        return any(
+            claim in claims for claim in ("email", "name", "given_name", "family_name")
+        )
+
+    @staticmethod
     def is_m2m_token(token: JWTAuthorizationCredentials) -> bool:
         """Detect if a JWT token is a Machine-to-Machine token.
 
@@ -64,12 +71,7 @@ class M2MTokenDetector:
 
         # Primary indicator: Missing cognito:username (Cognito-specific)
         has_cognito_username = COGNITO_USERNAME_CLAIM in claims or "username" in claims
-
-        # Secondary indicators
         token_use = claims.get("token_use", "")
-        has_client_id = "client_id" in claims
-        has_email = "email" in claims
-        has_name = "name" in claims or "given_name" in claims or "family_name" in claims
 
         # M2M tokens typically:
         # - Don't have username
@@ -77,10 +79,9 @@ class M2MTokenDetector:
         # - Have client_id but no user-specific claims
         is_m2m = (
             not has_cognito_username
-            and (token_use == "access" or not token_use)  # nosec B105 - JWT token_use claim value, not a password
-            and has_client_id
-            and not has_email
-            and not has_name
+            and (token_use == "access" or not token_use)  # nosec B105 - claim value
+            and "client_id" in claims
+            and not M2MTokenDetector._has_user_profile_claims(claims)
         )
 
         if is_m2m:

@@ -6,7 +6,6 @@ import pytest
 
 from auth_middleware.exceptions.authentication_error import AuthenticationError
 from auth_middleware.exceptions.password_policy_error import PasswordPolicyError
-from auth_middleware.exceptions.user_not_found_error import UserNotFoundError
 from auth_middleware.providers.aws.cognito_exceptions import (
     InvalidChallengeError,
     MfaSetupError,
@@ -28,7 +27,11 @@ except ImportError:  # pragma: no cover - optional dependency
 
 
 class _FakeClientError(_BaseError):  # type: ignore[misc,valid-type]
-    """Stand-in for botocore.exceptions.ClientError (a real subclass when available)."""
+    """Stand-in for botocore.exceptions.ClientError (a real subclass when available).
+
+    The service catches ``botocore.exceptions.ClientError`` when botocore is
+    importable and plain ``Exception`` otherwise; subclassing keeps both paths valid.
+    """
 
     def __init__(self, code: str) -> None:
         response = {"Error": {"Code": code, "Message": code}}
@@ -390,11 +393,12 @@ def test_forgot_password_success(svc):
     assert result.destination == "u***@example.com"
 
 
-def test_forgot_password_raises_user_not_found(svc):
+def test_forgot_password_does_not_reveal_unknown_users(svc):
     svc._cognito.forgot_password.side_effect = _client_error("UserNotFoundException")
 
-    with pytest.raises(UserNotFoundError):
-        svc.forgot_password("unknown@example.com")
+    result = svc.forgot_password("unknown@example.com")  # no exception: no oracle
+
+    assert result.delivery_medium == "EMAIL"
 
 
 # ---------------------------------------------------------------------------
@@ -437,12 +441,12 @@ def test_reset_password_raises_policy_error(svc):
         svc.reset_password("user@example.com", "123456", "weak")
 
 
-def test_reset_password_raises_user_not_found(svc):
+def test_reset_password_unknown_user_looks_like_a_wrong_code(svc):
     svc._cognito.confirm_forgot_password.side_effect = _client_error(
         "UserNotFoundException"
     )
 
-    with pytest.raises(UserNotFoundError):
+    with pytest.raises(InvalidChallengeError):
         svc.reset_password("unknown@example.com", "123456", "NewPass1!")
 
 

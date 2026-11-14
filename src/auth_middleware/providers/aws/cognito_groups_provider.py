@@ -1,7 +1,9 @@
+from collections.abc import Mapping
 from typing import Any
 
 from auth_middleware.contracts.groups_provider import GroupsProvider
 from auth_middleware.providers.aws import COGNITO_GROUPS_CLAIM
+from auth_middleware.providers.aws.scope_mapping import names_from_scope
 from auth_middleware.types.jwt import JWTAuthorizationCredentials
 
 
@@ -12,10 +14,28 @@ class CognitoGroupsProvider(GroupsProvider):
         groups_claim (str): name of the claim carrying the user's groups
             (a list of group names on ID tokens). Defaults to
             ``COGNITO_GROUPS_CLAIM`` (``"cognito:groups"``).
+        resource_server (str | None): identifier of your Cognito resource
+            server. Machine tokens carry no groups claim, only a custom scope
+            ``"<resource_server>/<name>"``; when set, such a single scope maps
+            to ``<name>``. Scopes of other resource servers never map.
+        scope_map (Mapping[str, str] | None): exact ``full scope -> name``
+            table, an alternative (or addition) to ``resource_server``.
+
+    Without ``resource_server`` or ``scope_map`` the ``scope`` claim is ignored
+    (fail closed): blindly stripping the prefix would turn a token issued for
+    another resource server into one of your groups.
     """
 
-    def __init__(self, *, groups_claim: str = COGNITO_GROUPS_CLAIM) -> None:
+    def __init__(
+        self,
+        *,
+        groups_claim: str = COGNITO_GROUPS_CLAIM,
+        resource_server: str | None = None,
+        scope_map: Mapping[str, str] | None = None,
+    ) -> None:
         self._groups_claim = groups_claim
+        self._resource_server = resource_server
+        self._scope_map = dict(scope_map) if scope_map else None
 
     async def fetch_groups(self, token: str | JWTAuthorizationCredentials) -> list[str]:
         """Get groups using the token provided
@@ -53,13 +73,8 @@ class CognitoGroupsProvider(GroupsProvider):
             # the groups claim is a list of groups
             return list(claims[self._groups_claim])
 
-        # 'scope' is a space-separated list of OAuth2 scopes. Only a
-        # single custom scope in the Cognito 'resourceServer/scopeName'
-        # format can be mapped to one group name; a real user access
-        # token's standard multi-scope claim (e.g. "openid profile
-        # email") carries no group information and must not be
-        # misread as a single group.
-        scopes = str(claims["scope"]).split()
-        if len(scopes) != 1:
-            return []
-        return [scopes[0].split("/")[-1]]
+        return names_from_scope(
+            claims,
+            resource_server=self._resource_server,
+            scope_map=self._scope_map,
+        )

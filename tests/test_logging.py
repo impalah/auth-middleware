@@ -185,7 +185,8 @@ class TestLogging:
         assert set(call_args[1].keys()) == expected_keys
         assert call_args[1]["serialize"] is False
         assert call_args[1]["backtrace"] is True
-        assert call_args[1]["diagnose"] is True
+        # diagnose would print local variables (tokens, passwords) in tracebacks
+        assert call_args[1]["diagnose"] is False
 
     def test_module_exports(self):
         """Test that module exports the expected symbols."""

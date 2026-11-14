@@ -149,7 +149,7 @@ class TestPermissionsChecker:
     async def test_permissions_checker_none_permissions(
         self, permissions_checker, mock_request, mock_user
     ):
-        """Test that checker handles None permissions correctly."""
+        """A provider returning None must be denied, not allowed."""
         with patch(
             "auth_middleware.guards.permissions_checker.settings"
         ) as mock_settings:
@@ -162,9 +162,10 @@ class TestPermissionsChecker:
                 mock_user._permissions = None
                 mock_user._permissions_task = None
 
-                # Should pass when permissions is None (the logic in the actual code)
-                result = await permissions_checker(mock_request)
-                assert result is None
+                # None must fail closed (it used to pass: a fail-open hole)
+                with pytest.raises(HTTPException) as exc:
+                    await permissions_checker(mock_request)
+                assert exc.value.status_code == 403
 
     @pytest.mark.asyncio
     async def test_permissions_checker_empty_permissions(

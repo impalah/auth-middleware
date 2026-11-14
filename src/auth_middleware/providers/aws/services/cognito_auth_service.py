@@ -15,7 +15,6 @@ except ImportError:
 
 from auth_middleware.exceptions.authentication_error import AuthenticationError
 from auth_middleware.exceptions.password_policy_error import PasswordPolicyError
-from auth_middleware.exceptions.user_not_found_error import UserNotFoundError
 from auth_middleware.providers.aws.cognito_exceptions import (
     InvalidChallengeError,
     MfaSetupError,
@@ -36,6 +35,27 @@ _CHALLENGE_MAP: dict[str, str] = {
     "SMS_MFA": "SMS_MFA",
     "NEW_PASSWORD_REQUIRED": "NEW_PASSWORD_REQUIRED",  # nosec B105 - Cognito challenge type name, not a password
 }
+
+# Name of the ChallengeResponses entry that carries the user's answer.
+_CHALLENGE_RESPONSE_FIELD: dict[str, str] = {
+    "MFA_TOTP": "SOFTWARE_TOKEN_MFA_CODE",
+    "SMS_MFA": "SMS_MFA_CODE",
+    "NEW_PASSWORD_REQUIRED": "NEW_PASSWORD",  # nosec B105 - Cognito field name
+}
+
+# Cognito error codes meaning "the challenge answer is wrong or expired".
+_INVALID_CHALLENGE_CODES = frozenset(
+    {"CodeMismatchException", "ExpiredCodeException", "NotAuthorizedException"}
+)
+
+
+def _raise_challenge_error(exc: Exception) -> None:
+    """Translate a Cognito ClientError of the challenge flow; returns if unknown."""
+    code = _error_code(exc) or ""
+    if code in _INVALID_CHALLENGE_CODES:
+        raise InvalidChallengeError() from exc
+    if code == "InvalidPasswordException":
+        raise PasswordPolicyError() from exc
 
 
 def _error_code(exc: Exception) -> str | None:
@@ -167,12 +187,9 @@ class CognitoAuthService:
         )
 
         challenge_responses: dict[str, str] = {"USERNAME": username or ""}
-        if challenge == "MFA_TOTP":
-            challenge_responses["SOFTWARE_TOKEN_MFA_CODE"] = response
-        elif challenge == "SMS_MFA":
-            challenge_responses["SMS_MFA_CODE"] = response
-        elif challenge == "NEW_PASSWORD_REQUIRED":
-            challenge_responses["NEW_PASSWORD"] = response
+        response_field = _CHALLENGE_RESPONSE_FIELD.get(challenge)
+        if response_field:
+            challenge_responses[response_field] = response
 
         secret_hash = self._secret_hash(username or "")
         if secret_hash:
@@ -186,15 +203,7 @@ class CognitoAuthService:
                 ChallengeResponses=challenge_responses,
             )
         except _ClientError as exc:
-            code = _error_code(exc) or ""
-            if code in (
-                "CodeMismatchException",
-                "ExpiredCodeException",
-                "NotAuthorizedException",
-            ):
-                raise InvalidChallengeError() from exc
-            if code == "InvalidPasswordException":
-                raise PasswordPolicyError() from exc
+            _raise_challenge_error(exc)
             raise
 
         if "ChallengeName" in resp:
@@ -300,7 +309,11 @@ class CognitoAuthService:
         except _ClientError as exc:
             code = _error_code(exc) or ""
             if code == "UserNotFoundException":
-                raise UserNotFoundError() from exc
+                # Same answer as for an existing user: do not reveal which
+                # usernames exist (the reset code simply never arrives).
+                return ForgotPasswordResponse(
+                    delivery_medium="EMAIL", destination="***"
+                )
             raise
         delivery = resp["CodeDeliveryDetails"]
         return ForgotPasswordResponse(
@@ -325,12 +338,14 @@ class CognitoAuthService:
             self._cognito.confirm_forgot_password(**params)
         except _ClientError as exc:
             code_err = _error_code(exc) or ""
-            if code_err in ("CodeMismatchException", "ExpiredCodeException"):
+            if code_err in (
+                "CodeMismatchException",
+                "ExpiredCodeException",
+                "UserNotFoundException",  # indistinguishable from a wrong code
+            ):
                 raise InvalidChallengeError("Invalid or expired reset code") from exc
             if code_err == "InvalidPasswordException":
                 raise PasswordPolicyError() from exc
-            if code_err == "UserNotFoundException":
-                raise UserNotFoundError() from exc
             raise
         return MessageResponse(message="Password reset successfully")
 

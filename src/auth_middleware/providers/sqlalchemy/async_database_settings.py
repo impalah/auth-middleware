@@ -28,6 +28,10 @@ class AsyncDatabaseSettings(Settings):
 
     AUTHZ_ECHO_POOL = config("AUTHZ_ECHO_POOL", cast=bool, default=False)
 
+    # Log every SQL statement. Separate from pool echo: statements carry bound
+    # parameters (usernames), so this must be an explicit choice.
+    AUTHZ_ECHO = config("AUTHZ_ECHO", cast=bool, default=False)
+
     AUTHZ_POOL_RECYCLE_IN_SECONDS: int = config(
         "AUTHZ_POOL_RECYCLE_IN_SECONDS",
         cast=int,

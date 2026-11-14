@@ -11,6 +11,9 @@ from auth_middleware.types.jwt import JWTAuthorizationCredentials
 from .async_database import AsyncDatabase
 from .sql_base_model import Base
 
+#: Claims a user can usually edit or that an IdP may not verify.
+_MUTABLE_CLAIMS = frozenset({"preferred_username", "email", "name", "nickname"})
+
 
 class GroupsModel(Base):  # type: ignore[misc]
     """Repository groups model
@@ -47,6 +50,13 @@ class SqlGroupsProvider(GroupsProvider):
     """
 
     def __init__(self, *, id_claim: str = "username") -> None:
+        if id_claim in _MUTABLE_CLAIMS:
+            logger.warning(
+                "id_claim={!r}: authorization is keyed on a claim that is editable "
+                "or unverified at many identity providers (it can be used to "
+                "impersonate another user). Prefer 'sub'.",
+                id_claim,
+            )
         self._id_claim = id_claim
 
     async def fetch_groups(self, token: str | JWTAuthorizationCredentials) -> list[str]:
@@ -98,8 +108,6 @@ class SqlGroupsProvider(GroupsProvider):
         Returns:
             List[str]: List of groups
         """
-
-        logger.debug("Username: {}", username)
 
         try:
             async with AsyncDatabase.get_session() as session:

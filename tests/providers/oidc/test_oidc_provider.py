@@ -21,7 +21,7 @@ _ISSUER = "https://authentik.example.com/application/o/my-app/"
 
 
 def _settings(**kwargs) -> OidcProviderSettings:
-    base = {"issuer": _ISSUER}
+    base = {"issuer": _ISSUER, "require_audience": False}
     base.update(kwargs)
     return OidcProviderSettings(**base)
 

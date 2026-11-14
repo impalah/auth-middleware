@@ -180,6 +180,10 @@ class User(BaseModel):
             email="synthetic@email.com",
         )
 
+    def _provider_token(self) -> Any:
+        """What lazy providers receive: parsed credentials if known, else the token."""
+        return self._jwt_credentials or self._token
+
     @property
     async def groups(self) -> list[str]:
         """Async property to get the groups of the user.
@@ -193,7 +197,10 @@ class User(BaseModel):
                 self._groups_task = asyncio.create_task(self._load_groups())
 
             # Wait for the task to finish
-            self._groups = await self._groups_task
+            # shield: a cancelled caller must not cancel the shared task
+            loaded = await asyncio.shield(self._groups_task)
+            self._groups = loaded
+            return loaded
 
         return self._groups
 
@@ -207,10 +214,11 @@ class User(BaseModel):
         if self._groups is not None:
             return self._groups
 
-        if not self._groups_provider or not self._token:
+        source = self._provider_token()
+        if not self._groups_provider or not source:
             return []
 
-        groups = await self._groups_provider.fetch_groups(self._token)
+        groups = await self._groups_provider.fetch_groups(source)
         return groups
 
     @property
@@ -226,7 +234,10 @@ class User(BaseModel):
                 self._roles_task = asyncio.create_task(self._load_roles())
 
             # Wait for the task to finish
-            self._roles = await self._roles_task
+            # shield: a cancelled caller must not cancel the shared task
+            loaded = await asyncio.shield(self._roles_task)
+            self._roles = loaded
+            return loaded
 
         return self._roles
 
@@ -240,10 +251,11 @@ class User(BaseModel):
         if self._roles is not None:
             return self._roles
 
-        if not self._roles_provider or not self._token:
+        source = self._provider_token()
+        if not self._roles_provider or not source:
             return []
 
-        roles = await self._roles_provider.fetch_roles(self._token)
+        roles = await self._roles_provider.fetch_roles(source)
         return roles
 
     @property
@@ -259,7 +271,10 @@ class User(BaseModel):
                 self._permissions_task = asyncio.create_task(self._load_permissions())
 
             # Wait for the task to finish
-            self._permissions = await self._permissions_task
+            # shield: a cancelled caller must not cancel the shared task
+            loaded = await asyncio.shield(self._permissions_task)
+            self._permissions = loaded
+            return loaded
 
         return self._permissions
 
@@ -269,8 +284,9 @@ class User(BaseModel):
         Returns:
             List[str]: _description_
         """
-        if not self._permissions_provider or not self._token:
+        source = self._provider_token()
+        if not self._permissions_provider or not source:
             return []
 
-        permissions = await self._permissions_provider.fetch_permissions(self._token)
+        permissions = await self._permissions_provider.fetch_permissions(source)
         return permissions

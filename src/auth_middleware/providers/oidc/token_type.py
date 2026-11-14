@@ -1,9 +1,9 @@
 """OAuth2/OIDC token type classification."""
 
-from enum import Enum
+from enum import StrEnum
 
 
-class TokenType(str, Enum):
+class TokenType(StrEnum):
     """The kind of token a Bearer credential turned out to be.
 
     Identity providers don't agree on how (or whether) they label this:

@@ -4,5 +4,3 @@ class AzureException(Exception):
     Args:
         Exception (Exception): inherits from base exception
     """
-
-    ...

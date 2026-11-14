@@ -55,8 +55,6 @@ class ChangePasswordRequest(BaseModel):
 class ForgotPasswordRequest(BaseLoginRequest):
     """Payload for initiating the forgot-password flow (sends a verification code)."""
 
-    ...
-
 
 class ResetPasswordRequest(BaseLoginRequest):
     """Payload for completing a password reset using the emailed verification code."""

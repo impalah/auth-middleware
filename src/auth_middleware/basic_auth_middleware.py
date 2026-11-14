@@ -1,3 +1,4 @@
+import asyncio
 import base64
 from typing import Any
 
@@ -21,6 +22,13 @@ from auth_middleware.settings import settings
 from auth_middleware.types.user import User
 from auth_middleware.types.user_credentials import UserCredentials
 
+#: A valid but never-matching hash, verified for unknown users so that they cost the
+#: same as a wrong password (no username enumeration through timing).
+_DUMMY_HASH = (
+    "pbkdf2_sha256$600000$e9755e6169c4dca5d3e791b040ee596e$"
+    "63e49e1522933101511f9fefc3ae8fc385cc53ee023cc85c74d896855e789b3f"
+)
+
 
 class BasicAuthMiddleware(BaseHTTPMiddleware):
     """Basic scheme Authorization middleware for FastAPI
@@ -41,6 +49,12 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
     ) -> None:
         # `app` comes first because Starlette's `add_middleware` instantiates
         # `cls(app, **options)`.
+        if settings.AUTH_MIDDLEWARE_DISABLED:
+            logger.warning(
+                "AUTH_MIDDLEWARE_DISABLED is set: authentication and the legacy "
+                "guards are OFF and every request is treated as the synthetic user. "
+                "Never use this in production."
+            )
         super().__init__(app, *args, **kwargs)
         self._credentials_repository = credentials_repository
 
@@ -49,7 +63,8 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
     ) -> Response | JSONResponse:
         try:
             request.state.current_user = await self.get_current_user(request=request)
-        except InvalidAuthorizationException as ite:
+        except (InvalidAuthorizationException, InvalidCredentialsException) as ite:
+            # A malformed header is a client error (401), never a 500.
             logger.error("Invalid authorization {}", str(ite))
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -143,30 +158,25 @@ class BasicAuthMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="No credentials provided",
             )
-        logger.debug("Credentials: {}", credentials)
 
         # Get user credentials from the repository
         user_credentials: (
             UserCredentials | None
         ) = await self._credentials_repository.get_by_id(id=credentials[0])
-        if not user_credentials:
+        # Unknown user and wrong password must look the same, in status and in
+        # time: always run the (deliberately slow) hash verification, and do it in
+        # a worker thread so it does not block the event loop.
+        stored_hash = (
+            user_credentials.hashed_password if user_credentials else _DUMMY_HASH
+        )
+        password_ok = await asyncio.to_thread(
+            verify_password, credentials[1], stored_hash
+        )
+        if not user_credentials or not password_ok:
+            logger.error("Basic authentication failed")
             raise InvalidAuthorizationException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials",
-            )
-
-        if not user_credentials:
-            logger.error("User not found")
-            raise InvalidAuthorizationException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid User credentials",
-            )
-
-        # Validate credentials
-        if not verify_password(credentials[1], user_credentials.hashed_password):
-            raise InvalidAuthorizationException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Invalid User credentials",
             )
 
         user: User = User(

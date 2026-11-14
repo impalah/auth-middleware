@@ -4,5 +4,3 @@ class AWSException(Exception):
     Args:
         Exception (Exception): inherits from base exception
     """
-
-    ...
