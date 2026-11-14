@@ -256,7 +256,7 @@
 <span class="w">    </span><span class="sd">"""Create the PynamoDB model classes bound to a runtime table name."""</span>
     <span class="n">gsi_name</span> <span class="o">=</span> <span class="n">index_name</span>
 
-    <span class="k">class</span><span class="w"> </span><span class="nc">ByPrincipal</span><span class="p">(</span><span class="n">GlobalSecondaryIndex</span><span class="p">):</span>  <span class="c1"># type: ignore[type-arg,no-untyped-call]</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">ByPrincipal</span><span class="p">(</span><span class="n">GlobalSecondaryIndex</span><span class="p">):</span>  <span class="c1"># type: ignore[type-arg,no-untyped-call,misc,unused-ignore]</span>
         <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
             <span class="n">index_name</span> <span class="o">=</span> <span class="n">gsi_name</span>
             <span class="n">projection</span> <span class="o">=</span> <span class="n">AllProjection</span><span class="p">()</span>
@@ -271,8 +271,8 @@
     <span class="n">meta_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
     <span class="n">meta_cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s2">"Meta"</span><span class="p">,</span> <span class="p">(),</span> <span class="n">meta_attrs</span><span class="p">)</span>
 
-    <span class="k">class</span><span class="w"> </span><span class="nc">Item</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-        <span class="n">Meta</span> <span class="o">=</span> <span class="n">meta_cls</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">Item</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>  <span class="c1"># type: ignore[misc,unused-ignore]</span>
+        <span class="n">Meta</span> <span class="o">=</span> <span class="n">meta_cls</span>  <span class="c1"># type: ignore[assignment,unused-ignore]</span>
         <span class="n">pk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">hash_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">sk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">range_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">gsi1pk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
