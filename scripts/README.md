@@ -10,7 +10,7 @@ This script automatically synchronizes the version number across all project fil
 
 1. **Reads version** from `pyproject.toml` (the authoritative source)
 2. **Updates** `src/auth_middleware/__init__.py` with the new `__version__`
-3. **Updates** `docs_source/conf.py` with the new `release = version = 'x.y.z'`
+3. **Updates** `pages_source/conf.py` with the new `release = version = 'x.y.z'`
 4. **Reports** all changes made
 
 ### Usage
@@ -38,7 +38,7 @@ uv run python scripts/update_version.py
 - **Files managed**:
   - `pyproject.toml` (source of truth, updated by bump2version)
   - `src/auth_middleware/__init__.py` (`__version__` variable)
-  - `docs_source/conf.py` (`release = version = 'x.y.z'` line)
+  - `pages_source/conf.py` (`release = version = 'x.y.z'` line)
 
 ### Example Output
 
@@ -46,7 +46,7 @@ uv run python scripts/update_version.py
 Synchronizing version across project files...
 Found version in pyproject.toml: 0.1.5
 Updated __version__ in src/auth_middleware/__init__.py
-Updated version and release in docs_source/conf.py
+Updated version and release in pages_source/conf.py
 Successfully synchronized version 0.1.5 across all files
 ```
 

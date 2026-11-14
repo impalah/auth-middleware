@@ -69,7 +69,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
-docs/_build/
+pages/_build/
 
 # PyBuilder
 .pybuilder/
@@ -213,3 +213,6 @@ graphify-out/
 
 # Claude Code project instructions (not committed yet)
 CLAUDE.md
+
+# Claude Code local state
+.claude/

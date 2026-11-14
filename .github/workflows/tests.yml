@@ -30,3 +30,70 @@ jobs:
 
       - name: Run tests
         run: uv run pytest tests/ -q
+
+  integration-postgres:
+    # Real-database tests of the SQL assignment store (pytest marker: integration).
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: pw
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      AUTHZ_TEST_POSTGRES_URL: postgresql+asyncpg://postgres:pw@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --python 3.14 --all-extras --group dev
+
+      - name: Run integration tests
+        run: uv run pytest -m integration tests/authz -q
+
+  integration-dynamodb:
+    # The DynamoDB store tests against the real DynamoDB engine (DynamoDB Local).
+    runs-on: ubuntu-latest
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local:latest
+        ports:
+          - 8000:8000
+    env:
+      AUTHZ_TEST_DYNAMODB_ENDPOINT: http://localhost:8000
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --python 3.14 --all-extras --group dev
+
+      - name: Run integration tests
+        run: uv run pytest -m integration tests/authz/integration/test_dynamodb_store.py -q
+
+  floci:
+    # DynamoDB, PostgreSQL and MySQL stores against Floci, started with testcontainers
+    # (Floci starts the real database containers through the runner's Docker socket).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --python 3.14 --all-extras --group dev
+
+      - name: Run Floci tests
+        run: uv run pytest -m floci tests/authz/integration/test_floci.py -v

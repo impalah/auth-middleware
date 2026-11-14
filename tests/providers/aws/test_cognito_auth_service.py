@@ -21,12 +21,22 @@ from auth_middleware.providers.aws.services.cognito_auth_service import (
 # ---------------------------------------------------------------------------
 
 
-class _FakeClientError(Exception):
-    """Minimal stand-in for botocore.exceptions.ClientError."""
+try:  # botocore is installed once the dynamodb extra / moto are (see AUTHZ-009/010)
+    from botocore.exceptions import ClientError as _BaseError
+except ImportError:  # pragma: no cover - optional dependency
+    _BaseError = Exception  # type: ignore[assignment,misc]
+
+
+class _FakeClientError(_BaseError):  # type: ignore[misc,valid-type]
+    """Stand-in for botocore.exceptions.ClientError (a real subclass when available)."""
 
     def __init__(self, code: str) -> None:
-        self.response = {"Error": {"Code": code, "Message": code}}
-        super().__init__(code)
+        response = {"Error": {"Code": code, "Message": code}}
+        if _BaseError is Exception:
+            super().__init__(code)
+            self.response = response
+        else:
+            super().__init__(response, "TestOperation")
 
 
 def _client_error(code: str) -> _FakeClientError:

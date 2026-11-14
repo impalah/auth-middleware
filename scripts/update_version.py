@@ -4,7 +4,7 @@ Script to synchronize version across all project files.
 
 This script reads the version from pyproject.toml and updates it in:
 - src/auth_middleware/__init__.py (__version__)
-- docs_source/conf.py (release and version)
+- pages_source/conf.py (release and version)
 - Any other files that need version synchronization
 """
 
@@ -77,8 +77,8 @@ def update_init_version(version: str) -> bool:
 
 
 def update_sphinx_conf(version: str) -> bool:
-    """Update version and release in docs_source/conf.py"""
-    conf_path = Path("docs_source/conf.py")
+    """Update version and release in pages_source/conf.py"""
+    conf_path = Path("pages_source/conf.py")
 
     if not conf_path.exists():
         print(f"Warning: {conf_path} not found")

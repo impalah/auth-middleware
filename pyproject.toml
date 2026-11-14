@@ -1,6 +1,6 @@
 [project]
 name = "auth-middleware"
-version = "0.6.2"
+version = "0.7.0"
 description = "Async Auth Middleware for FastAPI/Starlette"
 authors = [
     {name = "impalah", email = "impalah@gmail.com"}
@@ -23,22 +23,42 @@ classifiers = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.128.0",
-    "python-dotenv>=1.2.2",
-    "svix-ksuid>=0.6.2",
+    "fastapi>=0.162.7",
+    "starlette>=1.10.0",
+    "python-dotenv>=1.2.4",
     "httpx>=0.28.1",
-    "click>=8.3.1",
-    "loguru>=0.7.3",
-    "joserfc>=1.6.3",
-    "pydantic[email]>=2.12.5",
-    "pydantic-settings>=2.12.0",
+    "click>=8.5.1",
+    "loguru>=0.8.0",
+    "joserfc>=1.8.0",
+    "pydantic[email]>=2.14.3",
+    "pydantic-settings>=2.16.3",
+    "email-validator>=2.3.0",
 ]
 
 [project.optional-dependencies]
+# SQL stores and providers. `sqlalchemy` installs both drivers (historical name);
+# use `postgres` or `mysql` to install only the one you need.
 sqlalchemy = [
-    "sqlalchemy[asyncio]>=2.0.46",
-    "asyncpg>=0.31.0",
+    "sqlalchemy[asyncio]>=2.1.8",
+    "svix-ksuid>=0.7.0",
+    "asyncpg>=0.32.0",
     "aiomysql>=0.3.2",
+]
+postgres = [
+    "sqlalchemy[asyncio]>=2.1.8",
+    "svix-ksuid>=0.7.0",
+    "asyncpg>=0.32.0",
+]
+mysql = [
+    "sqlalchemy[asyncio]>=2.1.8",
+    "svix-ksuid>=0.7.0",
+    "aiomysql>=0.3.2",
+]
+dynamodb = [
+    "pynamodb>=6.1.0",
+]
+cognito = [
+    "boto3>=1.44.3",
 ]
 
 [project.urls]
@@ -56,28 +76,31 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "bandit>=1.9.3",
-    "debugpy>=1.8.19",
+    "bandit>=1.9.4",
+    "debugpy>=1.8.22",
     "httpx>=0.28.1",
-    "ipykernel>=7.1.0",
-    "mypy>=1.19.1",
-    "pytest>=9.0.2",
-    "pytest-asyncio>=1.3.0",
-    "pytest-cov>=7.0.0",
-    "pytest-mock>=3.15.1",
-    "ruff>=0.14.14",
+    "ipykernel>=7.4.0",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "pytest-cov>=7.1.0",
+    "pytest-mock>=3.17.0",
+    "ruff>=0.17.5",
     "mock>=5.2.0",
-    "pytest-env>=1.2.0",
-    "alembic>=1.18.2",
-    "psycopg2-binary>=2.9.11",
-    "uvicorn>=0.40.0",
-    "pysonar>=1.7.0.5143",
+    "pytest-env>=1.8.5",
+    "alembic>=1.20.1",
+    "psycopg2-binary>=2.9.13",
+    "uvicorn>=0.54.0",
+    "pysonar>=1.11.0.6012",
+    "aiosqlite>=0.22.1",
+    "moto[dynamodb,server]>=5.2.5",
+    "testcontainers>=4.15.0",
 ]
 docs = [
-    "sphinx>=9.1.0",
+    "sphinx>=9.1.1",
     "sphinx-rtd-theme>=3.1.0",
-    "sphinx-autodoc-typehints>=3.6.2",
-    "myst-parser>=5.0.0",
+    "sphinx-autodoc-typehints>=3.17.5",
+    "myst-parser>=5.2.0",
     "sphinx-copybutton>=0.5.2",
     "furo>=2025.12.19",
 ]
@@ -90,13 +113,34 @@ target-version = "py312"  # Lowest supported Python
 [tool.ruff.lint]
 # Activate additional rules to imitate flake8 and isort
 select = [
-  "E", "F", "I", "UP", "B", "W", "C90"
+  "E", "F", "I", "UP", "B", "W", "C90",
+  # Added by the 0.7.0 quality review: security (bandit rules), async pitfalls,
+  # pylint errors, stale noqa and mutable class defaults.
+  "S", "ASYNC", "PLE", "RUF100", "RUF012",
 ]
 # Exclude files and folders that are not part of the source code
 exclude = ["tests/data", ".venv"]
 
 # Activate autofix for common problems
 fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests may assert, use throwaway credentials and bind to ephemeral ports.
+"tests/**" = ["S102", "S101", "S105", "S106", "S108", "S110", "S311", "S603", "S607", "S104"]
+# The shipped contract test-suite is assertion based by design.
+"src/auth_middleware/authz/testing/*" = ["S101"]
+# `token_type = "Bearer"` / `token_use == "access"` are not passwords.
+"src/auth_middleware/providers/aws/services/cognito_auth_models.py" = ["S105"]
+"src/auth_middleware/providers/aws/services/m2m_detector.py" = ["S105"]
+"examples/*" = ["S101", "S105", "S106", "S104"]
+# FastAPI idiom: Depends(...) in argument defaults; long literals in tests
+"tests/authz/*" = ["B008", "E501"]
+"tests/test_cli_authz.py" = ["E501"]
+"tests/test_hardening_regressions.py" = ["E501"]
+"examples/authz_example.py" = ["B008"]
+"tests/guards/test_authenticated.py" = ["B008"]
+"tests/test_jwt_auth_middleware_options.py" = ["B008"]
+"tests/providers/oidc/test_oidc_hardening.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -130,3 +174,24 @@ warn_return_any = false
 
 
 
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+# Floci tests start Docker containers: opt in with `-m floci` (make test-floci)
+addopts = "-m 'not floci'"
+markers = [
+    "integration: needs a real external service (set AUTHZ_TEST_POSTGRES_URL / AUTHZ_TEST_DYNAMODB_*) or Docker; skipped when absent",
+    "floci: runs against a Floci container started with testcontainers (needs Docker); excluded by default, select with -m floci",
+]
+
+[tool.deptry]
+known_first_party = ["auth_middleware"]
+# The ksuid module ships in the svix-ksuid distribution.
+package_module_name_map = { "svix-ksuid" = "ksuid" }
+
+[tool.deptry.per_rule_ignores]
+# Loaded by name at runtime, never imported: pydantic-settings reads `.env` with
+# python-dotenv; SQLAlchemy loads the asyncpg/aiomysql driver from the URL scheme.
+DEP002 = ["python-dotenv", "asyncpg", "aiomysql"]
+# botocore ships with boto3 (the `cognito` extra), imported lazily with it.
+DEP001 = ["botocore"]

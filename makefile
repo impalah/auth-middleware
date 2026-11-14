@@ -27,7 +27,7 @@ venv:
 	echo "Created virtual environment" && \
 	uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version
 
-# Sync version from pyproject.toml to __init__.py and docs_source/conf.py
+# Sync version from pyproject.toml to __init__.py and pages_source/conf.py
 sync-version:
 	uv run python scripts/update_version.py
 
@@ -101,7 +101,7 @@ type-check:
 
 # Run security checks with bandit
 security-check:
-	uv run bandit -r src/
+	uv run bandit -r src/ --exclude src/auth_middleware/authz/testing
 
 # Run all quality checks
 check: lint format type-check security-check
@@ -141,12 +141,16 @@ info:
 	@echo "Virtual env: $$(if [ -d .venv ]; then echo ".venv exists"; else echo ".venv not found"; fi)"
 
 # Build documentation
-docs:
-	uv run sphinx-build docs_source docs
+# Stores against DynamoDB, PostgreSQL and MySQL emulated by Floci (needs Docker)
+test-floci:
+	uv run pytest -m floci tests/authz/integration/test_floci.py -v
+
+pages:
+	uv run sphinx-build -W --keep-going pages_source pages
 
 # Serve documentation locally
-docs-serve: docs
-	uv run python -m http.server 8000 --directory docs
+pages-serve: pages
+	uv run python -m http.server 8000 --directory pages
 
 # Help target
 help:
@@ -167,8 +171,10 @@ help:
 	@echo "  check         - Run all quality checks"
 	@echo "  docker-build  - Build and push Docker image"
 	@echo "  docker-release- Release Docker image"
-	@echo "  docs          - Build documentation"
-	@echo "  docs-serve    - Serve documentation locally"
+	@echo "  test-floci    - Run the store tests on Floci (Docker, testcontainers)"
+	@echo "  deps-check    - Check declared vs imported dependencies (deptry)"
+	@echo "  pages         - Build the Sphinx site into pages/"
+	@echo "  pages-serve   - Serve the built site locally"
 	@echo "  run           - Run the application"
 	@echo "  shell         - Open Python REPL"
 	@echo "  clean         - Clean build artifacts"
@@ -181,4 +187,8 @@ sonar: ## Run SonarQube analysis with pysonar
 
 sonar-check: test-cov sonar ## Run coverage and SonarQube analysis
 
-.PHONY: venv bump-version sync-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info docs docs-serve help sonar sonar-check
+.PHONY: venv bump-version sync-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info test-floci pages pages-serve deps-check help sonar sonar-check
+
+# Dependency hygiene (undeclared / unused / misplaced dependencies)
+deps-check:
+	uvx deptry src
