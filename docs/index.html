@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auth Middleware Documentation &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Auth Middleware Documentation &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/index.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -56,10 +56,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -190,13 +202,13 @@ Keycloak, Auth0, Okta, …):</p>
     <span class="n">OidcProviderSettings</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;My Secure API&quot;</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"My Secure API"</span><span class="p">)</span>
 
 <span class="c1"># Configure OIDC authentication. For AWS Cognito, the issuer is</span>
 <span class="c1"># https://cognito-idp.{region}.amazonaws.com/{user_pool_id}</span>
 <span class="n">auth_settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://your-issuer.example.com&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://your-issuer.example.com"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
     <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -206,12 +218,14 @@ Keycloak, Auth0, Okta, …):</p>
     <span class="n">auth_provider</span><span class="o">=</span><span class="n">OidcProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/protected&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/protected"</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">protected_endpoint</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Hello </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Hello </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
 </pre></div>
 </div>
-<hr class="docutils" />
+</section>
+<section id="contents">
+<h1>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
 <ul>
@@ -241,7 +255,8 @@ Keycloak, Auth0, Okta, …):</p>
 <li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#basic-middleware-setup">Basic Middleware Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#middleware-parameters">Middleware Parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#path-configuration">Path Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#identity-provider-outages">Identity provider outages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#public-and-protected-paths">Public and protected paths</a></li>
 <li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#environment-variables">Environment Variables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#custom-authentication-providers">Custom Authentication Providers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="middleware-configuration.html#performance-configuration">Performance Configuration</a></li>
@@ -271,6 +286,7 @@ Keycloak, Auth0, Okta, …):</p>
 <li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#troubleshooting">Troubleshooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#security-best-practices">Security Best Practices</a></li>
 <li class="toctree-l2"><a class="reference internal" href="infrastructure/cognito-setup.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infrastructure/dynamodb-setup.html">DynamoDB Setup for Scoped Permissions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="infrastructure/entra-id-setup.html">Azure Entra ID Infrastructure Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="infrastructure/entra-id-setup.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="infrastructure/entra-id-setup.html#coming-soon">Coming Soon</a></li>
@@ -309,6 +325,66 @@ Keycloak, Auth0, Okta, …):</p>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authz-quickstart.html#install-only-what-you-need">1. Install only what you need</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-quickstart.html#describe-your-permissions-the-catalog">2. Describe your permissions (the catalog)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-quickstart.html#choose-a-store-and-build-authz">3. Choose a store and build <code class="docutils literal notranslate"><span class="pre">Authz</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-quickstart.html#install-it-on-the-application-and-guard-routes">4. Install it on the application and guard routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-quickstart.html#give-people-roles">5. Give people roles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-quickstart.html#test-your-routes">6. Test your routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-quickstart.html#where-next">Where next</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authz-overview.html#flat-rbac-or-scoped-permissions">Flat RBAC or scoped permissions?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-overview.html#concepts">Concepts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-overview.html#two-failure-modes-on-purpose">Two failure modes, on purpose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-overview.html#request-flow">Request flow</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authz-catalog.html#in-code">In code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-catalog.html#from-toml-or-json">From TOML or JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-catalog.html#scope-kinds-and-hide-existence">Scope kinds and <code class="docutils literal notranslate"><span class="pre">hide_existence</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authz-stores.html#contract-semantics-all-stores">Contract semantics (all stores)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-stores.html#sqlalchemy">SQLAlchemy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-stores.html#per-request-store-sharing-the-request-s-session">Per-request store (sharing the request’s session)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-stores.html#dynamodb">DynamoDB</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-stores.html#tested-engines">Tested engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-stores.html#writing-your-own-adapter">Writing your own adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authz-fastapi.html#wiring">Wiring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-fastapi.html#guarding-routes">Guarding routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-fastapi.html#error-policy">Error policy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-fastapi.html#openapi-and-architecture-tests">OpenAPI and architecture tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-fastapi.html#mounted-sub-applications">Mounted sub-applications</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authz-operations.html#assignment-service">Assignment service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-operations.html#cli">CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-operations.html#cache-opt-in">Cache (opt-in)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-operations.html#audit-and-metrics">Audit and metrics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="authz-api.html#runtime-and-guards">Runtime and guards</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-api.html#catalog-and-engine">Catalog and engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-api.html#service-cache-and-events">Service, cache and events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-api.html#stores">Stores</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a><ul>
@@ -332,6 +408,10 @@ Keycloak, Auth0, Okta, …):</p>
 <li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#example-keycloak">Example: Keycloak</a></li>
 <li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#building-your-own-provider">Building Your Own Provider</a></li>
 <li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#module-auth_middleware.providers.oidc.oidc_provider">API Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="oidc_provider.html#hardening-checklist">Hardening checklist</a></li>
 </ul>
 </li>
 </ul>
@@ -528,6 +608,8 @@ Keycloak, Auth0, Okta, …):</p>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#advanced-usage-examples">Advanced Usage Examples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#error-handling">Error Handling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="functions.html#module-auth_middleware.guards.functions">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#require-authenticated">require_authenticated()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#get-identity">get_identity()</a></li>
 </ul>
 </li>
 </ul>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Permissions Provider &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Permissions Provider &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/permissions-provider.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -57,10 +57,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul class="current">
@@ -206,7 +218,7 @@
 
 <span class="c1"># Configure database connection</span>
 <span class="n">db_settings</span> <span class="o">=</span> <span class="n">AsyncDatabaseSettings</span><span class="p">(</span>
-    <span class="n">database_url</span><span class="o">=</span><span class="s2">&quot;postgresql+asyncpg://user:pass@localhost/mydb&quot;</span>
+    <span class="n">database_url</span><span class="o">=</span><span class="s2">"postgresql+asyncpg://user:pass@localhost/mydb"</span>
 <span class="p">)</span>
 <span class="n">AsyncDatabase</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">db_settings</span><span class="p">)</span>
 
@@ -228,12 +240,19 @@
 using it with <a class="reference internal" href="entra_id_provider.html"><span class="doc">Azure Entra ID Authentication Provider</span></a> or <a class="reference internal" href="oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a>, that
 claim usually doesn’t exist — pass <code class="docutils literal notranslate"><span class="pre">id_claim</span></code> to match what your
 identity provider actually issues:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Entra ID / generic OIDC providers typically use &quot;preferred_username&quot;</span>
-<span class="n">permissions_provider</span> <span class="o">=</span> <span class="n">SqlPermissionsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">&quot;preferred_username&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># "sub" is stable, provider-agnostic and cannot be edited by the user (recommended)</span>
+<span class="n">permissions_provider</span> <span class="o">=</span> <span class="n">SqlPermissionsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">"sub"</span><span class="p">)</span>
 
-<span class="c1"># Or use &quot;sub&quot; for a stable, provider-agnostic identifier</span>
-<span class="n">permissions_provider</span> <span class="o">=</span> <span class="n">SqlPermissionsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
+<span class="c1"># Claims such as "preferred_username" or "email" work, but a warning is logged:</span>
+<span class="c1"># many identity providers let users edit them</span>
+<span class="n">permissions_provider</span> <span class="o">=</span> <span class="n">SqlPermissionsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">"preferred_username"</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Authorization is keyed on that claim. <code class="docutils literal notranslate"><span class="pre">preferred_username</span></code> and <code class="docutils literal notranslate"><span class="pre">email</span></code> are editable or unverified at
+some identity providers, which would let a user impersonate another user’s groups; prefer <code class="docutils literal notranslate"><span class="pre">&quot;sub&quot;</span></code>.
+On MySQL, note that the default collations compare case-insensitively (<code class="docutils literal notranslate"><span class="pre">Admin</span></code> equals <code class="docutils literal notranslate"><span class="pre">admin</span></code>).</p>
 </div>
 </div>
 <p><strong>Managing Permissions:</strong></p>
@@ -261,9 +280,9 @@ identity provider actually issues:</p>
             <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 
 <span class="c1"># Example usage</span>
-<span class="k">await</span> <span class="n">grant_permission</span><span class="p">(</span><span class="s2">&quot;john.doe&quot;</span><span class="p">,</span> <span class="s2">&quot;read:posts&quot;</span><span class="p">)</span>
-<span class="k">await</span> <span class="n">grant_permission</span><span class="p">(</span><span class="s2">&quot;john.doe&quot;</span><span class="p">,</span> <span class="s2">&quot;write:posts&quot;</span><span class="p">)</span>
-<span class="k">await</span> <span class="n">grant_permission</span><span class="p">(</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;delete:posts&quot;</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">grant_permission</span><span class="p">(</span><span class="s2">"john.doe"</span><span class="p">,</span> <span class="s2">"read:posts"</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">grant_permission</span><span class="p">(</span><span class="s2">"john.doe"</span><span class="p">,</span> <span class="s2">"write:posts"</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">grant_permission</span><span class="p">(</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"delete:posts"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -277,32 +296,32 @@ identity provider actually issues:</p>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/posts&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_posts</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">&quot;read:posts&quot;</span><span class="p">))):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;posts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]}</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/posts"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_posts</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">"read:posts"</span><span class="p">))):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"posts"</span><span class="p">:</span> <span class="p">[</span><span class="o">...</span><span class="p">]}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/posts&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_post</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">&quot;write:posts&quot;</span><span class="p">))):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Post created&quot;</span><span class="p">}</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/posts"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_post</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">"write:posts"</span><span class="p">))):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Post created"</span><span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/posts/</span><span class="si">{post_id}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">"/posts/</span><span class="si">{post_id}</span><span class="s2">"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_post</span><span class="p">(</span>
     <span class="n">post_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">&quot;delete:posts&quot;</span><span class="p">))</span>
+    <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">"delete:posts"</span><span class="p">))</span>
 <span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Post </span><span class="si">{</span><span class="n">post_id</span><span class="si">}</span><span class="s2"> deleted&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Post </span><span class="si">{</span><span class="n">post_id</span><span class="si">}</span><span class="s2"> deleted"</span><span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/user-permissions&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/user-permissions"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">user_permissions</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">())):</span>
     <span class="c1"># Access permissions directly</span>
     <span class="n">permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">user</span><span class="o">.</span><span class="n">permissions</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="n">permissions</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="s2">"permissions"</span><span class="p">:</span> <span class="n">permissions</span><span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/admin-posts&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/admin-posts"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">admin_posts</span><span class="p">(</span>
-    <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">([</span><span class="s2">&quot;read:posts&quot;</span><span class="p">,</span> <span class="s2">&quot;admin:posts&quot;</span><span class="p">]))</span>
+    <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">([</span><span class="s2">"read:posts"</span><span class="p">,</span> <span class="s2">"admin:posts"</span><span class="p">]))</span>
 <span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin access to posts&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Admin access to posts"</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -310,40 +329,40 @@ identity provider actually issues:</p>
 <h1>Permission Patterns<a class="headerlink" href="#permission-patterns" title="Link to this heading"></a></h1>
 <p><strong>Common Permission Formats:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Resource-based permissions</span>
-<span class="s2">&quot;read:posts&quot;</span>
-<span class="s2">&quot;write:posts&quot;</span>
-<span class="s2">&quot;delete:posts&quot;</span>
+<span class="s2">"read:posts"</span>
+<span class="s2">"write:posts"</span>
+<span class="s2">"delete:posts"</span>
 
 <span class="c1"># Action-based permissions</span>
-<span class="s2">&quot;create:user&quot;</span>
-<span class="s2">&quot;update:user&quot;</span>
-<span class="s2">&quot;delete:user&quot;</span>
+<span class="s2">"create:user"</span>
+<span class="s2">"update:user"</span>
+<span class="s2">"delete:user"</span>
 
 <span class="c1"># Hierarchical permissions</span>
-<span class="s2">&quot;admin:system&quot;</span>
-<span class="s2">&quot;admin:users&quot;</span>
-<span class="s2">&quot;admin:posts&quot;</span>
+<span class="s2">"admin:system"</span>
+<span class="s2">"admin:users"</span>
+<span class="s2">"admin:posts"</span>
 
 <span class="c1"># Fine-grained permissions</span>
-<span class="s2">&quot;read:posts:published&quot;</span>
-<span class="s2">&quot;write:posts:draft&quot;</span>
-<span class="s2">&quot;approve:posts:pending&quot;</span>
+<span class="s2">"read:posts:published"</span>
+<span class="s2">"write:posts:draft"</span>
+<span class="s2">"approve:posts:pending"</span>
 </pre></div>
 </div>
 <p><strong>Permission Inheritance:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HierarchicalPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider with inheritance support.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider with inheritance support."""</span>
 
     <span class="n">PERMISSION_HIERARCHY</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;admin&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;admin:*&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;admin:posts&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">,</span> <span class="s2">&quot;write:posts&quot;</span><span class="p">,</span> <span class="s2">&quot;delete:posts&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;admin:users&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read:users&quot;</span><span class="p">,</span> <span class="s2">&quot;write:users&quot;</span><span class="p">,</span> <span class="s2">&quot;delete:users&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;editor&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">,</span> <span class="s2">&quot;write:posts&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;viewer&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">]</span>
+        <span class="s2">"admin"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"admin:*"</span><span class="p">],</span>
+        <span class="s2">"admin:posts"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"read:posts"</span><span class="p">,</span> <span class="s2">"write:posts"</span><span class="p">,</span> <span class="s2">"delete:posts"</span><span class="p">],</span>
+        <span class="s2">"admin:users"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"read:users"</span><span class="p">,</span> <span class="s2">"write:users"</span><span class="p">,</span> <span class="s2">"delete:users"</span><span class="p">],</span>
+        <span class="s2">"editor"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"read:posts"</span><span class="p">,</span> <span class="s2">"write:posts"</span><span class="p">],</span>
+        <span class="s2">"viewer"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"read:posts"</span><span class="p">]</span>
     <span class="p">}</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions with hierarchy resolution.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions with hierarchy resolution."""</span>
         <span class="c1"># Get base permissions</span>
         <span class="n">base_permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_base_permissions</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
@@ -359,7 +378,7 @@ identity provider actually issues:</p>
         <span class="c1"># Handle wildcard permissions</span>
         <span class="n">final_permissions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">permission</span> <span class="ow">in</span> <span class="n">expanded_permissions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">permission</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;:*&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">permission</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">":*"</span><span class="p">):</span>
                 <span class="c1"># Grant all permissions for this resource</span>
                 <span class="n">resource</span> <span class="o">=</span> <span class="n">permission</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
                 <span class="n">final_permissions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_all_permissions_for_resource</span><span class="p">(</span><span class="n">resource</span><span class="p">))</span>
@@ -378,14 +397,14 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom permissions provider implementation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Custom permissions provider implementation."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_client</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span> <span class="o">=</span> <span class="n">api_client</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions from custom source.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions from custom source."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
 
         <span class="c1"># Implement your custom logic here</span>
         <span class="n">permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">get_user_permissions</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
@@ -400,9 +419,9 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RedisPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider using Redis for storage.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider using Redis for storage."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redis_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;redis://localhost:6379&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redis_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"redis://localhost:6379"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_url</span> <span class="o">=</span> <span class="n">redis_url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -412,22 +431,22 @@ identity provider actually issues:</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions from Redis.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions from Redis."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="n">redis_client</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
 
         <span class="c1"># Get direct permissions</span>
-        <span class="n">direct_permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;user_permissions:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">direct_permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="sa">f</span><span class="s2">"user_permissions:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># Get role-based permissions</span>
-        <span class="n">user_roles</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;user_roles:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">user_roles</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="sa">f</span><span class="s2">"user_roles:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
         <span class="n">role_permissions</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">user_roles</span><span class="p">:</span>
-            <span class="n">role_perms</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;role_permissions:</span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">role_perms</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="sa">f</span><span class="s2">"role_permissions:</span><span class="si">{</span><span class="n">role</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">role_permissions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">role_perms</span><span class="p">)</span>
 
         <span class="c1"># Combine and deduplicate</span>
@@ -441,13 +460,13 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">JwtPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract permissions directly from JWT claims.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Extract permissions directly from JWT claims."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">permissions_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;permissions&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">permissions_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"permissions"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">permissions_claim</span> <span class="o">=</span> <span class="n">permissions_claim</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract permissions from JWT claims.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Extract permissions from JWT claims."""</span>
         <span class="n">permissions</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permissions_claim</span><span class="p">,</span> <span class="p">[])</span>
 
         <span class="c1"># Handle different claim formats</span>
@@ -467,7 +486,7 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ApiPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider using external API.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider using external API."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_base_url</span> <span class="o">=</span> <span class="n">api_base_url</span>
@@ -475,9 +494,9 @@ identity provider actually issues:</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions from external API.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
-        <span class="n">user_id</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions from external API."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sub"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">user_id</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
@@ -487,17 +506,17 @@ identity provider actually issues:</p>
         <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_base_url</span><span class="si">}</span><span class="s2">/users/</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">/permissions&quot;</span><span class="p">,</span>
-                    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_base_url</span><span class="si">}</span><span class="s2">/users/</span><span class="si">{</span><span class="n">identifier</span><span class="si">}</span><span class="s2">/permissions"</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
                 <span class="p">)</span>
                 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
 
                 <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-                <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permissions"</span><span class="p">,</span> <span class="p">[])</span>
 
             <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="c1"># Log error and return empty permissions</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to fetch permissions: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to fetch permissions: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 </div>
@@ -509,15 +528,15 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">FilePermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider using JSON file storage.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider using JSON file storage."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">permissions_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;permissions.json&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">permissions_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"permissions.json"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">permissions_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">permissions_file</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_permissions_cache</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_last_modified</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load permissions from file with caching.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Load permissions from file with caching."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">permissions_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">{}</span>
 
@@ -533,22 +552,22 @@ identity provider actually issues:</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permissions_cache</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions from JSON file.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions from JSON file."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="n">permissions_data</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_permissions</span><span class="p">()</span>
 
         <span class="c1"># Get direct user permissions</span>
-        <span class="n">user_permissions</span> <span class="o">=</span> <span class="n">permissions_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;users&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">user_permissions</span> <span class="o">=</span> <span class="n">permissions_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"users"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="p">[])</span>
 
         <span class="c1"># Get role-based permissions</span>
-        <span class="n">user_roles</span> <span class="o">=</span> <span class="n">permissions_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_roles&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">user_roles</span> <span class="o">=</span> <span class="n">permissions_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"user_roles"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="p">[])</span>
         <span class="n">role_permissions</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">user_roles</span><span class="p">:</span>
-            <span class="n">role_perms</span> <span class="o">=</span> <span class="n">permissions_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;roles&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">role_perms</span> <span class="o">=</span> <span class="n">permissions_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"roles"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="p">[])</span>
             <span class="n">role_permissions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">role_perms</span><span class="p">)</span>
 
         <span class="c1"># Combine and deduplicate</span>
@@ -559,19 +578,19 @@ identity provider actually issues:</p>
 </div>
 <p><strong>Example permissions.json file:</strong></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;users&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin:*&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;john.doe&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;write:posts&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"users"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"admin"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"admin:*"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"john.doe"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"read:posts"</span><span class="p">,</span><span class="w"> </span><span class="s2">"write:posts"</span><span class="p">]</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;editor&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;write:posts&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;edit:posts&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;viewer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin:*&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"roles"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"editor"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"read:posts"</span><span class="p">,</span><span class="w"> </span><span class="s2">"write:posts"</span><span class="p">,</span><span class="w"> </span><span class="s2">"edit:posts"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"viewer"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"read:posts"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"admin"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"admin:*"</span><span class="p">]</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;user_roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;john.doe&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;editor&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;jane.smith&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;viewer&quot;</span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;admin&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="nt">"user_roles"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"john.doe"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"editor"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"jane.smith"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"viewer"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"admin"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"admin"</span><span class="p">]</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -581,22 +600,22 @@ identity provider actually issues:</p>
 <h1>Advanced Features<a class="headerlink" href="#advanced-features" title="Link to this heading"></a></h1>
 <p><strong>Conditional Permissions:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ConditionalPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider with conditional logic.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider with conditional logic."""</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions with conditional logic.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions with conditional logic."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="n">permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_base_permissions</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
 
         <span class="c1"># Add time-based permissions</span>
         <span class="n">current_hour</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">hour</span>
         <span class="k">if</span> <span class="mi">9</span> <span class="o">&lt;=</span> <span class="n">current_hour</span> <span class="o">&lt;=</span> <span class="mi">17</span><span class="p">:</span>  <span class="c1"># Business hours</span>
-            <span class="n">permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;business_hours:access&quot;</span><span class="p">)</span>
+            <span class="n">permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"business_hours:access"</span><span class="p">)</span>
 
         <span class="c1"># Add location-based permissions (from token claims)</span>
-        <span class="n">location</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;location&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">location</span> <span class="o">==</span> <span class="s2">&quot;headquarters&quot;</span><span class="p">:</span>
-            <span class="n">permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;onsite:access&quot;</span><span class="p">)</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"location"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">location</span> <span class="o">==</span> <span class="s2">"headquarters"</span><span class="p">:</span>
+            <span class="n">permissions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"onsite:access"</span><span class="p">)</span>
 
         <span class="c1"># Add temporary permissions</span>
         <span class="n">temp_permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_temporary_permissions</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
@@ -612,7 +631,7 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CachedPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider with caching support.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider with caching support."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span><span class="p">,</span> <span class="n">cache_ttl</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base_provider</span> <span class="o">=</span> <span class="n">base_provider</span>
@@ -620,9 +639,9 @@ identity provider actually issues:</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions with caching.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
-        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;permissions:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions with caching."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"permissions:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span>
 
         <span class="c1"># Check cache</span>
         <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
@@ -639,9 +658,9 @@ identity provider actually issues:</p>
         <span class="k">return</span> <span class="n">permissions</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear cache for specific user or all users.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Clear cache for specific user or all users."""</span>
         <span class="k">if</span> <span class="n">username</span><span class="p">:</span>
-            <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;permissions:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"permissions:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -661,33 +680,33 @@ identity provider actually issues:</p>
     <span class="n">username</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">permission</span><span class="p">:</span> <span class="nb">str</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/api/permissions/grant&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/api/permissions/grant"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">grant_permission</span><span class="p">(</span>
     <span class="n">request</span><span class="p">:</span> <span class="n">PermissionRequest</span><span class="p">,</span>
-    <span class="n">admin</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">&quot;admin:permissions&quot;</span><span class="p">))</span>
+    <span class="n">admin</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">"admin:permissions"</span><span class="p">))</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Grant permission to user.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Grant permission to user."""</span>
     <span class="k">await</span> <span class="n">grant_permission</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">permission</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Permission </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">permission</span><span class="si">}</span><span class="s2"> granted to </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Permission </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">permission</span><span class="si">}</span><span class="s2"> granted to </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/api/permissions/revoke&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/api/permissions/revoke"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">revoke_permission</span><span class="p">(</span>
     <span class="n">request</span><span class="p">:</span> <span class="n">PermissionRequest</span><span class="p">,</span>
-    <span class="n">admin</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">&quot;admin:permissions&quot;</span><span class="p">))</span>
+    <span class="n">admin</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">"admin:permissions"</span><span class="p">))</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Revoke permission from user.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Revoke permission from user."""</span>
     <span class="k">await</span> <span class="n">revoke_permission</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">permission</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Permission </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">permission</span><span class="si">}</span><span class="s2"> revoked from </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Permission </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">permission</span><span class="si">}</span><span class="s2"> revoked from </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/permissions/</span><span class="si">{username}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/permissions/</span><span class="si">{username}</span><span class="s2">"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_permissions</span><span class="p">(</span>
     <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">admin</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">&quot;admin:permissions&quot;</span><span class="p">))</span>
+    <span class="n">admin</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permissions</span><span class="p">(</span><span class="s2">"admin:permissions"</span><span class="p">))</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get all permissions for a user.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Get all permissions for a user."""</span>
     <span class="c1"># This would need to be implemented based on your provider</span>
     <span class="n">permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_user_permissions_from_db</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="n">permissions</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s2">"permissions"</span><span class="p">:</span> <span class="n">permissions</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -703,25 +722,25 @@ identity provider actually issues:</p>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_custom_permissions_provider</span><span class="p">():</span>
     <span class="c1"># Setup</span>
     <span class="n">mock_api_client</span> <span class="o">=</span> <span class="n">AsyncMock</span><span class="p">()</span>
-    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_permissions</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">,</span> <span class="s2">&quot;write:posts&quot;</span><span class="p">]</span>
+    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_permissions</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"read:posts"</span><span class="p">,</span> <span class="s2">"write:posts"</span><span class="p">]</span>
 
     <span class="n">provider</span> <span class="o">=</span> <span class="n">CustomPermissionsProvider</span><span class="p">(</span><span class="n">mock_api_client</span><span class="p">)</span>
 
     <span class="c1"># Create test token</span>
     <span class="n">token</span> <span class="o">=</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">(</span>
-        <span class="n">jwt_token</span><span class="o">=</span><span class="s2">&quot;test_token&quot;</span><span class="p">,</span>
-        <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alg&quot;</span><span class="p">:</span> <span class="s2">&quot;HS256&quot;</span><span class="p">},</span>
-        <span class="n">signature</span><span class="o">=</span><span class="s2">&quot;signature&quot;</span><span class="p">,</span>
-        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;message&quot;</span><span class="p">,</span>
-        <span class="n">claims</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;testuser&quot;</span><span class="p">}</span>
+        <span class="n">jwt_token</span><span class="o">=</span><span class="s2">"test_token"</span><span class="p">,</span>
+        <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">"alg"</span><span class="p">:</span> <span class="s2">"HS256"</span><span class="p">},</span>
+        <span class="n">signature</span><span class="o">=</span><span class="s2">"signature"</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">"message"</span><span class="p">,</span>
+        <span class="n">claims</span><span class="o">=</span><span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="s2">"testuser"</span><span class="p">}</span>
     <span class="p">)</span>
 
     <span class="c1"># Test</span>
     <span class="n">permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">fetch_permissions</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
     <span class="c1"># Assertions</span>
-    <span class="k">assert</span> <span class="n">permissions</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;read:posts&quot;</span><span class="p">,</span> <span class="s2">&quot;write:posts&quot;</span><span class="p">]</span>
-    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_permissions</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s2">&quot;testuser&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">permissions</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"read:posts"</span><span class="p">,</span> <span class="s2">"write:posts"</span><span class="p">]</span>
+    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_permissions</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s2">"testuser"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>Integration Testing:</strong></p>
@@ -732,18 +751,18 @@ identity provider actually issues:</p>
     <span class="n">client</span> <span class="o">=</span> <span class="n">TestClient</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
 
     <span class="c1"># Test with sufficient permissions</span>
-    <span class="n">user_token</span> <span class="o">=</span> <span class="s2">&quot;valid_jwt_with_read_posts_permission&quot;</span>
+    <span class="n">user_token</span> <span class="o">=</span> <span class="s2">"valid_jwt_with_read_posts_permission"</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;/posts&quot;</span><span class="p">,</span>
-        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">user_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+        <span class="s2">"/posts"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="n">user_token</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
 
     <span class="c1"># Test with insufficient permissions</span>
-    <span class="n">limited_token</span> <span class="o">=</span> <span class="s2">&quot;valid_jwt_without_read_posts_permission&quot;</span>
+    <span class="n">limited_token</span> <span class="o">=</span> <span class="s2">"valid_jwt_without_read_posts_permission"</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;/posts&quot;</span><span class="p">,</span>
-        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">limited_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+        <span class="s2">"/posts"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="n">limited_token</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">403</span>
 </pre></div>
@@ -771,7 +790,7 @@ identity provider actually issues:</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_permissions_internal</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to fetch permissions: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to fetch permissions: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="c1"># Return minimal permissions or raise exception</span>
             <span class="k">return</span> <span class="p">[]</span>  <span class="c1"># Or raise an exception based on your security model</span>
 </pre></div>
@@ -809,14 +828,14 @@ identity provider actually issues:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.contracts.permissions_provider.PermissionsProvider">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.contracts.permissions_provider.</span></span><span class="sig-name descname"><span class="pre">PermissionsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/contracts/permissions_provider.html#PermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Abstract contract for a permissions provider.</p>
 <p>Implementations must return the list of permissions granted to the
 authenticated user, given either a raw token string or a parsed
 <code class="docutils literal notranslate"><span class="pre">JWTAuthorizationCredentials</span></code> object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.contracts.permissions_provider.PermissionsProvider.fetch_permissions">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/contracts/permissions_provider.html#PermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/contracts/permissions_provider.html#PermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
 <dd><p>Return the permissions for the authenticated user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -833,13 +852,13 @@ or a parsed <code class="docutils literal notranslate"><span class="pre">JWTAuth
 
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.sqlalchemy.sql_permissions_provider.</span></span><span class="sig-name descname"><span class="pre">SqlPermissionsProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.sqlalchemy.sql_permissions_provider.</span></span><span class="sig-name descname"><span class="pre">SqlPermissionsProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermissionsProvider</span></code></a></p>
 <p>Recovers permissions from a SQL database, keyed by an identifier
 claim from the JWT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>id_claim</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the JWT claim used as the lookup key when
+<dd class="field-odd"><p><strong>id_claim</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – name of the JWT claim used as the lookup key when
 <code class="docutils literal notranslate"><span class="pre">fetch_permissions</span></code> is called with a
 <code class="docutils literal notranslate"><span class="pre">JWTAuthorizationCredentials</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;username&quot;</span></code>
 (Cognito’s convention) for backward compatibility. Identity
@@ -850,43 +869,43 @@ always-present, provider-agnostic <code class="docutils literal notranslate"><sp
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_permissions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.fetch_permissions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.fetch_permissions" title="Link to this definition"></a></dt>
 <dd><p>Get groups using the token provided</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token containing the claims.</p>
+<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – The token containing the claims.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a JWTAuthorizationCredentials token is missing
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If a JWTAuthorizationCredentials token is missing
     the configured id_claim.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>_description_</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_permissions_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.get_permissions_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_permissions_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_permissions_provider.html#SqlPermissionsProvider.get_permissions_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db" title="Link to this definition"></a></dt>
 <dd><p>Gets permissions from the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Username</p>
+<dd class="field-odd"><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – Username</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of permissions</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.oidc.oidc_provider &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>auth_middleware.providers.oidc.oidc_provider &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/oidc/oidc_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="../../../../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -54,10 +54,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -150,15 +162,16 @@
            <div itemprop="articleBody">
              
   <h1>Source code for auth_middleware.providers.oidc.oidc_provider</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Generic OpenID Connect JWT provider.</span>
+<span></span><span class="sd">"""Generic OpenID Connect JWT provider.</span>
 
 <span class="sd">Works with any standards-compliant OIDC identity provider — Authentik,</span>
 <span class="sd">Keycloak, Auth0, Okta, or any other issuer that exposes a</span>
 <span class="sd">``.well-known/openid-configuration`` discovery document and a JWKS</span>
 <span class="sd">endpoint — instead of being tied to a specific cloud vendor.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_ns</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">monotonic</span><span class="p">,</span> <span class="n">time_ns</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
@@ -172,6 +185,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.roles_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">RolesProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.identity_provider_unavailable_exception</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">IdentityProviderUnavailableException</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.invalid_token_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">OidcException</span>
@@ -184,7 +200,7 @@
 <div class="viewcode-block" id="OidcProvider">
 <a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OidcProvider</span><span class="p">(</span><span class="n">JWTProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;JWT authentication provider for any standards-compliant OIDC issuer.</span>
+<span class="w">    </span><span class="sd">"""JWT authentication provider for any standards-compliant OIDC issuer.</span>
 
 <span class="sd">    Example:</span>
 <span class="sd">        .. code-block:: python</span>
@@ -195,13 +211,13 @@
 <span class="sd">            )</span>
 
 <span class="sd">            settings = OidcProviderSettings(</span>
-<span class="sd">                issuer=&quot;https://authentik.example.com/application/o/my-app/&quot;,</span>
-<span class="sd">                audience=&quot;my-client-id&quot;,</span>
+<span class="sd">                issuer="https://authentik.example.com/application/o/my-app/",</span>
+<span class="sd">                audience="my-client-id",</span>
 <span class="sd">            )</span>
 <span class="sd">            auth_provider = OidcProvider(settings=settings)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
-    <span class="n">_settings</span><span class="p">:</span> <span class="n">OidcProviderSettings</span>
+    <span class="n">_settings</span><span class="p">:</span> <span class="n">OidcProviderSettings</span>  <span class="c1"># pyright: ignore[reportIncompatibleVariableOverride]</span>
     <span class="n">_jwks_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="OidcProvider.__init__">
@@ -214,7 +230,7 @@
         <span class="n">roles_provider</span><span class="p">:</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">OidcProviderSettings</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;OidcProvider requires OidcProviderSettings&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"OidcProvider requires OidcProviderSettings"</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
@@ -222,12 +238,36 @@
             <span class="n">groups_provider</span><span class="o">=</span><span class="n">groups_provider</span><span class="p">,</span>
             <span class="n">roles_provider</span><span class="o">=</span><span class="n">roles_provider</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">jwks_uri</span></div>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">require_audience</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">audience</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"require_audience is set but no audience is configured: without an "</span>
+                <span class="s2">"expected audience any token signed by the issuer would be accepted"</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">audience</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"OidcProvider without an audience (require_audience=False): any "</span>
+                <span class="s2">"token signed by </span><span class="si">{}</span><span class="s2"> is accepted, whichever client it was issued for"</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">issuer</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">accepted_token_types</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"OidcProvider accepts ID tokens as bearer credentials "</span>
+                <span class="s2">"(accepted_token_types is not set); use "</span>
+                <span class="s2">"accepted_token_types=</span><span class="si">{TokenType.ACCESS}</span><span class="s2"> for APIs"</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">jwt_token_verification_disabled</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"jwt_token_verification_disabled is set: tokens are NOT verified"</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">jwks_uri</span>
+        <span class="c1"># Per instance on purpose: two providers must not throttle each other.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_forced_refresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_forced_refresh_task</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Future</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_discover_jwks_uri</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve the JWKS URL, discovering it from the OIDC discovery</span>
-<span class="sd">        document the first time it&#39;s needed if not explicitly configured.</span>
+<span class="w">        </span><span class="sd">"""Resolve the JWKS URL, discovering it from the OIDC discovery</span>
+<span class="sd">        document the first time it's needed if not explicitly configured.</span>
 <span class="sd">        The result is cached on the instance so the discovery document is</span>
 <span class="sd">        not re-fetched on every JWKS refresh.</span>
 
@@ -237,14 +277,14 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            InvalidTokenException: if the discovery document cannot be</span>
 <span class="sd">                fetched or parsed.</span>
-<span class="sd">            OidcException: if the discovery document has no &#39;jwks_uri&#39;.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            OidcException: if the discovery document has no 'jwks_uri'.</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span>
 
         <span class="n">discovery_url</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">discovery_url</span>
-            <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">issuer</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/.well-known/openid-configuration&quot;</span>
+            <span class="ow">or</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">issuer</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span><span class="si">}</span><span class="s2">/.well-known/openid-configuration"</span>
         <span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -254,42 +294,42 @@
                 <span class="n">discovery_doc</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPStatusError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;OIDC discovery endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"OIDC discovery endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">exc</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
                 <span class="n">discovery_url</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to retrieve OIDC discovery document&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to retrieve OIDC discovery document"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Network error fetching OIDC discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"Network error fetching OIDC discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">discovery_url</span><span class="p">,</span>
                 <span class="n">exc</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to reach identity provider&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to reach identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Invalid JSON in OIDC discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"Invalid JSON in OIDC discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">discovery_url</span><span class="p">,</span>
                 <span class="n">exc</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid OIDC discovery response from identity provider&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Invalid OIDC discovery response from identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
-        <span class="n">jwks_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">discovery_doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">)</span>
+        <span class="n">jwks_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">discovery_doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"jwks_uri"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">jwks_uri</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;OIDC discovery document from </span><span class="si">{}</span><span class="s2"> has no &#39;jwks_uri&#39;&quot;</span><span class="p">,</span> <span class="n">discovery_url</span>
+                <span class="s2">"OIDC discovery document from </span><span class="si">{}</span><span class="s2"> has no 'jwks_uri'"</span><span class="p">,</span> <span class="n">discovery_url</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="n">OidcException</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;OIDC discovery document at </span><span class="si">{</span><span class="n">discovery_url</span><span class="si">}</span><span class="s2"> is missing &#39;jwks_uri&#39;&quot;</span>
+                <span class="sa">f</span><span class="s2">"OIDC discovery document at </span><span class="si">{</span><span class="n">discovery_url</span><span class="si">}</span><span class="s2"> is missing 'jwks_uri'"</span>
             <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_jwks_uri</span> <span class="o">=</span> <span class="n">jwks_uri</span>
@@ -298,39 +338,39 @@
 <div class="viewcode-block" id="OidcProvider.get_keys">
 <a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.get_keys">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch the JWKS keys from the OIDC identity provider.</span>
+<span class="w">        </span><span class="sd">"""Fetch the JWKS keys from the OIDC identity provider.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[JWK]: a list of JWK keys</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">jwks_uri</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_discover_jwks_uri</span><span class="p">()</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">jwks_uri</span><span class="p">)</span>
                 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-                <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+                <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">"keys"</span><span class="p">]</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPStatusError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;OIDC JWKS endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"OIDC JWKS endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">exc</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
                 <span class="n">jwks_uri</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to retrieve public keys from identity provider&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to retrieve public keys from identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Network error fetching OIDC JWKS from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to reach identity provider&quot;</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Network error fetching OIDC JWKS from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to reach identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unexpected JWKS response format from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid JWKS response from identity provider&quot;</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Unexpected JWKS response format from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Invalid JWKS response from identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
         <span class="k">return</span> <span class="n">keys</span></div>
@@ -339,11 +379,11 @@
 <div class="viewcode-block" id="OidcProvider.load_jwks">
 <a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.load_jwks">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load_jwks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWKS</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load JWKS credentials from the OIDC identity provider.</span>
+<span class="w">        </span><span class="sd">"""Load JWKS credentials from the OIDC identity provider.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            JWKS: cached key set with refresh metadata.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_keys</span><span class="p">()</span>
 
         <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
@@ -354,6 +394,50 @@
         <span class="k">return</span> <span class="n">JWKS</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">usage_counter</span><span class="o">=</span><span class="n">usage_counter</span><span class="p">)</span></div>
 
 
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_hmac_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWK</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Find the signing key; optionally force one JWKS refresh for an unknown kid.</span>
+
+<span class="sd">        With ``forced_jwks_refresh_min_interval_seconds`` set, a token whose ``kid``</span>
+<span class="sd">        is missing from the cached JWKS triggers at most one refresh per interval</span>
+<span class="sd">        (a token without ``kid`` never does). The slot is claimed *before* awaiting</span>
+<span class="sd">        so that concurrent requests share that single refresh instead of each</span>
+<span class="sd">        starting their own.</span>
+<span class="sd">        """</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_hmac_key</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">forced_jwks_refresh_min_interval_seconds</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">interval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">token</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kid"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">key</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forced_refresh</span><span class="p">(</span><span class="n">interval</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_hmac_key</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_forced_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Refresh the JWKS now, joining an in-flight refresh. False if throttled."""</span>
+        <span class="n">pending</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forced_refresh_task</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">pending</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">pending</span><span class="o">.</span><span class="n">done</span><span class="p">()</span>
+            <span class="ow">and</span> <span class="n">pending</span><span class="o">.</span><span class="n">get_loop</span><span class="p">()</span> <span class="ow">is</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">shield</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">monotonic</span><span class="p">()</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_forced_refresh</span>
+        <span class="k">if</span> <span class="n">last</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">now</span> <span class="o">-</span> <span class="n">last</span> <span class="o">&lt;</span> <span class="n">interval</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_forced_refresh</span> <span class="o">=</span> <span class="n">now</span>  <span class="c1"># claimed before the await</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reload_jwks_quietly</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_forced_refresh_task</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">shield</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_reload_jwks_quietly</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jks</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_jwks</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"JWKS refreshed after an unknown key id"</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># the identity provider being down is not a crash</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Forced JWKS refresh failed: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+
 <div class="viewcode-block" id="OidcProvider.verify_token">
 <a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.verify_token">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">verify_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -363,11 +447,11 @@
         <span class="n">hmac_key_candidate</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_hmac_key</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">hmac_key_candidate</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;No public key found that matches the one present in the TOKEN!&quot;</span>
+                <span class="s2">"No public key found that matches the one present in the TOKEN!"</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
                 <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;No public key found!&quot;</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"No public key found!"</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">key</span> <span class="o">=</span> <span class="n">import_key</span><span class="p">(</span><span class="n">hmac_key_candidate</span><span class="p">)</span>
@@ -380,71 +464,82 @@
             <span class="p">)</span>
             <span class="n">JWTClaimsRegistry</span><span class="p">(</span>
                 <span class="n">leeway</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">jwt_leeway</span><span class="p">,</span>
-                <span class="n">iss</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;essential&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">issuer</span><span class="p">},</span>
+                <span class="n">iss</span><span class="o">=</span><span class="p">{</span><span class="s2">"essential"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">issuer</span><span class="p">},</span>
             <span class="p">)</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">JoseError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_token_type</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">REFRESH</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Refresh token used as a bearer credential — rejecting&quot;</span><span class="p">)</span>
+        <span class="n">detected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_token_type</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">detected</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">REFRESH</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Refresh token used as a bearer credential — rejecting"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">accepted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">accepted_token_types</span>
+        <span class="k">if</span> <span class="n">accepted</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">detected</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">accepted</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Token type '</span><span class="si">{}</span><span class="s2">' is not accepted — rejecting"</span><span class="p">,</span> <span class="n">detected</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verify_audience</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_verify_audience</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the token was issued for the configured client.</span>
+<span class="w">        </span><span class="sd">"""Check the token was issued for the configured client.</span>
 
 <span class="sd">        Standard OIDC ID tokens carry the client id in ``aud``. Many</span>
-<span class="sd">        providers&#39; *access* tokens don&#39;t carry ``aud`` at all - Cognito</span>
+<span class="sd">        providers' *access* tokens don't carry ``aud`` at all - Cognito</span>
 <span class="sd">        access tokens use ``client_id`` instead - or use it for a</span>
 <span class="sd">        different-looking resource identifier, so the client id is also</span>
 <span class="sd">        accepted from any of ``client_id_claims`` (e.g. ``azp``).</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            claims (dict[str, Any]): The token&#39;s decoded claims.</span>
+<span class="sd">            claims (dict[str, Any]): The token's decoded claims.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: True if no audience is configured to check against, or if</span>
-<span class="sd">            the token&#39;s aud/client-id claims match it.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            the token's aud/client-id claims match it.</span>
+<span class="sd">        """</span>
         <span class="n">expected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">audience</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">expected</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
+            <span class="c1"># With require_audience this cannot be reached through the constructor</span>
+            <span class="c1"># (it refuses to build); it also holds if settings were mutated later.</span>
+            <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">require_audience</span>
 
-        <span class="n">token_aud</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;aud&quot;</span><span class="p">)</span>
+        <span class="n">token_aud</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"aud"</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">token_aud</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">expected</span> <span class="ow">in</span> <span class="n">token_aud</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">token_aud</span> <span class="o">==</span> <span class="n">expected</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">expected</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">client_id_claims</span><span class="p">):</span>
+        <span class="c1"># client_id/azp only stand in for a missing aud. A token whose aud names</span>
+        <span class="c1"># another API must not pass just because it was issued to our client.</span>
+        <span class="k">if</span> <span class="n">token_aud</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="p">[])</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">==</span> <span class="n">expected</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">client_id_claims</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-            <span class="s2">&quot;Token audience/client-id does not match configured audience &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="p">,</span>
+            <span class="s2">"Token audience/client-id does not match configured audience '</span><span class="si">{}</span><span class="s2">'"</span><span class="p">,</span>
             <span class="n">expected</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_detect_token_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TokenType</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Classify a token as an ID, access, or refresh token.</span>
+<span class="w">        </span><span class="sd">"""Classify a token as an ID, access, or refresh token.</span>
 
 <span class="sd">        Cognito labels this explicitly via ``token_use``. Most generic OIDC</span>
-<span class="sd">        providers (Authentik, Keycloak, ...) don&#39;t, so absent that claim</span>
+<span class="sd">        providers (Authentik, Keycloak, ...) don't, so absent that claim</span>
 <span class="sd">        this falls back to a heuristic: a token carrying identity claims</span>
 <span class="sd">        (``username_claim``, or any of ``identity_claims``) is an ID token;</span>
 <span class="sd">        one carrying a client-id claim (``client_id_claims``) but no</span>
 <span class="sd">        identity claims looks like a client_credentials access token;</span>
-<span class="sd">        otherwise the type can&#39;t be determined.</span>
+<span class="sd">        otherwise the type can't be determined.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            claims (dict[str, Any]): The token&#39;s decoded claims.</span>
+<span class="sd">            claims (dict[str, Any]): The token's decoded claims.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            TokenType: the detected token type.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">token_use_claim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">token_use_claim</span>
         <span class="k">if</span> <span class="n">token_use_claim</span> <span class="ow">and</span> <span class="n">token_use_claim</span> <span class="ow">in</span> <span class="n">claims</span><span class="p">:</span>
             <span class="n">raw_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">claims</span><span class="p">[</span><span class="n">token_use_claim</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -452,7 +547,7 @@
                 <span class="k">return</span> <span class="n">TokenType</span><span class="p">(</span><span class="n">raw_value</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Unrecognized &#39;</span><span class="si">{}</span><span class="s2">&#39; claim value: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">token_use_claim</span><span class="p">,</span> <span class="n">raw_value</span>
+                    <span class="s2">"Unrecognized '</span><span class="si">{}</span><span class="s2">' claim value: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">token_use_claim</span><span class="p">,</span> <span class="n">raw_value</span>
                 <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_identity_claim</span><span class="p">(</span><span class="n">claims</span><span class="p">):</span>
@@ -462,7 +557,7 @@
         <span class="k">return</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">UNKNOWN</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_has_identity_claim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether *claims* carries any claim that identifies a real user.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether *claims* carries any claim that identifies a real user."""</span>
         <span class="k">if</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">username_claim</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">username_claim_fallbacks</span><span class="p">):</span>
@@ -470,18 +565,18 @@
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">identity_claims</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_username</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the user&#39;s display name from the token claims.</span>
+<span class="w">        </span><span class="sd">"""Return the user's display name from the token claims.</span>
 
 <span class="sd">        Tries ``username_claim`` first, then each of</span>
 <span class="sd">        ``username_claim_fallbacks`` in order, then falls back to ``email``.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            claims (dict[str, Any]): The token&#39;s decoded claims.</span>
+<span class="sd">            claims (dict[str, Any]): The token's decoded claims.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str | None: the resolved display name, or None if none of the</span>
 <span class="sd">            configured claims are present.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">username_claim</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -489,12 +584,12 @@
             <span class="n">value</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">claim_name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="n">email</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">)</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"email"</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">email</span><span class="p">)</span> <span class="k">if</span> <span class="n">email</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_m2m_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">token_type</span><span class="p">:</span> <span class="n">TokenType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether *claims* looks like a machine-to-machine (client_credentials)</span>
-<span class="sd">        token: an access token issued to a client rather than a user.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Whether *claims* looks like a machine-to-machine (client_credentials)</span>
+<span class="sd">        token: an access token issued to a client rather than a user."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">detect_m2m_tokens</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">token_type</span> <span class="o">!=</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">ACCESS</span><span class="p">:</span>
@@ -502,17 +597,35 @@
         <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_identity_claim</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_extract_client_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the first configured client-id claim present, if any.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Return the first configured client-id claim present, if any."""</span>
         <span class="k">for</span> <span class="n">claim_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">client_id_claims</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">claim_name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_groups</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">,</span> <span class="n">is_m2m</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Groups from the provider, else from the configured claim (never for M2M)."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">claim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">groups_claim</span>
+        <span class="k">if</span> <span class="n">claim</span> <span class="ow">and</span> <span class="n">claim</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="n">claim</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_roles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">,</span> <span class="n">is_m2m</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="o">.</span><span class="n">fetch_roles</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
 <div class="viewcode-block" id="OidcProvider.create_user_from_token">
 <a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.create_user_from_token">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_user_from_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a domain User object with data recovered from a JWT</span>
+<span class="w">        </span><span class="sd">"""Initializes a domain User object with data recovered from a JWT</span>
 <span class="sd">        token issued by the configured OIDC provider - either a user ID/</span>
 <span class="sd">        access token, or a machine-to-machine access token.</span>
 
@@ -523,45 +636,37 @@
 <span class="sd">            User: Domain object.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            OidcException: if the token has neither a &#39;sub&#39; claim nor a</span>
+<span class="sd">            OidcException: if the token has neither a 'sub' claim nor a</span>
 <span class="sd">                client-id claim to use as the user id.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">claims</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span>
         <span class="n">token_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_token_type</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
         <span class="n">is_m2m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_m2m_token</span><span class="p">(</span><span class="n">claims</span><span class="p">,</span> <span class="n">token_type</span><span class="p">)</span>
         <span class="n">client_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_client_id</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
 
-        <span class="n">subject</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">client_id</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sub"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">client_id</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">subject</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">OidcException</span><span class="p">(</span>
-                <span class="s2">&quot;Token has neither a &#39;sub&#39; claim nor a client-id claim &quot;</span>
-                <span class="s2">&quot;(checked: </span><span class="si">{}</span><span class="s2">) to use as the user id&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">client_id_claims</span><span class="p">)</span>
+                <span class="s2">"Token has neither a 'sub' claim nor a client-id claim "</span>
+                <span class="s2">"(checked: </span><span class="si">{}</span><span class="s2">) to use as the user id"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">client_id_claims</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">groups_claim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_settings</span><span class="o">.</span><span class="n">groups_claim</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
-            <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">groups_claim</span> <span class="ow">and</span> <span class="n">groups_claim</span> <span class="ow">in</span> <span class="n">claims</span><span class="p">:</span>
-            <span class="n">groups</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">claims</span><span class="p">[</span><span class="n">groups_claim</span><span class="p">])</span>
-
-        <span class="n">roles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_m2m</span><span class="p">:</span>
-            <span class="n">roles</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="o">.</span><span class="n">fetch_roles</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_groups</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">is_m2m</span><span class="p">)</span>
+        <span class="n">roles</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_roles</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">is_m2m</span><span class="p">)</span>
 
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_username</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
-            <span class="n">token</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">token</span><span class="p">),</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">jwt_token</span><span class="p">,</span>
             <span class="n">jwt_credentials</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
             <span class="n">groups_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_groups_provider</span><span class="p">,</span>
             <span class="n">roles_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="p">,</span>
             <span class="n">permissions_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span><span class="p">,</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="n">client_id</span> <span class="ow">or</span> <span class="n">subject</span><span class="p">,</span>
-            <span class="n">email</span><span class="o">=</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">),</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"email"</span><span class="p">),</span>
             <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
             <span class="n">roles</span><span class="o">=</span><span class="n">roles</span><span class="p">,</span>
             <span class="n">is_m2m</span><span class="o">=</span><span class="n">is_m2m</span><span class="p">,</span>

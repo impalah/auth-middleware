@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scoped Permissions: Quick Start &mdash; Auth Middleware 0.7.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/authz-quickstart.html" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Scoped Permissions: Overview" href="authz-overview.html" />
+    <link rel="prev" title="Google Identity Infrastructure Setup" href="infrastructure/google-setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scoped Permissions: Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-only-what-you-need">1. Install only what you need</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#describe-your-permissions-the-catalog">2. Describe your permissions (the catalog)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choose-a-store-and-build-authz">3. Choose a store and build <code class="docutils literal notranslate"><span class="pre">Authz</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-it-on-the-application-and-guard-routes">4. Install it on the application and guard routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#give-people-roles">5. Give people roles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-your-routes">6. Test your routes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#where-next">Where next</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Scoped Permissions: Quick Start</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/authz-quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scoped-permissions-quick-start">
+<span id="authz-quickstart"></span><h1>Scoped Permissions: Quick Start<a class="headerlink" href="#scoped-permissions-quick-start" title="Link to this heading"></a></h1>
+<p>This guide takes you from nothing to a FastAPI route that only a <em>project editor</em> may call. It uses
+the in-memory store first and then shows how to switch to PostgreSQL, MySQL or DynamoDB. A complete runnable
+version of the first part is <code class="docutils literal notranslate"><span class="pre">examples/authz_example.py</span></code> (tested in the suite).</p>
+<section id="install-only-what-you-need">
+<h2>1. Install only what you need<a class="headerlink" href="#install-only-what-you-need" title="Link to this heading"></a></h2>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install auth-middleware                      # core + scoped permissions, no database driver</span>
+<span class="go">pip install 'auth-middleware[postgres]'          # + SQLAlchemy, asyncpg  (SQL store)</span>
+<span class="go">pip install 'auth-middleware[mysql]'             # + SQLAlchemy, aiomysql (SQL store)</span>
+<span class="go">pip install 'auth-middleware[sqlalchemy]'        # both SQL drivers (historical name)</span>
+<span class="go">pip install 'auth-middleware[dynamodb]'          # + PynamoDB (DynamoDB store)</span>
+</pre></div>
+</div>
+<p>The scoped-permissions code itself (catalog, guard, in-memory store) is in the core package. A store whose
+extra is missing raises an <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> that names the extra to install.</p>
+</section>
+<section id="describe-your-permissions-the-catalog">
+<h2>2. Describe your permissions (the catalog)<a class="headerlink" href="#describe-your-permissions-the-catalog" title="Link to this heading"></a></h2>
+<p>Decide what a <em>scope</em> is (a tenant, a project, a studio…), which permissions exist inside it and which
+roles bundle them. The catalog is validated when built and never changes afterwards.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">catalog</span> <span class="o">=</span> <span class="n">PermissionCatalog</span><span class="o">.</span><span class="n">from_mapping</span><span class="p">(</span>
+    <span class="n">scopes</span><span class="o">=</span><span class="p">[</span><span class="n">ScopeKind</span><span class="p">(</span><span class="s2">"project"</span><span class="p">)],</span>
+    <span class="n">permissions</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">PermissionSpec</span><span class="p">(</span><span class="s2">"docs.read"</span><span class="p">,</span> <span class="s2">"project"</span><span class="p">),</span>
+        <span class="n">PermissionSpec</span><span class="p">(</span><span class="s2">"docs.write"</span><span class="p">,</span> <span class="s2">"project"</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">roles</span><span class="o">=</span><span class="p">{</span><span class="s2">"EDITOR"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"docs.read"</span><span class="p">,</span> <span class="s2">"docs.write"</span><span class="p">],</span> <span class="s2">"VIEWER"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"docs.read"</span><span class="p">]},</span>
+<span class="p">)</span>
+
+
+</pre></div>
+</div>
+<p>The same catalog can live in a TOML or JSON file (<code class="docutils literal notranslate"><span class="pre">PermissionCatalog.from_file</span></code>), see <a class="reference internal" href="authz-catalog.html"><span class="doc">The Permission Catalog</span></a>.</p>
+</section>
+<section id="choose-a-store-and-build-authz">
+<h2>3. Choose a store and build <code class="docutils literal notranslate"><span class="pre">Authz</span></code><a class="headerlink" href="#choose-a-store-and-build-authz" title="Link to this heading"></a></h2>
+<p>The store holds <em>who has which role in which scope</em>. Pick one (all pass the same contract test suite):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">memory_authz</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Authz</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tests and demos: nothing to install."""</span>
+    <span class="k">return</span> <span class="n">Authz</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">InMemoryAssignmentStore</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">sql_authz</span><span class="p">(</span><span class="n">database_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Authz</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""SQL (pip install 'auth-middleware[postgres]' or '[mysql]').</span>
+
+<span class="sd">    ``database_url`` e.g. ``postgresql+asyncpg://user:pw@host/db`` or</span>
+<span class="sd">    ``mysql+aiomysql://user:pw@host/db``. Create the table with the Alembic</span>
+<span class="sd">    revision shipped in ``alembic/`` or with ``sql_models.metadata``.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.ext.asyncio</span><span class="w"> </span><span class="kn">import</span> <span class="n">async_sessionmaker</span><span class="p">,</span> <span class="n">create_async_engine</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqlAssignmentStore</span>
+
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">create_async_engine</span><span class="p">(</span><span class="n">database_url</span><span class="p">,</span> <span class="n">pool_pre_ping</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">sessions</span> <span class="o">=</span> <span class="n">async_sessionmaker</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">expire_on_commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Authz</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">SqlAssignmentStore</span><span class="p">(</span><span class="n">sessions</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">dynamodb_authz</span><span class="p">(</span><span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Authz</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""DynamoDB (pip install 'auth-middleware[dynamodb]').</span>
+
+<span class="sd">    The table must exist: ``DynamoDbAssignmentStore.table_definition(name)``</span>
+<span class="sd">    returns the ``create_table`` arguments. Credentials come from the usual</span>
+<span class="sd">    AWS chain; ``region`` and ``endpoint_url`` are optional keyword options.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">DynamoDbAssignmentStore</span>
+
+    <span class="n">store</span> <span class="o">=</span> <span class="n">DynamoDbAssignmentStore</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="n">table_name</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Authz</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The SQL table comes from the Alembic revision <code class="docutils literal notranslate"><span class="pre">a3f1c9d2b7e4</span></code> (or from
+<code class="docutils literal notranslate"><span class="pre">auth_middleware.authz.stores.sql_models.metadata</span></code> in your own migrations). The DynamoDB table comes from
+<code class="docutils literal notranslate"><span class="pre">DynamoDbAssignmentStore.table_definition(name)</span></code> (see <a class="reference internal" href="infrastructure/dynamodb-setup.html"><span class="doc">DynamoDB Setup for Scoped Permissions</span></a>). Nothing in the
+library reads environment variables to choose a backend: you inject it here.</p>
+<p>To share the request’s own database session (one transaction per request, row-level security) use a
+per-request store instead:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">sql_per_request_authz</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Authz</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""SQL sharing the request's own session (one transaction per request)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">SqlAssignmentStore</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">store_for</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SqlAssignmentStore</span><span class="p">:</span>
+        <span class="c1"># `request.state.session` is an AsyncSession opened by your own dependency,</span>
+        <span class="c1"># which FastAPI must run *before* the permission guard.</span>
+        <span class="k">return</span> <span class="n">SqlAssignmentStore</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Authz</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span> <span class="n">store_factory</span><span class="o">=</span><span class="n">store_for</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="install-it-on-the-application-and-guard-routes">
+<h2>4. Install it on the application and guard routes<a class="headerlink" href="#install-it-on-the-application-and-guard-routes" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">on_startup</span><span class="o">=</span><span class="p">[</span><span class="n">seed</span><span class="p">])</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span><span class="n">DemoAuth</span><span class="p">)</span>
+<span class="n">Authz</span><span class="o">.</span><span class="n">build</span><span class="p">(</span>
+    <span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span>
+    <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
+    <span class="n">group_roles</span><span class="o">=</span><span class="p">{</span><span class="s2">"platform-admins"</span><span class="p">:</span> <span class="s2">"PLATFORM_ADMIN"</span><span class="p">},</span>  <span class="c1"># token group -&gt; global role</span>
+<span class="p">)</span><span class="o">.</span><span class="n">install</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">install</span></code> also checks at startup that every guarded route uses a permission that exists in the catalog.
+Then protect a route; the scope comes from a path parameter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">"/studios/</span><span class="si">{studio_id}</span><span class="s2">/design"</span><span class="p">,</span> <span class="n">openapi_extra</span><span class="o">=</span><span class="n">permission_extra</span><span class="p">(</span><span class="s2">"design.write"</span><span class="p">))</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">write_design</span><span class="p">(</span>
+    <span class="n">studio_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">ctx</span><span class="p">:</span> <span class="n">AuthzContext</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_permission</span><span class="p">(</span><span class="s2">"design.write"</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="n">studio</span><span class="p">)),</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"saved"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+
+</pre></div>
+</div>
+<p>Authentication still comes from <code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware</span></code> (see <a class="reference internal" href="user-guide.html"><span class="doc">User Guide</span></a>): the guard reads
+<code class="docutils literal notranslate"><span class="pre">request.state.current_user</span></code> and uses its <code class="docutils literal notranslate"><span class="pre">id</span></code> (the token <code class="docutils literal notranslate"><span class="pre">sub</span></code>) as the principal.</p>
+<p>What callers get:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">401</span></code>: no authenticated user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">404</span></code>: the user has no active assignment in that scope, <strong>or</strong> the scope does not exist (the two are
+indistinguishable on purpose).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">403</span></code> with <code class="docutils literal notranslate"><span class="pre">{&quot;detail&quot;:</span> <span class="pre">{&quot;error&quot;:</span> <span class="pre">&quot;forbidden&quot;,</span> <span class="pre">&quot;required_permission&quot;:</span> <span class="pre">&quot;...&quot;}}</span></code>: the user belongs to the
+scope but lacks the permission.</p></li>
+</ul>
+</section>
+<section id="give-people-roles">
+<h2>5. Give people roles<a class="headerlink" href="#give-people-roles" title="Link to this heading"></a></h2>
+<p>Your application decides who may be assigned what (invitations, “last owner” rules…). Use
+<code class="docutils literal notranslate"><span class="pre">AssignmentService</span></code> from your own endpoints, or the CLI for operations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz</span><span class="w"> </span><span class="kn">import</span> <span class="n">AssignmentService</span><span class="p">,</span> <span class="n">ScopeRef</span>
+
+<span class="n">service</span> <span class="o">=</span> <span class="n">AssignmentService</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">catalog</span><span class="p">)</span>   <span class="c1"># store: any store with the write side</span>
+<span class="n">scope</span> <span class="o">=</span> <span class="n">ScopeRef</span><span class="p">(</span><span class="s2">"project"</span><span class="p">,</span> <span class="s2">"p-1"</span><span class="p">)</span>
+<span class="n">assignment</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="s2">"user-sub"</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="s2">"EDITOR"</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">change_role</span><span class="p">(</span><span class="s2">"user-sub"</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="s2">"VIEWER"</span><span class="p">,</span> <span class="n">expected_revision</span><span class="o">=</span><span class="n">assignment</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">revoke</span><span class="p">(</span><span class="s2">"user-sub"</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="n">expected_revision</span><span class="o">=</span><span class="n">assignment</span><span class="o">.</span><span class="n">revision</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">export AUTHZ_SQLALCHEMY_DATABASE_URI=postgresql+asyncpg://user:pw@host/db   # or AUTHZ_DYNAMODB_TABLE</span>
+<span class="go">authcli authz assign --store sqlalchemy --principal user-sub --scope project:p-1 --role EDITOR</span>
+<span class="go">authcli authz list   --store sqlalchemy --scope project:p-1</span>
+</pre></div>
+</div>
+<p>Revisions make concurrent edits safe: a stale <code class="docutils literal notranslate"><span class="pre">expected_revision</span></code> raises <code class="docutils literal notranslate"><span class="pre">RevisionConflictError</span></code>.
+Platform-wide staff can be derived from token groups instead of stored assignments:
+<code class="docutils literal notranslate"><span class="pre">Authz.build(...,</span> <span class="pre">group_roles={&quot;staff&quot;:</span> <span class="pre">&quot;PLATFORM_ADMIN&quot;})</span></code>.</p>
+</section>
+<section id="test-your-routes">
+<h2>6. Test your routes<a class="headerlink" href="#test-your-routes" title="Link to this heading"></a></h2>
+<p>Use the in-memory store and drive the app with <code class="docutils literal notranslate"><span class="pre">httpx</span></code> exactly as <code class="docutils literal notranslate"><span class="pre">tests/authz/test_example.py</span></code> does. Add an
+architecture test that no route is left unguarded with <code class="docutils literal notranslate"><span class="pre">declared_permissions(app)</span></code> (see <a class="reference internal" href="authz-fastapi.html"><span class="doc">FastAPI Integration</span></a>).</p>
+</section>
+<section id="where-next">
+<h2>Where next<a class="headerlink" href="#where-next" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Concepts and the 404/403 rule: <a class="reference internal" href="authz-overview.html"><span class="doc">Scoped Permissions: Overview</span></a></p></li>
+<li><p>Stores, contract tests, own adapters: <a class="reference internal" href="authz-stores.html"><span class="doc">Assignment Stores</span></a></p></li>
+<li><p>Error policy, OpenAPI, mounted apps: <a class="reference internal" href="authz-fastapi.html"><span class="doc">FastAPI Integration</span></a></p></li>
+<li><p>Operations (cache, audit, metrics): <a class="reference internal" href="authz-operations.html"><span class="doc">Operations: Service, CLI, Cache, Audit</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="infrastructure/google-setup.html" class="btn btn-neutral float-left" title="Google Identity Infrastructure Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="authz-overview.html" class="btn btn-neutral float-right" title="Scoped Permissions: Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

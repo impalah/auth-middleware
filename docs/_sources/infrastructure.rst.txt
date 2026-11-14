@@ -15,6 +15,7 @@ Provider-Specific Setup Guides
    :maxdepth: 2
 
    infrastructure/cognito-setup
+   infrastructure/dynamodb-setup
    infrastructure/entra-id-setup
    infrastructure/authentik-setup
    infrastructure/keycloak-setup
@@ -49,7 +50,7 @@ Each identity provider requires different infrastructure components:
    - User management through Google Workspace (optional)
 
 Security Considerations
-======================
+=======================
 
 When setting up identity provider infrastructure, consider the following security best practices:
 

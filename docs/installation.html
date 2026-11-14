@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Installation &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/installation.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -66,10 +66,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -167,7 +179,7 @@
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>Python</strong>: 3.14 or higher</p></li>
+<li><p><strong>Python</strong>: 3.12 or higher</p></li>
 <li><p><strong>FastAPI</strong>: 0.128.0 or higher (for FastAPI applications)</p></li>
 <li><p><strong>Starlette</strong>: Compatible with Starlette-based applications</p></li>
 </ul>
@@ -178,6 +190,18 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>auth-middleware
 </pre></div>
 </div>
+<p><strong>Optional extras</strong> (install only what you use; the core needs no database driver):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'auth-middleware[postgres]'</span><span class="w">    </span><span class="c1"># SQL store/providers on PostgreSQL (SQLAlchemy + asyncpg)</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'auth-middleware[mysql]'</span><span class="w">       </span><span class="c1"># SQL store/providers on MySQL (SQLAlchemy + aiomysql)</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'auth-middleware[sqlalchemy]'</span><span class="w">  </span><span class="c1"># both SQL drivers</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'auth-middleware[dynamodb]'</span><span class="w">    </span><span class="c1"># DynamoDB assignment store (PynamoDB)</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'auth-middleware[cognito]'</span><span class="w">     </span><span class="c1"># CognitoAuthService (login/MFA/password flows, boto3)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">authcli</span></code> command works without extras; commands that need one tell you which to install.
+See <a class="reference internal" href="authz-quickstart.html"><span class="doc">Scoped Permissions: Quick Start</span></a> for the scoped-permissions guide.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CognitoAuthService</span></code> uses blocking boto3 calls: from <code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">def</span></code> code use <code class="docutils literal notranslate"><span class="pre">AsyncCognitoAuthService(service)</span></code>
+(same methods, awaitable, run in a worker thread) so the event loop is not stalled.</p>
 <p><strong>Using UV</strong> (fastest):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>add<span class="w"> </span>auth-middleware
 </pre></div>
@@ -253,7 +277,7 @@ uvicorn&gt;=0.40.0
 
 <span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.
 
-<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;uvicorn&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;main:app&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--host&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0.0.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--port&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;8000&quot;</span><span class="p">]</span>
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">"uvicorn"</span><span class="p">,</span><span class="w"> </span><span class="s2">"main:app"</span><span class="p">,</span><span class="w"> </span><span class="s2">"--host"</span><span class="p">,</span><span class="w"> </span><span class="s2">"0.0.0.0"</span><span class="p">,</span><span class="w"> </span><span class="s2">"--port"</span><span class="p">,</span><span class="w"> </span><span class="s2">"8000"</span><span class="p">]</span>
 </pre></div>
 </div>
 </section>

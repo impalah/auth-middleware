@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.guards.functions &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>auth_middleware.guards.functions &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/guards/functions.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -54,10 +54,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -150,7 +162,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for auth_middleware.guards.functions</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Request</span>
@@ -159,20 +171,33 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards.permissions_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsChecker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.guards.role_checker</span><span class="w"> </span><span class="kn">import</span> <span class="n">RoleChecker</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.identity</span><span class="w"> </span><span class="kn">import</span> <span class="n">Identity</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_match</span><span class="p">(</span><span class="n">match</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"any"</span><span class="p">,</span> <span class="s2">"all"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"match must be 'any' or 'all'"</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="require_permissions">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.require_permissions">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">require_permissions</span><span class="p">(</span><span class="n">allowed_permissions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required permissions</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_permissions</span><span class="p">(</span>
+    <span class="n">allowed_permissions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">match</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"any"</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Check if the user has the required permissions</span>
+
+<span class="sd">    By default the user needs **at least one** of ``allowed_permissions``</span>
+<span class="sd">    (``match="any"``, like ``require_groups`` and ``require_roles``); pass</span>
+<span class="sd">    ``match="all"`` to require every one of them.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        allowed_permissions (List[str]): a list of required permissions</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">_check_match</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_permissions_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calls the GroupChecker class to check if</span>
+<span class="w">        </span><span class="sd">"""Calls the GroupChecker class to check if</span>
 <span class="sd">        the user has the required permissions</span>
 
 <span class="sd">        Args:</span>
@@ -180,8 +205,8 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            GroupChecker: group checker object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">checker</span> <span class="o">=</span> <span class="n">PermissionsChecker</span><span class="p">(</span><span class="n">allowed_permissions</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">checker</span> <span class="o">=</span> <span class="n">PermissionsChecker</span><span class="p">(</span><span class="n">allowed_permissions</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">match</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">checker</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_permissions_checker</span></div>
@@ -191,7 +216,7 @@
 <div class="viewcode-block" id="has_permissions">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.has_permissions">[docs]</a>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">has_permissions</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">allowed_permissions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required permissions asynchronously</span>
+<span class="w">    </span><span class="sd">"""Check if the user has the required permissions asynchronously</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        request (Request): FastAPI request object</span>
@@ -199,7 +224,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if the user has the required permissions, False otherwise</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">checker</span> <span class="o">=</span> <span class="n">PermissionsChecker</span><span class="p">(</span><span class="n">allowed_permissions</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">await</span> <span class="n">checker</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -211,15 +236,18 @@
 
 <div class="viewcode-block" id="require_groups">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.require_groups">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">require_groups</span><span class="p">(</span><span class="n">allowed_groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required groups</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_groups</span><span class="p">(</span>
+    <span class="n">allowed_groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">match</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"any"</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Check if the user has the required groups</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        allowed_groups (List[str]): a list of required groups</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">_check_match</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_group_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calls the GroupChecker class to check if</span>
+<span class="w">        </span><span class="sd">"""Calls the GroupChecker class to check if</span>
 <span class="sd">        the user has the required groups</span>
 
 <span class="sd">        Args:</span>
@@ -227,8 +255,8 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            GroupChecker: group checker object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">checker</span> <span class="o">=</span> <span class="n">GroupChecker</span><span class="p">(</span><span class="n">allowed_groups</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">checker</span> <span class="o">=</span> <span class="n">GroupChecker</span><span class="p">(</span><span class="n">allowed_groups</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">match</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">checker</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_group_checker</span></div>
@@ -238,7 +266,7 @@
 <div class="viewcode-block" id="has_groups">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.has_groups">[docs]</a>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">has_groups</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">allowed_groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required groups asynchronously</span>
+<span class="w">    </span><span class="sd">"""Check if the user has the required groups asynchronously</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        request (Request): FastAPI request object</span>
@@ -246,7 +274,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if the user has the required groups, False otherwise</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">checker</span> <span class="o">=</span> <span class="n">GroupChecker</span><span class="p">(</span><span class="n">allowed_groups</span><span class="o">=</span><span class="n">allowed_groups</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">await</span> <span class="n">checker</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -258,15 +286,18 @@
 
 <div class="viewcode-block" id="require_roles">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.require_roles">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">require_roles</span><span class="p">(</span><span class="n">allowed_roles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required roles</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_roles</span><span class="p">(</span>
+    <span class="n">allowed_roles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">match</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"any"</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Check if the user has the required roles</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        allowed_roles (List[str]): a list of required roles</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
+    <span class="n">_check_match</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_role_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calls the RoleChecker class to check if</span>
+<span class="w">        </span><span class="sd">"""Calls the RoleChecker class to check if</span>
 <span class="sd">        the user has the required roles</span>
 
 <span class="sd">        Args:</span>
@@ -274,8 +305,8 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            RoleChecker: role checker object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">checker</span> <span class="o">=</span> <span class="n">RoleChecker</span><span class="p">(</span><span class="n">allowed_roles</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">checker</span> <span class="o">=</span> <span class="n">RoleChecker</span><span class="p">(</span><span class="n">allowed_roles</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="n">match</span><span class="p">)</span>
         <span class="k">await</span> <span class="n">checker</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_role_checker</span></div>
@@ -285,7 +316,7 @@
 <div class="viewcode-block" id="has_roles">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.has_roles">[docs]</a>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">has_roles</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">allowed_roles</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user has the required roles asynchronously</span>
+<span class="w">    </span><span class="sd">"""Check if the user has the required roles asynchronously</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        request (Request): FastAPI request object</span>
@@ -293,7 +324,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        bool: True if the user has the required roles, False otherwise</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">checker</span> <span class="o">=</span> <span class="n">RoleChecker</span><span class="p">(</span><span class="n">allowed_roles</span><span class="o">=</span><span class="n">allowed_roles</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">await</span> <span class="n">checker</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
@@ -306,19 +337,19 @@
 <div class="viewcode-block" id="require_user">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.require_user">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">require_user</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the user is authenticated&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Check if the user is authenticated"""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_user_checker</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_MIDDLEWARE_DISABLED</span><span class="p">:</span>
             <span class="c1"># Consistent with require_groups/require_roles/require_permissions:</span>
             <span class="c1"># auth disabled means requests are never blocked. Prefer whatever</span>
             <span class="c1"># user the middleware already set (which is User.synthetic() when</span>
-            <span class="c1"># disabled), falling back to it directly if state wasn&#39;t set at all.</span>
-            <span class="n">current_user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;current_user&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="c1"># disabled), falling back to it directly if state wasn't set at all.</span>
+            <span class="n">current_user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"current_user"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">current_user</span> <span class="ow">or</span> <span class="n">User</span><span class="o">.</span><span class="n">synthetic</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;current_user&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Authentication required&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"current_user"</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Authentication required"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>  <span class="c1"># type: ignore[no-any-return]</span>
 
@@ -329,16 +360,97 @@
 <div class="viewcode-block" id="get_current_user">
 <a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.get_current_user">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_current_user</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the current user object if it exists&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Returns the current user object if it exists"""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_user</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;current_user&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"state"</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"current_user"</span><span class="p">)</span>
             <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_get_user</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unauthenticated</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">on_unauthenticated</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">on_unauthenticated</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">on_unauthenticated</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HTTPException</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
+        <span class="n">detail</span><span class="o">=</span><span class="s2">"Authentication required"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"WWW-Authenticate"</span><span class="p">:</span> <span class="s2">"Bearer"</span><span class="p">},</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_authenticated_user</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
+    <span class="n">allow_synthetic</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">on_unauthenticated</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"current_user"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span> <span class="ow">or</span> <span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"synthetic"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_synthetic</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">_unauthenticated</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">on_unauthenticated</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">user</span>  <span class="c1"># type: ignore[no-any-return]</span>
+
+
+<div class="viewcode-block" id="require_authenticated">
+<a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.require_authenticated">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">require_authenticated</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">allow_synthetic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">on_unauthenticated</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Awaitable</span><span class="p">[</span><span class="n">User</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Fail-closed authentication guard.</span>
+
+<span class="sd">    Unlike :func:`require_user`, it never lets the request through when</span>
+<span class="sd">    ``AUTH_MIDDLEWARE_DISABLED`` is set: the placeholder ``synthetic`` user the</span>
+<span class="sd">    middleware creates then is rejected (401) unless ``allow_synthetic=True``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        allow_synthetic: Accept the placeholder user (development only).</span>
+<span class="sd">        on_unauthenticated: Builds the exception to raise instead of the default</span>
+<span class="sd">            ``401`` with ``WWW-Authenticate: Bearer`` (e.g. a uniform problem body).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A dependency returning the authenticated :class:`User`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        HTTPException: 401 when there is no user (or only the synthetic one).</span>
+<span class="sd">    """</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_dependency</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_authenticated_user</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">allow_synthetic</span><span class="p">,</span> <span class="n">on_unauthenticated</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_dependency</span></div>
+
+
+
+<div class="viewcode-block" id="get_identity">
+<a class="viewcode-back" href="../../../functions.html#auth_middleware.guards.functions.get_identity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_identity</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">allow_synthetic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">on_unauthenticated</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Awaitable</span><span class="p">[</span><span class="n">Identity</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Like :func:`require_authenticated` but returns an immutable :class:`Identity`.</span>
+
+<span class="sd">    ``Identity.groups`` resolves the lazy ``await user.groups``; ``name`` falls back</span>
+<span class="sd">    to the ``sub`` and ``email`` to ``""``.</span>
+<span class="sd">    """</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_dependency</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Identity</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">_authenticated_user</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">allow_synthetic</span><span class="p">,</span> <span class="n">on_unauthenticated</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Identity</span><span class="p">(</span>
+            <span class="n">sub</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">groups</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="k">await</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span> <span class="ow">or</span> <span class="p">()),</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_dependency</span></div>
 
 </pre></div>
 

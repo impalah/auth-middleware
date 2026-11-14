@@ -73,11 +73,18 @@ Retrieves permissions from a SQL database using SQLAlchemy.
 
    .. code-block:: python
 
-      # Entra ID / generic OIDC providers typically use "preferred_username"
+      # "sub" is stable, provider-agnostic and cannot be edited by the user (recommended)
+      permissions_provider = SqlPermissionsProvider(id_claim="sub")
+
+      # Claims such as "preferred_username" or "email" work, but a warning is logged:
+      # many identity providers let users edit them
       permissions_provider = SqlPermissionsProvider(id_claim="preferred_username")
 
-      # Or use "sub" for a stable, provider-agnostic identifier
-      permissions_provider = SqlPermissionsProvider(id_claim="sub")
+   .. warning::
+
+      Authorization is keyed on that claim. ``preferred_username`` and ``email`` are editable or unverified at
+      some identity providers, which would let a user impersonate another user's groups; prefer ``"sub"``.
+      On MySQL, note that the default collations compare case-insensitively (``Admin`` equals ``admin``).
 
 **Managing Permissions:**
 
@@ -516,7 +523,7 @@ Advanced Features
                self._cache.clear()
 
 Permission Management
-====================
+=====================
 
 **Permission Management API:**
 

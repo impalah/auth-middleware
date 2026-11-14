@@ -27,7 +27,7 @@ The library defines several user-related types to represent authenticated users:
        extra: Dict[str, Any] = None
 
 Provider Types
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 Authentication providers implement the following interfaces:
 
@@ -48,7 +48,7 @@ Authentication providers implement the following interfaces:
            ...
 
 Configuration Types
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 Provider settings and configuration types:
 
@@ -75,10 +75,10 @@ Provider settings and configuration types:
        leeway: int = 0
 
 Token Types
-----------
+-----------
 
 JWT Token Structure
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 Standard JWT token claims structure:
 
@@ -107,10 +107,10 @@ Standard JWT token claims structure:
        custom_claims: Dict[str, Any] = {}
 
 Authentication Context
----------------------
+----------------------
 
 Request Context Types
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Types for managing authentication context in requests:
 
@@ -138,7 +138,7 @@ Types for managing authentication context in requests:
            return self.current_user is not None
 
 Middleware Types
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Types for middleware configuration:
 
@@ -164,10 +164,10 @@ Types for middleware configuration:
        token_prefix: str = "Bearer"
 
 Exception Types
---------------
+---------------
 
 Error and Exception Types
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -200,10 +200,10 @@ Error and Exception Types
            self.claims = claims
 
 Provider-Specific Types
-----------------------
+-----------------------
 
 AWS Cognito Types
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -218,7 +218,7 @@ AWS Cognito Types
        custom_attributes: Dict[str, str] = {}
 
 Azure Entra ID Types
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -233,10 +233,10 @@ Azure Entra ID Types
        upn: Optional[str] = None  # User Principal Name
 
 Validation Types
----------------
+----------------
 
 Validation Rules
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -282,7 +282,7 @@ Usage Examples
 --------------
 
 Type Hints in Application Code
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -306,7 +306,7 @@ Type Hints in Application Code
        }
 
 Custom Provider Implementation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 

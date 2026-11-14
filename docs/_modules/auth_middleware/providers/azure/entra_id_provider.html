@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.azure.entra_id_provider &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>auth_middleware.providers.azure.entra_id_provider &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/azure/entra_id_provider.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="../../../../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -54,10 +54,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -163,12 +175,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupsProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.jwt_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.permissions_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionsProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.contracts.roles_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">RolesProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.identity_provider_unavailable_exception</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">IdentityProviderUnavailableException</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.exceptions.invalid_token_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidTokenException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.azure.azure_exception</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.azure.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWK</span><span class="p">,</span> <span class="n">JWKS</span><span class="p">,</span> <span class="n">JWTAuthorizationCredentials</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.user</span><span class="w"> </span><span class="kn">import</span> <span class="n">User</span>
+
+<span class="c1">#: Tenant ids that mean "any tenant": the ``tid`` claim cannot be pinned.</span>
+<span class="n">_MULTI_TENANT_ALIASES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"common"</span><span class="p">,</span> <span class="s2">"organizations"</span><span class="p">,</span> <span class="s2">"consumers"</span><span class="p">})</span>
 
 
 <div class="viewcode-block" id="EntraIDProvider">
@@ -180,17 +199,19 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">permissions_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">roles_provider</span><span class="p">:</span> <span class="n">RolesProvider</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">permissions_provider</span><span class="o">=</span><span class="n">permissions_provider</span><span class="p">,</span>
             <span class="n">groups_provider</span><span class="o">=</span><span class="n">groups_provider</span><span class="p">,</span>
+            <span class="n">roles_provider</span><span class="o">=</span><span class="n">roles_provider</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="EntraIDProvider.get_keys">
 <a class="viewcode-back" href="../../../../entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get keys from the Entra ID JWKS endpoint.</span>
+<span class="w">        </span><span class="sd">"""Get keys from the Entra ID JWKS endpoint.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            jwks_uri: The JWKS endpoint URL, as returned by the OIDC</span>
@@ -198,35 +219,35 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[JWK]: a list of JWK keys</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">jwks_uri</span><span class="p">)</span>
                 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-                <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+                <span class="n">keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">JWK</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">"keys"</span><span class="p">]</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPStatusError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Entra ID JWKS endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"Entra ID JWKS endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">exc</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
                 <span class="n">jwks_uri</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to retrieve public keys from identity provider&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to retrieve public keys from identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Network error fetching Entra ID JWKS from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span>
+                <span class="s2">"Network error fetching Entra ID JWKS from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to reach identity provider&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to reach identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unexpected JWKS response format from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid JWKS response from identity provider&quot;</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Unexpected JWKS response format from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">jwks_uri</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Invalid JWKS response from identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
         <span class="k">return</span> <span class="n">keys</span></div>
@@ -235,11 +256,11 @@
 <div class="viewcode-block" id="EntraIDProvider.get_openid_config">
 <a class="viewcode-back" href="../../../../entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_openid_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the OIDC discovery document for the configured Entra ID tenant.</span>
+<span class="w">        </span><span class="sd">"""Get the OIDC discovery document for the configured Entra ID tenant.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dict[str, Any]: the discovery document.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">discovery_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="p">,</span>
         <span class="p">)</span>
@@ -250,33 +271,33 @@
                 <span class="n">config_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPStatusError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Entra ID discovery endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"Entra ID discovery endpoint returned </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">exc</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
                 <span class="n">discovery_url</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to retrieve OIDC discovery document&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to retrieve OIDC discovery document"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Network error fetching Entra ID discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"Network error fetching Entra ID discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">discovery_url</span><span class="p">,</span>
                 <span class="n">exc</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Unable to reach identity provider&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Unable to reach identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;Invalid JSON in Entra ID discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="s2">"Invalid JSON in Entra ID discovery document from </span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="n">discovery_url</span><span class="p">,</span>
                 <span class="n">exc</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid OIDC discovery response from identity provider&quot;</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Invalid OIDC discovery response from identity provider"</span><span class="p">,</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
 
         <span class="k">return</span> <span class="n">config_data</span></div>
@@ -287,38 +308,34 @@
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">load_jwks</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JWKS</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load JWKS credentials from remote Identity Provider</span>
+<span class="w">        </span><span class="sd">"""Load JWKS credentials from remote Identity Provider</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            JWKS: cached key set with refresh metadata.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">openid_config</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_openid_config</span><span class="p">()</span>
 
-        <span class="n">jwks_uri</span> <span class="o">=</span> <span class="n">openid_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">)</span>
+        <span class="n">jwks_uri</span> <span class="o">=</span> <span class="n">openid_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"jwks_uri"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">jwks_uri</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Entra ID discovery document has no &#39;jwks_uri&#39;&quot;</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
-                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Invalid OIDC discovery response from identity provider&quot;</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Entra ID discovery document has no 'jwks_uri'"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">IdentityProviderUnavailableException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"Invalid OIDC discovery response from identity provider"</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">keys</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_keys</span><span class="p">(</span><span class="n">jwks_uri</span><span class="p">)</span>
 
-        <span class="c1"># Convert &#39;x5c&#39; field in each key from list to string</span>
+        <span class="c1"># Convert 'x5c' field in each key from list to string</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;x5c&quot;</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="s2">&quot;x5c&quot;</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="n">key</span><span class="p">[</span><span class="s2">&quot;x5c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="s2">&quot;x5c&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s2">"x5c"</span> <span class="ow">in</span> <span class="n">key</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="s2">"x5c"</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">key</span><span class="p">[</span><span class="s2">"x5c"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="s2">"x5c"</span><span class="p">])</span>
 
         <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">time_ns</span><span class="p">()</span>
-            <span class="o">+</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
-            <span class="o">*</span> <span class="mi">60</span>
-            <span class="o">*</span> <span class="mi">1000000000</span>
+            <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1_000_000_000</span>
         <span class="p">)</span>
-        <span class="n">usage_counter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
-            <span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;AUTH_MIDDLEWARE_JWKS_CACHE_USAGES&quot;</span><span class="p">,</span> <span class="mi">1000</span>
-        <span class="p">)</span>
+        <span class="n">usage_counter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_MIDDLEWARE_JWKS_CACHE_USAGES</span>
         <span class="n">jks</span><span class="p">:</span> <span class="n">JWKS</span> <span class="o">=</span> <span class="n">JWKS</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">usage_counter</span><span class="o">=</span><span class="n">usage_counter</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">jks</span></div>
 
@@ -326,7 +343,7 @@
 <div class="viewcode-block" id="EntraIDProvider.verify_token">
 <a class="viewcode-back" href="../../../../entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.verify_token">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">verify_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Verifiy token signature</span>
+<span class="w">        </span><span class="sd">"""Verifiy token signature</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            token (JWTAuthorizationCredentials): _description_</span>
@@ -336,67 +353,80 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            bool: _description_</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">hmac_key_candidate</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_hmac_key</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">hmac_key_candidate</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s2">&quot;No public key found that matches the one present in the TOKEN!&quot;</span>
+                <span class="s2">"No public key found that matches the one present in the TOKEN!"</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="n">InvalidTokenException</span><span class="p">(</span>
                 <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
-                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;No public key found!&quot;</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">"No public key found!"</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># "use" is optional in a JWK (RFC 7517) and not needed to verify.</span>
             <span class="n">rsa_key_dict</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;kty&quot;</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">&quot;kty&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;kid&quot;</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">&quot;kid&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;use&quot;</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">&quot;use&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">&quot;n&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;e&quot;</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">&quot;e&quot;</span><span class="p">],</span>
+                <span class="s2">"kty"</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">"kty"</span><span class="p">],</span>
+                <span class="s2">"kid"</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">"kid"</span><span class="p">],</span>
+                <span class="s2">"n"</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">"n"</span><span class="p">],</span>
+                <span class="s2">"e"</span><span class="p">:</span> <span class="n">hmac_key_candidate</span><span class="p">[</span><span class="s2">"e"</span><span class="p">],</span>
             <span class="p">}</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">import_key</span><span class="p">(</span><span class="n">rsa_key_dict</span><span class="p">)</span>
             <span class="n">audience</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span>
             <span class="n">token_obj</span> <span class="o">=</span> <span class="n">joserfc_jwt</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
                 <span class="n">token</span><span class="o">.</span><span class="n">jwt_token</span><span class="p">,</span>
                 <span class="n">key</span><span class="p">,</span>
-                <span class="n">algorithms</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">],</span>
+                <span class="n">algorithms</span><span class="o">=</span><span class="p">[</span><span class="s2">"RS256"</span><span class="p">],</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_validate_registered_claims</span><span class="p">(</span>
                 <span class="n">token_obj</span><span class="o">.</span><span class="n">claims</span><span class="p">,</span>
                 <span class="n">leeway</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">audience</span><span class="p">:</span>
+                <span class="c1"># Microsoft signs tokens of every tenant and app with the same keys:</span>
+                <span class="c1"># without an audience any of them would be accepted.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">"AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID is not set: tokens "</span>
+                    <span class="s2">"issued for any application are accepted. Set it."</span>
+                <span class="p">)</span>
+            <span class="n">tenant</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span>
+            <span class="k">if</span> <span class="n">tenant</span> <span class="ow">and</span> <span class="n">tenant</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_MULTI_TENANT_ALIASES</span><span class="p">:</span>
+                <span class="c1"># Keys are shared across tenants: pin the tenant explicitly.</span>
+                <span class="k">if</span> <span class="n">token_obj</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"tid"</span><span class="p">)</span> <span class="o">!=</span> <span class="n">tenant</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Token issued by another Entra ID tenant"</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">audience</span><span class="p">:</span>
                 <span class="n">claims_registry</span> <span class="o">=</span> <span class="n">JWTClaimsRegistry</span><span class="p">(</span>
-                    <span class="n">aud</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;essential&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">audience</span><span class="p">},</span>
+                    <span class="n">aud</span><span class="o">=</span><span class="p">{</span><span class="s2">"essential"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="n">audience</span><span class="p">},</span>
                     <span class="n">leeway</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">claims_registry</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">token_obj</span><span class="o">.</span><span class="n">claims</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">token_obj</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sub&quot;</span><span class="p">))</span>
+            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">token_obj</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sub"</span><span class="p">))</span>
         <span class="k">except</span> <span class="n">JoseError</span> <span class="k">as</span> <span class="n">je</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in EntraIDClient: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">je</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Error in EntraIDClient: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">je</span><span class="p">))</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error in JWTBearerManager: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-            <span class="k">raise</span> <span class="n">AzureException</span><span class="p">(</span><span class="s2">&quot;Error in JWTBearerManager&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Error in JWTBearerManager: </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">AzureException</span><span class="p">(</span><span class="s2">"Error in JWTBearerManager"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span></div>
 
 
 <div class="viewcode-block" id="EntraIDProvider.create_user_from_token">
 <a class="viewcode-back" href="../../../../entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.create_user_from_token">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_user_from_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes a domain User object with data recovered from a JWT TOKEN.</span>
+<span class="w">        </span><span class="sd">"""Initializes a domain User object with data recovered from a JWT TOKEN.</span>
 <span class="sd">        Args:</span>
 <span class="sd">        token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            User: Domain object.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="n">name_property</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;username&quot;</span> <span class="k">if</span> <span class="s2">&quot;username&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="s2">&quot;preferred_username&quot;</span>
+            <span class="s2">"username"</span> <span class="k">if</span> <span class="s2">"username"</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="s2">"preferred_username"</span>
         <span class="p">)</span>
 
         <span class="n">groups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -406,14 +436,18 @@
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">],</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">jwt_token</span><span class="p">,</span>
+            <span class="n">jwt_credentials</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+            <span class="n">permissions_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_permissions_provider</span><span class="p">,</span>
+            <span class="n">roles_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_roles_provider</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">"sub"</span><span class="p">],</span>
             <span class="n">name</span><span class="o">=</span><span class="p">(</span>
                 <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="n">name_property</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">name_property</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span>
-                <span class="k">else</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
+                <span class="k">else</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">"sub"</span><span class="p">]</span>
             <span class="p">),</span>
             <span class="n">groups</span><span class="o">=</span><span class="n">groups</span><span class="p">,</span>
-            <span class="n">email</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="s2">&quot;email&quot;</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="p">[</span><span class="s2">"email"</span><span class="p">]</span> <span class="k">if</span> <span class="s2">"email"</span> <span class="ow">in</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span></div>
 </div>
 

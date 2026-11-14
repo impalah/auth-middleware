@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Services Module &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Services Module &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/services.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -57,10 +57,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul class="current">
@@ -262,7 +274,7 @@
 <dd><p>Static utility class for detecting M2M tokens.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.is_m2m_token">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_m2m_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.is_m2m_token" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_m2m_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.is_m2m_token" title="Link to this definition"></a></dt>
 <dd><p>Determines if JWT token represents M2M authentication.</p>
 <p><strong>Detection Criteria:</strong></p>
 <ul class="simple">
@@ -283,9 +295,9 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">M2MTokenDetector</span>
 
 <span class="n">claims</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;token_use&quot;</span><span class="p">:</span> <span class="s2">&quot;access&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="s2">&quot;service-account-123&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;api/read api/write&quot;</span>
+    <span class="s2">"token_use"</span><span class="p">:</span> <span class="s2">"access"</span><span class="p">,</span>
+    <span class="s2">"client_id"</span><span class="p">:</span> <span class="s2">"service-account-123"</span><span class="p">,</span>
+    <span class="s2">"scope"</span><span class="p">:</span> <span class="s2">"api/read api/write"</span>
 <span class="p">}</span>
 
 <span class="n">is_m2m</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">is_m2m_token</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
@@ -296,7 +308,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.get_client_id">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_client_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.get_client_id" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_client_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.get_client_id" title="Link to this definition"></a></dt>
 <dd><p>Extracts client ID from token claims.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -308,14 +320,14 @@
 </dl>
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">client_id</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">get_client_id</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
-<span class="c1"># Returns: &quot;service-account-123&quot;</span>
+<span class="c1"># Returns: "service-account-123"</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.get_token_metadata">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_token_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.get_token_metadata" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_token_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.get_token_metadata" title="Link to this definition"></a></dt>
 <dd><p>Extracts comprehensive metadata from token.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -325,10 +337,10 @@
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">metadata</span> <span class="o">=</span> <span class="n">M2MTokenDetector</span><span class="o">.</span><span class="n">get_token_metadata</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span>
 <span class="c1"># Returns: {</span>
-<span class="c1">#     &quot;token_use&quot;: &quot;access&quot;,</span>
-<span class="c1">#     &quot;client_id&quot;: &quot;service-account-123&quot;,</span>
-<span class="c1">#     &quot;scopes&quot;: [&quot;api/read&quot;, &quot;api/write&quot;],</span>
-<span class="c1">#     &quot;has_user_context&quot;: False</span>
+<span class="c1">#     "token_use": "access",</span>
+<span class="c1">#     "client_id": "service-account-123",</span>
+<span class="c1">#     "scopes": ["api/read", "api/write"],</span>
+<span class="c1">#     "has_user_context": False</span>
 <span class="c1"># }</span>
 </pre></div>
 </div>
@@ -336,7 +348,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.M2MTokenDetector.requires_user_context">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">requires_user_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.requires_user_context" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">requires_user_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">claims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#auth_middleware.services.M2MTokenDetector.requires_user_context" title="Link to this definition"></a></dt>
 <dd><p>Checks if token has user context (for user operations).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -359,35 +371,35 @@
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/data&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/data"</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_data</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
 
     <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_m2m</span><span class="p">:</span>
         <span class="c1"># Service account access</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Service account authenticated&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span>
-            <span class="s2">&quot;service_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+            <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Service account authenticated"</span><span class="p">,</span>
+            <span class="s2">"client_id"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span>
+            <span class="s2">"service_id"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
         <span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Human user access</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Hello </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+            <span class="s2">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Hello </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"user_id"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
         <span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/human-only&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/human-only"</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">human_only</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
 
     <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">is_m2m</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
             <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
-            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;This endpoint requires human user authentication&quot;</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">"This endpoint requires human user authentication"</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Human user access granted&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Human user access granted"</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -403,7 +415,7 @@
 <dd><p>Sliding window rate limiter with async support.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.RateLimiter.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_requests</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.RateLimiter.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_requests</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.RateLimiter.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize rate limiter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -435,7 +447,7 @@
 </dd>
 </dl>
 <p><strong>Example:</strong></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">allowed</span> <span class="o">=</span> <span class="k">await</span> <span class="n">limiter</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">(</span><span class="s2">&quot;user-123&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">allowed</span> <span class="o">=</span> <span class="k">await</span> <span class="n">limiter</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">(</span><span class="s2">"user-123"</span><span class="p">)</span>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">allowed</span><span class="p">:</span>
     <span class="c1"># Rate limit exceeded</span>
     <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">429</span><span class="p">)</span>
@@ -481,7 +493,7 @@
 <h2>rate_limit Decorator<a class="headerlink" href="#rate-limit-decorator" title="Link to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="auth_middleware.services.rate_limit">
-<span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">rate_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_requests</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.rate_limit" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">auth_middleware.services.</span></span><span class="sig-name descname"><span class="pre">rate_limit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_requests</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_seconds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.rate_limit" title="Link to this definition"></a></dt>
 <dd><p>Decorator for endpoint rate limiting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -495,20 +507,20 @@
 <p><strong>Example:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.services</span><span class="w"> </span><span class="kn">import</span> <span class="n">rate_limit</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/data&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/data"</span><span class="p">)</span>
 <span class="nd">@rate_limit</span><span class="p">(</span><span class="n">max_requests</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">window_seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_data</span><span class="p">():</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"data"</span><span class="p">:</span> <span class="s2">"value"</span><span class="p">}</span>
 
 <span class="c1"># Custom identifier</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/user-data&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/user-data"</span><span class="p">)</span>
 <span class="nd">@rate_limit</span><span class="p">(</span>
     <span class="n">max_requests</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
     <span class="n">window_seconds</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
     <span class="n">identifier</span><span class="o">=</span><span class="k">lambda</span> <span class="n">req</span><span class="p">:</span> <span class="n">req</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span><span class="o">.</span><span class="n">id</span>
 <span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_data</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;user specific&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"data"</span><span class="p">:</span> <span class="s2">"user specific"</span><span class="p">}</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -522,21 +534,21 @@
 
 <span class="n">api_limiter</span> <span class="o">=</span> <span class="n">RateLimiter</span><span class="p">(</span><span class="n">max_requests</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">window_seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/api/custom&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/api/custom"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">custom_endpoint</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">Response</span><span class="p">):</span>
     <span class="n">client_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">host</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="n">api_limiter</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">(</span><span class="n">client_id</span><span class="p">):</span>
         <span class="n">remaining</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api_limiter</span><span class="o">.</span><span class="n">get_remaining</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
-        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-RateLimit-Remaining&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">429</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Rate limit exceeded&quot;</span><span class="p">)</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-RateLimit-Remaining"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">429</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Rate limit exceeded"</span><span class="p">)</span>
 
     <span class="c1"># Add rate limit headers</span>
     <span class="n">remaining</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api_limiter</span><span class="o">.</span><span class="n">get_remaining</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-RateLimit-Limit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;100&quot;</span>
-    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;X-RateLimit-Remaining&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-RateLimit-Limit"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"100"</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">"X-RateLimit-Remaining"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"data"</span><span class="p">:</span> <span class="s2">"success"</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -558,73 +570,73 @@
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.event_type">
-<span class="sig-name descname"><span class="pre">event_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.event_type" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">event_type</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.event_type" title="Link to this definition"></a></dt>
 <dd><p>Event type (auth_success, auth_failure, access_denied, etc.)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.user_id">
-<span class="sig-name descname"><span class="pre">user_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.user_id" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.user_id" title="Link to this definition"></a></dt>
 <dd><p>User or service account ID</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.client_id">
-<span class="sig-name descname"><span class="pre">client_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.client_id" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">client_id</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.client_id" title="Link to this definition"></a></dt>
 <dd><p>Client ID for M2M tokens</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.is_m2m">
-<span class="sig-name descname"><span class="pre">is_m2m</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.is_m2m" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">is_m2m</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.is_m2m" title="Link to this definition"></a></dt>
 <dd><p>Whether this is M2M authentication</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.path">
-<span class="sig-name descname"><span class="pre">path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.path" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.path" title="Link to this definition"></a></dt>
 <dd><p>Request path</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.method">
-<span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.method" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.method" title="Link to this definition"></a></dt>
 <dd><p>HTTP method</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.status_code">
-<span class="sig-name descname"><span class="pre">status_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.status_code" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">status_code</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.status_code" title="Link to this definition"></a></dt>
 <dd><p>Response status code</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.ip_address">
-<span class="sig-name descname"><span class="pre">ip_address</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.ip_address" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ip_address</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.ip_address" title="Link to this definition"></a></dt>
 <dd><p>Client IP address</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.user_agent">
-<span class="sig-name descname"><span class="pre">user_agent</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.user_agent" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">user_agent</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.user_agent" title="Link to this definition"></a></dt>
 <dd><p>Client user agent</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.metadata">
-<span class="sig-name descname"><span class="pre">metadata</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.metadata" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">metadata</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.metadata" title="Link to this definition"></a></dt>
 <dd><p>Additional event-specific data</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.to_dict" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.to_dict" title="Link to this definition"></a></dt>
 <dd><p>Convert event to dictionary for logging.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditEvent.to_json">
-<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.to_json" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#auth_middleware.services.AuditEvent.to_json" title="Link to this definition"></a></dt>
 <dd><p>Convert event to JSON string.</p>
 </dd></dl>
 
@@ -639,7 +651,7 @@
 <dd><p>Service for logging audit events.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_to_console</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_to_console</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.__init__" title="Link to this definition"></a></dt>
 <dd><p>Initialize audit logger.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -672,19 +684,19 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.log_auth_success">
-<span class="sig-name descname"><span class="pre">log_auth_success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_m2m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_auth_success" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">log_auth_success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_m2m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_auth_success" title="Link to this definition"></a></dt>
 <dd><p>Log successful authentication.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.log_auth_failure">
-<span class="sig-name descname"><span class="pre">log_auth_failure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_auth_failure" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">log_auth_failure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_auth_failure" title="Link to this definition"></a></dt>
 <dd><p>Log failed authentication.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.services.AuditLogger.log_access_denied">
-<span class="sig-name descname"><span class="pre">log_access_denied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_access_denied" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">log_access_denied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auth_middleware.services.AuditLogger.log_access_denied" title="Link to this definition"></a></dt>
 <dd><p>Log access denial.</p>
 </dd></dl>
 
@@ -707,7 +719,7 @@
     <span class="n">AuditMiddleware</span><span class="p">,</span>
     <span class="n">enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">audit_logger</span><span class="o">=</span><span class="n">AuditLogger</span><span class="p">(),</span>
-    <span class="n">exclude_paths</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;/health&quot;</span><span class="p">,</span> <span class="s2">&quot;/metrics&quot;</span><span class="p">]</span>
+    <span class="n">exclude_paths</span><span class="o">=</span><span class="p">[</span><span class="s2">"/health"</span><span class="p">,</span> <span class="s2">"/metrics"</span><span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -721,18 +733,18 @@
 
 <span class="n">audit_logger</span> <span class="o">=</span> <span class="n">AuditLogger</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/sensitive-operation&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/sensitive-operation"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">sensitive_op</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
 
     <span class="c1"># Log operation start</span>
     <span class="n">event</span> <span class="o">=</span> <span class="n">AuditEvent</span><span class="p">(</span>
-        <span class="n">event_type</span><span class="o">=</span><span class="s2">&quot;sensitive_operation&quot;</span><span class="p">,</span>
+        <span class="n">event_type</span><span class="o">=</span><span class="s2">"sensitive_operation"</span><span class="p">,</span>
         <span class="n">user_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
         <span class="n">is_m2m</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">is_m2m</span><span class="p">,</span>
-        <span class="n">path</span><span class="o">=</span><span class="s2">&quot;/sensitive-operation&quot;</span><span class="p">,</span>
-        <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;data_modification&quot;</span><span class="p">,</span>
-        <span class="n">data_type</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">=</span><span class="s2">"/sensitive-operation"</span><span class="p">,</span>
+        <span class="n">operation</span><span class="o">=</span><span class="s2">"data_modification"</span><span class="p">,</span>
+        <span class="n">data_type</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"type"</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">audit_logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
 
@@ -742,8 +754,8 @@
     <span class="c1"># Log success</span>
     <span class="n">audit_logger</span><span class="o">.</span><span class="n">log_auth_success</span><span class="p">(</span>
         <span class="n">user_id</span><span class="o">=</span><span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;data_modification&quot;</span><span class="p">,</span>
-        <span class="n">result</span><span class="o">=</span><span class="s2">&quot;success&quot;</span>
+        <span class="n">operation</span><span class="o">=</span><span class="s2">"data_modification"</span><span class="p">,</span>
+        <span class="n">result</span><span class="o">=</span><span class="s2">"success"</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result</span>
@@ -803,17 +815,17 @@
 <dd><p>Get current metrics snapshot.</p>
 <p><strong>Returns:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;uptime_seconds&quot;</span><span class="p">:</span> <span class="mf">3600.5</span><span class="p">,</span>
-    <span class="s2">&quot;tokens_validated&quot;</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
-    <span class="s2">&quot;tokens_failed&quot;</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
-    <span class="s2">&quot;total_tokens&quot;</span><span class="p">:</span> <span class="mi">10150</span><span class="p">,</span>
-    <span class="s2">&quot;success_rate&quot;</span><span class="p">:</span> <span class="mf">98.52</span><span class="p">,</span>
-    <span class="s2">&quot;validation_time_avg_ms&quot;</span><span class="p">:</span> <span class="mf">25.3</span><span class="p">,</span>
-    <span class="s2">&quot;validation_time_p95_ms&quot;</span><span class="p">:</span> <span class="mf">45.7</span><span class="p">,</span>
-    <span class="s2">&quot;validation_time_p99_ms&quot;</span><span class="p">:</span> <span class="mf">89.2</span><span class="p">,</span>
-    <span class="s2">&quot;errors_by_type&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;expired_token&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-        <span class="s2">&quot;invalid_signature&quot;</span><span class="p">:</span> <span class="mi">50</span>
+    <span class="s2">"uptime_seconds"</span><span class="p">:</span> <span class="mf">3600.5</span><span class="p">,</span>
+    <span class="s2">"tokens_validated"</span><span class="p">:</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="s2">"tokens_failed"</span><span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="s2">"total_tokens"</span><span class="p">:</span> <span class="mi">10150</span><span class="p">,</span>
+    <span class="s2">"success_rate"</span><span class="p">:</span> <span class="mf">98.52</span><span class="p">,</span>
+    <span class="s2">"validation_time_avg_ms"</span><span class="p">:</span> <span class="mf">25.3</span><span class="p">,</span>
+    <span class="s2">"validation_time_p95_ms"</span><span class="p">:</span> <span class="mf">45.7</span><span class="p">,</span>
+    <span class="s2">"validation_time_p99_ms"</span><span class="p">:</span> <span class="mf">89.2</span><span class="p">,</span>
+    <span class="s2">"errors_by_type"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"expired_token"</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="s2">"invalid_signature"</span><span class="p">:</span> <span class="mi">50</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
@@ -838,7 +850,7 @@
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">MetricsCollector</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">middleware</span><span class="p">(</span><span class="s2">"http"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">metrics_middleware</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">call_next</span><span class="p">):</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
@@ -846,10 +858,10 @@
         <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">call_next</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
         <span class="n">duration_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
 
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">&quot;current_user&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"current_user"</span><span class="p">):</span>
             <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_success</span><span class="p">(</span><span class="n">duration_ms</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">401</span><span class="p">:</span>
-            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="s2">&quot;unauthorized&quot;</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="s2">"unauthorized"</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">response</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -857,27 +869,27 @@
         <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
         <span class="k">raise</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/metrics&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/metrics"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_metrics</span><span class="p">():</span>
     <span class="k">return</span> <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/metrics/prometheus&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/metrics/prometheus"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">prometheus_metrics</span><span class="p">():</span>
     <span class="n">snapshot</span> <span class="o">=</span> <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""</span>
 <span class="s2">    # HELP auth_tokens_validated_total Total validated tokens</span>
 <span class="s2">    # TYPE auth_tokens_validated_total counter</span>
-<span class="s2">    auth_tokens_validated_total </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;tokens_validated&#39;</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">    auth_tokens_validated_total </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">'tokens_validated'</span><span class="p">]</span><span class="si">}</span>
 
 <span class="s2">    # HELP auth_success_rate Authentication success rate</span>
 <span class="s2">    # TYPE auth_success_rate gauge</span>
-<span class="s2">    auth_success_rate </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;success_rate&#39;</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">    auth_success_rate </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">'success_rate'</span><span class="p">]</span><span class="si">}</span>
 
 <span class="s2">    # HELP auth_validation_duration_avg_ms Average validation time</span>
 <span class="s2">    # TYPE auth_validation_duration_avg_ms gauge</span>
-<span class="s2">    auth_validation_duration_avg_ms </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">&#39;validation_time_avg_ms&#39;</span><span class="p">]</span><span class="si">}</span>
-<span class="s2">    &quot;&quot;&quot;</span>
+<span class="s2">    auth_validation_duration_avg_ms </span><span class="si">{</span><span class="n">snapshot</span><span class="p">[</span><span class="s1">'validation_time_avg_ms'</span><span class="p">]</span><span class="si">}</span>
+<span class="s2">    """</span>
 </pre></div>
 </div>
 </section>

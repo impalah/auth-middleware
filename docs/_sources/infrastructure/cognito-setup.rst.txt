@@ -103,7 +103,7 @@ Step 2: Create App Clients
 You'll need two different app clients for different authentication flows:
 
 App Client 1: Client Credentials Flow
-------------------------------------
+-------------------------------------
 
 This client is used for server-to-server authentication.
 
@@ -188,7 +188,7 @@ This client is used for user authentication with username/password.
    - **Save the Client ID (and Client Secret if generated)**
 
 Step 3: Create User Groups
-=========================
+==========================
 
 User groups are essential for authorization and role-based access control.
 
@@ -223,7 +223,7 @@ User groups are essential for authorization and role-based access control.
    - "premium" (precedence: 8)
 
 Step 4: Create Users
-===================
+====================
 
 Create test users to verify your setup.
 
@@ -310,7 +310,7 @@ You can test your Cognito setup using the Bruno API client (as shown in your tes
 
 1. **Test User Authentication**:
 
-   .. code-block:: json
+   .. code-block:: text
 
       POST https://cognito-idp.{region}.amazonaws.com/
       Content-Type: application/x-amz-json-1.1
@@ -327,7 +327,7 @@ You can test your Cognito setup using the Bruno API client (as shown in your tes
 
 2. **Test Client Credentials**:
 
-   .. code-block:: json
+   .. code-block:: text
 
       POST https://cognito-idp.{region}.amazonaws.com/
       Content-Type: application/x-amz-json-1.1
@@ -342,7 +342,7 @@ You can test your Cognito setup using the Bruno API client (as shown in your tes
       }
 
 Configuration Summary
-====================
+=====================
 
 After completing these steps, you'll have:
 

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.providers.oidc.oidc_provider_settings &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>auth_middleware.providers.oidc.oidc_provider_settings &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/providers/oidc/oidc_provider_settings.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="../../../../_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -54,10 +54,22 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -153,138 +165,175 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.jwt_provider_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTProviderSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.token_type</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenType</span>
 
 
 <div class="viewcode-block" id="OidcProviderSettings">
 <a class="viewcode-back" href="../../../../oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OidcProviderSettings</span><span class="p">(</span><span class="n">JWTProviderSettings</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Settings for a generic OpenID Connect provider.</span>
+<span class="w">    </span><span class="sd">"""Settings for a generic OpenID Connect provider.</span>
 
 <span class="sd">    Works with any standards-compliant OIDC identity provider (Authentik,</span>
-<span class="sd">    Keycloak, Auth0, Okta, ...): the JWKS is discovered from the issuer&#39;s</span>
+<span class="sd">    Keycloak, Auth0, Okta, ...): the JWKS is discovered from the issuer's</span>
 <span class="sd">    ``.well-known/openid-configuration`` document unless ``jwks_uri`` is</span>
 <span class="sd">    set explicitly.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">issuer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;OIDC issuer URL, e.g. https://authentik.example.com/application/o/my-app/&quot;</span>
+            <span class="s2">"OIDC issuer URL, e.g. https://authentik.example.com/application/o/my-app/"</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">audience</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Expected &#39;aud&#39; claim (the OIDC client ID). Strongly &quot;</span>
-            <span class="s2">&quot;recommended: without it, any token signed by the issuer for &quot;</span>
-            <span class="s2">&quot;any client is accepted.&quot;</span>
+            <span class="s2">"Expected 'aud' claim (the OIDC client ID). Strongly "</span>
+            <span class="s2">"recommended: without it, any token signed by the issuer for "</span>
+            <span class="s2">"any client is accepted."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">jwks_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Explicit JWKS URL. If not set, it is discovered from &quot;</span>
-            <span class="s2">&quot;&#39;</span><span class="si">{issuer}</span><span class="s2">/.well-known/openid-configuration&#39; on first use.&quot;</span>
+            <span class="s2">"Explicit JWKS URL. If not set, it is discovered from "</span>
+            <span class="s2">"'</span><span class="si">{issuer}</span><span class="s2">/.well-known/openid-configuration' on first use."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">discovery_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Override for the OIDC discovery document URL. Defaults to &quot;</span>
-            <span class="s2">&quot;&#39;</span><span class="si">{issuer}</span><span class="s2">/.well-known/openid-configuration&#39;.&quot;</span>
+            <span class="s2">"Override for the OIDC discovery document URL. Defaults to "</span>
+            <span class="s2">"'</span><span class="si">{issuer}</span><span class="s2">/.well-known/openid-configuration'."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">algorithms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;RS256&quot;</span><span class="p">],</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;JWS algorithms accepted when verifying the token signature&quot;</span><span class="p">,</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">"RS256"</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"JWS algorithms accepted when verifying the token signature"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">username_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;preferred_username&quot;</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Claim used as the user&#39;s display name&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"preferred_username"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Claim used as the user's display name"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">username_claim_fallbacks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Additional claims tried, in order, if &#39;username_claim&#39; is &quot;</span>
-            <span class="s2">&quot;absent from the token. Useful for issuers whose ID and access &quot;</span>
-            <span class="s2">&quot;tokens carry the display name under different claims (e.g. &quot;</span>
-            <span class="s2">&quot;Cognito: &#39;username&#39; on access tokens, &#39;cognito:username&#39; on ID &quot;</span>
-            <span class="s2">&quot;tokens).&quot;</span>
+            <span class="s2">"Additional claims tried, in order, if 'username_claim' is "</span>
+            <span class="s2">"absent from the token. Useful for issuers whose ID and access "</span>
+            <span class="s2">"tokens carry the display name under different claims (e.g. "</span>
+            <span class="s2">"Cognito: 'username' on access tokens, 'cognito:username' on ID "</span>
+            <span class="s2">"tokens)."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">groups_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"groups"</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Claim containing the user&#39;s groups, if present in the token. &quot;</span>
-            <span class="s2">&quot;Used as a fallback only when OidcProvider is constructed &quot;</span>
-            <span class="s2">&quot;without a GroupsProvider (or for machine-to-machine tokens, &quot;</span>
-            <span class="s2">&quot;which never consult a GroupsProvider) — an explicitly &quot;</span>
-            <span class="s2">&quot;configured GroupsProvider always takes precedence over this &quot;</span>
-            <span class="s2">&quot;claim. Set to None to disable extracting groups from the &quot;</span>
-            <span class="s2">&quot;token claims entirely.&quot;</span>
+            <span class="s2">"Claim containing the user's groups, if present in the token. "</span>
+            <span class="s2">"Used as a fallback only when OidcProvider is constructed "</span>
+            <span class="s2">"without a GroupsProvider (or for machine-to-machine tokens, "</span>
+            <span class="s2">"which never consult a GroupsProvider) — an explicitly "</span>
+            <span class="s2">"configured GroupsProvider always takes precedence over this "</span>
+            <span class="s2">"claim. Set to None to disable extracting groups from the "</span>
+            <span class="s2">"token claims entirely."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">token_use_claim</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;token_use&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">"token_use"</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Claim carrying an explicit token type marker, as Cognito sets &quot;</span>
-            <span class="s2">&quot;it (values &#39;id&#39;/&#39;access&#39;/&#39;refresh&#39;). Most generic OIDC &quot;</span>
-            <span class="s2">&quot;providers (Authentik, Keycloak, ...) don&#39;t set this, in which &quot;</span>
-            <span class="s2">&quot;case the token type falls back to the identity_claims/&quot;</span>
-            <span class="s2">&quot;client_id_claims heuristic below. Set to None to always use &quot;</span>
-            <span class="s2">&quot;the heuristic, even for issuers that happen to set this claim.&quot;</span>
+            <span class="s2">"Claim carrying an explicit token type marker, as Cognito sets "</span>
+            <span class="s2">"it (values 'id'/'access'/'refresh'). Most generic OIDC "</span>
+            <span class="s2">"providers (Authentik, Keycloak, ...) don't set this, in which "</span>
+            <span class="s2">"case the token type falls back to the identity_claims/"</span>
+            <span class="s2">"client_id_claims heuristic below. Set to None to always use "</span>
+            <span class="s2">"the heuristic, even for issuers that happen to set this claim."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">identity_claims</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;username&quot;</span><span class="p">],</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">"email"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="s2">"username"</span><span class="p">],</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Claims whose presence indicates a token represents a real &quot;</span>
-            <span class="s2">&quot;user rather than a service/client (used, together with &quot;</span>
-            <span class="s2">&quot;username_claim, as the id/access token-type heuristic and for &quot;</span>
-            <span class="s2">&quot;machine-to-machine detection when token_use_claim is absent &quot;</span>
-            <span class="s2">&quot;or not set on the token). Includes &#39;username&#39; by default so &quot;</span>
-            <span class="s2">&quot;Cognito *access* tokens - which carry &#39;username&#39; but not &quot;</span>
-            <span class="s2">&quot;&#39;preferred_username&#39;/&#39;email&#39; - aren&#39;t misclassified as &quot;</span>
-            <span class="s2">&quot;machine-to-machine.&quot;</span>
+            <span class="s2">"Claims whose presence indicates a token represents a real "</span>
+            <span class="s2">"user rather than a service/client (used, together with "</span>
+            <span class="s2">"username_claim, as the id/access token-type heuristic and for "</span>
+            <span class="s2">"machine-to-machine detection when token_use_claim is absent "</span>
+            <span class="s2">"or not set on the token). Includes 'username' by default so "</span>
+            <span class="s2">"Cognito *access* tokens - which carry 'username' but not "</span>
+            <span class="s2">"'preferred_username'/'email' - aren't misclassified as "</span>
+            <span class="s2">"machine-to-machine."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">client_id_claims</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;client_id&quot;</span><span class="p">,</span> <span class="s2">&quot;azp&quot;</span><span class="p">],</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">"client_id"</span><span class="p">,</span> <span class="s2">"azp"</span><span class="p">],</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Claims that identify the OAuth client a token was issued to. &quot;</span>
-            <span class="s2">&quot;Used as a fallback audience check for access tokens that &quot;</span>
-            <span class="s2">&quot;carry no &#39;aud&#39; claim at all (e.g. Cognito access tokens use &quot;</span>
-            <span class="s2">&quot;&#39;client_id&#39; instead), and to detect machine-to-machine &quot;</span>
-            <span class="s2">&quot;tokens and populate User.client_id.&quot;</span>
+            <span class="s2">"Claims that identify the OAuth client a token was issued to. "</span>
+            <span class="s2">"Used as a fallback audience check for access tokens that "</span>
+            <span class="s2">"carry no 'aud' claim at all (e.g. Cognito access tokens use "</span>
+            <span class="s2">"'client_id' instead), and to detect machine-to-machine "</span>
+            <span class="s2">"tokens and populate User.client_id."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">detect_m2m_tokens</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Whether to detect machine-to-machine (client_credentials) &quot;</span>
-            <span class="s2">&quot;tokens heuristically and skip groups/roles-provider lookups &quot;</span>
-            <span class="s2">&quot;for them. Disable if it misclassifies your provider&#39;s tokens.&quot;</span>
+            <span class="s2">"Whether to detect machine-to-machine (client_credentials) "</span>
+            <span class="s2">"tokens heuristically and skip groups/roles-provider lookups "</span>
+            <span class="s2">"for them. Disable if it misclassifies your provider's tokens."</span>
         <span class="p">),</span>
     <span class="p">)</span>
 
     <span class="n">jwks_cache_interval</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Cache interval refresh time (minutes)&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Cache interval refresh time (minutes)"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">jwks_cache_usages</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Number of jwks signature verifications before refresh&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Number of jwks signature verifications before refresh"</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">require_audience</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"When True (the default), constructing the provider without an "</span>
+            <span class="s2">"'audience' raises ValueError, and the audience check can never "</span>
+            <span class="s2">"pass without an expected value: otherwise any token signed by "</span>
+            <span class="s2">"the issuer, for any client, would be accepted. Set to False only "</span>
+            <span class="s2">"if you deliberately accept tokens of every client of the issuer "</span>
+            <span class="s2">"(a warning is logged)."</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">accepted_token_types</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="n">TokenType</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Hardening: token types accepted as a bearer credential. None "</span>
+            <span class="s2">"keeps the historical behaviour (only refresh tokens are "</span>
+            <span class="s2">"rejected). </span><span class="si">{TokenType.ACCESS}</span><span class="s2"> accepts access tokens only: an ID "</span>
+            <span class="s2">"token signed by the same key and issuer (Cognito does this) is "</span>
+            <span class="s2">"rejected, and so is a token whose type cannot be determined."</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">forced_jwks_refresh_min_interval_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">"Hardening: when a token carries a 'kid' that is not in the "</span>
+            <span class="s2">"cached JWKS, refresh the JWKS once, at most every this many "</span>
+            <span class="s2">"seconds, so an identity-provider key rotation works without a "</span>
+            <span class="s2">"restart while forged 'kid's cannot flood the provider. None "</span>
+            <span class="s2">"keeps the historical behaviour (refresh only by cache "</span>
+            <span class="s2">"interval/usages). 30 is a good value."</span>
+        <span class="p">),</span>
     <span class="p">)</span></div>
 
 </pre></div>

@@ -1,0 +1,640 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>auth_middleware.authz.stores.dynamodb &mdash; Auth Middleware 0.7.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/stores/dynamodb.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">auth_middleware.authz.stores.dynamodb</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for auth_middleware.authz.stores.dynamodb</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""DynamoDB assignment store, built on PynamoDB.</span>
+
+<span class="sd">PynamoDB is synchronous, so every call runs in a worker thread</span>
+<span class="sd">(``asyncio.to_thread``) and never blocks the event loop.</span>
+
+<span class="sd">Single-table design (on-demand billing recommended):</span>
+
+<span class="sd">=============  ============================  ================================</span>
+<span class="sd">Attribute      Value                         Purpose</span>
+<span class="sd">=============  ============================  ================================</span>
+<span class="sd">``pk`` (HASH)  ``SCOPE#&lt;kind&gt;#&lt;id&gt;``         one partition per scope</span>
+<span class="sd">``sk`` (RANGE) ``PRINCIPAL#&lt;principal_id&gt;``  one item per (scope, principal)</span>
+<span class="sd">``gsi1pk``     ``PRINCIPAL#&lt;principal_id&gt;``  GSI ``by-principal`` HASH</span>
+<span class="sd">``gsi1sk``     ``SCOPE#&lt;kind&gt;#&lt;id&gt;``         GSI ``by-principal`` RANGE</span>
+<span class="sd">=============  ============================  ================================</span>
+
+<span class="sd">Payload: ``principal_id``, ``scope_kind``, ``scope_id``, ``role``, ``status``,</span>
+<span class="sd">``revision`` (N), ``created_at``, ``updated_at`` and ``attrs_json`` (a JSON</span>
+<span class="sd">string, at most 4 KB, to avoid DynamoDB's float/Decimal map pitfalls).</span>
+
+<span class="sd">Consistency: ``get_assignment`` (the guard path) uses ``ConsistentRead=True`` by</span>
+<span class="sd">default so a just-revoked principal is never admitted. A GSI only supports</span>
+<span class="sd">eventually consistent reads, so ``list_assignments`` ("my scopes") may lag by a</span>
+<span class="sd">moment; the guard never uses it. Writes are conditional (optimistic ``revision``).</span>
+<span class="sd">Use botocore retries (adaptive mode) for throttling; what still fails is raised as</span>
+<span class="sd">``StoreUnavailableError``.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">UTC</span><span class="p">,</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">RevisionConflictError</span><span class="p">,</span> <span class="n">StoreUnavailableError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Assignment</span><span class="p">,</span>
+    <span class="n">AssignmentStatus</span><span class="p">,</span>
+    <span class="n">NewAssignment</span><span class="p">,</span>
+    <span class="n">ScopeRef</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">NumberAttribute</span><span class="p">,</span>
+        <span class="n">UnicodeAttribute</span><span class="p">,</span>
+        <span class="n">UTCDateTimeAttribute</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">PAY_PER_REQUEST_BILLING_MODE</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">DoesNotExist</span><span class="p">,</span>
+        <span class="n">PynamoDBConnectionError</span><span class="p">,</span>
+        <span class="n">PynamoDBException</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.indexes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AllProjection</span><span class="p">,</span> <span class="n">GlobalSecondaryIndex</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - exercised without the extra</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+        <span class="s2">"the DynamoDB assignment store needs PynamoDB: "</span>
+        <span class="s2">"pip install 'auth-middleware[dynamodb]'"</span>
+    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+<span class="n">DEFAULT_INDEX_NAME</span> <span class="o">=</span> <span class="s2">"by-principal"</span>
+<span class="n">MAX_ATTRIBUTES_BYTES</span> <span class="o">=</span> <span class="mi">4096</span>
+<span class="n">_UNAVAILABLE_CODES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">"ProvisionedThroughputExceededException"</span><span class="p">,</span>
+        <span class="s2">"ThrottlingException"</span><span class="p">,</span>
+        <span class="s2">"RequestLimitExceeded"</span><span class="p">,</span>
+        <span class="s2">"InternalServerError"</span><span class="p">,</span>
+        <span class="s2">"ServiceUnavailable"</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="n">_CONDITIONAL</span> <span class="o">=</span> <span class="s2">"ConditionalCheckFailedException"</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scope_key</span><span class="p">(</span><span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"SCOPE#</span><span class="si">{</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_principal_key</span><span class="p">(</span><span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"PRINCIPAL#</span><span class="si">{</span><span class="n">principal_id</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_models</span><span class="p">(</span>
+    <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Create the PynamoDB model classes bound to a runtime table name."""</span>
+    <span class="n">gsi_name</span> <span class="o">=</span> <span class="n">index_name</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">ByPrincipal</span><span class="p">(</span><span class="n">GlobalSecondaryIndex</span><span class="p">):</span>  <span class="c1"># type: ignore[type-arg,no-untyped-call]</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+            <span class="n">index_name</span> <span class="o">=</span> <span class="n">gsi_name</span>
+            <span class="n">projection</span> <span class="o">=</span> <span class="n">AllProjection</span><span class="p">()</span>
+
+        <span class="n">gsi1pk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">hash_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gsi1sk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">range_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">meta_attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"table_name"</span><span class="p">:</span> <span class="n">table_name</span><span class="p">,</span>
+        <span class="s2">"billing_mode"</span><span class="p">:</span> <span class="n">PAY_PER_REQUEST_BILLING_MODE</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">meta_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+    <span class="n">meta_cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s2">"Meta"</span><span class="p">,</span> <span class="p">(),</span> <span class="n">meta_attrs</span><span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Item</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+        <span class="n">Meta</span> <span class="o">=</span> <span class="n">meta_cls</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="n">pk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">hash_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">range_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gsi1pk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
+        <span class="n">gsi1sk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
+        <span class="n">principal_id</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
+        <span class="n">scope_kind</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
+        <span class="n">scope_id</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
+        <span class="n">role</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">()</span>
+        <span class="n">revision</span> <span class="o">=</span> <span class="n">NumberAttribute</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">created_at</span> <span class="o">=</span> <span class="n">UTCDateTimeAttribute</span><span class="p">()</span>
+        <span class="n">updated_at</span> <span class="o">=</span> <span class="n">UTCDateTimeAttribute</span><span class="p">()</span>
+        <span class="n">attrs_json</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">by_principal</span> <span class="o">=</span> <span class="n">ByPrincipal</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">Item</span><span class="p">,</span> <span class="n">ByPrincipal</span>
+
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamoDbAssignmentStore</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``AssignmentStore`` + ``AssignmentAdmin`` over a single DynamoDB table.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        table_name: Existing table (see :meth:`table_definition`).</span>
+<span class="sd">        region: AWS region; default from the botocore chain.</span>
+<span class="sd">        endpoint_url: Custom endpoint (DynamoDB Local, emulators, tests).</span>
+<span class="sd">        index_name: Name of the by-principal GSI.</span>
+<span class="sd">        consistent_read: Consistent reads on ``get_assignment`` (default, and</span>
+<span class="sd">            required to never admit a just-revoked principal). Turning it off</span>
+<span class="sd">            accepts staleness: only for callers that explicitly want it.</span>
+<span class="sd">        connect_timeout_seconds: botocore connect timeout.</span>
+<span class="sd">        read_timeout_seconds: botocore read timeout.</span>
+<span class="sd">        max_retry_attempts: botocore retries (throttling backoff).</span>
+<span class="sd">        aws_access_key_id: Explicit credentials, for tests only; otherwise the</span>
+<span class="sd">            botocore credential chain is used (nothing is read from code).</span>
+<span class="sd">        aws_secret_access_key: Explicit credentials, for tests only.</span>
+<span class="sd">        max_workers: Size of a dedicated thread pool for the blocking PynamoDB calls.</span>
+<span class="sd">            ``None`` uses the event loop's default executor, shared with the rest of</span>
+<span class="sd">            the application.</span>
+<span class="sd">    """</span>
+
+    <span class="n">supports_attributes</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.__init__">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_INDEX_NAME</span><span class="p">,</span>
+        <span class="n">consistent_read</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">connect_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">read_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_retry_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">aws_access_key_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">aws_secret_access_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"connect_timeout_seconds"</span><span class="p">:</span> <span class="n">connect_timeout_seconds</span><span class="p">,</span>
+            <span class="s2">"read_timeout_seconds"</span><span class="p">:</span> <span class="n">read_timeout_seconds</span><span class="p">,</span>
+            <span class="s2">"max_retry_attempts"</span><span class="p">:</span> <span class="n">max_retry_attempts</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="n">region</span><span class="p">:</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">"region"</span><span class="p">]</span> <span class="o">=</span> <span class="n">region</span>
+        <span class="k">if</span> <span class="n">endpoint_url</span><span class="p">:</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span> <span class="o">=</span> <span class="n">endpoint_url</span>
+        <span class="k">if</span> <span class="n">aws_access_key_id</span><span class="p">:</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">"aws_access_key_id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_access_key_id</span>
+        <span class="k">if</span> <span class="n">aws_secret_access_key</span><span class="p">:</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s2">"aws_secret_access_key"</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_secret_access_key</span>
+        <span class="c1"># A dedicated, bounded pool keeps a slow DynamoDB from starving the other</span>
+        <span class="c1"># users of the event loop's default executor (and bounds our own concurrency).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="p">,</span> <span class="n">thread_name_prefix</span><span class="o">=</span><span class="s2">"authz-dynamodb"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">max_workers</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">table_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index_name</span> <span class="o">=</span> <span class="n">index_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consistent_read</span> <span class="o">=</span> <span class="n">consistent_read</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gsi</span> <span class="o">=</span> <span class="n">_build_models</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">index_name</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------ helpers</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_encode_attributes</span><span class="p">(</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">attributes</span><span class="p">),</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">MAX_ATTRIBUTES_BYTES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"attributes larger than </span><span class="si">{</span><span class="n">MAX_ATTRIBUTES_BYTES</span><span class="si">}</span><span class="s2"> bytes"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run a blocking PynamoDB call in a thread, mapping errors."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">PynamoDBException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="s2">"cause_response_code"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">_CONDITIONAL</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"conditional check failed"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+            <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">_UNAVAILABLE_CODES</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">PynamoDBConnectionError</span><span class="p">):</span>
+                <span class="c1"># throttling, server errors, timeouts and unreachable endpoints</span>
+                <span class="k">raise</span> <span class="n">StoreUnavailableError</span><span class="p">(</span><span class="s2">"DynamoDB is unavailable"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+            <span class="k">raise</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_to_assignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span>
+            <span class="n">principal_id</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">principal_id</span><span class="p">,</span>
+            <span class="n">scope</span><span class="o">=</span><span class="n">ScopeRef</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">scope_id</span><span class="p">),</span>
+            <span class="n">role</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">role</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">AssignmentStatus</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
+            <span class="n">revision</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">revision</span><span class="p">),</span>
+            <span class="n">created_at</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">created_at</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">UTC</span><span class="p">),</span>
+            <span class="n">attributes</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">attrs_json</span> <span class="ow">or</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">_scope_key</span><span class="p">(</span><span class="n">scope</span><span class="p">),</span>
+                <span class="n">_principal_key</span><span class="p">(</span><span class="n">principal_id</span><span class="p">),</span>
+                <span class="n">consistent_read</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">consistent_read</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># --------------------------------------------------------------------- reads</span>
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.get_assignment">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.get_assignment">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_assignment</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">principal_id</span><span class="p">,</span> <span class="n">scope</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_assignment</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.list_for_scope">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.list_for_scope">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_for_scope</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Assignment</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                    <span class="n">_scope_key</span><span class="p">(</span><span class="n">scope</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">sk</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"PRINCIPAL#"</span><span class="p">),</span>
+                    <span class="n">consistent_read</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_assignment</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">run</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.list_assignments">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.list_assignments">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_assignments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Assignment</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""List a principal's scopes via the GSI (eventually consistent)."""</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">by_principal</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                    <span class="n">_principal_key</span><span class="p">(</span><span class="n">principal_id</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">gsi1sk</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"SCOPE#"</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_assignment</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">run</span><span class="p">)]</span></div>
+
+
+    <span class="c1"># -------------------------------------------------------------------- writes</span>
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.assign">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.assign">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="n">NewAssignment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span><span class="p">:</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_attributes</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">principal_id</span><span class="p">,</span> <span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="p">))</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)</span>
+        <span class="n">item_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">item_cls</span><span class="p">(</span>
+                <span class="n">_scope_key</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="p">),</span>
+                <span class="n">_principal_key</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">principal_id</span><span class="p">),</span>
+                <span class="n">gsi1pk</span><span class="o">=</span><span class="n">_principal_key</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">principal_id</span><span class="p">),</span>
+                <span class="n">gsi1sk</span><span class="o">=</span><span class="n">_scope_key</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="p">),</span>
+                <span class="n">principal_id</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">principal_id</span><span class="p">,</span>
+                <span class="n">scope_kind</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+                <span class="n">scope_id</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">role</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">role</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">AssignmentStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">revision</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">created_at</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+                <span class="n">updated_at</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+                <span class="n">attrs_json</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="n">item_cls</span><span class="o">.</span><span class="n">pk</span><span class="o">.</span><span class="n">does_not_exist</span><span class="p">()))</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_assignment</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">AssignmentStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"assignment already active"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span>
+            <span class="n">existing</span><span class="p">,</span>
+            <span class="n">expected</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">existing</span><span class="o">.</span><span class="n">revision</span><span class="p">),</span>
+            <span class="n">required_status</span><span class="o">=</span><span class="n">AssignmentStatus</span><span class="o">.</span><span class="n">REVOKED</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">actions</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">item_cls</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">role</span><span class="p">),</span>
+                <span class="n">item_cls</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">AssignmentStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+                <span class="n">item_cls</span><span class="o">.</span><span class="n">attrs_json</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">attrs</span><span class="p">),</span>
+            <span class="p">],</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_update</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">expected</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">required_status</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">actions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span><span class="p">:</span>
+        <span class="n">item_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="p">(</span><span class="n">item_cls</span><span class="o">.</span><span class="n">revision</span> <span class="o">==</span> <span class="n">expected</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">required_status</span>
+        <span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">*</span><span class="n">actions</span><span class="p">,</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">revision</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">updated_at</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="n">condition</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_assignment</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_mutate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">,</span>
+        <span class="n">expected_revision</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">actions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">principal_id</span><span class="p">,</span> <span class="n">scope</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">AssignmentStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="o">.</span><span class="n">value</span>
+            <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_revision</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"stale revision or no active assignment"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span>
+            <span class="n">item</span><span class="p">,</span>
+            <span class="n">expected</span><span class="o">=</span><span class="n">expected_revision</span><span class="p">,</span>
+            <span class="n">required_status</span><span class="o">=</span><span class="n">AssignmentStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.change_role">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.change_role">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">change_role</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutate</span><span class="p">(</span>
+            <span class="n">principal_id</span><span class="p">,</span> <span class="n">scope</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">role</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">role</span><span class="p">)]</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.revoke">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.revoke">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">revoke</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutate</span><span class="p">(</span>
+            <span class="n">principal_id</span><span class="p">,</span>
+            <span class="n">scope</span><span class="p">,</span>
+            <span class="n">expected_revision</span><span class="p">,</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">AssignmentStatus</span><span class="o">.</span><span class="n">REVOKED</span><span class="o">.</span><span class="n">value</span><span class="p">)],</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># ---------------------------------------------------------------- operations</span>
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.aclose">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.aclose">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">aclose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Stop the dedicated worker pool, if any (PynamoDB manages its client)."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.table_definition">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.table_definition">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">table_definition</span><span class="p">(</span>
+        <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">billing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"PAY_PER_REQUEST"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"PAY_PER_REQUEST"</span><span class="p">,</span>
+        <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_INDEX_NAME</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return ``boto3`` ``create_table`` keyword arguments for the table."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"TableName"</span><span class="p">:</span> <span class="n">table_name</span><span class="p">,</span>
+            <span class="s2">"BillingMode"</span><span class="p">:</span> <span class="n">billing</span><span class="p">,</span>
+            <span class="s2">"AttributeDefinitions"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"pk"</span><span class="p">,</span> <span class="s2">"AttributeType"</span><span class="p">:</span> <span class="s2">"S"</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"sk"</span><span class="p">,</span> <span class="s2">"AttributeType"</span><span class="p">:</span> <span class="s2">"S"</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"gsi1pk"</span><span class="p">,</span> <span class="s2">"AttributeType"</span><span class="p">:</span> <span class="s2">"S"</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"gsi1sk"</span><span class="p">,</span> <span class="s2">"AttributeType"</span><span class="p">:</span> <span class="s2">"S"</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">"KeySchema"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"pk"</span><span class="p">,</span> <span class="s2">"KeyType"</span><span class="p">:</span> <span class="s2">"HASH"</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"sk"</span><span class="p">,</span> <span class="s2">"KeyType"</span><span class="p">:</span> <span class="s2">"RANGE"</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">"GlobalSecondaryIndexes"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">"IndexName"</span><span class="p">:</span> <span class="n">index_name</span><span class="p">,</span>
+                    <span class="s2">"KeySchema"</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"gsi1pk"</span><span class="p">,</span> <span class="s2">"KeyType"</span><span class="p">:</span> <span class="s2">"HASH"</span><span class="p">},</span>
+                        <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"gsi1sk"</span><span class="p">,</span> <span class="s2">"KeyType"</span><span class="p">:</span> <span class="s2">"RANGE"</span><span class="p">},</span>
+                    <span class="p">],</span>
+                    <span class="s2">"Projection"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"ProjectionType"</span><span class="p">:</span> <span class="s2">"ALL"</span><span class="p">},</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbAssignmentStore.create_table_if_missing">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.create_table_if_missing">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_table_if_missing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the table (and GSI) if absent. Dev/tests only; never implicit."""</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">create_table</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">run</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"DynamoDbAssignmentStore"</span><span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

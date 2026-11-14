@@ -32,9 +32,11 @@ async def limited_endpoint():
 @rate_limit(
     max_requests=10,
     window_seconds=60,
-    identifier=lambda request: request.state.current_user.id
-    if hasattr(request.state, "current_user")
-    else (request.client.host if request.client else "unknown"),
+    identifier=lambda request: (
+        request.state.current_user.id
+        if hasattr(request.state, "current_user")
+        else (request.client.host if request.client else "unknown")
+    ),
 )
 async def user_limited_endpoint(request: Request):
     """Endpoint with per-user rate limiting."""

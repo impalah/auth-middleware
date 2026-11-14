@@ -221,3 +221,64 @@ authentication providers, see:
 * :doc:`infrastructure/keycloak-setup` - Keycloak realm and client setup
 * :doc:`infrastructure/cognito-setup` - AWS Cognito user pool setup
 * :doc:`entra_id_provider` - Azure Entra ID integration
+
+Hardening options
+=================
+
+Three additive ``OidcProviderSettings`` fields (defaults keep the historical behaviour) and one middleware
+flag close the gaps most deployments care about:
+
+.. code-block:: python
+
+   from auth_middleware.providers.oidc.token_type import TokenType
+
+   settings = OidcProviderSettings(
+       issuer="https://idp.example.com/pool/",
+       audience="my-client-id",
+       require_audience=True,
+       accepted_token_types=frozenset({TokenType.ACCESS}),
+       forced_jwks_refresh_min_interval_seconds=30,
+   )
+   app.add_middleware(
+       JwtAuthMiddleware, auth_provider=OidcProvider(settings), strict=True
+   )
+
+* ``require_audience`` (**on by default**): constructing the provider without an ``audience`` raises ``ValueError``; the
+  audience check never passes without an expected value. Set ``require_audience=False`` only if you deliberately accept
+  tokens of every client of the issuer (a warning is logged).
+* ``accepted_token_types``: ``{TokenType.ACCESS}`` accepts access tokens only. An ID token signed by the same key
+  and issuer (Cognito does this) is rejected, and so is a token whose type cannot be determined.
+* ``forced_jwks_refresh_min_interval_seconds``: a token with an unknown ``kid`` refreshes the JWKS once, at most
+  every interval, so an identity-provider key rotation works without a restart while forged ``kid`` values cannot
+  flood the provider. Concurrent requests share that single refresh. A token without ``kid`` never triggers one.
+* ``JwtAuthMiddleware(strict=True)``: raises ``RuntimeError`` at construction if ``AUTH_MIDDLEWARE_DISABLED`` is set
+  or the provider has ``jwt_token_verification_disabled=True``.
+
+Hardening checklist
+-------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 35 40
+
+   * - Gap
+     - Default behaviour
+     - Recommendation
+   * - Audience optional
+     - Refused at construction unless ``audience`` is set (``require_audience=True`` is the default)
+     - Set ``audience``; use ``require_audience=False`` only to opt out knowingly
+   * - Token type
+     - Only refresh tokens are rejected; ID tokens pass
+     - ``accepted_token_types={TokenType.ACCESS}`` for APIs that take access tokens
+   * - Unknown ``kid``
+     - JWKS refreshes only by cache interval / usage counter
+     - ``forced_jwks_refresh_min_interval_seconds=30``
+   * - Disabled verification
+     - ``jwt_token_verification_disabled`` and ``AUTH_MIDDLEWARE_DISABLED`` can switch checks off
+     - ``JwtAuthMiddleware(strict=True)`` in production
+   * - ``nbf``
+     - Validated only when present
+     - Accepted as is
+   * - Token size
+     - No cap in the library
+     - Cap header size at the proxy / server

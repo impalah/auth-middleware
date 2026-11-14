@@ -150,7 +150,7 @@ External Database Integration
            await self.es.close()
 
 Microservices Integration
-------------------------
+-------------------------
 
 **gRPC Groups Provider:**
 
@@ -364,7 +364,7 @@ Advanced Patterns
 =================
 
 Multi-Source Provider
---------------------
+---------------------
 
 Combine multiple authorization sources:
 
@@ -476,7 +476,7 @@ Implement permission inheritance and hierarchies:
            return permissions
 
 Context-Aware Provider
----------------------
+----------------------
 
 Make authorization decisions based on request context:
 
@@ -547,7 +547,7 @@ Make authorization decisions based on request context:
            return await self._check_ownership(username, resource_id)
 
 Caching and Performance
-======================
+=======================
 
 Advanced Caching Provider
 -------------------------
@@ -667,7 +667,7 @@ Error Handling and Resilience
 =============================
 
 Circuit Breaker Provider
------------------------
+------------------------
 
 .. code-block:: python
 
@@ -741,7 +741,7 @@ Circuit Breaker Provider
                logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
 
 Retry Provider
--------------
+--------------
 
 .. code-block:: python
 
@@ -845,7 +845,7 @@ Testing Custom Providers
                assert groups == []
 
 Deployment Considerations
-========================
+=========================
 
 **Configuration Management:**
 
@@ -899,7 +899,7 @@ Deployment Considerations
            return {"status": "unhealthy", "error": str(e)}, 503
 
 Best Practices Summary
-=====================
+======================
 
 **Design Principles:**
 

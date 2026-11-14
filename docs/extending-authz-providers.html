@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Extending Authorization Providers &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Extending Authorization Providers &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/extending-authz-providers.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -57,10 +57,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul class="current">
@@ -191,7 +203,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">GroupsProvider</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups for the user identified by the token.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch groups for the user identified by the token."""</span>
         <span class="k">pass</span>
 </pre></div>
 </div>
@@ -202,7 +214,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PermissionsProvider</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions for the user identified by the token.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions for the user identified by the token."""</span>
         <span class="k">pass</span>
 </pre></div>
 </div>
@@ -215,10 +227,10 @@
 <span class="n">token</span><span class="o">.</span><span class="n">claims</span>         <span class="c1"># Decoded JWT claims dict</span>
 
 <span class="c1"># Common claims available:</span>
-<span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
-<span class="n">user_id</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
-<span class="n">email</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;email&quot;</span><span class="p">)</span>
-<span class="n">custom_claim</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;custom_field&quot;</span><span class="p">)</span>
+<span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
+<span class="n">user_id</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sub"</span><span class="p">)</span>
+<span class="n">email</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"email"</span><span class="p">)</span>
+<span class="n">custom_claim</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"custom_field"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -232,7 +244,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">MongoGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider using MongoDB.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider using MongoDB."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">AsyncIOMotorClient</span><span class="p">(</span><span class="n">connection_string</span><span class="p">)</span>
@@ -240,21 +252,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">user_groups</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from MongoDB.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from MongoDB."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="c1"># Find user document</span>
-        <span class="n">user_doc</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">})</span>
+        <span class="n">user_doc</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">({</span><span class="s2">"username"</span><span class="p">:</span> <span class="n">username</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="n">user_doc</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">user_doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">return</span> <span class="n">user_doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[])</span>
 
         <span class="k">return</span> <span class="p">[]</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up MongoDB connection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Clean up MongoDB connection."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -264,23 +276,23 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ElasticsearchPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider using Elasticsearch.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider using Elasticsearch."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hosts</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;user_permissions&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hosts</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">index_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"user_permissions"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">es</span> <span class="o">=</span> <span class="n">AsyncElasticsearch</span><span class="p">(</span><span class="n">hosts</span><span class="o">=</span><span class="n">hosts</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index_name</span> <span class="o">=</span> <span class="n">index_name</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions from Elasticsearch.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions from Elasticsearch."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Search for user permissions</span>
             <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
-                    <span class="s2">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;username.keyword&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">}</span>
+                <span class="s2">"query"</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">"term"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"username.keyword"</span><span class="p">:</span> <span class="n">username</span><span class="p">}</span>
                 <span class="p">}</span>
             <span class="p">}</span>
 
@@ -290,17 +302,17 @@
             <span class="p">)</span>
 
             <span class="n">permissions</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;hits&quot;</span><span class="p">][</span><span class="s2">&quot;hits&quot;</span><span class="p">]:</span>
-                <span class="n">permissions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">hit</span><span class="p">[</span><span class="s2">&quot;_source&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+            <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s2">"hits"</span><span class="p">][</span><span class="s2">"hits"</span><span class="p">]:</span>
+                <span class="n">permissions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">hit</span><span class="p">[</span><span class="s2">"_source"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permissions"</span><span class="p">,</span> <span class="p">[]))</span>
 
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">permissions</span><span class="p">))</span>  <span class="c1"># Deduplicate</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Elasticsearch error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Elasticsearch error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up Elasticsearch connection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Clean up Elasticsearch connection."""</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">es</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -315,7 +327,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">your_proto</span><span class="w"> </span><span class="kn">import</span> <span class="n">user_service_pb2</span><span class="p">,</span> <span class="n">user_service_pb2_grpc</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">GrpcGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider using gRPC service.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider using gRPC service."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grpc_endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grpc_endpoint</span> <span class="o">=</span> <span class="n">grpc_endpoint</span>
@@ -329,8 +341,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stub</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups via gRPC.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch groups via gRPC."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
@@ -342,11 +354,11 @@
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="n">grpc</span><span class="o">.</span><span class="n">RpcError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gRPC error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"gRPC error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up gRPC connection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Clean up gRPC connection."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_channel</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
@@ -357,19 +369,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">GraphQLPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider using GraphQL API.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider using GraphQL API."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graphql_endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">graphql_endpoint</span> <span class="o">=</span> <span class="n">graphql_endpoint</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions via GraphQL.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions via GraphQL."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
-        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">        query GetUserPermissions($username: String!) {</span>
 <span class="s2">            user(username: $username) {</span>
 <span class="s2">                permissions {</span>
@@ -382,27 +394,27 @@
 <span class="s2">                }</span>
 <span class="s2">            }</span>
 <span class="s2">        }</span>
-<span class="s2">        &quot;&quot;&quot;</span>
+<span class="s2">        """</span>
 
         <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">graphql_endpoint</span><span class="p">,</span>
                     <span class="n">json</span><span class="o">=</span><span class="p">{</span>
-                        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
-                        <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">}</span>
+                        <span class="s2">"query"</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span>
+                        <span class="s2">"variables"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="n">username</span><span class="p">}</span>
                     <span class="p">},</span>
-                    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
                 <span class="p">)</span>
 
                 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
-                <span class="k">if</span> <span class="s2">&quot;errors&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GraphQL errors: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s2">"errors"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GraphQL errors: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'errors'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">return</span> <span class="p">[]</span>
 
-                <span class="n">user_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
+                <span class="n">user_data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"data"</span><span class="p">][</span><span class="s2">"user"</span><span class="p">]</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">user_data</span><span class="p">:</span>
                     <span class="k">return</span> <span class="p">[]</span>
 
@@ -410,18 +422,18 @@
                 <span class="n">permissions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
                 <span class="c1"># Direct permissions</span>
-                <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-                    <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">perm</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permissions"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">perm</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
 
                 <span class="c1"># Role-based permissions</span>
-                <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;roles&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-                    <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">role</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span> <span class="p">[]):</span>
-                        <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">perm</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">user_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"roles"</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="n">role</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permissions"</span><span class="p">,</span> <span class="p">[]):</span>
+                        <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">perm</span><span class="p">[</span><span class="s2">"name"</span><span class="p">])</span>
 
                 <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">permissions</span><span class="p">)</span>
 
             <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GraphQL HTTP error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GraphQL HTTP error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 </div>
@@ -435,29 +447,29 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">DynamoDBGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider using AWS DynamoDB.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider using AWS DynamoDB."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;us-east-1&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"us-east-1"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">table_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dynamodb</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;dynamodb&quot;</span><span class="p">,</span> <span class="n">region_name</span><span class="o">=</span><span class="n">region_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynamodb</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">"dynamodb"</span><span class="p">,</span> <span class="n">region_name</span><span class="o">=</span><span class="n">region_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from DynamoDB.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from DynamoDB."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">Key</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">})</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">Key</span><span class="o">=</span><span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="n">username</span><span class="p">})</span>
 
-            <span class="k">if</span> <span class="s2">&quot;Item&quot;</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;Item&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="k">if</span> <span class="s2">"Item"</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">response</span><span class="p">[</span><span class="s2">"Item"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[])</span>
 
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="k">except</span> <span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DynamoDB error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DynamoDB error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 </pre></div>
 </div>
@@ -468,7 +480,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CosmosDBPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider using Azure Cosmos DB.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider using Azure Cosmos DB."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">container_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">CosmosClient</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -476,15 +488,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">get_container_client</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions from Cosmos DB.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions from Cosmos DB."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Query for user permissions</span>
-            <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;SELECT * FROM c WHERE c.username = @username&quot;</span>
-            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;@username&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">}]</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="s2">"SELECT * FROM c WHERE c.username = @username"</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"@username"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="n">username</span><span class="p">}]</span>
 
             <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">query_items</span><span class="p">(</span>
                 <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -494,16 +506,16 @@
 
             <span class="n">permissions</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">async</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
-                <span class="n">permissions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+                <span class="n">permissions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permissions"</span><span class="p">,</span> <span class="p">[]))</span>
 
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">permissions</span><span class="p">))</span>
 
         <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">CosmosHttpResponseError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cosmos DB error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cosmos DB error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up Cosmos DB connection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Clean up Cosmos DB connection."""</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -515,14 +527,14 @@
 <h2>Multi-Source Provider<a class="headerlink" href="#multi-source-provider" title="Link to this heading"></a></h2>
 <p>Combine multiple authorization sources:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MultiSourceGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider that combines multiple sources.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider that combines multiple sources."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">providers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">],</span> <span class="n">merge_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;union&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">providers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GroupsProvider</span><span class="p">],</span> <span class="n">merge_strategy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"union"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">providers</span> <span class="o">=</span> <span class="n">providers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">merge_strategy</span> <span class="o">=</span> <span class="n">merge_strategy</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from multiple sources.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from multiple sources."""</span>
         <span class="n">all_groups</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Fetch from all providers</span>
@@ -531,21 +543,21 @@
                 <span class="n">provider_groups</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
                 <span class="n">all_groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">provider_groups</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Provider error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Provider error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="c1"># Continue with other providers</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">all_groups</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="c1"># Apply merge strategy</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_strategy</span> <span class="o">==</span> <span class="s2">&quot;union&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_strategy</span> <span class="o">==</span> <span class="s2">"union"</span><span class="p">:</span>
             <span class="c1"># Union of all groups</span>
             <span class="n">result</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">all_groups</span><span class="p">:</span>
                 <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_strategy</span> <span class="o">==</span> <span class="s2">&quot;intersection&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_strategy</span> <span class="o">==</span> <span class="s2">"intersection"</span><span class="p">:</span>
             <span class="c1"># Intersection of all groups</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">all_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">groups</span> <span class="ow">in</span> <span class="n">all_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
@@ -553,7 +565,7 @@
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown merge strategy: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">merge_strategy</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown merge strategy: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">merge_strategy</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -561,30 +573,30 @@
 <h2>Hierarchical Permissions Provider<a class="headerlink" href="#hierarchical-permissions-provider" title="Link to this heading"></a></h2>
 <p>Implement permission inheritance and hierarchies:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HierarchicalPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider with hierarchy support.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider with hierarchy support."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base_provider</span> <span class="o">=</span> <span class="n">base_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;admin&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;inherits&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span>  <span class="c1"># Wildcard for all permissions</span>
+            <span class="s2">"admin"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"inherits"</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">"permissions"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"*"</span><span class="p">]</span>  <span class="c1"># Wildcard for all permissions</span>
             <span class="p">},</span>
-            <span class="s2">&quot;manager&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;inherits&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">],</span>
-                <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;manage:*&quot;</span><span class="p">]</span>
+            <span class="s2">"manager"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"inherits"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"user"</span><span class="p">],</span>
+                <span class="s2">"permissions"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"manage:*"</span><span class="p">]</span>
             <span class="p">},</span>
-            <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;inherits&quot;</span><span class="p">:</span> <span class="p">[],</span>
-                <span class="s2">&quot;permissions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;read:*&quot;</span><span class="p">]</span>
+            <span class="s2">"user"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"inherits"</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">"permissions"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"read:*"</span><span class="p">]</span>
             <span class="p">}</span>
         <span class="p">}</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions with hierarchy resolution.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions with hierarchy resolution."""</span>
         <span class="c1"># Get base permissions and groups</span>
         <span class="n">base_permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_provider</span><span class="o">.</span><span class="n">fetch_permissions</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-        <span class="n">user_groups</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">user_groups</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[])</span>
 
         <span class="c1"># Resolve hierarchical permissions</span>
         <span class="n">all_permissions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">base_permissions</span><span class="p">)</span>
@@ -596,7 +608,7 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_permissions</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_group_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">visited</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Recursively resolve group permissions.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Recursively resolve group permissions."""</span>
         <span class="k">if</span> <span class="n">visited</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">visited</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
@@ -608,10 +620,10 @@
 
         <span class="c1"># Get direct permissions</span>
         <span class="n">group_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hierarchy</span><span class="p">[</span><span class="n">group</span><span class="p">]</span>
-        <span class="n">permissions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">group_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permissions&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="n">permissions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">group_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permissions"</span><span class="p">,</span> <span class="p">[]))</span>
 
         <span class="c1"># Get inherited permissions</span>
-        <span class="k">for</span> <span class="n">inherited_group</span> <span class="ow">in</span> <span class="n">group_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;inherits&quot;</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="k">for</span> <span class="n">inherited_group</span> <span class="ow">in</span> <span class="n">group_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"inherits"</span><span class="p">,</span> <span class="p">[]):</span>
             <span class="n">inherited_permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_group_permissions</span><span class="p">(</span><span class="n">inherited_group</span><span class="p">,</span> <span class="n">visited</span><span class="p">)</span>
             <span class="n">permissions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inherited_permissions</span><span class="p">)</span>
 
@@ -627,16 +639,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="c1"># Context variables to store request information</span>
-<span class="n">request_context</span><span class="p">:</span> <span class="n">ContextVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="s2">&quot;request_context&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{})</span>
+<span class="n">request_context</span><span class="p">:</span> <span class="n">ContextVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">ContextVar</span><span class="p">(</span><span class="s2">"request_context"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">{})</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ContextAwarePermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider that considers request context.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider that considers request context."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base_provider</span> <span class="o">=</span> <span class="n">base_provider</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions considering request context.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions considering request context."""</span>
         <span class="c1"># Get base permissions</span>
         <span class="n">base_permissions</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_provider</span><span class="o">.</span><span class="n">fetch_permissions</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
@@ -648,28 +660,28 @@
 
         <span class="c1"># Time-based permissions</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_business_hours</span><span class="p">():</span>
-            <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;business_hours:access&quot;</span><span class="p">)</span>
+            <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"business_hours:access"</span><span class="p">)</span>
 
         <span class="c1"># IP-based permissions</span>
-        <span class="n">client_ip</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;client_ip&quot;</span><span class="p">)</span>
+        <span class="n">client_ip</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"client_ip"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_internal_ip</span><span class="p">(</span><span class="n">client_ip</span><span class="p">):</span>
-            <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;internal:access&quot;</span><span class="p">)</span>
+            <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">"internal:access"</span><span class="p">)</span>
 
         <span class="c1"># Resource-based permissions</span>
-        <span class="n">resource_id</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resource_id&quot;</span><span class="p">)</span>
+        <span class="n">resource_id</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resource_id"</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">resource_id</span> <span class="ow">and</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_user_owns_resource</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">):</span>
-            <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;owner:</span><span class="si">{</span><span class="n">resource_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">permissions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="sa">f</span><span class="s2">"owner:</span><span class="si">{</span><span class="n">resource_id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">permissions</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_business_hours</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if current time is during business hours.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check if current time is during business hours."""</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
         <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
         <span class="k">return</span> <span class="mi">9</span> <span class="o">&lt;=</span> <span class="n">now</span><span class="o">.</span><span class="n">hour</span> <span class="o">&lt;=</span> <span class="mi">17</span> <span class="ow">and</span> <span class="n">now</span><span class="o">.</span><span class="n">weekday</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">5</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_is_internal_ip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if IP is from internal network.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check if IP is from internal network."""</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ip</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -680,9 +692,9 @@
             <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_user_owns_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if user owns the specified resource.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check if user owns the specified resource."""</span>
         <span class="c1"># Implement your ownership logic here</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="c1"># Query your database to check ownership</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_ownership</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">)</span>
 </pre></div>
@@ -701,7 +713,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AdvancedCachedGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider with advanced caching features.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider with advanced caching features."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span><span class="p">,</span>
                  <span class="n">cache_ttl</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
@@ -717,7 +729,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups with advanced caching.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch groups with advanced caching."""</span>
         <span class="n">cache_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_cache_key</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
         <span class="c1"># Check cache</span>
@@ -744,17 +756,17 @@
                 <span class="k">raise</span> <span class="n">e</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_generate_cache_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a unique cache key for the token.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Generate a unique cache key for the token."""</span>
         <span class="n">key_data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sub&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;iat&quot;</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;iat&quot;</span><span class="p">),</span>  <span class="c1"># Include token issue time</span>
+            <span class="s2">"username"</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">),</span>
+            <span class="s2">"sub"</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"sub"</span><span class="p">),</span>
+            <span class="s2">"iat"</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"iat"</span><span class="p">),</span>  <span class="c1"># Include token issue time</span>
         <span class="p">}</span>
         <span class="n">key_string</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">key_data</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">key_string</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_get_from_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get value from cache if valid.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get value from cache if valid."""</span>
         <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
             <span class="n">cached_data</span><span class="p">,</span> <span class="n">expiry_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span>
 
@@ -770,7 +782,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_store_in_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">ttl</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Store data in cache with TTL.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Store data in cache with TTL."""</span>
         <span class="k">if</span> <span class="n">ttl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ttl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span>
 
@@ -784,14 +796,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_access_times</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_evict_lru</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evict least recently used item.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Evict least recently used item."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_times</span><span class="p">:</span>
             <span class="n">lru_key</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_access_times</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_access_times</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">[</span><span class="n">lru_key</span><span class="p">]</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_access_times</span><span class="p">[</span><span class="n">lru_key</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear cache entries matching pattern.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Clear cache entries matching pattern."""</span>
         <span class="k">if</span> <span class="n">pattern</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_access_times</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
@@ -816,12 +828,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CircuitState</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-    <span class="n">CLOSED</span> <span class="o">=</span> <span class="s2">&quot;closed&quot;</span>
-    <span class="n">OPEN</span> <span class="o">=</span> <span class="s2">&quot;open&quot;</span>
-    <span class="n">HALF_OPEN</span> <span class="o">=</span> <span class="s2">&quot;half_open&quot;</span>
+    <span class="n">CLOSED</span> <span class="o">=</span> <span class="s2">"closed"</span>
+    <span class="n">OPEN</span> <span class="o">=</span> <span class="s2">"open"</span>
+    <span class="n">HALF_OPEN</span> <span class="o">=</span> <span class="s2">"half_open"</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CircuitBreakerPermissionsProvider</span><span class="p">(</span><span class="n">PermissionsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permissions provider with circuit breaker pattern.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permissions provider with circuit breaker pattern."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_provider</span><span class="p">:</span> <span class="n">PermissionsProvider</span><span class="p">,</span>
                  <span class="n">failure_threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
@@ -830,7 +842,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">base_provider</span> <span class="o">=</span> <span class="n">base_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">failure_threshold</span> <span class="o">=</span> <span class="n">failure_threshold</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fallback_permissions</span> <span class="o">=</span> <span class="n">fallback_permissions</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">&quot;guest&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fallback_permissions</span> <span class="o">=</span> <span class="n">fallback_permissions</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">"guest"</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">CircuitState</span><span class="o">.</span><span class="n">CLOSED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">failure_count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -838,13 +850,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch permissions with circuit breaker protection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch permissions with circuit breaker protection."""</span>
         <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">CircuitState</span><span class="o">.</span><span class="n">OPEN</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_attempt_reset</span><span class="p">():</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">CircuitState</span><span class="o">.</span><span class="n">HALF_OPEN</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Circuit breaker open, returning fallback permissions&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"Circuit breaker open, returning fallback permissions"</span><span class="p">)</span>
                     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_permissions</span>
 
             <span class="k">try</span><span class="p">:</span>
@@ -854,29 +866,29 @@
 
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_failure</span><span class="p">()</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Permission provider failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Permission provider failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_permissions</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_should_attempt_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if circuit breaker should attempt reset.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check if circuit breaker should attempt reset."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_failure_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_failure_time</span> <span class="o">&gt;</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_on_success</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle successful call.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Handle successful call."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">failure_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">CircuitState</span><span class="o">.</span><span class="n">CLOSED</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_on_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle failed call.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Handle failed call."""</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">failure_count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_failure_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">failure_count</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">failure_threshold</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">CircuitState</span><span class="o">.</span><span class="n">OPEN</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Circuit breaker opened after </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">failure_count</span><span class="si">}</span><span class="s2"> failures&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Circuit breaker opened after </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">failure_count</span><span class="si">}</span><span class="s2"> failures"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -887,7 +899,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RetryGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider with retry logic.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider with retry logic."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span><span class="p">,</span>
                  <span class="n">max_retries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
@@ -897,7 +909,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">backoff_factor</span> <span class="o">=</span> <span class="n">backoff_factor</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups with retry logic.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch groups with retry logic."""</span>
         <span class="n">last_exception</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -910,10 +922,10 @@
                 <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="p">:</span>
                     <span class="c1"># Calculate backoff delay</span>
                     <span class="n">delay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backoff_factor</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> failed, retrying in </span><span class="si">{</span><span class="n">delay</span><span class="si">}</span><span class="s2">s: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> failed, retrying in </span><span class="si">{</span><span class="n">delay</span><span class="si">}</span><span class="s2">s: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
                     <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> attempts failed&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"All </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_retries</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> attempts failed"</span><span class="p">)</span>
 
         <span class="c1"># Re-raise the last exception</span>
         <span class="k">raise</span> <span class="n">last_exception</span>
@@ -934,32 +946,32 @@
     <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">(</span>
-            <span class="n">jwt_token</span><span class="o">=</span><span class="s2">&quot;test_token&quot;</span><span class="p">,</span>
-            <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alg&quot;</span><span class="p">:</span> <span class="s2">&quot;HS256&quot;</span><span class="p">},</span>
-            <span class="n">signature</span><span class="o">=</span><span class="s2">&quot;signature&quot;</span><span class="p">,</span>
-            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;message&quot;</span><span class="p">,</span>
-            <span class="n">claims</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;testuser&quot;</span><span class="p">,</span> <span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="s2">&quot;123&quot;</span><span class="p">}</span>
+            <span class="n">jwt_token</span><span class="o">=</span><span class="s2">"test_token"</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">"alg"</span><span class="p">:</span> <span class="s2">"HS256"</span><span class="p">},</span>
+            <span class="n">signature</span><span class="o">=</span><span class="s2">"signature"</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">"message"</span><span class="p">,</span>
+            <span class="n">claims</span><span class="o">=</span><span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="s2">"testuser"</span><span class="p">,</span> <span class="s2">"sub"</span><span class="p">:</span> <span class="s2">"123"</span><span class="p">}</span>
         <span class="p">)</span>
 
     <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">provider</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">CustomGroupsProvider</span><span class="p">(</span><span class="n">api_endpoint</span><span class="o">=</span><span class="s2">&quot;http://test.com&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CustomGroupsProvider</span><span class="p">(</span><span class="n">api_endpoint</span><span class="o">=</span><span class="s2">"http://test.com"</span><span class="p">)</span>
 
     <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_groups_success</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test successful group fetching.&quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s1">&#39;_api_call&#39;</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">"""Test successful group fetching."""</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s1">'_api_call'</span><span class="p">,</span> <span class="n">return_value</span><span class="o">=</span><span class="p">[</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">]):</span>
             <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">groups</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="n">groups</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">]</span>
 
     <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_groups_empty_username</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provider</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test handling of empty username.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Test handling of empty username."""</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">(</span>
-            <span class="n">jwt_token</span><span class="o">=</span><span class="s2">&quot;test_token&quot;</span><span class="p">,</span>
-            <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alg&quot;</span><span class="p">:</span> <span class="s2">&quot;HS256&quot;</span><span class="p">},</span>
-            <span class="n">signature</span><span class="o">=</span><span class="s2">&quot;signature&quot;</span><span class="p">,</span>
-            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;message&quot;</span><span class="p">,</span>
+            <span class="n">jwt_token</span><span class="o">=</span><span class="s2">"test_token"</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">"alg"</span><span class="p">:</span> <span class="s2">"HS256"</span><span class="p">},</span>
+            <span class="n">signature</span><span class="o">=</span><span class="s2">"signature"</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">"message"</span><span class="p">,</span>
             <span class="n">claims</span><span class="o">=</span><span class="p">{}</span>  <span class="c1"># No username</span>
         <span class="p">)</span>
 
@@ -968,15 +980,15 @@
 
     <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_groups_api_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test handling of API errors.&quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s1">&#39;_api_call&#39;</span><span class="p">,</span> <span class="n">side_effect</span><span class="o">=</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;API Error&quot;</span><span class="p">)):</span>
+<span class="w">        </span><span class="sd">"""Test handling of API errors."""</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s1">'_api_call'</span><span class="p">,</span> <span class="n">side_effect</span><span class="o">=</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">"API Error"</span><span class="p">)):</span>
             <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">groups</span> <span class="o">==</span> <span class="p">[]</span>  <span class="c1"># Should return empty list on error</span>
 
     <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">asyncio</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_fetch_groups_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">provider</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test handling of timeout.&quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s1">&#39;_api_call&#39;</span><span class="p">,</span> <span class="n">side_effect</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Test handling of timeout."""</span>
+        <span class="k">with</span> <span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="s1">'_api_call'</span><span class="p">,</span> <span class="n">side_effect</span><span class="o">=</span><span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">):</span>
             <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">groups</span> <span class="o">==</span> <span class="p">[]</span>
 </pre></div>
@@ -991,19 +1003,19 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">your_app.providers</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomGroupsProvider</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">create_groups_provider</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory function for groups provider.&quot;&quot;&quot;</span>
-    <span class="n">provider_type</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GROUPS_PROVIDER_TYPE&quot;</span><span class="p">,</span> <span class="s2">&quot;cognito&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Factory function for groups provider."""</span>
+    <span class="n">provider_type</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"GROUPS_PROVIDER_TYPE"</span><span class="p">,</span> <span class="s2">"cognito"</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">&quot;sql&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">"sql"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">SqlGroupsProvider</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">&quot;cognito&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">"cognito"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">CognitoGroupsProvider</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">&quot;custom&quot;</span><span class="p">:</span>
-        <span class="n">api_endpoint</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CUSTOM_GROUPS_API_ENDPOINT&quot;</span><span class="p">)</span>
-        <span class="n">api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CUSTOM_GROUPS_API_KEY&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">"custom"</span><span class="p">:</span>
+        <span class="n">api_endpoint</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"CUSTOM_GROUPS_API_ENDPOINT"</span><span class="p">)</span>
+        <span class="n">api_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"CUSTOM_GROUPS_API_KEY"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">CustomGroupsProvider</span><span class="p">(</span><span class="n">api_endpoint</span><span class="p">,</span> <span class="n">api_key</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown groups provider type: </span><span class="si">{</span><span class="n">provider_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown groups provider type: </span><span class="si">{</span><span class="n">provider_type</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>Health Checks:</strong></p>
@@ -1012,9 +1024,9 @@
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/health/groups-provider&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/health/groups-provider"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">health_check_groups_provider</span><span class="p">(</span><span class="n">groups_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_groups_provider</span><span class="p">)):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Health check endpoint for groups provider.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Health check endpoint for groups provider."""</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Create a test token</span>
         <span class="n">test_token</span> <span class="o">=</span> <span class="n">create_test_token</span><span class="p">()</span>
@@ -1025,10 +1037,10 @@
             <span class="n">timeout</span><span class="o">=</span><span class="mf">5.0</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;healthy&quot;</span><span class="p">,</span> <span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">groups_provider</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"healthy"</span><span class="p">,</span> <span class="s2">"provider"</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">groups_provider</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
 
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;unhealthy&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span> <span class="mi">503</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"unhealthy"</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span> <span class="mi">503</span>
 </pre></div>
 </div>
 </section>

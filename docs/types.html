@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Type Definitions &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Type Definitions &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/types.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -56,10 +56,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -201,7 +213,7 @@
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">User</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an authenticated user.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Represents an authenticated user."""</span>
     <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">email</span><span class="p">:</span> <span class="nb">str</span>
@@ -218,14 +230,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthenticationProvider</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol for authentication providers.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Protocol for authentication providers."""</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">validate_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate a token and return user information.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Validate a token and return user information."""</span>
         <span class="o">...</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract user information from token data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Extract user information from token data."""</span>
         <span class="o">...</span>
 </pre></div>
 </div>
@@ -237,15 +249,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ProviderSettings</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base settings for authentication providers.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base settings for authentication providers."""</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
-        <span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;forbid&quot;</span>  <span class="c1"># Prevent additional fields</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="s2">"forbid"</span>  <span class="c1"># Prevent additional fields</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">JWTProviderSettings</span><span class="p">(</span><span class="n">ProviderSettings</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Settings for JWT authentication provider.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Settings for JWT authentication provider."""</span>
     <span class="n">secret_key</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;HS256&quot;</span>
+    <span class="n">algorithm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"HS256"</span>
     <span class="n">issuer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">audience</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">verify_signature</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
@@ -265,7 +277,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">JWTClaims</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Standard JWT claims.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Standard JWT claims."""</span>
 
     <span class="c1"># Standard claims</span>
     <span class="n">iss</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1"># Issuer</span>
@@ -295,21 +307,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthenticatedRequest</span><span class="p">(</span><span class="n">Request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extended request with authentication context.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Extended request with authentication context."""</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">current_user</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">User</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current authenticated user.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;current_user&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Get the current authenticated user."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">'current_user'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">auth_token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the authentication token.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">&#39;auth_token&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Get the authentication token."""</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s1">'auth_token'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_authenticated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if request is authenticated.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Check if request is authenticated."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </pre></div>
 </div>
@@ -321,20 +333,20 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Awaitable</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthMode</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Authentication modes.&quot;&quot;&quot;</span>
-    <span class="n">REQUIRED</span> <span class="o">=</span> <span class="s2">&quot;required&quot;</span>      <span class="c1"># Authentication required for all endpoints</span>
-    <span class="n">OPTIONAL</span> <span class="o">=</span> <span class="s2">&quot;optional&quot;</span>      <span class="c1"># Authentication optional</span>
-    <span class="n">DISABLED</span> <span class="o">=</span> <span class="s2">&quot;disabled&quot;</span>      <span class="c1"># Authentication disabled</span>
+<span class="w">    </span><span class="sd">"""Authentication modes."""</span>
+    <span class="n">REQUIRED</span> <span class="o">=</span> <span class="s2">"required"</span>      <span class="c1"># Authentication required for all endpoints</span>
+    <span class="n">OPTIONAL</span> <span class="o">=</span> <span class="s2">"optional"</span>      <span class="c1"># Authentication optional</span>
+    <span class="n">DISABLED</span> <span class="o">=</span> <span class="s2">"disabled"</span>      <span class="c1"># Authentication disabled</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthMiddlewareConfig</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for authentication middleware.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Configuration for authentication middleware."""</span>
 
     <span class="n">auth_provider</span><span class="p">:</span> <span class="n">AuthenticationProvider</span>
     <span class="n">auth_mode</span><span class="p">:</span> <span class="n">AuthMode</span> <span class="o">=</span> <span class="n">AuthMode</span><span class="o">.</span><span class="n">REQUIRED</span>
     <span class="n">excluded_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">included_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">token_header</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Authorization&quot;</span>
-    <span class="n">token_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Bearer&quot;</span>
+    <span class="n">token_header</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Authorization"</span>
+    <span class="n">token_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Bearer"</span>
 </pre></div>
 </div>
 </section>
@@ -346,7 +358,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">AuthError</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base authentication error.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base authentication error."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -359,7 +371,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">details</span> <span class="ow">or</span> <span class="p">{}</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ValidationError</span><span class="p">(</span><span class="n">AuthError</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Token validation error.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Token validation error."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -379,12 +391,12 @@
 <section id="aws-cognito-types">
 <h3>AWS Cognito Types<a class="headerlink" href="#aws-cognito-types" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">CognitoUser</span><span class="p">(</span><span class="n">User</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cognito-specific user representation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Cognito-specific user representation."""</span>
 
     <span class="n">cognito_username</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">user_pool_id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">client_id</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">token_use</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># &#39;access&#39; or &#39;id&#39;</span>
+    <span class="n">token_use</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># 'access' or 'id'</span>
     <span class="n">cognito_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">custom_attributes</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 </pre></div>
@@ -393,7 +405,7 @@
 <section id="azure-entra-id-types">
 <h3>Azure Entra ID Types<a class="headerlink" href="#azure-entra-id-types" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">EntraIdUser</span><span class="p">(</span><span class="n">User</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Azure Entra ID user representation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Azure Entra ID user representation."""</span>
 
     <span class="n">object_id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">tenant_id</span><span class="p">:</span> <span class="nb">str</span>
@@ -414,37 +426,37 @@
 <span class="n">ValidationRule</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">PermissionRule</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Permission validation rule.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Permission validation rule."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">required_permissions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">operation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;any&quot;</span>  <span class="c1"># &quot;any&quot; or &quot;all&quot;</span>
+        <span class="n">operation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"any"</span>  <span class="c1"># "any" or "all"</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">required_permissions</span> <span class="o">=</span> <span class="n">required_permissions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="n">operation</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_permissions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span> <span class="s2">"all"</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">perm</span> <span class="ow">in</span> <span class="n">user_permissions</span> <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_permissions</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># &quot;any&quot;</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># "any"</span>
             <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">perm</span> <span class="ow">in</span> <span class="n">user_permissions</span> <span class="k">for</span> <span class="n">perm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_permissions</span><span class="p">)</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">GroupRule</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Group membership validation rule.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Group membership validation rule."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">required_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">operation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;any&quot;</span>
+        <span class="n">operation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"any"</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">required_groups</span> <span class="o">=</span> <span class="n">required_groups</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">=</span> <span class="n">operation</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user_groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operation</span> <span class="o">==</span> <span class="s2">"all"</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">group</span> <span class="ow">in</span> <span class="n">user_groups</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_groups</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># &quot;any&quot;</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># "any"</span>
             <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">group</span> <span class="ow">in</span> <span class="n">user_groups</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">required_groups</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -460,17 +472,17 @@
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/profile&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/profile"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_profile</span><span class="p">(</span>
     <span class="n">request</span><span class="p">:</span> <span class="n">AuthenticatedRequest</span><span class="p">,</span>
     <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">)</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
-        <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span>
-        <span class="s2">&quot;is_authenticated&quot;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">is_authenticated</span>
+        <span class="s2">"user_id"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">"email"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+        <span class="s2">"groups"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span><span class="p">,</span>
+        <span class="s2">"is_authenticated"</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">is_authenticated</span>
     <span class="p">}</span>
 </pre></div>
 </div>
@@ -481,7 +493,7 @@
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomProviderSettings</span><span class="p">(</span><span class="n">ProviderSettings</span><span class="p">):</span>
     <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;https://api.example.com&quot;</span>
+    <span class="n">base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"https://api.example.com"</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomProvider</span><span class="p">(</span><span class="n">AuthenticationProvider</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="n">CustomProviderSettings</span><span class="p">):</span>
@@ -494,10 +506,10 @@
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">User</span><span class="p">:</span>
         <span class="c1"># Extract user information</span>
         <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;user_id&quot;</span><span class="p">],</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-            <span class="n">email</span><span class="o">=</span><span class="n">token_data</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span>
-            <span class="n">groups</span><span class="o">=</span><span class="n">token_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">token_data</span><span class="p">[</span><span class="s2">"user_id"</span><span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">token_data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">token_data</span><span class="p">[</span><span class="s2">"email"</span><span class="p">],</span>
+            <span class="n">groups</span><span class="o">=</span><span class="n">token_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[])</span>
         <span class="p">)</span>
 </pre></div>
 </div>

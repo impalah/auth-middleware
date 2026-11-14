@@ -71,7 +71,9 @@ Keycloak, Auth0, Okta, ...):
    @app.get("/protected", dependencies=[Depends(require_user())])
    async def protected_endpoint(request):
        return {"message": f"Hello {request.state.current_user.name}"}
-======================
+
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
@@ -86,6 +88,19 @@ Keycloak, Auth0, Okta, ...):
    :caption: Infrastructure Setup:
 
    infrastructure
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Scoped Permissions:
+
+   authz-quickstart
+   authz-overview
+   authz-catalog
+   authz-stores
+   authz-fastapi
+   authz-operations
+   authz-migration
+   authz-api
 
 .. toctree::
    :maxdepth: 2

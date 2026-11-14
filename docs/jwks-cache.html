@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JWKS Cache Strategies &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>JWKS Cache Strategies &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/jwks-cache.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -57,10 +57,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul class="current">
@@ -216,9 +228,9 @@
 <span class="p">)</span>
 
 <span class="n">settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
-    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"time"</span><span class="p">,</span>
     <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>  <span class="c1"># Refresh every 20 minutes</span>
 <span class="p">)</span>
 </pre></div>
@@ -241,9 +253,9 @@
 <p>Refresh cache after a specified number of token validations.</p>
 <p><strong>Configuration:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
-    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;usage&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"usage"</span><span class="p">,</span>
     <span class="n">jwks_cache_usages</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>  <span class="c1"># Refresh after 1000 validations</span>
 <span class="p">)</span>
 </pre></div>
@@ -266,9 +278,9 @@
 <p>Refresh cache when either time OR usage threshold is reached (whichever comes first).</p>
 <p><strong>Configuration:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
-    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>  <span class="c1"># Default</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span>  <span class="c1"># Default</span>
     <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>      <span class="c1"># 20 minutes OR</span>
     <span class="n">jwks_cache_usages</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>      <span class="c1"># 1000 validations</span>
 <span class="p">)</span>
@@ -302,9 +314,9 @@
 <section id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
-    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span>
     <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="n">jwks_background_refresh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>          <span class="c1"># Enable background refresh</span>
     <span class="n">jwks_background_refresh_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="c1"># Refresh at 80% of lifetime</span>
@@ -359,11 +371,11 @@ Request N+1: Cache valid → Fast (10ms)
 <h2>High-Traffic Application<a class="headerlink" href="#high-traffic-application" title="Link to this heading"></a></h2>
 <p>For applications with thousands of requests per minute:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
 
     <span class="c1"># Use both strategies for reliability</span>
-    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span>
 
     <span class="c1"># Longer cache time for stability</span>
     <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>  <span class="c1"># 30 minutes</span>
@@ -382,11 +394,11 @@ Request N+1: Cache valid → Fast (10ms)
 <h2>Low-Traffic / High-Security Application<a class="headerlink" href="#low-traffic-high-security-application" title="Link to this heading"></a></h2>
 <p>For applications requiring frequent key rotation:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
 
     <span class="c1"># Time-based only for predictability</span>
-    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"time"</span><span class="p">,</span>
 
     <span class="c1"># Short cache interval</span>
     <span class="n">jwks_cache_interval</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>  <span class="c1"># 5 minutes</span>
@@ -402,11 +414,11 @@ Request N+1: Cache valid → Fast (10ms)
 <h2>Development / Testing<a class="headerlink" href="#development-testing" title="Link to this heading"></a></h2>
 <p>For local development and testing:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="s2">&quot;https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example&quot;</span><span class="p">,</span>
-    <span class="n">audience</span><span class="o">=</span><span class="s2">&quot;your-client-id&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="s2">"https://cognito-idp.us-east-1.amazonaws.com/us-east-1_example"</span><span class="p">,</span>
+    <span class="n">audience</span><span class="o">=</span><span class="s2">"your-client-id"</span><span class="p">,</span>
 
     <span class="c1"># Usage-based for variable dev traffic</span>
-    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;usage&quot;</span><span class="p">,</span>
+    <span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"usage"</span><span class="p">,</span>
     <span class="n">jwks_cache_usages</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>  <span class="c1"># Low threshold for testing</span>
 
     <span class="c1"># Optional: disable background refresh for simpler debugging</span>
@@ -435,11 +447,11 @@ Request N+1: Cache valid → Fast (10ms)
             <span class="n">jwks</span> <span class="o">=</span> <span class="k">await</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">load_jwks</span><span class="p">()</span>
             <span class="n">duration_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
             <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_success</span><span class="p">(</span><span class="n">duration_ms</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JWKS refreshed in </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">ms&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"JWKS refreshed in </span><span class="si">{</span><span class="n">duration_ms</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">ms"</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">jwks</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">duration_ms</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
-            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="s2">&quot;jwks_load_error&quot;</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">metrics</span><span class="o">.</span><span class="n">record_validation_failure</span><span class="p">(</span><span class="s2">"jwks_load_error"</span><span class="p">,</span> <span class="n">duration_ms</span><span class="p">)</span>
             <span class="k">raise</span>
 </pre></div>
 </div>
@@ -450,7 +462,7 @@ Request N+1: Cache valid → Fast (10ms)
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="c1"># Enable debug logging for JWT provider</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;auth_middleware.contracts.jwt_provider&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"auth_middleware.contracts.jwt_provider"</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>Example Output:</strong></p>
@@ -474,7 +486,7 @@ Request N+1: Cache valid → Fast (10ms)
 </li>
 <li><p><strong>Use Combined Strategy</strong></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">&quot;both&quot;</span></code> strategy provides the best balance:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">&quot;both&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">jwks_cache_strategy</span><span class="o">=</span><span class="s2">"both"</span>
 </pre></div>
 </div>
 </li>
@@ -497,9 +509,9 @@ Request N+1: Cache valid → Fast (10ms)
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
     <span class="n">jwks</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">load_jwks</span><span class="p">()</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JWKS refresh failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"JWKS refresh failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="c1"># Alert monitoring system</span>
-    <span class="n">send_alert</span><span class="p">(</span><span class="s2">&quot;JWKS refresh failure&quot;</span><span class="p">)</span>
+    <span class="n">send_alert</span><span class="p">(</span><span class="s2">"JWKS refresh failure"</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>

@@ -145,12 +145,12 @@ info:
 test-floci:
 	uv run pytest -m floci tests/authz/integration/test_floci.py -v
 
-pages:
-	uv run sphinx-build -W --keep-going pages_source pages
+docs:
+	uv run sphinx-build -W --keep-going pages_source docs
 
 # Serve documentation locally
-pages-serve: pages
-	uv run python -m http.server 8000 --directory pages
+docs-serve: docs
+	uv run python -m http.server 8000 --directory docs
 
 # Help target
 help:
@@ -173,8 +173,8 @@ help:
 	@echo "  docker-release- Release Docker image"
 	@echo "  test-floci    - Run the store tests on Floci (Docker, testcontainers)"
 	@echo "  deps-check    - Check declared vs imported dependencies (deptry)"
-	@echo "  pages         - Build the Sphinx site into pages/"
-	@echo "  pages-serve   - Serve the built site locally"
+	@echo "  docs          - Build the Sphinx site (pages_source) into docs/"
+	@echo "  docs-serve    - Serve the built site locally"
 	@echo "  run           - Run the application"
 	@echo "  shell         - Open Python REPL"
 	@echo "  clean         - Clean build artifacts"
@@ -187,7 +187,7 @@ sonar: ## Run SonarQube analysis with pysonar
 
 sonar-check: test-cov sonar ## Run coverage and SonarQube analysis
 
-.PHONY: venv bump-version sync-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info test-floci pages pages-serve deps-check help sonar sonar-check
+.PHONY: venv bump-version sync-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info test-floci docs docs-serve deps-check help sonar sonar-check
 
 # Dependency hygiene (undeclared / unused / misplaced dependencies)
 deps-check:

@@ -117,7 +117,7 @@ Set the required environment variables for your authentication provider:
    )
 
 OpenAPI Integration
-------------------
+-------------------
 
 Auth Middleware integrates with FastAPI's OpenAPI documentation to provide proper security schemas:
 
@@ -188,7 +188,7 @@ Once your application is protected, clients need to include JWT tokens in their 
    print(response.json())
 
 Accessing User Information
--------------------------
+--------------------------
 
 Within protected endpoints, you can access the current user information:
 
@@ -238,7 +238,7 @@ Auth Middleware provides specific exceptions for different authentication and au
        )
 
 Development Tips
----------------
+----------------
 
 **Disable Token Verification for Development**:
 

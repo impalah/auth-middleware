@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Index &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/genindex.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -54,10 +54,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -177,9 +189,25 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError.__init__">__init__() (auth_middleware.exceptions.AuthenticationError method)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.__init__">__init__() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
 
       <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.__init__">(auth_middleware.authz.catalog.PermissionCatalog method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.engine.Authorizer.__init__">(auth_middleware.authz.engine.Authorizer method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.__init__">(auth_middleware.authz.runtime.Authz method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.service.AssignmentService.__init__">(auth_middleware.authz.service.AssignmentService method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.__init__">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.__init__">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.__init__">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+        <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError.__init__">(auth_middleware.exceptions.AuthenticationError method)</a>
+</li>
         <li><a href="exceptions.html#auth_middleware.exceptions.ChallengeRequiredError.__init__">(auth_middleware.exceptions.ChallengeRequiredError method)</a>
 </li>
         <li><a href="exceptions.html#auth_middleware.exceptions.InvalidChallengeError.__init__">(auth_middleware.exceptions.InvalidChallengeError method)</a>
@@ -195,6 +223,8 @@
         <li><a href="functions.html#auth_middleware.guards.permissions_checker.PermissionsChecker.__init__">(auth_middleware.guards.permissions_checker.PermissionsChecker method)</a>
 </li>
         <li><a href="functions.html#auth_middleware.guards.role_checker.RoleChecker.__init__">(auth_middleware.guards.role_checker.RoleChecker method)</a>
+</li>
+        <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.AuthFailure.__init__">(auth_middleware.jwt_auth_middleware.AuthFailure method)</a>
 </li>
         <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.__init__">(auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
 </li>
@@ -223,10 +253,43 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.accepted_token_types">accepted_token_types (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.aclose">aclose() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.aclose">(auth_middleware.authz.runtime.Authz method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.aclose">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+      </ul></li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.algorithms">algorithms (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.assign">assign() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.service.AssignmentService.assign">(auth_middleware.authz.service.AssignmentService method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.assign">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.assign">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.assign">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.service.AssignmentService">AssignmentService (class in auth_middleware.authz.service)</a>
 </li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.audience">audience (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.events.audit_hook">audit_hook() (in module auth_middleware.authz.events)</a>
+</li>
+      <li>
+    auth_middleware.authz
+
+      <ul>
+        <li><a href="authz-api.html#module-auth_middleware.authz">module</a>
+</li>
+      </ul></li>
       <li>
     auth_middleware.exceptions
 
@@ -276,6 +339,8 @@
         <li><a href="jwt_bearer_manager.html#module-auth_middleware.jwt_bearer_manager">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     auth_middleware.providers.azure.entra_id_provider
 
@@ -290,8 +355,6 @@
         <li><a href="entra_id_provider.html#module-auth_middleware.providers.azure.settings">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     auth_middleware.providers.oidc.oidc_provider
 
@@ -332,6 +395,10 @@
         <li><a href="types.html#module-auth_middleware.types">module</a>
 </li>
       </ul></li>
+      <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES">AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
+</li>
+      <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES">AUTH_MIDDLEWARE_JWKS_CACHE_USAGES (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
+</li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
 </li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE">AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE (auth_middleware.providers.azure.settings.ModuleSettings attribute)</a>
@@ -342,11 +409,25 @@
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError">AuthenticationError</a>
 </li>
+      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.AuthFailure">AuthFailure (class in auth_middleware.jwt_auth_middleware)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.engine.Authorizer.authorize">authorize() (auth_middleware.authz.engine.Authorizer method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.engine.Authorizer">Authorizer (class in auth_middleware.authz.engine)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.authorizer_for">authorizer_for() (auth_middleware.authz.runtime.Authz method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz">Authz (class in auth_middleware.authz.runtime)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.build">build() (auth_middleware.authz.runtime.Authz class method)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     built-in function
@@ -361,15 +442,33 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore">CachingAssignmentStore (class in auth_middleware.authz.cache)</a>
+</li>
       <li><a href="exceptions.html#auth_middleware.exceptions.ChallengeRequiredError">ChallengeRequiredError</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.change_role">change_role() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.service.AssignmentService.change_role">(auth_middleware.authz.service.AssignmentService method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.change_role">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.change_role">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.change_role">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.engine.Authorizer.check">check() (auth_middleware.authz.engine.Authorizer method)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.client_id">client_id (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.client_id_claims">client_id_claims (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="groups-provider.html#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider">CognitoGroupsProvider (class in auth_middleware.providers.aws.cognito_groups_provider)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.create_table_if_missing">create_table_if_missing() (auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
 </li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.create_user_from_token">create_user_from_token() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 
@@ -385,11 +484,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.detect_m2m_tokens">detect_m2m_tokens (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.discovery_url">discovery_url (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.dispatch">dispatch() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore">DynamoDbAssignmentStore (class in auth_middleware.authz.stores.dynamodb)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -417,8 +518,6 @@
         <li><a href="groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.fetch_groups">(auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider.fetch_permissions">fetch_permissions() (auth_middleware.contracts.permissions_provider.PermissionsProvider method)</a>
 
       <ul>
@@ -426,11 +525,29 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.forced_jwks_refresh_min_interval_seconds">forced_jwks_refresh_min_interval_seconds (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.from_file">from_file() (auth_middleware.authz.catalog.PermissionCatalog class method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.from_mapping">from_mapping() (auth_middleware.authz.catalog.PermissionCatalog class method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.get_assignment">get_assignment() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.get_assignment">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.get_assignment">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.get_assignment">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+      </ul></li>
       <li><a href="services.html#auth_middleware.services.M2MTokenDetector.get_client_id">get_client_id() (auth_middleware.services.M2MTokenDetector static method)</a>
 </li>
       <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager.get_credentials">get_credentials() (auth_middleware.jwt_bearer_manager.JWTBearerManager method)</a>
@@ -443,14 +560,16 @@
       </ul></li>
       <li><a href="groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.get_groups_from_db">get_groups_from_db() (auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="functions.html#auth_middleware.guards.functions.get_identity">get_identity() (in module auth_middleware.guards.functions)</a>
+</li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys">get_keys() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 
       <ul>
         <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.get_keys">(auth_middleware.providers.oidc.oidc_provider.OidcProvider method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config">get_openid_config() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 </li>
       <li><a href="permissions-provider.html#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider.get_permissions_from_db">get_permissions_from_db() (auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider method)</a>
@@ -471,6 +590,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functions.html#auth_middleware.guards.functions.has_groups">has_groups() (in module auth_middleware.guards.functions)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.guards.has_permission">has_permission() (in module auth_middleware.authz.guards)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functions.html#auth_middleware.guards.functions.has_permissions">has_permissions() (in module auth_middleware.guards.functions)</a>
@@ -485,14 +606,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.identity_claims">identity_claims (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore">InMemoryAssignmentStore (class in auth_middleware.authz.stores.memory)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.install">install() (auth_middleware.authz.runtime.Authz method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.invalidate">invalidate() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+</li>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidAuthorizationException">InvalidAuthorizationException</a>
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidChallengeError">InvalidChallengeError</a>
 </li>
-      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidCredentialsException">InvalidCredentialsException</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="exceptions.html#auth_middleware.exceptions.InvalidCredentialsException">InvalidCredentialsException</a>
+</li>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidTokenException">InvalidTokenException</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.ip_address">ip_address (auth_middleware.services.AuditEvent attribute)</a>
@@ -527,6 +654,28 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.list_assignments">list_assignments() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.list_assignments">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.list_assignments">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.list_assignments">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.list_for_scope">list_for_scope() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.list_for_scope">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.list_for_scope">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.list_for_scope">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.load_jwks">load_jwks() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 
       <ul>
@@ -535,8 +684,6 @@
       </ul></li>
       <li><a href="services.html#auth_middleware.services.AuditLogger.log">log() (auth_middleware.services.AuditLogger method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="services.html#auth_middleware.services.AuditLogger.log_access_denied">log_access_denied() (auth_middleware.services.AuditLogger method)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditLogger.log_auth_failure">log_auth_failure() (auth_middleware.services.AuditLogger method)</a>
@@ -549,9 +696,13 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.service.AssignmentService.members">members() (auth_middleware.authz.service.AssignmentService method)</a>
+</li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.metadata">metadata (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.method">method (auth_middleware.services.AuditEvent attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.events.metrics_hook">metrics_hook() (in module auth_middleware.authz.events)</a>
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.MfaSetupError">MfaSetupError</a>
 </li>
@@ -561,6 +712,8 @@
     module
 
       <ul>
+        <li><a href="authz-api.html#module-auth_middleware.authz">auth_middleware.authz</a>
+</li>
         <li><a href="exceptions.html#module-auth_middleware.exceptions">auth_middleware.exceptions</a>
 </li>
         <li><a href="functions.html#module-auth_middleware.guards.functions">auth_middleware.guards.functions</a>
@@ -596,10 +749,12 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider">OidcProvider (class in auth_middleware.providers.oidc.oidc_provider)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.of">of() (auth_middleware.authz.runtime.Authz class method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider">OidcProvider (class in auth_middleware.providers.oidc.oidc_provider)</a>
+</li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings">OidcProviderSettings (class in auth_middleware.providers.oidc.oidc_provider_settings)</a>
 </li>
   </ul></td>
@@ -612,8 +767,14 @@
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.path">path (auth_middleware.services.AuditEvent attribute)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog">PermissionCatalog (class in auth_middleware.authz.catalog)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.permissions">permissions() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.permissions_for">permissions_for() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
+</li>
       <li><a href="functions.html#auth_middleware.guards.permissions_checker.PermissionsChecker">PermissionsChecker (class in auth_middleware.guards.permissions_checker)</a>
 </li>
       <li><a href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider">PermissionsProvider (class in auth_middleware.contracts.permissions_provider)</a>
@@ -624,19 +785,43 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.AuthFailure.reason">reason (auth_middleware.jwt_auth_middleware.AuthFailure attribute)</a>
+</li>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.require_audience">require_audience (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
+      <li><a href="functions.html#auth_middleware.guards.functions.require_authenticated">require_authenticated() (in module auth_middleware.guards.functions)</a>
+</li>
       <li><a href="functions.html#auth_middleware.guards.functions.require_groups">require_groups() (in module auth_middleware.guards.functions)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.guards.require_permission">require_permission() (in module auth_middleware.authz.guards)</a>
 </li>
       <li><a href="functions.html#auth_middleware.guards.functions.require_permissions">require_permissions() (in module auth_middleware.guards.functions)</a>
 </li>
       <li><a href="functions.html#auth_middleware.guards.functions.require_roles">require_roles() (in module auth_middleware.guards.functions)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functions.html#auth_middleware.guards.functions.require_user">require_user() (in module auth_middleware.guards.functions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="services.html#auth_middleware.services.M2MTokenDetector.requires_user_context">requires_user_context() (auth_middleware.services.M2MTokenDetector static method)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.revoke">revoke() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.service.AssignmentService.revoke">(auth_middleware.authz.service.AssignmentService method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.revoke">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.revoke">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.revoke">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+      </ul></li>
       <li><a href="functions.html#auth_middleware.guards.role_checker.RoleChecker">RoleChecker (class in auth_middleware.guards.role_checker)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.roles">roles() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.roles_granting">roles_granting() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -644,20 +829,40 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.scope_kind">scope_kind() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.spec">spec() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore">SqlAssignmentStore (class in auth_middleware.authz.stores.sql)</a>
+</li>
       <li><a href="groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider">SqlGroupsProvider (class in auth_middleware.providers.sqlalchemy.sql_groups_provider)</a>
+</li>
+      <li><a href="permissions-provider.html#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider">SqlPermissionsProvider (class in auth_middleware.providers.sqlalchemy.sql_permissions_provider)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="permissions-provider.html#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider">SqlPermissionsProvider (class in auth_middleware.providers.sqlalchemy.sql_permissions_provider)</a>
+      <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.AuthFailure.status_code">status_code (auth_middleware.jwt_auth_middleware.AuthFailure attribute)</a>
+
+      <ul>
+        <li><a href="services.html#auth_middleware.services.AuditEvent.status_code">(auth_middleware.services.AuditEvent attribute)</a>
 </li>
-      <li><a href="services.html#auth_middleware.services.AuditEvent.status_code">status_code (auth_middleware.services.AuditEvent attribute)</a>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.supports_attributes">supports_attributes (auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.supports_attributes">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore attribute)</a>
 </li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.supports_attributes">(auth_middleware.authz.stores.sql.SqlAssignmentStore attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.table_definition">table_definition() (auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore static method)</a>
+</li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.timestamp">timestamp (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.to_dict">to_dict() (auth_middleware.services.AuditEvent method)</a>
@@ -665,6 +870,8 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="services.html#auth_middleware.services.AuditEvent.to_json">to_json() (auth_middleware.services.AuditEvent method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.to_mapping">to_mapping() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
 </li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.token_use_claim">token_use_claim (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
@@ -691,6 +898,10 @@
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.validate_routes">validate_routes() (auth_middleware.authz.runtime.Authz method)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.verify_token">verify_token() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 

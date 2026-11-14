@@ -123,7 +123,7 @@ Background Refresh
 Background refresh proactively refreshes the JWKS cache before it expires, preventing cache expiry delays.
 
 How It Works
------------
+------------
 
 1. When cache is loaded, a background task is scheduled
 2. Task waits until ``threshold`` of cache lifetime has elapsed
@@ -187,7 +187,7 @@ With background refresh:
 **Always Enabled:** Recommended for all production deployments.
 
 Configuration Examples
-=====================
+======================
 
 High-Traffic Application
 ------------------------
@@ -237,7 +237,7 @@ For applications requiring frequent key rotation:
    )
 
 Development / Testing
---------------------
+---------------------
 
 For local development and testing:
 
@@ -381,7 +381,7 @@ Cache Not Refreshing
 4. Ensure network connectivity to identity provider
 
 High Latency Spikes
-------------------
+-------------------
 
 **Symptoms:**
 
@@ -395,7 +395,7 @@ High Latency Spikes
 3. Increase cache interval if refreshing too frequently
 
 Frequent Refreshes
------------------
+------------------
 
 **Symptoms:**
 
@@ -410,7 +410,7 @@ Frequent Refreshes
 3. Consider if traffic justifies current settings
 
 Error: "Background refresh failed"
----------------------------------
+----------------------------------
 
 **Symptoms:**
 
@@ -425,7 +425,7 @@ Error: "Background refresh failed"
 4. Implement retry logic
 
 Performance Comparison
-=====================
+======================
 
 **Without JWKS Caching:**
 

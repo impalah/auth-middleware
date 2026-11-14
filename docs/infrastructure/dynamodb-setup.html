@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DynamoDB Setup for Scoped Permissions &mdash; Auth Middleware 0.7.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/infrastructure/dynamodb-setup.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Azure Entra ID Infrastructure Setup" href="entra-id-setup.html" />
+    <link rel="prev" title="AWS Cognito Infrastructure Setup" href="cognito-setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html">AWS Cognito Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-1-create-a-user-pool">Step 1: Create a User Pool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-2-create-app-clients">Step 2: Create App Clients</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-3-create-user-groups">Step 3: Create User Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-4-create-users">Step 4: Create Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-5-assign-users-to-groups">Step 5: Assign Users to Groups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-6-configure-user-pool-settings">Step 6: Configure User Pool Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#step-7-testing-your-setup">Step 7: Testing Your Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cognito-setup.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">DynamoDB Setup for Scoped Permissions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#table-definition">Table definition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iam-policy-for-the-runtime-role-least-privilege">IAM policy for the runtime role (least privilege)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#consistency-caveats">Consistency caveats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests">Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html">Azure Entra ID Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="entra-id-setup.html#coming-soon">Coming Soon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html">Authentik Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-1-create-an-oauth2-openid-provider">Step 1: Create an OAuth2/OpenID Provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-2-create-an-application">Step 2: Create an Application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-3-include-groups-in-the-token-optional">Step 3: Include Groups in the Token (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-4-create-groups-and-users">Step 4: Create Groups and Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#step-5-testing-your-setup">Step 5: Testing Your Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#configure-auth-middleware">Configure auth-middleware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authentik-setup.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html">Keycloak Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#step-1-create-a-realm">Step 1: Create a Realm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#step-2-create-a-client">Step 2: Create a Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#step-3-include-groups-in-the-token-optional">Step 3: Include Groups in the Token (Optional)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#step-4-create-groups-and-users">Step 4: Create Groups and Users</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#step-5-testing-your-setup">Step 5: Testing Your Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#configuration-summary">Configuration Summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#configure-auth-middleware">Configure auth-middleware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#security-best-practices">Security Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="keycloak-setup.html#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html">Google Identity Infrastructure Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="google-setup.html#coming-soon">Coming Soon</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../infrastructure.html">Infrastructure Setup</a></li>
+      <li class="breadcrumb-item active">DynamoDB Setup for Scoped Permissions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/infrastructure/dynamodb-setup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dynamodb-setup-for-scoped-permissions">
+<span id="dynamodb-infrastructure-setup"></span><h1>DynamoDB Setup for Scoped Permissions<a class="headerlink" href="#dynamodb-setup-for-scoped-permissions" title="Link to this heading"></a></h1>
+<p><em>Draft: the final text is part of the 0.7.0 documentation pass.</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">DynamoDbAssignmentStore</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'auth-middleware[dynamodb]'</span></code>, built on
+<a class="reference external" href="https://pynamodb.readthedocs.io/">PynamoDB</a>) keeps one item per principal and scope in a
+single table. Creating the table is a deployment concern: the runtime role never needs
+table-level permissions.</p>
+<section id="table-definition">
+<h2>Table definition<a class="headerlink" href="#table-definition" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">DynamoDbAssignmentStore</span>
+
+<span class="n">DynamoDbAssignmentStore</span><span class="o">.</span><span class="n">table_definition</span><span class="p">(</span><span class="s2">"authz-assignments"</span><span class="p">)</span>  <span class="c1"># boto3 create_table kwargs</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pk</span></code></p></td>
+<td><p>S</p></td>
+<td><p>HASH, <code class="docutils literal notranslate"><span class="pre">SCOPE#&lt;kind&gt;#&lt;id&gt;</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sk</span></code></p></td>
+<td><p>S</p></td>
+<td><p>RANGE, <code class="docutils literal notranslate"><span class="pre">PRINCIPAL#&lt;principal_id&gt;</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gsi1pk</span></code></p></td>
+<td><p>S</p></td>
+<td><p>GSI <code class="docutils literal notranslate"><span class="pre">by-principal</span></code> HASH</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gsi1sk</span></code></p></td>
+<td><p>S</p></td>
+<td><p>GSI <code class="docutils literal notranslate"><span class="pre">by-principal</span></code> RANGE</p></td>
+</tr>
+</tbody>
+</table>
+<p>Billing mode <code class="docutils literal notranslate"><span class="pre">PAY_PER_REQUEST</span></code> is recommended; the GSI projects <code class="docutils literal notranslate"><span class="pre">ALL</span></code> attributes.
+A Terraform equivalent:</p>
+<div class="highlight-hcl notranslate"><div class="highlight"><pre><span></span><span class="kr">resource</span><span class="w"> </span><span class="nc">"aws_dynamodb_table"</span><span class="w"> </span><span class="nv">"authz"</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">name</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="s2">"authz-assignments"</span>
+<span class="w">  </span><span class="na">billing_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"PAY_PER_REQUEST"</span>
+<span class="w">  </span><span class="na">hash_key</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="s2">"pk"</span>
+<span class="w">  </span><span class="na">range_key</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">"sk"</span>
+
+<span class="w">  </span><span class="nb">attribute</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"pk"     type = "S"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nb">attribute</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"sk"     type = "S"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nb">attribute</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"gsi1pk" type = "S"</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="nb">attribute</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"gsi1sk" type = "S"</span><span class="w"> </span><span class="p">}</span>
+
+<span class="w">  </span><span class="nb">global_secondary_index</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="na">name</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="s2">"by-principal"</span>
+<span class="w">    </span><span class="na">hash_key</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="s2">"gsi1pk"</span>
+<span class="w">    </span><span class="na">range_key</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">"gsi1sk"</span>
+<span class="w">    </span><span class="na">projection_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"ALL"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="iam-policy-for-the-runtime-role-least-privilege">
+<h2>IAM policy for the runtime role (least privilege)<a class="headerlink" href="#iam-policy-for-the-runtime-role-least-privilege" title="Link to this heading"></a></h2>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">"Version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2012-10-17"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"Statement"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span>
+<span class="w">    </span><span class="nt">"Effect"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Allow"</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">"Action"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"dynamodb:GetItem"</span><span class="p">,</span><span class="w"> </span><span class="s2">"dynamodb:PutItem"</span><span class="p">,</span><span class="w"> </span><span class="s2">"dynamodb:UpdateItem"</span><span class="p">,</span><span class="w"> </span><span class="s2">"dynamodb:Query"</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">"Resource"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">"arn:aws:dynamodb:REGION:ACCOUNT:table/authz-assignments"</span><span class="p">,</span>
+<span class="w">      </span><span class="s2">"arn:aws:dynamodb:REGION:ACCOUNT:table/authz-assignments/index/by-principal"</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>No <code class="docutils literal notranslate"><span class="pre">Scan</span></code>, no <code class="docutils literal notranslate"><span class="pre">DeleteItem</span></code> (assignments are revoked, never deleted) and no table-level
+actions.</p>
+</section>
+<section id="consistency-caveats">
+<h2>Consistency caveats<a class="headerlink" href="#consistency-caveats" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">get_assignment</span></code> (the guard path) always sends <code class="docutils literal notranslate"><span class="pre">ConsistentRead=True</span></code>: an eventually
+consistent read could admit a principal that was just revoked. Turning it off
+(<code class="docutils literal notranslate"><span class="pre">consistent_read=False</span></code>) is an explicit acceptance of that risk.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">list_assignments</span></code> (“my scopes”) uses the GSI, which only supports eventually consistent
+reads: it may lag by a moment. The guard never calls it.</p></li>
+<li><p>Every write is conditional on <code class="docutils literal notranslate"><span class="pre">revision</span></code>; losers get <code class="docutils literal notranslate"><span class="pre">RevisionConflictError</span></code>.</p></li>
+<li><p>Throttling that survives botocore’s retries raises <code class="docutils literal notranslate"><span class="pre">StoreUnavailableError</span></code> so the error
+policy can answer 503. Configure botocore retries with <code class="docutils literal notranslate"><span class="pre">max_retry_attempts</span></code>.</p></li>
+<li><p>Ids may contain any character (the scope id is the last component of every composite key, so <code class="docutils literal notranslate"><span class="pre">#</span></code> is
+unambiguous); assignment attributes are limited to 4 KB of JSON.</p></li>
+<li><p>Each call runs in a worker thread. By default that is the event loop’s default executor, shared with the rest of the
+application: a slow DynamoDB can occupy it. Pass <code class="docutils literal notranslate"><span class="pre">max_workers=N</span></code> to give the store its own bounded pool, and keep
+<code class="docutils literal notranslate"><span class="pre">read_timeout_seconds</span></code> and <code class="docutils literal notranslate"><span class="pre">max_retry_attempts</span></code> modest.</p></li>
+</ul>
+</section>
+<section id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tests/authz/integration/test_dynamodb_store.py</span></code> runs against an in-process <code class="docutils literal notranslate"><span class="pre">moto</span></code> server by
+default. Set <code class="docutils literal notranslate"><span class="pre">AUTHZ_TEST_DYNAMODB_ENDPOINT=http://localhost:8000</span></code> to run the same tests against
+<code class="docutils literal notranslate"><span class="pre">amazon/dynamodb-local</span></code> (the CI <code class="docutils literal notranslate"><span class="pre">integration-dynamodb</span></code> job does). <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test-floci</span></code> runs it against Floci too.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cognito-setup.html" class="btn btn-neutral float-left" title="AWS Cognito Infrastructure Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="entra-id-setup.html" class="btn btn-neutral float-right" title="Azure Entra ID Infrastructure Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Groups Provider &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Groups Provider &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/groups-provider.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -57,10 +57,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul class="current">
@@ -192,7 +204,7 @@
 <p>Extracts groups directly from AWS Cognito JWT tokens.</p>
 <p><strong>Features:</strong>
 - Reads groups from <code class="docutils literal notranslate"><span class="pre">cognito:groups</span></code> claim
-- Fallback to <code class="docutils literal notranslate"><span class="pre">scope</span></code> claim for single group scenarios
+- Optional mapping of a custom <code class="docutils literal notranslate"><span class="pre">scope</span></code> (machine tokens) when you name your resource server or give an exact table
 - No external database queries required
 - Zero-latency group resolution</p>
 <p><strong>Usage:</strong></p>
@@ -200,7 +212,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.jwt_auth_middleware</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtAuthMiddleware</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.oidc.oidc_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">OidcProvider</span>
 
-<span class="c1"># Configure the authentication provider (e.g. pointed at AWS Cognito&#39;s</span>
+<span class="c1"># Configure the authentication provider (e.g. pointed at AWS Cognito's</span>
 <span class="c1"># OIDC issuer — see :doc:`oidc_provider`)</span>
 <span class="n">auth_provider</span> <span class="o">=</span> <span class="n">OidcProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">auth_settings</span><span class="p">)</span>
 
@@ -218,22 +230,23 @@
 <p><strong>Token Format:</strong></p>
 <p>The provider expects JWT tokens with group information in one of these formats:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;john.doe&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;cognito:groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;user&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;moderator&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234567890</span>
+<span class="w">  </span><span class="nt">"sub"</span><span class="p">:</span><span class="w"> </span><span class="s2">"user123"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"john.doe"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"cognito:groups"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"admin"</span><span class="p">,</span><span class="w"> </span><span class="s2">"user"</span><span class="p">,</span><span class="w"> </span><span class="s2">"moderator"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"exp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1234567890</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Or for single scope scenarios:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;user123&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;john.doe&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;api/admin&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234567890</span>
-<span class="p">}</span>
+<p>Machine (client-credentials) tokens carry no groups claim, only a custom scope. Map it explicitly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># "api/admin" -&gt; group "admin"; scopes of other resource servers are ignored</span>
+<span class="n">CognitoGroupsProvider</span><span class="p">(</span><span class="n">resource_server</span><span class="o">=</span><span class="s2">"api"</span><span class="p">)</span>
+
+<span class="c1"># or an exact table</span>
+<span class="n">CognitoGroupsProvider</span><span class="p">(</span><span class="n">scope_map</span><span class="o">=</span><span class="p">{</span><span class="s2">"api/admin"</span><span class="p">:</span> <span class="s2">"admin"</span><span class="p">})</span>
 </pre></div>
 </div>
+<p>Without <code class="docutils literal notranslate"><span class="pre">resource_server</span></code> or <code class="docutils literal notranslate"><span class="pre">scope_map</span></code> the <code class="docutils literal notranslate"><span class="pre">scope</span></code> claim is ignored (fail closed): stripping the prefix blindly
+would turn a token issued for another API (<code class="docutils literal notranslate"><span class="pre">other-api/admin</span></code>) into your <code class="docutils literal notranslate"><span class="pre">admin</span></code> group.</p>
 </section>
 <section id="sqlgroupsprovider">
 <h2>SqlGroupsProvider<a class="headerlink" href="#sqlgroupsprovider" title="Link to this heading"></a></h2>
@@ -260,7 +273,7 @@
 
 <span class="c1"># Configure database connection</span>
 <span class="n">db_settings</span> <span class="o">=</span> <span class="n">AsyncDatabaseSettings</span><span class="p">(</span>
-    <span class="n">database_url</span><span class="o">=</span><span class="s2">&quot;postgresql+asyncpg://user:pass@localhost/mydb&quot;</span>
+    <span class="n">database_url</span><span class="o">=</span><span class="s2">"postgresql+asyncpg://user:pass@localhost/mydb"</span>
 <span class="p">)</span>
 <span class="n">AsyncDatabase</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">db_settings</span><span class="p">)</span>
 
@@ -282,12 +295,19 @@
 using it with <a class="reference internal" href="entra_id_provider.html"><span class="doc">Azure Entra ID Authentication Provider</span></a> or <a class="reference internal" href="oidc_provider.html"><span class="doc">Generic OIDC Provider</span></a>, that
 claim usually doesn’t exist — pass <code class="docutils literal notranslate"><span class="pre">id_claim</span></code> to match what your
 identity provider actually issues:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Entra ID / generic OIDC providers typically use &quot;preferred_username&quot;</span>
-<span class="n">groups_provider</span> <span class="o">=</span> <span class="n">SqlGroupsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">&quot;preferred_username&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># "sub" is stable, provider-agnostic and cannot be edited by the user (recommended)</span>
+<span class="n">groups_provider</span> <span class="o">=</span> <span class="n">SqlGroupsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">"sub"</span><span class="p">)</span>
 
-<span class="c1"># Or use &quot;sub&quot; for a stable, provider-agnostic identifier</span>
-<span class="n">groups_provider</span> <span class="o">=</span> <span class="n">SqlGroupsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">)</span>
+<span class="c1"># Claims such as "preferred_username" or "email" work, but a warning is logged:</span>
+<span class="c1"># many identity providers let users edit them</span>
+<span class="n">groups_provider</span> <span class="o">=</span> <span class="n">SqlGroupsProvider</span><span class="p">(</span><span class="n">id_claim</span><span class="o">=</span><span class="s2">"preferred_username"</span><span class="p">)</span>
 </pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Authorization is keyed on that claim. <code class="docutils literal notranslate"><span class="pre">preferred_username</span></code> and <code class="docutils literal notranslate"><span class="pre">email</span></code> are editable or unverified at
+some identity providers, which would let a user impersonate another user’s groups; prefer <code class="docutils literal notranslate"><span class="pre">&quot;sub&quot;</span></code>.
+On MySQL, note that the default collations compare case-insensitively (<code class="docutils literal notranslate"><span class="pre">Admin</span></code> equals <code class="docutils literal notranslate"><span class="pre">admin</span></code>).</p>
 </div>
 </div>
 <p><strong>Managing Groups:</strong></p>
@@ -302,8 +322,8 @@ identity provider actually issues:</p>
         <span class="k">await</span> <span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 
 <span class="c1"># Example usage</span>
-<span class="k">await</span> <span class="n">add_user_to_group</span><span class="p">(</span><span class="s2">&quot;john.doe&quot;</span><span class="p">,</span> <span class="s2">&quot;admin&quot;</span><span class="p">)</span>
-<span class="k">await</span> <span class="n">add_user_to_group</span><span class="p">(</span><span class="s2">&quot;john.doe&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">add_user_to_group</span><span class="p">(</span><span class="s2">"john.doe"</span><span class="p">,</span> <span class="s2">"admin"</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">add_user_to_group</span><span class="p">(</span><span class="s2">"john.doe"</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -317,19 +337,19 @@ identity provider actually issues:</p>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/admin-only&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">admin_endpoint</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">(</span><span class="s2">&quot;admin&quot;</span><span class="p">))):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Hello admin </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/admin-only"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">admin_endpoint</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">(</span><span class="s2">"admin"</span><span class="p">))):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Hello admin </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/user-info&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/user-info"</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">user_info</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">())):</span>
     <span class="c1"># Access groups directly</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="n">user</span><span class="o">.</span><span class="n">groups</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="n">groups</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="s2">"groups"</span><span class="p">:</span> <span class="n">groups</span><span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/multi-role&quot;</span><span class="p">)</span>
-<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">multi_role</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">([</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;moderator&quot;</span><span class="p">]))):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin or moderator access&quot;</span><span class="p">}</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/multi-role"</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">multi_role</span><span class="p">(</span><span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">([</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"moderator"</span><span class="p">]))):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Admin or moderator access"</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -341,14 +361,14 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom groups provider implementation.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Custom groups provider implementation."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_client</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span> <span class="o">=</span> <span class="n">api_client</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from custom source.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from custom source."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
 
         <span class="c1"># Implement your custom logic here</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_client</span><span class="o">.</span><span class="n">get_user_groups</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
@@ -363,9 +383,9 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">RedisGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider using Redis for storage.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider using Redis for storage."""</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redis_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;redis://localhost:6379&quot;</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">redis_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"redis://localhost:6379"</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">redis_url</span> <span class="o">=</span> <span class="n">redis_url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -375,15 +395,15 @@ identity provider actually issues:</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from Redis.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from Redis."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="n">redis_client</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
 
         <span class="c1"># Get groups from Redis hash</span>
-        <span class="n">groups_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s2">&quot;user_groups&quot;</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
+        <span class="n">groups_data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">redis_client</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="s2">"user_groups"</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">groups_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">groups_data</span><span class="p">)</span>
@@ -391,12 +411,12 @@ identity provider actually issues:</p>
         <span class="k">return</span> <span class="p">[]</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up Redis connection.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Clean up Redis connection."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <span class="c1"># Usage</span>
-<span class="n">groups_provider</span> <span class="o">=</span> <span class="n">RedisGroupsProvider</span><span class="p">(</span><span class="s2">&quot;redis://localhost:6379&quot;</span><span class="p">)</span>
+<span class="n">groups_provider</span> <span class="o">=</span> <span class="n">RedisGroupsProvider</span><span class="p">(</span><span class="s2">"redis://localhost:6379"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>LDAP/Active Directory Groups Provider:</strong></p>
@@ -405,7 +425,7 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">LdapGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider using LDAP/Active Directory.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider using LDAP/Active Directory."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">base_dn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bind_user</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bind_password</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">server_url</span> <span class="o">=</span> <span class="n">server_url</span>
@@ -414,8 +434,8 @@ identity provider actually issues:</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">bind_password</span> <span class="o">=</span> <span class="n">bind_password</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from LDAP.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from LDAP."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
@@ -426,8 +446,8 @@ identity provider actually issues:</p>
 
         <span class="k">if</span> <span class="n">conn</span><span class="o">.</span><span class="n">bind</span><span class="p">():</span>
             <span class="c1"># Search for user groups</span>
-            <span class="n">search_filter</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(&amp;(objectClass=group)(member=cn=</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dn</span><span class="si">}</span><span class="s2">))&quot;</span>
-            <span class="n">conn</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dn</span><span class="p">,</span> <span class="n">search_filter</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;cn&#39;</span><span class="p">])</span>
+            <span class="n">search_filter</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"(&amp;(objectClass=group)(member=cn=</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dn</span><span class="si">}</span><span class="s2">))"</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dn</span><span class="p">,</span> <span class="n">search_filter</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">[</span><span class="s1">'cn'</span><span class="p">])</span>
 
             <span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">entry</span><span class="o">.</span><span class="n">cn</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">entries</span><span class="p">]</span>
             <span class="n">conn</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
@@ -442,28 +462,28 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ApiGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider using external API.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider using external API."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_base_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_base_url</span> <span class="o">=</span> <span class="n">api_base_url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from external API.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from external API."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="k">async</span> <span class="k">with</span> <span class="n">httpx</span><span class="o">.</span><span class="n">AsyncClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_base_url</span><span class="si">}</span><span class="s2">/users/</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">/groups&quot;</span><span class="p">,</span>
-                    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_base_url</span><span class="si">}</span><span class="s2">/users/</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">/groups"</span><span class="p">,</span>
+                    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
                 <span class="p">)</span>
                 <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
 
                 <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
-                <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[])</span>
 
             <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">:</span>
                 <span class="c1"># Log error and return empty groups</span>
@@ -475,14 +495,14 @@ identity provider actually issues:</p>
 <h1>Configuration Examples<a class="headerlink" href="#configuration-examples" title="Link to this heading"></a></h1>
 <p><strong>Multiple Groups Sources:</strong></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">HybridGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combines multiple groups sources.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Combines multiple groups sources."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cognito_provider</span><span class="p">,</span> <span class="n">sql_provider</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cognito_provider</span> <span class="o">=</span> <span class="n">cognito_provider</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sql_provider</span> <span class="o">=</span> <span class="n">sql_provider</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups from multiple sources.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch groups from multiple sources."""</span>
         <span class="c1"># Get groups from Cognito token</span>
         <span class="n">cognito_groups</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">cognito_provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
@@ -502,7 +522,7 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.types.jwt</span><span class="w"> </span><span class="kn">import</span> <span class="n">JWTAuthorizationCredentials</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">CachedGroupsProvider</span><span class="p">(</span><span class="n">GroupsProvider</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Groups provider with caching support.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Groups provider with caching support."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_provider</span><span class="p">:</span> <span class="n">GroupsProvider</span><span class="p">,</span> <span class="n">cache_ttl</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base_provider</span> <span class="o">=</span> <span class="n">base_provider</span>
@@ -510,9 +530,9 @@ identity provider actually issues:</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch groups with caching.&quot;&quot;&quot;</span>
-        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span>
-        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;groups:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="sd">"""Fetch groups with caching."""</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"username"</span><span class="p">)</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"groups:</span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">"</span>
 
         <span class="c1"># Check cache</span>
         <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span><span class="p">:</span>
@@ -542,25 +562,25 @@ identity provider actually issues:</p>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">test_custom_groups_provider</span><span class="p">():</span>
     <span class="c1"># Setup</span>
     <span class="n">mock_api_client</span> <span class="o">=</span> <span class="n">AsyncMock</span><span class="p">()</span>
-    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_groups</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">]</span>
+    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_groups</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">]</span>
 
     <span class="n">provider</span> <span class="o">=</span> <span class="n">CustomGroupsProvider</span><span class="p">(</span><span class="n">mock_api_client</span><span class="p">)</span>
 
     <span class="c1"># Create test token</span>
     <span class="n">token</span> <span class="o">=</span> <span class="n">JWTAuthorizationCredentials</span><span class="p">(</span>
-        <span class="n">jwt_token</span><span class="o">=</span><span class="s2">&quot;test_token&quot;</span><span class="p">,</span>
-        <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;alg&quot;</span><span class="p">:</span> <span class="s2">&quot;HS256&quot;</span><span class="p">},</span>
-        <span class="n">signature</span><span class="o">=</span><span class="s2">&quot;signature&quot;</span><span class="p">,</span>
-        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;message&quot;</span><span class="p">,</span>
-        <span class="n">claims</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;testuser&quot;</span><span class="p">}</span>
+        <span class="n">jwt_token</span><span class="o">=</span><span class="s2">"test_token"</span><span class="p">,</span>
+        <span class="n">header</span><span class="o">=</span><span class="p">{</span><span class="s2">"alg"</span><span class="p">:</span> <span class="s2">"HS256"</span><span class="p">},</span>
+        <span class="n">signature</span><span class="o">=</span><span class="s2">"signature"</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">"message"</span><span class="p">,</span>
+        <span class="n">claims</span><span class="o">=</span><span class="p">{</span><span class="s2">"username"</span><span class="p">:</span> <span class="s2">"testuser"</span><span class="p">}</span>
     <span class="p">)</span>
 
     <span class="c1"># Test</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="k">await</span> <span class="n">provider</span><span class="o">.</span><span class="n">fetch_groups</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
 
     <span class="c1"># Assertions</span>
-    <span class="k">assert</span> <span class="n">groups</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">]</span>
-    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_groups</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s2">&quot;testuser&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">groups</span> <span class="o">==</span> <span class="p">[</span><span class="s2">"admin"</span><span class="p">,</span> <span class="s2">"user"</span><span class="p">]</span>
+    <span class="n">mock_api_client</span><span class="o">.</span><span class="n">get_user_groups</span><span class="o">.</span><span class="n">assert_called_once_with</span><span class="p">(</span><span class="s2">"testuser"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><strong>Integration Testing:</strong></p>
@@ -571,18 +591,18 @@ identity provider actually issues:</p>
     <span class="n">client</span> <span class="o">=</span> <span class="n">TestClient</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
 
     <span class="c1"># Test with admin token</span>
-    <span class="n">admin_token</span> <span class="o">=</span> <span class="s2">&quot;valid_admin_jwt_token&quot;</span>
+    <span class="n">admin_token</span> <span class="o">=</span> <span class="s2">"valid_admin_jwt_token"</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;/admin-only&quot;</span><span class="p">,</span>
-        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">admin_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+        <span class="s2">"/admin-only"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="n">admin_token</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
 
     <span class="c1"># Test with user token</span>
-    <span class="n">user_token</span> <span class="o">=</span> <span class="s2">&quot;valid_user_jwt_token&quot;</span>
+    <span class="n">user_token</span> <span class="o">=</span> <span class="s2">"valid_user_jwt_token"</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;/admin-only&quot;</span><span class="p">,</span>
-        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bearer </span><span class="si">{</span><span class="n">user_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+        <span class="s2">"/admin-only"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Bearer </span><span class="si">{</span><span class="n">user_token</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
     <span class="p">)</span>
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">403</span>
 </pre></div>
@@ -610,10 +630,10 @@ identity provider actually issues:</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_groups_internal</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="c1"># Log error but don&#39;t expose to client</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to fetch groups: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># Log error but don't expose to client</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Failed to fetch groups: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="c1"># Return empty groups or default groups</span>
-            <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>  <span class="c1"># Default fallback group</span>
+            <span class="k">return</span> <span class="p">[</span><span class="s2">"user"</span><span class="p">]</span>  <span class="c1"># Default fallback group</span>
 </pre></div>
 </div>
 </section>
@@ -626,12 +646,12 @@ identity provider actually issues:</p>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sa</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">upgrade</span><span class="p">():</span>
-    <span class="n">op</span><span class="o">.</span><span class="n">create_table</span><span class="p">(</span><span class="s1">&#39;authz_groups&#39;</span><span class="p">,</span>
-        <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">27</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-        <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-        <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">op</span><span class="o">.</span><span class="n">create_table</span><span class="p">(</span><span class="s1">'authz_groups'</span><span class="p">,</span>
+        <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">'id'</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">27</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">'username'</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">500</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">sa</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="s1">'group'</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="n">op</span><span class="o">.</span><span class="n">create_index</span><span class="p">(</span><span class="s1">&#39;idx_authz_groups_username&#39;</span><span class="p">,</span> <span class="s1">&#39;authz_groups&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span>
+    <span class="n">op</span><span class="o">.</span><span class="n">create_index</span><span class="p">(</span><span class="s1">'idx_authz_groups_username'</span><span class="p">,</span> <span class="s1">'authz_groups'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'username'</span><span class="p">])</span>
 </pre></div>
 </div>
 <p><strong>Environment Configuration:</strong></p>
@@ -640,15 +660,15 @@ identity provider actually issues:</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.aws.cognito_groups_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">CognitoGroupsProvider</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">create_groups_provider</span><span class="p">():</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Factory function for groups provider based on environment.&quot;&quot;&quot;</span>
-    <span class="n">provider_type</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;GROUPS_PROVIDER&quot;</span><span class="p">,</span> <span class="s2">&quot;cognito&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Factory function for groups provider based on environment."""</span>
+    <span class="n">provider_type</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"GROUPS_PROVIDER"</span><span class="p">,</span> <span class="s2">"cognito"</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">&quot;sql&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">"sql"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">SqlGroupsProvider</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">&quot;cognito&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">provider_type</span> <span class="o">==</span> <span class="s2">"cognito"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">CognitoGroupsProvider</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown groups provider: </span><span class="si">{</span><span class="n">provider_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown groups provider: </span><span class="si">{</span><span class="n">provider_type</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -681,7 +701,7 @@ identity provider actually issues:</p>
 <p><strong>Debugging:</strong></p>
 <p>Enable debug logging to troubleshoot issues:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;auth_middleware&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"auth_middleware"</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -690,14 +710,14 @@ identity provider actually issues:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.contracts.groups_provider.GroupsProvider">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.contracts.groups_provider.</span></span><span class="sig-name descname"><span class="pre">GroupsProvider</span></span><a class="reference internal" href="_modules/auth_middleware/contracts/groups_provider.html#GroupsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.groups_provider.GroupsProvider" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Abstract contract for a groups provider.</p>
 <p>Implementations must return the list of groups the authenticated user
 belongs to, given either a raw token string or a parsed
 <code class="docutils literal notranslate"><span class="pre">JWTAuthorizationCredentials</span></code> object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.contracts.groups_provider.GroupsProvider.fetch_groups">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/contracts/groups_provider.html#GroupsProvider.fetch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.groups_provider.GroupsProvider.fetch_groups" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/contracts/groups_provider.html#GroupsProvider.fetch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.contracts.groups_provider.GroupsProvider.fetch_groups" title="Link to this definition"></a></dt>
 <dd><p>Return the groups for the authenticated user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -714,37 +734,48 @@ or a parsed <code class="docutils literal notranslate"><span class="pre">JWTAuth
 
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.aws.cognito_groups_provider.</span></span><span class="sig-name descname"><span class="pre">CognitoGroupsProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cognito:groups'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_groups_provider.html#CognitoGroupsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.aws.cognito_groups_provider.</span></span><span class="sig-name descname"><span class="pre">CognitoGroupsProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cognito:groups'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.15)"><span class="pre">Mapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_groups_provider.html#CognitoGroupsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a></p>
 <p>Recovers groups from AWS Cognito using the token provided</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>groups_claim</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the claim carrying the user’s groups
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>groups_claim</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – name of the claim carrying the user’s groups
 (a list of group names on ID tokens). Defaults to
-<code class="docutils literal notranslate"><span class="pre">COGNITO_GROUPS_CLAIM</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;cognito:groups&quot;</span></code>).</p>
+<code class="docutils literal notranslate"><span class="pre">COGNITO_GROUPS_CLAIM</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;cognito:groups&quot;</span></code>).</p></li>
+<li><p><strong>resource_server</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><em>None</em>) – identifier of your Cognito resource
+server. Machine tokens carry no groups claim, only a custom scope
+<code class="docutils literal notranslate"><span class="pre">&quot;&lt;resource_server&gt;/&lt;name&gt;&quot;</span></code>; when set, such a single scope maps
+to <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code>. Scopes of other resource servers never map.</p></li>
+<li><p><strong>scope_map</strong> (<em>Mapping</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>) – exact <code class="docutils literal notranslate"><span class="pre">full</span> <span class="pre">scope</span> <span class="pre">-&gt;</span> <span class="pre">name</span></code>
+table, an alternative (or addition) to <code class="docutils literal notranslate"><span class="pre">resource_server</span></code>.</p></li>
+</ul>
 </dd>
 </dl>
+<p>Without <code class="docutils literal notranslate"><span class="pre">resource_server</span></code> or <code class="docutils literal notranslate"><span class="pre">scope_map</span></code> the <code class="docutils literal notranslate"><span class="pre">scope</span></code> claim is ignored
+(fail closed): blindly stripping the prefix would turn a token issued for
+another resource server into one of your groups.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cognito:groups'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_groups_provider.html#CognitoGroupsProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'cognito:groups'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource_server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.15)"><span class="pre">Mapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_groups_provider.html#CognitoGroupsProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.fetch_groups">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_groups_provider.html#CognitoGroupsProvider.fetch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.fetch_groups" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/aws/cognito_groups_provider.html#CognitoGroupsProvider.fetch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider.fetch_groups" title="Link to this definition"></a></dt>
 <dd><p>Get groups using the token provided</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token containing the claims.</p>
+<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – The token containing the claims.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – _description_</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#NotImplementedError" title="(in Python v3.15)"><strong>NotImplementedError</strong></a> – _description_</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>_description_</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -753,13 +784,13 @@ or a parsed <code class="docutils literal notranslate"><span class="pre">JWTAuth
 
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.sqlalchemy.sql_groups_provider.</span></span><span class="sig-name descname"><span class="pre">SqlGroupsProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.sqlalchemy.sql_groups_provider.</span></span><span class="sig-name descname"><span class="pre">SqlGroupsProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupsProvider</span></code></a></p>
 <p>Recovers groups from a SQL database, keyed by an identifier claim
 from the JWT.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>id_claim</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the JWT claim used as the lookup key when
+<dd class="field-odd"><p><strong>id_claim</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – name of the JWT claim used as the lookup key when
 <code class="docutils literal notranslate"><span class="pre">fetch_groups</span></code> is called with a <code class="docutils literal notranslate"><span class="pre">JWTAuthorizationCredentials</span></code>.
 Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;username&quot;</span></code> (Cognito’s convention) for backward
 compatibility. Identity providers name this claim differently —
@@ -769,43 +800,43 @@ e.g. Entra ID/OIDC providers typically use <code class="docutils literal notrans
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_claim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'username'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.fetch_groups">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider.fetch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.fetch_groups" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">fetch_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider.fetch_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.fetch_groups" title="Link to this definition"></a></dt>
 <dd><p>Get groups using the token provided</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The token containing the claims.</p>
+<dd class="field-odd"><p><strong>token</strong> (<em>JWTAuthorizationCredentials</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – The token containing the claims.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If a JWTAuthorizationCredentials token is missing
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If a JWTAuthorizationCredentials token is missing
     the configured id_claim.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>_description_</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.get_groups_from_db">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_groups_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider.get_groups_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.get_groups_from_db" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_groups_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/sqlalchemy/sql_groups_provider.html#SqlGroupsProvider.get_groups_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.get_groups_from_db" title="Link to this definition"></a></dt>
 <dd><p>Gets groups from the database</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Username</p>
+<dd class="field-odd"><p><strong>username</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – Username</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>List of groups</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>

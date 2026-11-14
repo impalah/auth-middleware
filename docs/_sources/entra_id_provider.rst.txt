@@ -39,7 +39,7 @@ Basic Configuration
    app.add_middleware(JwtAuthMiddleware, auth_provider=entra_provider)
 
 Multi-tenant Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For applications that need to accept users from any Azure AD tenant:
 
@@ -50,10 +50,10 @@ For applications that need to accept users from any Azure AD tenant:
    )
 
 Environment Variables
---------------------
+---------------------
 
 Required Environment Variables
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -78,7 +78,7 @@ Environment-based Configuration
        return EntraIdSettings()
 
 Token Structure
---------------
+---------------
 
 Expected Entra ID Claims
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -104,7 +104,7 @@ Azure Entra ID tokens contain the following claims:
    }
 
 User Information Mapping
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The provider maps Entra ID claims to user information:
 
@@ -120,10 +120,10 @@ The provider maps Entra ID claims to user information:
        scopes: List[str]    # From 'scp' claim (space-separated)
 
 Azure AD App Registration
-------------------------
+-------------------------
 
 Application Setup
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 1. **Register Application**: Go to Azure Portal > App registrations > New registration
 2. **Configure Authentication**: Set redirect URIs and supported account types
@@ -131,7 +131,7 @@ Application Setup
 4. **Expose API**: Configure application ID URI and scopes
 
 App Registration Configuration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: json
 
@@ -155,10 +155,10 @@ App Registration Configuration
    }
 
 Integration Examples
--------------------
+--------------------
 
 Single-tenant Application
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -198,7 +198,7 @@ Single-tenant Application
        return {"message": "Admin access granted"}
 
 Multi-tenant SaaS Application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -222,10 +222,10 @@ Multi-tenant SaaS Application
        }
 
 Token Acquisition
-----------------
+-----------------
 
 Client-side Token Acquisition
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 JavaScript/TypeScript example for acquiring tokens:
 
@@ -259,7 +259,7 @@ JavaScript/TypeScript example for acquiring tokens:
    });
 
 Server-side Token Acquisition
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Python example using MSAL:
 
@@ -285,7 +285,7 @@ Error Handling
 --------------
 
 Entra ID Specific Errors
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -315,17 +315,17 @@ Security Recommendations
 5. **Certificate Authentication**: Use certificates instead of client secrets for production
 
 Performance Optimization
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. **Key Caching**: The provider automatically caches Azure's public keys
 2. **Connection Pooling**: Use HTTP connection pooling for JWKS endpoints
 3. **Token Validation**: Validate tokens locally to reduce Azure AD calls
 
 Troubleshooting
---------------
+---------------
 
 Common Issues
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 **Invalid Issuer**
    Ensure the issuer in your configuration matches the token's 'iss' claim

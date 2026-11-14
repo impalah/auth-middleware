@@ -51,7 +51,7 @@ Quick Reference
 ---------------
 
 Common Classes and Functions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Middleware**
    - :class:`auth_middleware.JwtAuthMiddleware` - Main authentication middleware
@@ -77,7 +77,7 @@ Usage Patterns
 ---------------
 
 Basic Setup
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -101,7 +101,7 @@ Basic Setup
    app.add_middleware(JwtAuthMiddleware, auth_provider=auth_provider)
 
 Endpoint Protection
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -118,7 +118,7 @@ Endpoint Protection
        return {"message": "Admin access granted"}
 
 Error Handling
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 .. code-block:: python
 

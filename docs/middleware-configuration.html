@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Middleware Configuration &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Middleware Configuration &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,7 +14,7 @@
     <link rel="canonical" href="/auth-middleware/middleware-configuration.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -50,10 +50,9 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Middleware Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#basic-middleware-setup">Basic Middleware Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#middleware-parameters">Middleware Parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#path-configuration">Path Configuration</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#excluding-paths-from-authentication">Excluding Paths from Authentication</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#including-specific-paths-only">Including Specific Paths Only</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pattern-matching">Pattern Matching</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#identity-provider-outages">Identity provider outages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#public-and-protected-paths">Public and protected paths</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#authenticating-only-a-subtree">Authenticating only a subtree</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment Variables</a><ul>
@@ -102,10 +101,22 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -238,81 +249,55 @@
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">auth_provider</span></code></p></td>
 <td><p>The authentication provider instance</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">AuthProvider</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">JWTProvider</span></code></p></td>
 <td><p>Required</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exclude_paths</span></code></p></td>
-<td><p>Paths to exclude from authentication</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">[]</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">canonical_bearer_scheme</span></code></p></td>
+<td><p>Accept <code class="docutils literal notranslate"><span class="pre">bearer</span></code>/<code class="docutils literal notranslate"><span class="pre">BEARER</span></code> (RFC 7235: the scheme is case-insensitive); rewritten to <code class="docutils literal notranslate"><span class="pre">Bearer</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">include_paths</span></code></p></td>
-<td><p>Paths to include in authentication</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">List[str]</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">[&quot;/*&quot;]</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">path_prefix</span></code></p></td>
+<td><p>Only authenticate paths equal to the prefix or below it; other paths skip the middleware and get no
+<code class="docutils literal notranslate"><span class="pre">request.state.current_user</span></code> (use it when other apps are mounted inside with their own middleware)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> (all paths)</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">auth_header_name</span></code></p></td>
-<td><p>HTTP header for authentication token</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">&quot;Authorization&quot;</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">auth_scheme</span></code></p></td>
-<td><p>Authentication scheme</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">&quot;Bearer&quot;</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">error_responder</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(request,</span> <span class="pre">AuthFailure)</span> <span class="pre">-&gt;</span> <span class="pre">Response</span></code> replacing the built-in JSON errors for invalid token,
+bad scheme and internal errors. <code class="docutils literal notranslate"><span class="pre">AuthFailure</span></code> has <code class="docutils literal notranslate"><span class="pre">status_code</span></code> and a <code class="docutils literal notranslate"><span class="pre">reason</span></code> for logs; it
+never carries the exception text</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Callable</span> <span class="pre">|</span> <span class="pre">None</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> (<code class="docutils literal notranslate"><span class="pre">{&quot;detail&quot;:</span> <span class="pre">...}</span></code>)</p></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="path-configuration">
-<h2>Path Configuration<a class="headerlink" href="#path-configuration" title="Link to this heading"></a></h2>
-<section id="excluding-paths-from-authentication">
-<h3>Excluding Paths from Authentication<a class="headerlink" href="#excluding-paths-from-authentication" title="Link to this heading"></a></h3>
-<p>You can exclude specific paths from authentication requirements:</p>
+<section id="identity-provider-outages">
+<h2>Identity provider outages<a class="headerlink" href="#identity-provider-outages" title="Link to this heading"></a></h2>
+<p>If the JWKS or discovery endpoint cannot be reached (or answers nonsense), the middleware answers <code class="docutils literal notranslate"><span class="pre">503</span></code> with
+<code class="docutils literal notranslate"><span class="pre">Retry-After</span></code> instead of <code class="docutils literal notranslate"><span class="pre">401</span></code>: valid users are not told their credentials are wrong. While keys are already cached
+they keep being served (with a 30 s retry back-off), so a short outage is invisible. Custom <code class="docutils literal notranslate"><span class="pre">error_responder</span></code> callables
+receive <code class="docutils literal notranslate"><span class="pre">AuthFailure(reason=&quot;unavailable&quot;)</span></code>. Call <code class="docutils literal notranslate"><span class="pre">await</span> <span class="pre">provider.aclose()</span></code> on shutdown to cancel the background
+JWKS refresh task.</p>
+<p>A signed token that the library cannot turn into a user (no <code class="docutils literal notranslate"><span class="pre">sub</span></code>, over-long or malformed claims) is a <code class="docutils literal notranslate"><span class="pre">401</span></code>.</p>
+</section>
+<section id="public-and-protected-paths">
+<h2>Public and protected paths<a class="headerlink" href="#public-and-protected-paths" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">JwtAuthMiddleware</span></code> does not reject requests that carry no credentials: it sets
+<code class="docutils literal notranslate"><span class="pre">request.state.current_user</span></code> to <code class="docutils literal notranslate"><span class="pre">None</span></code> and lets the request through, and an invalid token is answered with
+<code class="docutils literal notranslate"><span class="pre">401</span></code>. Which routes require a user is decided by the guards (<code class="docutils literal notranslate"><span class="pre">require_user()</span></code>, <code class="docutils literal notranslate"><span class="pre">require_authenticated()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">require_groups(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">require_permission(...)</span></code>), so a public route is simply a route without a guard.</p>
+<section id="authenticating-only-a-subtree">
+<h3>Authenticating only a subtree<a class="headerlink" href="#authenticating-only-a-subtree" title="Link to this heading"></a></h3>
+<p>Use <code class="docutils literal notranslate"><span class="pre">path_prefix</span></code> when several applications are mounted in one process and each has its own middleware (for
+example a different audience per subtree). Paths equal to the prefix or below it are validated; every other path
+skips the middleware entirely and gets no <code class="docutils literal notranslate"><span class="pre">current_user</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
     <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
-    <span class="n">auth_provider</span><span class="o">=</span><span class="n">auth_provider</span><span class="p">,</span>
-    <span class="n">exclude_paths</span><span class="o">=</span><span class="p">[</span>
-        <span class="s2">&quot;/&quot;</span><span class="p">,</span>                    <span class="c1"># Public homepage</span>
-        <span class="s2">&quot;/health&quot;</span><span class="p">,</span>              <span class="c1"># Health check endpoint</span>
-        <span class="s2">&quot;/docs&quot;</span><span class="p">,</span>                <span class="c1"># OpenAPI documentation</span>
-        <span class="s2">&quot;/openapi.json&quot;</span><span class="p">,</span>        <span class="c1"># OpenAPI schema</span>
-        <span class="s2">&quot;/metrics&quot;</span><span class="p">,</span>             <span class="c1"># Prometheus metrics</span>
-        <span class="s2">&quot;/static/*&quot;</span><span class="p">,</span>            <span class="c1"># Static files</span>
-        <span class="s2">&quot;/public/*&quot;</span><span class="p">,</span>            <span class="c1"># Public assets</span>
-    <span class="p">]</span>
+    <span class="n">auth_provider</span><span class="o">=</span><span class="n">studio_provider</span><span class="p">,</span>
+    <span class="n">path_prefix</span><span class="o">=</span><span class="s2">"/api/studio/v1"</span><span class="p">,</span>
 <span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="including-specific-paths-only">
-<h3>Including Specific Paths Only<a class="headerlink" href="#including-specific-paths-only" title="Link to this heading"></a></h3>
-<p>Alternatively, you can specify only the paths that require authentication:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
-    <span class="n">JwtAuthMiddleware</span><span class="p">,</span>
-    <span class="n">auth_provider</span><span class="o">=</span><span class="n">auth_provider</span><span class="p">,</span>
-    <span class="n">include_paths</span><span class="o">=</span><span class="p">[</span>
-        <span class="s2">&quot;/api/*&quot;</span><span class="p">,</span>               <span class="c1"># All API endpoints</span>
-        <span class="s2">&quot;/admin/*&quot;</span><span class="p">,</span>             <span class="c1"># Admin interface</span>
-        <span class="s2">&quot;/user/*&quot;</span><span class="p">,</span>              <span class="c1"># User-specific endpoints</span>
-    <span class="p">]</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="pattern-matching">
-<h3>Pattern Matching<a class="headerlink" href="#pattern-matching" title="Link to this heading"></a></h3>
-<p>The middleware supports glob-style pattern matching:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> matches any characters within a single path segment</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">**</span></code> matches any characters across multiple path segments</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">?</span></code> matches any single character</p></li>
-</ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">exclude_paths</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;/api/v*/public/*&quot;</span><span class="p">,</span>     <span class="c1"># Version-specific public endpoints</span>
-    <span class="s2">&quot;/health*&quot;</span><span class="p">,</span>             <span class="c1"># All health-related endpoints</span>
-    <span class="s2">&quot;/static/**&quot;</span><span class="p">,</span>           <span class="c1"># All static files recursively</span>
-<span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -383,12 +368,12 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomAuthProvider</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">User</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate token and return user information.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Validate token and return user information."""</span>
         <span class="k">pass</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get user group memberships.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Get user group memberships."""</span>
         <span class="k">pass</span>
 </pre></div>
 </div>
@@ -404,20 +389,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">valid_api_keys</span> <span class="o">=</span> <span class="n">valid_api_keys</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">User</span><span class="p">]:</span>
-        <span class="c1"># Remove &#39;Bearer &#39; prefix if present</span>
-        <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;Bearer &#39;</span><span class="p">):</span>
+        <span class="c1"># Remove 'Bearer ' prefix if present</span>
+        <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'Bearer '</span><span class="p">):</span>
             <span class="n">token</span> <span class="o">=</span> <span class="n">token</span><span class="p">[</span><span class="mi">7</span><span class="p">:]</span>
 
         <span class="c1"># Look up API key</span>
         <span class="n">user_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_api_keys</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">user_info</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">AuthenticationError</span><span class="p">(</span><span class="s2">&quot;Invalid API key&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">AuthenticationError</span><span class="p">(</span><span class="s2">"Invalid API key"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">User</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
-            <span class="n">email</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span>
-            <span class="n">groups</span><span class="o">=</span><span class="n">user_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="p">[]),</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">"id"</span><span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">user_info</span><span class="p">[</span><span class="s2">"email"</span><span class="p">],</span>
+            <span class="n">groups</span><span class="o">=</span><span class="n">user_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"groups"</span><span class="p">,</span> <span class="p">[]),</span>
             <span class="n">raw_token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -426,11 +411,11 @@
 
 <span class="c1"># Usage</span>
 <span class="n">api_keys</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;api_key_123&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;user1&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="s2">&quot;john@example.com&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;groups&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;admin&quot;</span><span class="p">]</span>
+    <span class="s2">"api_key_123"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"user1"</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"John Doe"</span><span class="p">,</span>
+        <span class="s2">"email"</span><span class="p">:</span> <span class="s2">"john@example.com"</span><span class="p">,</span>
+        <span class="s2">"groups"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"user"</span><span class="p">,</span> <span class="s2">"admin"</span><span class="p">]</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
@@ -482,13 +467,13 @@ supported configuration (<code class="docutils literal notranslate"><span class=
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 
 <span class="c1"># Configure auth middleware logging</span>
-<span class="n">auth_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;auth_middleware&quot;</span><span class="p">)</span>
+<span class="n">auth_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"auth_middleware"</span><span class="p">)</span>
 <span class="n">auth_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
 <span class="c1"># Add handler</span>
 <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
 <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
-    <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+    <span class="s1">'</span><span class="si">%(asctime)s</span><span class="s1"> - </span><span class="si">%(name)s</span><span class="s1"> - </span><span class="si">%(levelname)s</span><span class="s1"> - </span><span class="si">%(message)s</span><span class="s1">'</span>
 <span class="p">)</span>
 <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 <span class="n">auth_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
@@ -499,8 +484,8 @@ supported configuration (<code class="docutils literal notranslate"><span class=
 <h3>Environment-based Logging<a class="headerlink" href="#environment-based-logging" title="Link to this heading"></a></h3>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set log level via environment</span>
 <span class="nv">AUTH_MIDDLEWARE_LOG_LEVEL</span><span class="o">=</span>DEBUG
-<span class="nv">AUTH_MIDDLEWARE_LOG_FORMAT</span><span class="o">=</span><span class="s2">&quot;%(asctime)s %(name)s %(levelname)s %(message)s&quot;</span>
-<span class="nv">AUTH_MIDDLEWARE_LOGGER_NAME</span><span class="o">=</span><span class="s2">&quot;my_auth&quot;</span>
+<span class="nv">AUTH_MIDDLEWARE_LOG_FORMAT</span><span class="o">=</span><span class="s2">"%(asctime)s %(name)s %(levelname)s %(message)s"</span>
+<span class="nv">AUTH_MIDDLEWARE_LOGGER_NAME</span><span class="o">=</span><span class="s2">"my_auth"</span>
 </pre></div>
 </div>
 </section>
@@ -544,9 +529,9 @@ supported configuration (<code class="docutils literal notranslate"><span class=
     <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
         <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
         <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Authentication Failed&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Please provide a valid authentication token&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;authentication_error&quot;</span>
+            <span class="s2">"error"</span><span class="p">:</span> <span class="s2">"Authentication Failed"</span><span class="p">,</span>
+            <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Please provide a valid authentication token"</span><span class="p">,</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"authentication_error"</span>
         <span class="p">}</span>
     <span class="p">)</span>
 
@@ -555,9 +540,9 @@ supported configuration (<code class="docutils literal notranslate"><span class=
     <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
         <span class="n">status_code</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
         <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Token Error&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;invalid_token&quot;</span>
+            <span class="s2">"error"</span><span class="p">:</span> <span class="s2">"Token Error"</span><span class="p">,</span>
+            <span class="s2">"message"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"invalid_token"</span>
         <span class="p">}</span>
     <span class="p">)</span>
 </pre></div>
@@ -573,9 +558,9 @@ supported configuration (<code class="docutils literal notranslate"><span class=
 
 <span class="c1"># Development-friendly configuration</span>
 <span class="n">auth_settings</span> <span class="o">=</span> <span class="n">OidcProviderSettings</span><span class="p">(</span>
-    <span class="n">issuer</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OIDC_ISSUER&quot;</span><span class="p">),</span>
-    <span class="n">audience</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;OIDC_AUDIENCE&quot;</span><span class="p">),</span>
-    <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENVIRONMENT&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;development&quot;</span><span class="p">,</span>
+    <span class="n">issuer</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OIDC_ISSUER"</span><span class="p">),</span>
+    <span class="n">audience</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OIDC_AUDIENCE"</span><span class="p">),</span>
+    <span class="n">jwt_token_verification_disabled</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"ENVIRONMENT"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"development"</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -609,8 +594,8 @@ uvicorn<span class="w"> </span>main:app<span class="w"> </span>--reload<span cla
     <span class="n">client</span> <span class="o">=</span> <span class="n">TestClient</span><span class="p">(</span><span class="n">test_app</span><span class="p">)</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-        <span class="s2">&quot;/protected&quot;</span><span class="p">,</span>
-        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer test_token&quot;</span><span class="p">}</span>
+        <span class="s2">"/protected"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Authorization"</span><span class="p">:</span> <span class="s2">"Bearer test_token"</span><span class="p">}</span>
     <span class="p">)</span>
 
     <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>

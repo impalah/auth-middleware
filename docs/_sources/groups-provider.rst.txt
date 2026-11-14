@@ -17,13 +17,13 @@ Built-in Providers
 ==================
 
 CognitoGroupsProvider
---------------------
+---------------------
 
 Extracts groups directly from AWS Cognito JWT tokens.
 
 **Features:**
 - Reads groups from ``cognito:groups`` claim
-- Fallback to ``scope`` claim for single group scenarios
+- Optional mapping of a custom ``scope`` (machine tokens) when you name your resource server or give an exact table
 - No external database queries required
 - Zero-latency group resolution
 
@@ -62,16 +62,18 @@ The provider expects JWT tokens with group information in one of these formats:
      "exp": 1234567890
    }
 
-Or for single scope scenarios:
+Machine (client-credentials) tokens carry no groups claim, only a custom scope. Map it explicitly:
 
-.. code-block:: json
+.. code-block:: python
 
-   {
-     "sub": "user123", 
-     "username": "john.doe",
-     "scope": "api/admin",
-     "exp": 1234567890
-   }
+   # "api/admin" -> group "admin"; scopes of other resource servers are ignored
+   CognitoGroupsProvider(resource_server="api")
+
+   # or an exact table
+   CognitoGroupsProvider(scope_map={"api/admin": "admin"})
+
+Without ``resource_server`` or ``scope_map`` the ``scope`` claim is ignored (fail closed): stripping the prefix blindly
+would turn a token issued for another API (``other-api/admin``) into your ``admin`` group.
 
 SqlGroupsProvider
 -----------------
@@ -130,11 +132,18 @@ Retrieves groups from a SQL database using SQLAlchemy.
 
    .. code-block:: python
 
-      # Entra ID / generic OIDC providers typically use "preferred_username"
+      # "sub" is stable, provider-agnostic and cannot be edited by the user (recommended)
+      groups_provider = SqlGroupsProvider(id_claim="sub")
+
+      # Claims such as "preferred_username" or "email" work, but a warning is logged:
+      # many identity providers let users edit them
       groups_provider = SqlGroupsProvider(id_claim="preferred_username")
 
-      # Or use "sub" for a stable, provider-agnostic identifier
-      groups_provider = SqlGroupsProvider(id_claim="sub")
+   .. warning::
+
+      Authorization is keyed on that claim. ``preferred_username`` and ``email`` are editable or unverified at
+      some identity providers, which would let a user impersonate another user's groups; prefer ``"sub"``.
+      On MySQL, note that the default collations compare case-insensitively (``Admin`` equals ``admin``).
 
 **Managing Groups:**
 
@@ -486,7 +495,7 @@ Best Practices
                return ["user"]  # Default fallback group
 
 Migration and Deployment
-=======================
+========================
 
 **Database Migrations:**
 

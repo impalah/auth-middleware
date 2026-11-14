@@ -27,7 +27,7 @@ M2M authentication is commonly used for:
 The detector analyzes JWT claims to determine if a token represents a service account or a human user.
 
 M2MTokenDetector Class
----------------------
+----------------------
 
 .. class:: auth_middleware.services.M2MTokenDetector
 
@@ -149,7 +149,7 @@ Rate Limiting
 Built-in rate limiting helps protect endpoints from abuse and excessive usage.
 
 RateLimiter Class
-----------------
+-----------------
 
 .. class:: auth_middleware.services.RateLimiter
 
@@ -205,7 +205,7 @@ RateLimiter Class
       Clear all rate limit data.
 
 rate_limit Decorator
--------------------
+--------------------
 
 .. function:: auth_middleware.services.rate_limit(max_requests: int, window_seconds: int, identifier: Callable = None)
 
@@ -237,7 +237,7 @@ rate_limit Decorator
           return {"data": "user specific"}
 
 Manual Rate Limiting
--------------------
+--------------------
 
 For fine-grained control:
 
@@ -270,7 +270,7 @@ Audit Logging
 Comprehensive audit logging for security and compliance requirements.
 
 AuditEvent Class
----------------
+----------------
 
 .. class:: auth_middleware.services.AuditEvent
 
@@ -340,7 +340,7 @@ AuditEvent Class
       Convert event to JSON string.
 
 AuditLogger Class
-----------------
+-----------------
 
 .. class:: auth_middleware.services.AuditLogger
 
@@ -385,7 +385,7 @@ AuditLogger Class
       Log access denial.
 
 AuditMiddleware Class
---------------------
+---------------------
 
 .. class:: auth_middleware.services.AuditMiddleware
 
@@ -407,7 +407,7 @@ AuditMiddleware Class
       )
 
 Manual Audit Logging
--------------------
+--------------------
 
 For specific operations:
 
@@ -450,7 +450,7 @@ Metrics Collection
 Monitor authentication performance and track success rates.
 
 MetricsCollector Class
----------------------
+----------------------
 
 .. class:: auth_middleware.services.MetricsCollector
 
@@ -509,7 +509,7 @@ MetricsCollector Class
       Reset all metrics to initial state.
 
 Usage Example
-------------
+-------------
 
 .. code-block:: python
 
@@ -565,7 +565,7 @@ Best Practices
 ==============
 
 M2M Token Detection
-------------------
+-------------------
 
 1. **Validate M2M tokens differently** - Service accounts may not have email/name
 2. **Use client_id for identification** - Don't rely on user_id for M2M
@@ -590,7 +590,7 @@ Audit Logging
 5. **Compliance** - Ensure logging meets regulatory requirements
 
 Metrics Collection
------------------
+------------------
 
 1. **Track key metrics** - Success rate, latency, error types
 2. **Set up alerts** - Monitor for anomalies

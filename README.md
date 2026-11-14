@@ -57,6 +57,10 @@ poetry add auth-middleware
 uv add auth-middleware
 ```
 
+The core needs no database driver. Optional extras: `auth-middleware[postgres]`,
+`auth-middleware[mysql]`, `auth-middleware[sqlalchemy]` (both SQL drivers), `auth-middleware[dynamodb]`
+(see [Scoped permissions](#scoped-permissions)) and `auth-middleware[cognito]` (boto3, for `CognitoAuthService`).
+
 ## Quick Start
 
 ### JWT Authentication with AWS Cognito (via generic OIDC)
@@ -81,11 +85,13 @@ app.add_middleware(
     auth_provider=OidcProvider(settings=auth_settings),
 )
 
+
 # Requires valid authentication
 @app.get("/protected", dependencies=[Depends(require_user())])
 async def protected_endpoint(request: Request):
     user = request.state.current_user
     return {"message": f"Hello {user.name}", "user_id": user.id}
+
 
 # Requires group membership
 @app.get("/admin", dependencies=[Depends(require_groups(["admin", "moderator"]))])
@@ -143,11 +149,13 @@ from auth_middleware.types.user_credentials import UserCredentials
 # (e.g. hashed_password column) — never store the plaintext password.
 stored_hash = hash_password("their-password")
 
+
 class MyCredentialsRepository(CredentialsRepository):
     async def get_by_id(self, *, id: str) -> UserCredentials | None:
         # Look up the user and return their stored credentials, including
         # the hash produced by hash_password() above
         return UserCredentials(id=id, name="Jane Doe", hashed_password=stored_hash)
+
 
 app.add_middleware(
     BasicAuthMiddleware,
@@ -180,13 +188,17 @@ AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID=your-client-id
 ```python
 from auth_middleware.providers.oidc.oidc_provider import OidcProvider
 from auth_middleware.providers.sqlalchemy.sql_groups_provider import SqlGroupsProvider
-from auth_middleware.providers.sqlalchemy.sql_permissions_provider import SqlPermissionsProvider
+from auth_middleware.providers.sqlalchemy.sql_permissions_provider import (
+    SqlPermissionsProvider,
+)
 from auth_middleware.providers.sqlalchemy.async_database import AsyncDatabase
-from auth_middleware.providers.sqlalchemy.async_database_settings import AsyncDatabaseSettings
+from auth_middleware.providers.sqlalchemy.async_database_settings import (
+    AsyncDatabaseSettings,
+)
 
-AsyncDatabase.configure(AsyncDatabaseSettings(
-    database_url="postgresql+asyncpg://user:pass@localhost/mydb"
-))
+AsyncDatabase.configure(
+    AsyncDatabaseSettings(database_url="postgresql+asyncpg://user:pass@localhost/mydb")
+)
 
 auth_provider = OidcProvider(
     settings=auth_settings,
@@ -232,9 +244,11 @@ async def get_profile(request: Request):
 ```python
 from auth_middleware.guards import require_roles, require_permissions
 
+
 @app.get("/reports", dependencies=[Depends(require_roles(["analyst", "manager"]))])
 async def get_reports(request: Request):
     return {"message": "Reports access granted"}
+
 
 @app.post("/admin/users", dependencies=[Depends(require_permissions(["user.create"]))])
 async def create_user(request: Request):
@@ -248,6 +262,92 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
      http://localhost:8000/protected
 ```
 
+## Scoped permissions
+
+Beyond flat groups/roles, `auth_middleware.authz` answers *"may this principal do X in this scope?"* (a tenant,
+a project...) from a validated permission catalog and a pluggable assignment store injected at startup. A user
+with no assignment in a scope (or a scope that does not exist) gets `404`; a member without the permission gets
+`403` naming it.
+
+### 1. Install only what you need
+
+```bash
+pip install auth-middleware                  # core + scoped permissions (in-memory store), no DB driver
+pip install 'auth-middleware[postgres]'      # + SQLAlchemy, asyncpg
+pip install 'auth-middleware[mysql]'         # + SQLAlchemy, aiomysql
+pip install 'auth-middleware[sqlalchemy]'    # both SQL drivers
+pip install 'auth-middleware[dynamodb]'      # + PynamoDB
+```
+
+### 2. Describe permissions and pick a store
+
+```python
+from auth_middleware.authz import Authz, PermissionCatalog, PermissionSpec, ScopeKind
+from auth_middleware.authz.stores import InMemoryAssignmentStore
+
+catalog = PermissionCatalog.from_mapping(
+    scopes=[ScopeKind("project")],
+    permissions=[
+        PermissionSpec("docs.read", "project"),
+        PermissionSpec("docs.write", "project"),
+    ],
+    roles={"EDITOR": ["docs.read", "docs.write"], "VIEWER": ["docs.read"]},
+)
+
+authz = Authz.build(catalog=catalog, store=InMemoryAssignmentStore())  # tests/demos
+```
+
+Real backends (the same code works with any of them):
+
+```python
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from auth_middleware.authz.stores import SqlAssignmentStore, DynamoDbAssignmentStore
+
+engine = create_async_engine(
+    "postgresql+asyncpg://user:pw@host/db"
+)  # or mysql+aiomysql://...
+store = SqlAssignmentStore(async_sessionmaker(engine, expire_on_commit=False))
+# store = DynamoDbAssignmentStore(table_name="authz-assignments", region="eu-west-1")
+authz = Authz.build(catalog=catalog, store=store)
+```
+
+The SQL table comes from the Alembic revision `a3f1c9d2b7e4`; the DynamoDB table from
+`DynamoDbAssignmentStore.table_definition(name)`.
+
+### 3. Install it and guard routes
+
+```python
+from fastapi import Depends
+from auth_middleware.authz import AuthzContext, ScopeFromPath, require_permission
+
+authz.install(app)  # after app.add_middleware(JwtAuthMiddleware, ...)
+
+
+@app.put("/projects/{project_id}/docs")
+async def save(
+    project_id: str,
+    ctx: AuthzContext = Depends(
+        require_permission("docs.write", scope=ScopeFromPath("project", "project_id"))
+    ),
+): ...
+```
+
+### 4. Give people roles
+
+```python
+from auth_middleware.authz import AssignmentService, ScopeRef
+
+service = AssignmentService(store, catalog)
+await service.assign("user-sub", ScopeRef("project", "p-1"), "EDITOR")
+```
+
+or from the shell: `authcli authz assign --store sqlalchemy --principal user-sub --scope project:p-1 --role EDITOR`.
+
+Runnable, tested examples: [`examples/authz_example.py`](examples/authz_example.py) and
+[`examples/authz_stores_config.py`](examples/authz_stores_config.py). Full guide ("Scoped Permissions" in the
+documentation): quick start, catalog, stores, FastAPI integration, operations and migration from the flat
+guards, which are unchanged.
+
 ## Package Structure
 
 ```
@@ -260,7 +360,6 @@ auth_middleware/
 │   ├── groups_provider.py       #   GroupsProvider
 │   ├── roles_provider.py        #   RolesProvider
 │   ├── permissions_provider.py  #   PermissionsProvider
-│   ├── profile_provider.py      #   ProfileProvider
 │   └── credentials_repository.py #  CredentialsRepository
 ├── guards/                      # FastAPI dependency guards
 │   ├── functions.py             #   require_user, require_groups, require_roles,
@@ -268,11 +367,14 @@ auth_middleware/
 │   ├── group_checker.py         #   GroupChecker
 │   ├── role_checker.py          #   RoleChecker
 │   └── permissions_checker.py   #   PermissionsChecker
+├── authz/                       # Scoped permissions (catalog, engine, stores, guard)
+│   ├── catalog.py, engine.py, runtime.py, guards.py, service.py, cache.py, events.py
+│   ├── stores/                  #   memory, sql (SQLAlchemy), dynamodb (PynamoDB)
+│   └── testing/                 #   AssignmentStoreContract for your own adapters
 ├── providers/
 │   ├── aws/                     # AWS Cognito groups/roles + auth service (pair with OidcProvider)
 │   │   ├── cognito_groups_provider.py
 │   │   ├── cognito_groups_as_roles_provider.py
-│   │   ├── cognito_profile_provider.py
 │   │   └── services/            #   Cognito auth service, M2M detector
 │   ├── azure/                   # Azure Entra ID
 │   │   ├── entra_id_provider.py

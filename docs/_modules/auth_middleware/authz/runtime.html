@@ -1,0 +1,528 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>auth_middleware.authz.runtime &mdash; Auth Middleware 0.7.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/runtime.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">auth_middleware.authz.runtime</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for auth_middleware.authz.runtime</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The ``Authz`` runtime: wiring injected at application startup."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncIterator</span><span class="p">,</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">asynccontextmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.applications</span><span class="w"> </span><span class="kn">import</span> <span class="n">Starlette</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">starlette.requests</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.catalog</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionCatalog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Authorizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.errors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ConfigurationError</span><span class="p">,</span>
+    <span class="n">PermissionDeniedError</span><span class="p">,</span>
+    <span class="n">ScopeNotVisibleError</span><span class="p">,</span>
+    <span class="n">StoreUnavailableError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">AssignmentStore</span><span class="p">,</span> <span class="n">StoreFactory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.resolvers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AssignmentRoleResolver</span><span class="p">,</span>
+    <span class="n">GroupRoleResolver</span><span class="p">,</span>
+    <span class="n">RoleResolver</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">GLOBAL_KIND</span><span class="p">,</span>
+    <span class="n">DecisionKind</span><span class="p">,</span>
+    <span class="n">ScopeRef</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
+
+<span class="c1">#: Attributes the guard puts on its dependency so routes can be validated.</span>
+<span class="n">PERMISSION_ATTR</span> <span class="o">=</span> <span class="s2">"__authz_permission__"</span>
+<span class="n">SCOPE_ATTR</span> <span class="o">=</span> <span class="s2">"__authz_scope__"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">default_not_visible</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">ScopeNotVisibleError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""404, identical for "not a member" and "does not exist"."""</span>
+    <span class="k">return</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Not Found"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">default_denied</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">PermissionDeniedError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""403 naming the missing permission."""</span>
+    <span class="k">return</span> <span class="n">HTTPException</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span>
+        <span class="n">detail</span><span class="o">=</span><span class="p">{</span><span class="s2">"error"</span><span class="p">:</span> <span class="s2">"forbidden"</span><span class="p">,</span> <span class="s2">"required_permission"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">required</span><span class="p">},</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">default_unauthenticated</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""401 with a Bearer challenge."""</span>
+    <span class="k">return</span> <span class="n">HTTPException</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">401</span><span class="p">,</span>
+        <span class="n">detail</span><span class="o">=</span><span class="s2">"Not authenticated"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"WWW-Authenticate"</span><span class="p">:</span> <span class="s2">"Bearer"</span><span class="p">},</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">default_unavailable</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">StoreUnavailableError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""503: the store is throttling or unreachable (an outage, not a decision)."""</span>
+    <span class="k">return</span> <span class="n">HTTPException</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">503</span><span class="p">,</span>
+        <span class="n">detail</span><span class="o">=</span><span class="s2">"Authorization service unavailable"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">"Retry-After"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">},</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ErrorPolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""How authorization outcomes become exceptions (HTTP responses)."""</span>
+
+    <span class="n">not_visible</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">,</span> <span class="n">ScopeNotVisibleError</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">default_not_visible</span>
+    <span class="p">)</span>
+    <span class="n">denied</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">,</span> <span class="n">PermissionDeniedError</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_denied</span>
+    <span class="n">unauthenticated</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_unauthenticated</span>
+    <span class="n">unavailable</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">,</span> <span class="n">StoreUnavailableError</span><span class="p">],</span> <span class="ne">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">default_unavailable</span>
+    <span class="p">)</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DecisionEvent</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One authorization decision, delivered to ``AuthzHooks.on_decision``.</span>
+
+<span class="sd">    Carries ids and permission names only: never e-mails, tokens or claim values.</span>
+<span class="sd">    ``roles`` is only filled for ``ALLOWED``: ``NOT_VISIBLE`` reveals nothing about the</span>
+<span class="sd">    scope and ``DENIED`` is raised before a context exists.</span>
+<span class="sd">    """</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="n">DecisionKind</span>
+    <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span>
+    <span class="n">permission</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">roles</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">()</span>
+    <span class="n">sensitive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">duration_ms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">request_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return a JSON-serialisable view."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"kind"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">"principal_id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">principal_id</span><span class="p">,</span>
+            <span class="s2">"scope_kind"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+            <span class="s2">"scope_id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">"permission"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">permission</span><span class="p">,</span>
+            <span class="s2">"roles"</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roles</span><span class="p">),</span>
+            <span class="s2">"sensitive"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sensitive</span><span class="p">,</span>
+            <span class="s2">"duration_ms"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">duration_ms</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+            <span class="s2">"request_id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_id</span><span class="p">,</span>
+        <span class="p">}</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AuthzHooks</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Optional callbacks."""</span>
+
+    <span class="n">on_decision</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DecisionEvent</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="Authz">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Authz</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Catalog + store wiring + error policy, held in ``app.state.authz``."""</span>
+
+<div class="viewcode-block" id="Authz.__init__">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">catalog</span><span class="p">:</span> <span class="n">PermissionCatalog</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="n">AssignmentStore</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_factory</span><span class="p">:</span> <span class="n">StoreFactory</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">group_roles</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">group_scope_kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">error_policy</span><span class="p">:</span> <span class="n">ErrorPolicy</span><span class="p">,</span>
+        <span class="n">hooks</span><span class="p">:</span> <span class="n">AuthzHooks</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span> <span class="o">=</span> <span class="n">catalog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_policy</span> <span class="o">=</span> <span class="n">error_policy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span> <span class="o">=</span> <span class="n">hooks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_store</span> <span class="o">=</span> <span class="n">store</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_store_factory</span> <span class="o">=</span> <span class="n">store_factory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group_roles</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">group_roles</span><span class="p">)</span> <span class="k">if</span> <span class="n">group_roles</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group_scope_kind</span> <span class="o">=</span> <span class="n">group_scope_kind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Authz.build">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.build">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">catalog</span><span class="p">:</span> <span class="n">PermissionCatalog</span><span class="p">,</span>
+        <span class="n">store</span><span class="p">:</span> <span class="n">AssignmentStore</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_factory</span><span class="p">:</span> <span class="n">StoreFactory</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">group_roles</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">group_scope_kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">GLOBAL_KIND</span><span class="p">,</span>
+        <span class="n">error_policy</span><span class="p">:</span> <span class="n">ErrorPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">hooks</span><span class="p">:</span> <span class="n">AuthzHooks</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Authz</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Validate the combination of sources and build the runtime.</span>
+
+<span class="sd">        Exactly one of ``store`` / ``store_factory``; neither is accepted only</span>
+<span class="sd">        for a pure group-based setup (``group_roles`` given).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ConfigurationError: Invalid combination or unknown role/scope kind.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">store_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">"give either store or store_factory, not both"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">store</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">store_factory</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">group_roles</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+                <span class="s2">"no source of roles: give store, store_factory or group_roles"</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">group_roles</span><span class="p">:</span>
+            <span class="n">known</span> <span class="o">=</span> <span class="n">catalog</span><span class="o">.</span><span class="n">roles</span><span class="p">()</span>
+            <span class="n">unknown</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">group_roles</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="n">known</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"group_roles use unknown roles: </span><span class="si">{</span><span class="n">unknown</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">catalog</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">(</span><span class="n">group_scope_kind</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span>
+            <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
+            <span class="n">store_factory</span><span class="o">=</span><span class="n">store_factory</span><span class="p">,</span>
+            <span class="n">group_roles</span><span class="o">=</span><span class="n">group_roles</span><span class="p">,</span>
+            <span class="n">group_scope_kind</span><span class="o">=</span><span class="n">group_scope_kind</span><span class="p">,</span>
+            <span class="n">error_policy</span><span class="o">=</span><span class="n">error_policy</span> <span class="ow">or</span> <span class="n">ErrorPolicy</span><span class="p">(),</span>
+            <span class="n">hooks</span><span class="o">=</span><span class="n">hooks</span> <span class="ow">or</span> <span class="n">AuthzHooks</span><span class="p">(),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Authz.authorizer_for">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.authorizer_for">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">authorizer_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Authorizer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build an :class:`Authorizer` for ``request`` (calls the factory once)."""</span>
+        <span class="n">resolvers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">RoleResolver</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">store</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store_factory</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isawaitable</span><span class="p">(</span><span class="n">store</span><span class="p">):</span>
+                <span class="n">store</span> <span class="o">=</span> <span class="k">await</span> <span class="n">store</span>
+            <span class="n">resolvers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AssignmentRoleResolver</span><span class="p">(</span><span class="n">store</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">resolvers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AssignmentRoleResolver</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group_roles</span><span class="p">:</span>
+            <span class="n">resolvers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">GroupRoleResolver</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_roles</span><span class="p">,</span> <span class="n">scope_kind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_scope_kind</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Authorizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">,</span> <span class="n">resolvers</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Authz.of">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.of">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">of</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Authz</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the instance installed on ``request.app``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ConfigurationError: Not installed on this app (mounted sub-apps have</span>
+<span class="sd">                their own ``app.state``: install on each, or pass ``authz=``).</span>
+<span class="sd">        """</span>
+        <span class="n">authz</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="s2">"authz"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">authz</span><span class="p">,</span> <span class="n">Authz</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">"authz not installed on this app"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">authz</span></div>
+
+
+<div class="viewcode-block" id="Authz.install">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.install">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">install</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Starlette</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">allow_disabled_for_development</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Attach to ``app``: ``app.state.authz``, route validation and shutdown.</span>
+
+<span class="sd">        Route validation runs at lifespan startup. Apps exercised without the</span>
+<span class="sd">        lifespan (a ``TestClient`` not used as a context manager) should call</span>
+<span class="sd">        :meth:`validate_routes` themselves, e.g. in an architecture test.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ConfigurationError: ``AUTH_MIDDLEWARE_DISABLED`` is set and</span>
+<span class="sd">                ``allow_disabled_for_development`` is not.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_MIDDLEWARE_DISABLED</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">allow_disabled_for_development</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+                    <span class="s2">"AUTH_MIDDLEWARE_DISABLED is set: refusing to install "</span>
+                    <span class="s2">"authorization (pass allow_disabled_for_development=True)"</span>
+                <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"authz installed with AUTH_MIDDLEWARE_DISABLED; guard still enforces"</span>
+            <span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">authz</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">previous</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">lifespan_context</span>
+
+        <span class="nd">@asynccontextmanager</span>
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">lifespan</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">validate_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">previous</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">as</span> <span class="n">state</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">state</span>
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">aclose</span><span class="p">()</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">lifespan_context</span> <span class="o">=</span> <span class="n">lifespan</span></div>
+
+
+<div class="viewcode-block" id="Authz.validate_routes">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.validate_routes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_routes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">Starlette</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Check every guarded route against the catalog.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnknownPermissionError: A guard uses a permission not in the catalog.</span>
+<span class="sd">            ScopeKindMismatchError: A guard's scope kind differs from the permission's.</span>
+<span class="sd">            ConfigurationError: A path-based scope uses a parameter the route lacks.</span>
+<span class="sd">        """</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScopeKindMismatchError</span>
+
+        <span class="k">for</span> <span class="n">route_path</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">call</span> <span class="ow">in</span> <span class="n">_iter_guards</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+            <span class="n">permission</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">PERMISSION_ATTR</span><span class="p">)</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">spec</span><span class="p">(</span><span class="n">permission</span><span class="p">)</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">SCOPE_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kind</span> <span class="o">!=</span> <span class="n">spec</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ScopeKindMismatchError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">route_path</span><span class="si">}</span><span class="s2">: permission </span><span class="si">{</span><span class="n">permission</span><span class="si">}</span><span class="s2"> belongs to scope kind "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">scope_kind</span><span class="si">}</span><span class="s2">, guard uses </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">"</span>
+                <span class="p">)</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"param"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">route_path</span><span class="si">}</span><span class="s2">: scope path parameter </span><span class="si">{</span><span class="n">param</span><span class="si">!r}</span><span class="s2"> not in the route"</span>
+                <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Authz.aclose">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.aclose">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">aclose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Close the injected store if it exposes ``aclose()``. Idempotent."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">closer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">,</span> <span class="s2">"aclose"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">closer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">closer</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isawaitable</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+                <span class="k">await</span> <span class="n">result</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_iter_guards</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Yield ``(path, path_param_names, dependency_callable)`` for guarded routes."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">APIRoute</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">starlette.routing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mount</span>
+
+    <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s2">"routes"</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">APIRoute</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">param_convertors</span><span class="p">)</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">route</span><span class="o">.</span><span class="n">dependant</span><span class="p">]</span>
+            <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+                <span class="n">dep</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+                <span class="n">stack</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dep</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">dep</span><span class="o">.</span><span class="n">call</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dep</span><span class="o">.</span><span class="n">call</span><span class="p">,</span> <span class="n">PERMISSION_ATTR</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">route</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">dep</span><span class="o">.</span><span class="n">call</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="n">Mount</span><span class="p">)</span> <span class="ow">and</span> <span class="n">route</span><span class="o">.</span><span class="n">app</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">yield from</span> <span class="n">_iter_guards</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">app</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">route</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

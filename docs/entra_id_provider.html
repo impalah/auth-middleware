@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Azure Entra ID Authentication Provider &mdash; Auth Middleware 0.6.1 documentation</title>
+  <title>Azure Entra ID Authentication Provider &mdash; Auth Middleware 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
@@ -14,14 +14,14 @@
     <link rel="canonical" href="/auth-middleware/entra_id_provider.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=2bd037f0"></script>
+      <script src="_static/documentation_options.js?v=fe7df9b0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Generic OIDC Provider" href="oidc_provider.html" />
-    <link rel="prev" title="Google Identity Infrastructure Setup" href="infrastructure/google-setup.html" /> 
+    <link rel="prev" title="Scoped Permissions API Reference" href="authz-api.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -56,6 +56,17 @@
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
 <ul class="current">
@@ -115,6 +126,8 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings"><code class="docutils literal notranslate"><span class="pre">ModuleSettings</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY"><code class="docutils literal notranslate"><span class="pre">ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY</span></code></a></li>
@@ -126,6 +139,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
 <ul>
@@ -241,8 +255,8 @@
 
 <span class="c1"># Configure Entra ID settings</span>
 <span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdSettings</span><span class="p">(</span>
-    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">&quot;your-tenant-id&quot;</span><span class="p">,</span>
-    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span><span class="o">=</span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
+    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">"your-tenant-id"</span><span class="p">,</span>
+    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span><span class="o">=</span><span class="s2">"your-application-id"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Create Entra ID provider</span>
@@ -257,7 +271,7 @@
 <h3>Multi-tenant Configuration<a class="headerlink" href="#multi-tenant-configuration" title="Link to this heading"></a></h3>
 <p>For applications that need to accept users from any Azure AD tenant:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdSettings</span><span class="p">(</span>
-    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">&quot;common&quot;</span><span class="p">,</span>  <span class="c1"># Accept from any tenant</span>
+    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">"common"</span><span class="p">,</span>  <span class="c1"># Accept from any tenant</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -295,19 +309,19 @@
 <h3>Expected Entra ID Claims<a class="headerlink" href="#expected-entra-id-claims" title="Link to this heading"></a></h3>
 <p>Azure Entra ID tokens contain the following claims:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://sts.windows.net/tenant-id/&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1640908800</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1640995200</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AAAAAAAAAAAAAAAAAAAAAMLkj3QiQZ-KiFQjQ&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;preferred_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;john@company.com&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;john@company.com&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;tid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tenant-id&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;oid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;object-id&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;group-id-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;group-id-2&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Role.Admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Role.User&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;scp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User.Read Profile.Read&quot;</span>
+<span class="w">  </span><span class="nt">"aud"</span><span class="p">:</span><span class="w"> </span><span class="s2">"your-application-id"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"iss"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://sts.windows.net/tenant-id/"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"iat"</span><span class="p">:</span><span class="w"> </span><span class="mi">1640908800</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"exp"</span><span class="p">:</span><span class="w"> </span><span class="mi">1640995200</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"sub"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AAAAAAAAAAAAAAAAAAAAAMLkj3QiQZ-KiFQjQ"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"John Doe"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"preferred_username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"john@company.com"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"email"</span><span class="p">:</span><span class="w"> </span><span class="s2">"john@company.com"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"tid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"tenant-id"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"oid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"object-id"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"groups"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"group-id-1"</span><span class="p">,</span><span class="w"> </span><span class="s2">"group-id-2"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"roles"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Role.Admin"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Role.User"</span><span class="p">],</span>
+<span class="w">  </span><span class="nt">"scp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"User.Read Profile.Read"</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -316,13 +330,13 @@
 <h3>User Information Mapping<a class="headerlink" href="#user-information-mapping" title="Link to this heading"></a></h3>
 <p>The provider maps Entra ID claims to user information:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">EntraIdUser</span><span class="p">:</span>
-    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>              <span class="c1"># From &#39;oid&#39; claim</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>            <span class="c1"># From &#39;name&#39; claim</span>
-    <span class="n">email</span><span class="p">:</span> <span class="nb">str</span>           <span class="c1"># From &#39;email&#39; or &#39;preferred_username&#39;</span>
-    <span class="n">tenant_id</span><span class="p">:</span> <span class="nb">str</span>       <span class="c1"># From &#39;tid&#39; claim</span>
-    <span class="n">groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>    <span class="c1"># From &#39;groups&#39; claim</span>
-    <span class="n">roles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>     <span class="c1"># From &#39;roles&#39; claim</span>
-    <span class="n">scopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>    <span class="c1"># From &#39;scp&#39; claim (space-separated)</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>              <span class="c1"># From 'oid' claim</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>            <span class="c1"># From 'name' claim</span>
+    <span class="n">email</span><span class="p">:</span> <span class="nb">str</span>           <span class="c1"># From 'email' or 'preferred_username'</span>
+    <span class="n">tenant_id</span><span class="p">:</span> <span class="nb">str</span>       <span class="c1"># From 'tid' claim</span>
+    <span class="n">groups</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>    <span class="c1"># From 'groups' claim</span>
+    <span class="n">roles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>     <span class="c1"># From 'roles' claim</span>
+    <span class="n">scopes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>    <span class="c1"># From 'scp' claim (space-separated)</span>
 </pre></div>
 </div>
 </section>
@@ -341,18 +355,18 @@
 <section id="app-registration-configuration">
 <h3>App Registration Configuration<a class="headerlink" href="#app-registration-configuration" title="Link to this heading"></a></h3>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Your API Application&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;signInAudience&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AzureADMyOrg&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Single tenant</span>
-<span class="w">  </span><span class="nt">&quot;identifierUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="s2">&quot;api://your-application-id&quot;</span>
+<span class="w">  </span><span class="nt">"displayName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Your API Application"</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">"signInAudience"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AzureADMyOrg"</span><span class="p">,</span><span class="w">  </span><span class="c1">// Single tenant</span>
+<span class="w">  </span><span class="nt">"identifierUris"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"api://your-application-id"</span>
 <span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;requiredResourceAccess&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"requiredResourceAccess"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;resourceAppId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;00000003-0000-0000-c000-000000000000&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Microsoft Graph</span>
-<span class="w">      </span><span class="nt">&quot;resourceAccess&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="nt">"resourceAppId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"00000003-0000-0000-c000-000000000000"</span><span class="p">,</span><span class="w">  </span><span class="c1">// Microsoft Graph</span>
+<span class="w">      </span><span class="nt">"resourceAccess"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e1fe6dd8-ba31-4d61-89e7-88639da4683d&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// User.Read</span>
-<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Scope&quot;</span>
+<span class="w">          </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e1fe6dd8-ba31-4d61-89e7-88639da4683d"</span><span class="p">,</span><span class="w">  </span><span class="c1">// User.Read</span>
+<span class="w">          </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Scope"</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">      </span><span class="p">]</span>
 <span class="w">    </span><span class="p">}</span>
@@ -372,12 +386,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.azure.entra_id_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">EntraIdProvider</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.providers.azure.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleSettings</span> <span class="k">as</span> <span class="n">EntraIdSettings</span>
 
-<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Enterprise API&quot;</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">"Enterprise API"</span><span class="p">)</span>
 
 <span class="c1"># Single-tenant configuration</span>
 <span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdSettings</span><span class="p">(</span>
-    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">&quot;12345678-1234-1234-1234-123456789012&quot;</span><span class="p">,</span>
-    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span><span class="o">=</span><span class="s2">&quot;87654321-4321-4321-4321-210987654321&quot;</span><span class="p">,</span>
+    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">"12345678-1234-1234-1234-123456789012"</span><span class="p">,</span>
+    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span><span class="o">=</span><span class="s2">"87654321-4321-4321-4321-210987654321"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
@@ -385,21 +399,21 @@
     <span class="n">auth_provider</span><span class="o">=</span><span class="n">EntraIdProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">entra_settings</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/user/profile&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/user/profile"</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_user_profile</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;user_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
-        <span class="s2">&quot;tenant&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">,</span>
-        <span class="s2">&quot;roles&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">roles</span><span class="p">,</span>
+        <span class="s2">"user_id"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">"email"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span>
+        <span class="s2">"tenant"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">,</span>
+        <span class="s2">"roles"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">roles</span><span class="p">,</span>
     <span class="p">}</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/admin/users&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">([</span><span class="s2">&quot;Administrators&quot;</span><span class="p">]))])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/admin/users"</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_groups</span><span class="p">([</span><span class="s2">"Administrators"</span><span class="p">]))])</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="c1"># Only users in the &quot;Administrators&quot; group can access this endpoint</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Admin access granted&quot;</span><span class="p">}</span>
+    <span class="c1"># Only users in the "Administrators" group can access this endpoint</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Admin access granted"</span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -407,7 +421,7 @@
 <h3>Multi-tenant SaaS Application<a class="headerlink" href="#multi-tenant-saas-application" title="Link to this heading"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Multi-tenant configuration</span>
 <span class="n">entra_settings</span> <span class="o">=</span> <span class="n">EntraIdSettings</span><span class="p">(</span>
-    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">&quot;common&quot;</span><span class="p">,</span>
+    <span class="n">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span><span class="o">=</span><span class="s2">"common"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
@@ -415,13 +429,13 @@
     <span class="n">auth_provider</span><span class="o">=</span><span class="n">EntraIdProvider</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">entra_settings</span><span class="p">),</span>
 <span class="p">)</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/tenant/info&quot;</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/tenant/info"</span><span class="p">,</span> <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">require_user</span><span class="p">())])</span>
 <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_tenant_info</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
     <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">current_user</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;tenant_id&quot;</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">,</span>
-        <span class="s2">&quot;user_count&quot;</span><span class="p">:</span> <span class="k">await</span> <span class="n">get_tenant_user_count</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">),</span>
-        <span class="s2">&quot;subscription&quot;</span><span class="p">:</span> <span class="k">await</span> <span class="n">get_tenant_subscription</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">),</span>
+        <span class="s2">"tenant_id"</span><span class="p">:</span> <span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">,</span>
+        <span class="s2">"user_count"</span><span class="p">:</span> <span class="k">await</span> <span class="n">get_tenant_user_count</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">),</span>
+        <span class="s2">"subscription"</span><span class="p">:</span> <span class="k">await</span> <span class="n">get_tenant_subscription</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">tenant_id</span><span class="p">),</span>
     <span class="p">}</span>
 </pre></div>
 </div>
@@ -432,13 +446,13 @@
 <section id="client-side-token-acquisition">
 <h3>Client-side Token Acquisition<a class="headerlink" href="#client-side-token-acquisition" title="Link to this heading"></a></h3>
 <p>JavaScript/TypeScript example for acquiring tokens:</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">PublicClientApplication</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@azure/msal-browser&quot;</span><span class="p">;</span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">PublicClientApplication</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"@azure/msal-browser"</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">msalConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">auth</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">clientId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">authority</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://login.microsoftonline.com/your-tenant-id&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">redirectUri</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;http://localhost:3000&quot;</span>
+<span class="w">    </span><span class="nx">clientId</span><span class="o">:</span><span class="w"> </span><span class="s2">"your-application-id"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">authority</span><span class="o">:</span><span class="w"> </span><span class="s2">"https://login.microsoftonline.com/your-tenant-id"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">redirectUri</span><span class="o">:</span><span class="w"> </span><span class="s2">"http://localhost:3000"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">};</span>
 
@@ -446,16 +460,16 @@
 
 <span class="c1">// Acquire token</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">tokenRequest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">scopes</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;api://your-application-id/access_as_user&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="nx">scopes</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"api://your-application-id/access_as_user"</span><span class="p">],</span>
 <span class="p">};</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">msalInstance</span><span class="p">.</span><span class="nx">acquireTokenSilent</span><span class="p">(</span><span class="nx">tokenRequest</span><span class="p">);</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">accessToken</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">accessToken</span><span class="p">;</span>
 
 <span class="c1">// Use token in API calls</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">apiResponse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;/api/protected&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">apiResponse</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">"/api/protected"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;Authorization&quot;</span><span class="o">:</span><span class="w"> </span><span class="sb">`Bearer </span><span class="si">${</span><span class="nx">accessToken</span><span class="si">}</span><span class="sb">`</span>
+<span class="w">    </span><span class="s2">"Authorization"</span><span class="o">:</span><span class="w"> </span><span class="sb">`Bearer </span><span class="si">${</span><span class="nx">accessToken</span><span class="si">}</span><span class="sb">`</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">});</span>
 </pre></div>
@@ -467,18 +481,18 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">msal</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfidentialClientApplication</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">ConfidentialClientApplication</span><span class="p">(</span>
-    <span class="n">client_id</span><span class="o">=</span><span class="s2">&quot;your-application-id&quot;</span><span class="p">,</span>
-    <span class="n">client_credential</span><span class="o">=</span><span class="s2">&quot;your-client-secret&quot;</span><span class="p">,</span>
-    <span class="n">authority</span><span class="o">=</span><span class="s2">&quot;https://login.microsoftonline.com/your-tenant-id&quot;</span>
+    <span class="n">client_id</span><span class="o">=</span><span class="s2">"your-application-id"</span><span class="p">,</span>
+    <span class="n">client_credential</span><span class="o">=</span><span class="s2">"your-client-secret"</span><span class="p">,</span>
+    <span class="n">authority</span><span class="o">=</span><span class="s2">"https://login.microsoftonline.com/your-tenant-id"</span>
 <span class="p">)</span>
 
 <span class="c1"># Acquire token for API access</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">acquire_token_for_client</span><span class="p">(</span>
-    <span class="n">scopes</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;https://graph.microsoft.com/.default&quot;</span><span class="p">]</span>
+    <span class="n">scopes</span><span class="o">=</span><span class="p">[</span><span class="s2">"https://graph.microsoft.com/.default"</span><span class="p">]</span>
 <span class="p">)</span>
 
-<span class="k">if</span> <span class="s2">&quot;access_token&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-    <span class="n">access_token</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;access_token&quot;</span><span class="p">]</span>
+<span class="k">if</span> <span class="s2">"access_token"</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="n">access_token</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s2">"access_token"</span><span class="p">]</span>
 </pre></div>
 </div>
 </section>
@@ -495,8 +509,8 @@
     <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
         <span class="n">status_code</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span>
         <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;authentication_failed&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;error_description&quot;</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
+            <span class="s2">"error"</span><span class="p">:</span> <span class="s2">"authentication_failed"</span><span class="p">,</span>
+            <span class="s2">"error_description"</span><span class="p">:</span> <span class="n">exc</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
 </pre></div>
@@ -544,11 +558,11 @@
 <span id="api-reference"></span><h2>API Reference<a class="headerlink" href="#module-auth_middleware.providers.azure.entra_id_provider" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.azure.entra_id_provider.</span></span><span class="sig-name descname"><span class="pre">EntraIDProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><span class="pre">PermissionsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><span class="pre">GroupsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth_middleware.providers.azure.entra_id_provider.</span></span><span class="sig-name descname"><span class="pre">EntraIDProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><span class="pre">PermissionsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><span class="pre">GroupsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roles_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RolesProvider</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">JWTProvider</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><span class="pre">PermissionsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><span class="pre">GroupsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.__init__" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permissions_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider" title="auth_middleware.contracts.permissions_provider.PermissionsProvider"><span class="pre">PermissionsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider" title="auth_middleware.contracts.groups_provider.GroupsProvider"><span class="pre">GroupsProvider</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roles_provider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">RolesProvider</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.__init__" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -569,7 +583,7 @@ token (JWTAuthorizationCredentials): Defaults to Depends(oauth2_scheme).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jwks_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jwks_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys" title="Link to this definition"></a></dt>
 <dd><p>Get keys from the Entra ID JWKS endpoint.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -587,14 +601,14 @@ discovery document.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_openid_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_openid_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_openid_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.get_openid_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_openid_config" title="Link to this definition"></a></dt>
 <dd><p>Get the OIDC discovery document for the configured Entra ID tenant.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>the discovery document.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, Any]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, Any]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -615,7 +629,7 @@ discovery document.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.verify_token">
-<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">verify_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.verify_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.verify_token" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">verify_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">JWTAuthorizationCredentials</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/auth_middleware/providers/azure/entra_id_provider.html#EntraIDProvider.verify_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.verify_token" title="Link to this definition"></a></dt>
 <dd><p>Verifiy token signature</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -628,7 +642,7 @@ discovery document.</p>
 <dd class="field-odd"><p>_description_</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -641,23 +655,33 @@ discovery document.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code></p>
 <p>Settings for the module</p>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES">
+<span class="sig-name descname"><span class="pre">AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_INTERVAL_MINUTES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES">
+<span class="sig-name descname"><span class="pre">AUTH_MIDDLEWARE_JWKS_CACHE_USAGES</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_MIDDLEWARE_JWKS_CACHE_USAGES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID">
-<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_AUDIENCE_ID" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE">
-<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://login.microsoftonline.com/{}/v2.0/.well-known/openid-configuration'</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://login.microsoftonline.com/{}/v2.0/.well-known/openid-configuration'</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_JWKS_URL_TEMPLATE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY">
-<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_LEEWAY" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID">
-<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#auth_middleware.providers.azure.settings.ModuleSettings.AUTH_PROVIDER_AZURE_ENTRA_ID_TENANT_ID" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -673,7 +697,7 @@ discovery document.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="infrastructure/google-setup.html" class="btn btn-neutral float-left" title="Google Identity Infrastructure Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="authz-api.html" class="btn btn-neutral float-left" title="Scoped Permissions API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="oidc_provider.html" class="btn btn-neutral float-right" title="Generic OIDC Provider" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

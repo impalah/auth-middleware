@@ -12,7 +12,7 @@ Authentication Decorators
 -------------------------
 
 require_user()
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 Requires that a user is authenticated to access an endpoint.
 
@@ -33,7 +33,7 @@ Requires that a user is authenticated to access an endpoint.
        }
 
 require_groups()
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Requires that the authenticated user belongs to specific groups.
 
@@ -50,8 +50,16 @@ Requires that the authenticated user belongs to specific groups.
    async def staff_area(request):
        return {"message": "Staff access granted"}
 
+   # All of them (since 0.7.0): every listed group is required
+   @app.get("/board", dependencies=[Depends(require_groups(["managers", "finance"], match="all"))])
+   async def board(request):
+       return {"message": "Both groups held"}
+
+``require_groups``, ``require_roles`` and ``require_permissions`` all take ``match="any"`` (default: at least one) or
+``match="all"``.
+
 require_permissions()
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Requires that the authenticated user has specific permissions.
 
@@ -69,7 +77,7 @@ Requires that the authenticated user has specific permissions.
        return {"message": "Sensitive data deleted"}
 
 require_roles()
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 Requires that the authenticated user has specific roles.
 
@@ -85,7 +93,7 @@ Utility Functions
 -----------------
 
 get_current_user()
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Retrieves the current authenticated user from the request state.
 
@@ -110,7 +118,7 @@ The guards package also exposes three standalone checker classes for building
 custom dependency chains.
 
 GroupChecker
-~~~~~~~~~~~
+~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -120,7 +128,7 @@ GroupChecker
    checker = GroupChecker(groups=["admin"])
 
 RoleChecker
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -129,7 +137,7 @@ RoleChecker
    checker = RoleChecker(roles=["analyst"])
 
 PermissionsChecker
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -141,7 +149,7 @@ Advanced Usage Examples
 -----------------------
 
 Combining Requirements
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 You can combine multiple authentication requirements:
 
@@ -163,7 +171,7 @@ You can combine multiple authentication requirements:
        return {"message": f"User {user_id} deleted"}
 
 Optional Authentication
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 For endpoints that work with or without authentication:
 
@@ -183,7 +191,7 @@ For endpoints that work with or without authentication:
        return base_data
 
 Custom Authorization Logic
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Create custom authorization functions:
 
@@ -235,3 +243,34 @@ API Reference
 
 .. automodule:: auth_middleware.guards.permissions_checker
    :members:
+
+require_authenticated()
+-----------------------
+
+Fail-closed authentication guard (since 0.7.0). Unlike ``require_user()``, it is **not** disabled by
+``AUTH_MIDDLEWARE_DISABLED``: the placeholder ``synthetic`` user the middleware creates then is rejected
+with ``401`` unless ``allow_synthetic=True``. ``on_unauthenticated(request)`` may return your own exception
+(for example a uniform problem body); the default is ``401`` with ``WWW-Authenticate: Bearer``.
+
+.. code-block:: python
+
+   from auth_middleware.guards import require_authenticated
+
+   @app.get("/me")
+   async def me(user=Depends(require_authenticated())):
+       return {"id": user.id}
+
+get_identity()
+--------------
+
+Same checks, but returns an immutable ``Identity(sub, email, name, groups)`` with the lazy ``groups``
+already resolved. ``name`` falls back to ``sub`` and ``email`` to ``""``.
+
+.. code-block:: python
+
+   from auth_middleware.guards import get_identity
+   from auth_middleware.types.identity import Identity
+
+   @app.get("/whoami")
+   async def whoami(identity: Identity = Depends(get_identity())):
+       return {"sub": identity.sub, "groups": list(identity.groups)}
