@@ -31,10 +31,26 @@ Legend: size S (< 1 h), M (half a day), L (a day or more). "Repo" says where the
 | [AUTHZ-020](AUTHZ-020-artisevm-swap-guards.md) | ARTISEVM: swap the guards, platform admin as a role | G | M | artisevm | 018, 019 |
 | [AUTHZ-021](AUTHZ-021-artisevm-remove-token-duplicates.md) | ARTISEVM: drop `tokens.py` duplicates | G | M | artisevm | 015, 016, 017, 020 |
 | [AUTHZ-022](AUTHZ-022-decision-memberships-into-library-tables.md) | Decision record: memberships into library tables | G | S | both | 020 |
+| [AUTHZ-023](AUTHZ-023-abac-domain-model-and-ports.md) | ABAC domain model, errors and ports | H | M | auth-middleware | none |
+| [AUTHZ-024](AUTHZ-024-condition-language.md) | Condition language: parser, limits, three-valued evaluator | H | L | auth-middleware | 023 |
+| [AUTHZ-025](AUTHZ-025-attribute-schema-and-policy-validation.md) | Attribute schema in the catalog and policy validation | H | M | auth-middleware | 023, 024 |
+| [AUTHZ-026](AUTHZ-026-attribute-providers.md) | Attribute providers (subject, resource, environment) | H | M | auth-middleware | 023 |
+| [AUTHZ-027](AUTHZ-027-policy-decision-point.md) | Policy decision point and `Authorizer` integration | H | L | auth-middleware | 024, 025, 026 |
+| [AUTHZ-028](AUTHZ-028-abac-runtime-and-guard.md) | `Authz` runtime config and guard `resource=` | H | M | auth-middleware | 027 |
+| [AUTHZ-029](AUTHZ-029-memory-stores-and-contract-suite.md) | In-memory policy/attribute stores and contract suite | H | M | auth-middleware | 023 |
+| [AUTHZ-030](AUTHZ-030-sqlalchemy-policy-and-attribute-stores.md) | SQLAlchemy policy and attribute stores + migration | H | L | auth-middleware | 029 |
+| [AUTHZ-031](AUTHZ-031-dynamodb-policy-and-attribute-stores.md) | DynamoDB policy and attribute stores | H | L | auth-middleware | 029 |
+| [AUTHZ-032](AUTHZ-032-policy-service-and-cli.md) | `PolicyService`, static policy files and `authcli authz policy` | H | M | auth-middleware | 025, 029 |
+| [AUTHZ-033](AUTHZ-033-policy-snapshot-cache.md) | Policy snapshot cache | H | S | auth-middleware | 027, 029; Q5 |
+| [AUTHZ-034](AUTHZ-034-abac-audit-metrics-shadow.md) | Audit, metrics, explain and shadow mode | H | S | auth-middleware | 027 |
+| [AUTHZ-035](AUTHZ-035-abac-security-hardening.md) | Security hardening battery | H | M | auth-middleware | 027, 030, 031 |
+| [AUTHZ-036](AUTHZ-036-abac-docs-example-release.md) | Docs, example, CHANGELOG, `0.8.0` | H | M | auth-middleware | all of H |
 
 Suggested order: 001 -> 002 -> 003 -> 004 -> 005, with 006 in parallel from 001; then B and C
 (independent, can run in parallel); then 011, 012, 013; then 014 (release `0.7.0`). Epic F is independent
 and can ship earlier as `0.7.x`. Epic G starts after the release.
+Epic H (ABAC, `../PLAN-abac.md`, target `0.8.0`) is independent of F and G: 023 -> 024 -> 025 -> 027 -> 028
+is the critical path; 029 -> 030/031 (stores) run in parallel from 023; then 032-035; 036 releases.
 
 ## Definition of done (applies to every `auth-middleware` issue)
 
