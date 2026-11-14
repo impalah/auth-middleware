@@ -42,11 +42,23 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Check whether this version is already on PyPI
+        id: pypi
+        run: |
+          # PyPI never accepts the same version twice: pushes without a version bump
+          # (fixes, docs) must still run the tests and rebuild the site, not publish.
+          if curl -sf "https://pypi.org/pypi/auth-middleware/${VERSION}/json" > /dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Version ${VERSION} is already published: skipping build and publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install the project
         run: uv sync --all-extras --group dev --group docs
 
       - name: Run tests
-        run: uv run pytest tests/ --cov=src/ --cov-report=term --cov-fail-under=80 -v
+        run: uv run --all-extras pytest tests/ --cov=src/ --cov-report=term --cov-fail-under=80 -v
 
       - name: Build documentation
         run: |
@@ -61,14 +73,17 @@ jobs:
           git push origin HEAD
 
       - name: Build
+        if: steps.pypi.outputs.exists == 'false'
         run: |
           uv build
 
       - name: Publish on pypi
+        if: steps.pypi.outputs.exists == 'false'
         run: |
           uv publish --token ${{ secrets.PYPI_TOKEN }}
 
       - name: Create and push git tag
+        if: steps.pypi.outputs.exists == 'false'
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
@@ -76,6 +91,7 @@ jobs:
           git push origin "v${{ steps.version.outputs.version }}" || echo "Tag already pushed"
 
       - name: Create GitHub Release
+        if: steps.pypi.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}

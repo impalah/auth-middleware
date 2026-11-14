@@ -92,7 +92,7 @@ def _build_models(
     """Create the PynamoDB model classes bound to a runtime table name."""
     gsi_name = index_name
 
-    class ByPrincipal(GlobalSecondaryIndex):  # type: ignore[type-arg,no-untyped-call]
+    class ByPrincipal(GlobalSecondaryIndex):  # type: ignore[type-arg,no-untyped-call,misc,unused-ignore]
         class Meta:
             index_name = gsi_name
             projection = AllProjection()
@@ -107,8 +107,8 @@ def _build_models(
     meta_attrs.update(meta)
     meta_cls = type("Meta", (), meta_attrs)
 
-    class Item(Model):
-        Meta = meta_cls  # type: ignore[assignment]
+    class Item(Model):  # type: ignore[misc,unused-ignore]
+        Meta = meta_cls  # type: ignore[assignment,unused-ignore]
         pk = UnicodeAttribute(hash_key=True)
         sk = UnicodeAttribute(range_key=True)
         gsi1pk = UnicodeAttribute()

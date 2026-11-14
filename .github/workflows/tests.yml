@@ -23,13 +23,13 @@ jobs:
         run: uv sync --python ${{ matrix.python-version }} --all-extras --group dev
 
       - name: Type check
-        run: uv run mypy src
+        run: uv run --all-extras mypy src
 
       - name: Lint
-        run: uv run ruff check src tests
+        run: uv run --all-extras ruff check src tests
 
       - name: Run tests
-        run: uv run pytest tests/ -q
+        run: uv run --all-extras pytest tests/ -q
 
   integration-postgres:
     # Real-database tests of the SQL assignment store (pytest marker: integration).
@@ -58,7 +58,7 @@ jobs:
         run: uv sync --python 3.14 --all-extras --group dev
 
       - name: Run integration tests
-        run: uv run pytest -m integration tests/authz -q
+        run: uv run --all-extras pytest -m integration tests/authz -q
 
   integration-dynamodb:
     # The DynamoDB store tests against the real DynamoDB engine (DynamoDB Local).
@@ -80,7 +80,7 @@ jobs:
         run: uv sync --python 3.14 --all-extras --group dev
 
       - name: Run integration tests
-        run: uv run pytest -m integration tests/authz/integration/test_dynamodb_store.py -q
+        run: uv run --all-extras pytest -m integration tests/authz/integration/test_dynamodb_store.py -q
 
   floci:
     # DynamoDB, PostgreSQL and MySQL stores against Floci, started with testcontainers
@@ -96,4 +96,4 @@ jobs:
         run: uv sync --python 3.14 --all-extras --group dev
 
       - name: Run Floci tests
-        run: uv run pytest -m floci tests/authz/integration/test_floci.py -v
+        run: uv run --all-extras pytest -m floci tests/authz/integration/test_floci.py -v
