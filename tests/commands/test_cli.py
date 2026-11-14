@@ -212,8 +212,7 @@ class TestCLI:
     def test_cli_group_no_commands_by_default(self):
         """Test that CLI group has the expected commands registered."""
         # The get_permissions command is now added to cli
-        assert len(cli.commands) == 1
-        assert "get-permissions" in cli.commands
+        assert set(cli.commands) == {"get-permissions", "authz"}
 
     @patch("auth_middleware.cli.SqlPermissionsProvider")
     def test_get_permissions_async_execution_success(self, mock_provider_class):

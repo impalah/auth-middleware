@@ -1,1 +1,10 @@
 Generic single-database configuration.
+Scoped permissions (`auth_middleware.authz`)
+--------------------------------------------
+Revision `a3f1c9d2b7e4` creates `authz_assignment` (revises the legacy `authz_permissions` one).
+Applications that own their migrations can instead add
+`auth_middleware.authz.stores.sql_models.metadata` to their `target_metadata` and let their own
+Alembic generate the table. `env.py` also accepts an open connection through
+`config.attributes["connection"]` (used by the integration tests).
+Real-database tests: set `AUTHZ_TEST_POSTGRES_URL` (see `tests/authz/integration/`); MySQL is
+best effort and not covered by CI.

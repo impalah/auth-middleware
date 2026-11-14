@@ -6,9 +6,12 @@ performance, success rates, and error tracking.
 """
 
 import asyncio
-from collections import defaultdict
+from collections import defaultdict, deque
 from datetime import UTC, datetime
 from typing import Any
+
+#: Validation timings kept for the average/percentiles (oldest are dropped).
+_MAX_SAMPLES = 10_000
 
 
 class MetricsCollector:
@@ -40,10 +43,36 @@ class MetricsCollector:
         """Initialize metrics collector."""
         self._tokens_validated = 0
         self._tokens_failed = 0
-        self._validation_times: list[float] = []
+        # Bounded: an unbounded list is a slow memory leak and makes every
+        # snapshot sort the whole history.
+        self._validation_times: deque[float] = deque(maxlen=_MAX_SAMPLES)
         self._errors_by_type: dict[str, int] = defaultdict(int)
+        self._authz_decisions: dict[str, int] = defaultdict(int)
+        self._authz_by_permission: dict[str, dict[str, int]] = {}
         self._lock = asyncio.Lock()
         self._start_time = datetime.now(UTC)
+
+    async def record_authz_decision(self, kind: str, permission: str) -> None:
+        """Record one scoped-permission decision (``auth_middleware.authz``).
+
+        Args:
+            kind: ``allowed``, ``not_visible`` or ``denied``.
+            permission: Permission name checked.
+        """
+        async with self._lock:
+            self._authz_decisions[kind] += 1
+            per = self._authz_by_permission.setdefault(permission, defaultdict(int))
+            per[kind] += 1
+
+    async def get_authz_metrics(self) -> dict[str, Any]:
+        """Return decision counters: totals per kind and per permission."""
+        async with self._lock:
+            return {
+                "decisions": dict(self._authz_decisions),
+                "by_permission": {
+                    p: dict(v) for p, v in self._authz_by_permission.items()
+                },
+            }
 
     async def record_validation_success(self, duration_ms: float) -> None:
         """Record successful token validation.
@@ -153,6 +182,8 @@ class MetricsCollector:
         async with self._lock:
             self._tokens_validated = 0
             self._tokens_failed = 0
-            self._validation_times = []
+            self._validation_times = deque(maxlen=_MAX_SAMPLES)
             self._errors_by_type = defaultdict(int)
+            self._authz_decisions = defaultdict(int)
+            self._authz_by_permission = {}
             self._start_time = datetime.now(UTC)
