@@ -66,3 +66,35 @@ class StoreUnavailableError(AuthzError):
 
 class UnknownRoleError(AuthzError, ValueError):
     """A role not present in the catalog."""
+
+
+class PolicyError(AuthzError):
+    """Base class of the ABAC policy errors."""
+
+
+class InvalidPolicyError(PolicyError, ValueError):
+    """A policy, a condition or an attribute map is invalid.
+
+    Attributes:
+        problems: Every problem found (a validation reports them all at once).
+    """
+
+    def __init__(self, message: str, problems: tuple[str, ...] = ()) -> None:
+        super().__init__(message)
+        self.problems = problems or (message,)
+
+
+class ConditionError(InvalidPolicyError):
+    """A condition is not valid (unknown operator, wrong arity, a limit exceeded).
+
+    Attributes:
+        pointer: JSON pointer of the offending node, e.g. ``/all/1/eq/0``.
+    """
+
+    def __init__(self, message: str, pointer: str = "") -> None:
+        super().__init__(f"{pointer or '/'}: {message}")
+        self.pointer = pointer
+
+
+class PolicyConflictError(PolicyError):
+    """A policy with that id already exists."""
