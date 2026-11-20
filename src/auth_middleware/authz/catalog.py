@@ -13,6 +13,7 @@ from typing import Any
 
 from loguru import logger
 
+from auth_middleware.authz.abac.schema import AttributeSchema, AttributeSpec
 from auth_middleware.authz.errors import CatalogError, UnknownPermissionError
 from auth_middleware.authz.types import GLOBAL_KIND
 
@@ -61,7 +62,9 @@ class PermissionCatalog:
         scopes: Mapping[str, ScopeKind],
         permissions: Mapping[str, PermissionSpec],
         roles: Mapping[str, frozenset[str]],
+        attributes: Mapping[str, AttributeSpec] | None = None,
     ) -> None:
+        self._attributes = AttributeSchema(attributes)
         self._scopes = MappingProxyType(dict(scopes))
         self._permissions = MappingProxyType(dict(permissions))
         self._roles = MappingProxyType(dict(roles))
@@ -80,6 +83,7 @@ class PermissionCatalog:
         scopes: Sequence[ScopeKind],
         permissions: Sequence[PermissionSpec],
         roles: Mapping[str, Iterable[str]],
+        attributes: Sequence[AttributeSpec] = (),
     ) -> PermissionCatalog:
         """Build and validate a catalog.
 
@@ -89,6 +93,7 @@ class PermissionCatalog:
             scopes: Declared scope kinds.
             permissions: Declared permissions.
             roles: ``role -> permission names``.
+            attributes: Attributes policies may read (ABAC, optional).
 
         Returns:
             The immutable catalog.
@@ -100,10 +105,23 @@ class PermissionCatalog:
         scope_map = cls._check_scopes(scopes, problems)
         perm_map = cls._check_permissions(permissions, scope_map, problems)
         role_map = cls._check_roles(roles, perm_map, problems)
+        attr_map = cls._check_attributes(attributes, problems)
 
         if problems:
             raise CatalogError("; ".join(problems))
-        return cls(scope_map, perm_map, role_map)
+        return cls(scope_map, perm_map, role_map, attr_map)
+
+    @staticmethod
+    def _check_attributes(
+        attributes: Sequence[AttributeSpec], problems: list[str]
+    ) -> dict[str, AttributeSpec]:
+        attr_map: dict[str, AttributeSpec] = {}
+        for spec in attributes:
+            problems.extend(spec.problems())
+            if spec.path in attr_map:
+                problems.append(f"duplicate attribute: {spec.path}")
+            attr_map[spec.path] = spec
+        return attr_map
 
     @staticmethod
     def _check_scopes(
@@ -180,6 +198,9 @@ class PermissionCatalog:
             [roles]
             TIT = ["design.write"]
 
+            [attributes."subject.attrs.clearance"]   # optional, for ABAC policies
+            type = "int"
+
         Raises:
             CatalogError: Unreadable file, unknown extension or invalid content.
         """
@@ -201,9 +222,23 @@ class PermissionCatalog:
                     for p in data.get("permissions", [])
                 ],
                 roles=data.get("roles", {}),
+                attributes=[
+                    AttributeSpec(
+                        path,
+                        a["type"],
+                        tuple(a["enum"]) if "enum" in a else None,
+                        bool(a.get("required", False)),
+                    )
+                    for path, a in data.get("attributes", {}).items()
+                ],
             )
         except (OSError, ValueError, KeyError, TypeError) as exc:
             raise CatalogError(f"cannot load catalog {path}: {exc}") from exc
+
+    @property
+    def attributes(self) -> AttributeSchema:
+        """The attribute schema (built-ins plus the declared attributes)."""
+        return self._attributes
 
     def permissions_for(self, role: str) -> frozenset[str]:
         """Return the permissions granted by ``role``.
@@ -257,13 +292,16 @@ class PermissionCatalog:
 
     def to_mapping(self) -> dict[str, Any]:
         """Return a plain dict; ``from_mapping(**...)`` of it rebuilds the catalog."""
-        return {
+        mapping: dict[str, Any] = {
             "scopes": [
                 ScopeKind(s.name, s.hide_existence) for s in self._scopes.values()
             ],
             "permissions": list(self._permissions.values()),
             "roles": {r: sorted(p) for r, p in self._roles.items()},
         }
+        if self._attributes.declared:
+            mapping["attributes"] = list(self._attributes.declared.values())
+        return mapping
 
 
 __all__ = ["GLOBAL_KIND", "PermissionCatalog", "PermissionSpec", "ScopeKind"]
