@@ -1,4 +1,4 @@
-# Quality report · ABAC (Epic H, 0.8.0, unreleased)
+# Quality report · ABAC (Epic H, 0.8.0)
 
 Date: 2026-11-20 · Scope: `src/auth_middleware/authz/abac/`, `stores/sql_policy.py`,
 `stores/dynamodb_policy.py`, `testing/contract_abac.py`, the changes in `engine.py`, `runtime.py`,

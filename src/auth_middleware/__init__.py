@@ -10,7 +10,7 @@ from .jwt_auth_middleware import JwtAuthMiddleware
 from .password_hasher import hash_password, verify_password
 
 # Version info
-__version__ = "0.7.1"
+__version__ = "0.8.0"
 
 
 __all__ = [

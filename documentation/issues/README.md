@@ -129,8 +129,7 @@ is the critical path; 029 -> 030/031 (stores) run in parallel from 023; then 032
   validly signed oversized token is accepted by the library (no size cap), the test only asserts no 500; a 200 KB garbage
   token is 401. Defaults not changed (would be breaking: follow-up for a major version + ADR). CHANGELOG has an
   "Unreleased (0.7.x)" entry; the version bump is left to the owner.
-- AUTHZ-023..036 · 2026-11-20 · Epic H (ABAC), local commits, **not pushed, version not bumped** (0.8.0 is
-  documented as unreleased). Deviations from the issues:
+- AUTHZ-023..036 · 2026-11-20 · Epic H (ABAC), released as **0.8.0**. Deviations from the issues:
   - 023: the policy status enum is `PolicyStatus` (`active`/`disabled`) instead of `AssignmentStatus`;
     added `new_policy_from_dict`, `Policy.fail_closed`, `ResourceNotFoundError`. In-memory stores are
     `InMemoryPolicyStore` / `InMemoryAttributeStore` (like `InMemoryAssignmentStore`). `Principal` has no

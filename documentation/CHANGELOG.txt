@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-Version 0.8.0 (unreleased)
+Version 0.8.0 (2026-11-20)
 ---------------------------
 
 Attribute-based access control (ABAC) on top of the scoped permissions of 0.7. Everything is opt-in:
@@ -53,6 +53,18 @@ Security
   number) is indeterminate.
 - Static policies that read a header or a claim nobody allow-listed are rejected at build (the attribute
   would always be absent and a ``deny`` on it would deny everything).
+
+Tooling and tests
+~~~~~~~~~~~~~~~~~
+
+- ``make mutation`` (``mutmut``) runs mutation testing on the access-decision code, with a score per module
+  and a 90 % floor (``make mutation-report`` lists survivors). The first pass raised the mutation score of
+  the ABAC condition language, validation, decision point and cache to 93-100 % by adding boundary,
+  exact-message and ``explain`` tests. Results: ``documentation/QUALITY-REPORT-0.8.0.md``.
+- ``make bump-version`` rewrites only the ``version`` line of ``[project]`` (it used to replace every
+  occurrence of the old number in ``pyproject.toml``, including dependency pins).
+- ``make test-floci`` now runs every ``floci`` test under ``tests/authz/integration``; the coverage badge
+  of the README is up to date (96 %).
 
 Documentation
 ~~~~~~~~~~~~~
