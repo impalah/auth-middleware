@@ -143,7 +143,7 @@ info:
 # Build documentation
 # Stores against DynamoDB, PostgreSQL and MySQL emulated by Floci (needs Docker)
 test-floci:
-	uv run pytest -m floci tests/authz/integration/test_floci.py -v
+	uv run pytest -m floci tests/authz/integration -v
 
 docs:
 	uv run sphinx-build -W --keep-going pages_source docs

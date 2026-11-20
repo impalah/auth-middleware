@@ -13,7 +13,8 @@ Key design (one table; two tables, or the assignment table, work as well)::
 ``list_policies(scope)`` is two consistent ``Query`` calls (the scope's partition and
 the kind-wide ``*`` one), no scan. The **id marker** makes policy ids unique across
 scopes: it is created first with ``attribute_not_exists`` (a crash between the two
-writes leaves an orphan marker that the next ``create`` of that id recovers).
+writes leaves an orphan marker that a later ``create`` of that id takes over once it
+is older than 30 seconds, with a compare-and-set so only one creator can).
 ``list_all`` is a ``Scan``: tooling only, never the request path. A policy of the
 global scope is stored under ``*`` whether it was created as ``PolicyScope("global")``
 or ``PolicyScope("global", "*")``.
@@ -66,6 +67,9 @@ except ImportError as exc:  # pragma: no cover - exercised without the extra
 
 DEFAULT_POLICY_TABLE = "authz_policy"
 _POLICY = "POLICY#"
+#: A marker without its policy item younger than this is a create in flight, not
+#: the leftover of a crash: nobody may take it over.
+ORPHAN_GRACE_SECONDS = 30.0
 
 
 def _scope_pk(kind: str, scope_id: str | None) -> str:
@@ -326,6 +330,7 @@ class DynamoDbPolicyStore(_DynamoBase):
             policy_id=new.id,
             scope_kind=new.scope.kind,
             scope_id=new.scope.id or "*",
+            created_at=datetime.now(UTC),
         )
         try:
             await self._call(
@@ -357,16 +362,29 @@ class DynamoDbPolicyStore(_DynamoBase):
         return self._decode(item)
 
     async def _recover_orphan(self, marker: Any) -> bool:
-        """Re-take a marker whose policy item was never written (a crashed create)."""
+        """Take over a marker whose policy item was never written (a crashed create).
+
+        Only when the marker is older than :data:`ORPHAN_GRACE_SECONDS` (a younger
+        one is somebody's create in flight) and with a compare-and-set on its
+        ``created_at``, so concurrent recoverers cannot both succeed.
+        """
+        item_cls = self._item
 
         def run() -> bool:
             current = self._load(marker.policy_id)
             if current is None or current[1] is not None:
                 return False
-            marker.save()  # unconditional: the old marker pointed at nothing
+            old = current[0].created_at
+            age = None if old is None else (datetime.now(UTC) - old).total_seconds()
+            if age is None or age < ORPHAN_GRACE_SECONDS:
+                return False
+            marker.save(condition=item_cls.created_at == old)
             return True
 
-        return bool(await self._call(run))
+        try:
+            return bool(await self._call(run))
+        except RevisionConflictError:
+            return False
 
     async def _drop_marker(self, marker: Any) -> None:
         try:

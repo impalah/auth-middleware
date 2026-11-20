@@ -141,13 +141,33 @@ async def test_guard_path_reads_are_consistent_and_two_queries(endpoint):  # noq
 
 
 @pytest.mark.asyncio
-async def test_orphan_marker_from_a_crashed_create_is_recovered(endpoint):  # noqa: F811
+async def test_orphan_marker_is_recovered_only_when_old(endpoint):  # noqa: F811
+    from datetime import UTC, datetime, timedelta
+
     async with fresh(DynamoDbPolicyStore, endpoint) as store:
-        marker = store._item(
-            "POLICYID#p1", "META", policy_id="p1", scope_kind="studio", scope_id="s1"
+        # a create in flight (fresh marker, no policy item yet): nobody takes it over
+        young = store._item(
+            "POLICYID#p1",
+            "META",
+            policy_id="p1",
+            scope_kind="studio",
+            scope_id="s1",
+            created_at=datetime.now(UTC),
         )
-        await asyncio.to_thread(marker.save)  # the policy item was never written
+        await asyncio.to_thread(young.save)
         assert await store.get("p1") is None
+        with pytest.raises(PolicyConflictError):
+            await store.create(np(scope=PolicyScope("studio", "s2")))
+        # the leftover of a crashed create (old marker): the next create re-takes it
+        old = store._item(
+            "POLICYID#p1",
+            "META",
+            policy_id="p1",
+            scope_kind="studio",
+            scope_id="s1",
+            created_at=datetime.now(UTC) - timedelta(hours=1),
+        )
+        await asyncio.to_thread(old.save)
         created = await store.create(np())
         assert created.id == "p1" and (await store.get("p1")) is not None
         with pytest.raises(PolicyConflictError):
