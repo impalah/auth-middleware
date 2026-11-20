@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>auth_middleware.authz.abac.pdp &mdash; Auth Middleware 0.7.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/abac/pdp.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5a057da9"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../abac.html">Attribute-Based Access Control (ABAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">auth_middleware.authz.abac.pdp</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for auth_middleware.authz.abac.pdp</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The policy decision point: evaluates the applicable policies of one decision.</span>
+
+<span class="sd">Deny-overrides over the enforced policies, with fail-closed three-valued logic:</span>
+
+<span class="sd">* ``deny``: applies when its condition is TRUE **or INDETERMINATE**.</span>
+<span class="sd">* ``require``: denies unless its condition is TRUE.</span>
+<span class="sd">* ``permit`` (``grant`` mode only): grants only when TRUE.</span>
+
+<span class="sd">``enforce=False`` policies are evaluated and reported (``shadow_policy_ids``)</span>
+<span class="sd">but never change the outcome.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">AttributeRequest</span><span class="p">,</span> <span class="n">AttributeResolver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.conditions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ABSENT</span><span class="p">,</span>
+    <span class="n">Condition</span><span class="p">,</span>
+    <span class="n">Tri</span><span class="p">,</span>
+    <span class="n">condition_paths</span><span class="p">,</span>
+    <span class="n">evaluate</span><span class="p">,</span>
+    <span class="n">parse_condition</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Effect</span><span class="p">,</span> <span class="n">Policy</span><span class="p">,</span> <span class="n">PolicyStatus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.validation</span><span class="w"> </span><span class="kn">import</span> <span class="n">policy_matches_permission</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.errors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AuthzError</span><span class="p">,</span>
+    <span class="n">ConditionError</span><span class="p">,</span>
+    <span class="n">ConfigurationError</span><span class="p">,</span>
+    <span class="n">StoreUnavailableError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionKind</span>
+
+<span class="n">Mode</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"restrict"</span><span class="p">,</span> <span class="s2">"grant"</span><span class="p">]</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolicyTrace</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What one policy did in a decision (for ``explain``; values are opt-in)."""</span>
+
+    <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="n">Effect</span>
+    <span class="n">enforced</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">Tri</span>
+    <span class="n">decisive</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">absent</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbacOutcome</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The result of the policy phase of one decision."""</span>
+
+    <span class="n">denied</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">hidden</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">permitted</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">policy_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">shadow_policy_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trace</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">PolicyTrace</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Explanation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Why a decision came out as it did. For logs and tools, never for clients."""</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="n">DecisionKind</span>
+    <span class="n">rbac_granted</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">visible</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">roles</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">outcome</span><span class="p">:</span> <span class="n">AbacOutcome</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Human-readable multi-line text."""</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">"decision: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"visible: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">visible</span><span class="si">}</span><span class="s2">  rbac_granted: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rbac_granted</span><span class="si">}</span><span class="s2">  "</span>
+            <span class="sa">f</span><span class="s2">"roles: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">roles</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span><span class="o">.</span><span class="n">trace</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">outcome</span> <span class="k">else</span> <span class="p">():</span>
+            <span class="n">mark</span> <span class="o">=</span> <span class="s2">"*"</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">decisive</span> <span class="k">else</span> <span class="s2">" "</span>
+            <span class="n">shadow</span> <span class="o">=</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">enforced</span> <span class="k">else</span> <span class="s2">" [shadow]"</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">" </span><span class="si">{</span><span class="n">mark</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">policy_id</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shadow</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span>
+                <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" absent=</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">absent</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">absent</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Tally</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Running result of the policies of one decision."""</span>
+
+    <span class="n">denial</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Policy</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">permits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">shadow</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">trace</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PolicyTrace</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_denies</span><span class="p">(</span><span class="n">effect</span><span class="p">:</span> <span class="n">Effect</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Tri</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">effect</span> <span class="ow">is</span> <span class="n">Effect</span><span class="o">.</span><span class="n">DENY</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Tri</span><span class="o">.</span><span class="n">FALSE</span>
+    <span class="k">if</span> <span class="n">effect</span> <span class="ow">is</span> <span class="n">Effect</span><span class="o">.</span><span class="n">REQUIRE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Tri</span><span class="o">.</span><span class="n">TRUE</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_reason</span><span class="p">(</span><span class="n">effect</span><span class="p">:</span> <span class="n">Effect</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">Tri</span><span class="p">,</span> <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="n">Tri</span><span class="o">.</span><span class="n">INDETERMINATE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"indeterminate:</span><span class="si">{</span><span class="n">policy_id</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">effect</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">policy_id</span><span class="si">}</span><span class="s2">"</span>
+
+
+<div class="viewcode-block" id="PolicyDecisionPoint">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.pdp.PolicyDecisionPoint">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolicyDecisionPoint</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Loads, evaluates and combines the policies of a decision."""</span>
+
+<div class="viewcode-block" id="PolicyDecisionPoint.__init__">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.pdp.PolicyDecisionPoint.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">policies</span><span class="p">:</span> <span class="n">PolicyStore</span><span class="p">,</span>
+        <span class="n">resolver</span><span class="p">:</span> <span class="n">AttributeResolver</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">Mode</span> <span class="o">=</span> <span class="s2">"restrict"</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Args:</span>
+<span class="sd">            policies: Where the policies come from.</span>
+<span class="sd">            resolver: Where the attributes come from.</span>
+<span class="sd">            mode: ``restrict`` (policies only narrow) or ``grant`` (``permit``</span>
+<span class="sd">                policies may grant; experimental).</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"restrict"</span><span class="p">,</span> <span class="s2">"grant"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown ABAC mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_policies</span> <span class="o">=</span> <span class="n">policies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span> <span class="o">=</span> <span class="n">resolver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">:</span> <span class="n">Mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_warned</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span></div>
+
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">AttributeRequest</span><span class="p">,</span> <span class="n">permission</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Policy</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_policies</span><span class="o">.</span><span class="n">list_policies</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">scope</span><span class="p">)</span>
+            <span class="n">usable</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">p</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">found</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="n">PolicyStatus</span><span class="o">.</span><span class="n">ACTIVE</span>
+                <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">policy_matches_permission</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">permission</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">permissions</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">usable</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">AuthzError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="c1"># A broken source or a poisoned cache entry is an outage, never an allow.</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"policy source failed"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StoreUnavailableError</span><span class="p">(</span><span class="s2">"policy source failed"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="n">Policy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Condition</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parse_condition</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">condition</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ConditionError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">"stored policy </span><span class="si">{}</span><span class="s2"> has an invalid condition: it fails closed"</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">id</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_skip_permit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policy</span><span class="p">:</span> <span class="n">Policy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">policy</span><span class="o">.</span><span class="n">effect</span> <span class="ow">is</span> <span class="n">Effect</span><span class="o">.</span><span class="n">PERMIT</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"grant"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">policy</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_warned</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_warned</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">"policy </span><span class="si">{}</span><span class="s2"> is a permit but the mode is restrict: ignored"</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">id</span>
+                <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="PolicyDecisionPoint.evaluate">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.pdp.PolicyDecisionPoint.evaluate">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">AttributeRequest</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">explain</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">reveal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbacOutcome</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run the policy phase.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ctx: Principal, permission, scope, resource and request.</span>
+<span class="sd">            explain: Evaluate every policy and fill the trace.</span>
+<span class="sd">            reveal: Include attribute values in the trace (never for clients).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ResourceNotFoundError: The resource loader said it does not exist.</span>
+<span class="sd">            StoreUnavailableError: A source or provider failed (never an allow).</span>
+<span class="sd">        """</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluate</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">explain</span><span class="p">,</span> <span class="n">reveal</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">AuthzError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">opt</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"policy evaluation failed"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StoreUnavailableError</span><span class="p">(</span><span class="s2">"policy evaluation failed"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span></div>
+
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_evaluate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">AttributeRequest</span><span class="p">,</span> <span class="n">explain</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">reveal</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbacOutcome</span><span class="p">:</span>
+        <span class="n">policies</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">permission</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_permit</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">policies</span><span class="p">]</span>
+        <span class="n">needed</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">(</span><span class="n">condition_paths</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">parsed</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolver</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">needed</span><span class="p">)</span> <span class="k">if</span> <span class="n">needed</span> <span class="k">else</span> <span class="p">{}</span>
+
+        <span class="n">tally</span> <span class="o">=</span> <span class="n">_Tally</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">policy</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tally</span><span class="o">.</span><span class="n">denial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">policy</span><span class="o">.</span><span class="n">enforce</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">explain</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_judge</span><span class="p">(</span><span class="n">tally</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">explain</span><span class="p">,</span> <span class="n">reveal</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outcome</span><span class="p">(</span><span class="n">tally</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_judge</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">tally</span><span class="p">:</span> <span class="n">_Tally</span><span class="p">,</span>
+        <span class="n">policy</span><span class="p">:</span> <span class="n">Policy</span><span class="p">,</span>
+        <span class="n">cond</span><span class="p">:</span> <span class="n">Condition</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">values</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">explain</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">reveal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">Tri</span><span class="o">.</span><span class="n">INDETERMINATE</span> <span class="k">if</span> <span class="n">cond</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="n">denies</span> <span class="o">=</span> <span class="n">_denies</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="n">reason</span> <span class="o">=</span> <span class="n">_reason</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">policy</span><span class="o">.</span><span class="n">enforce</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">denies</span><span class="p">:</span>
+                <span class="n">tally</span><span class="o">.</span><span class="n">shadow</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">denies</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tally</span><span class="o">.</span><span class="n">denial</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tally</span><span class="o">.</span><span class="n">denial</span> <span class="o">=</span> <span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">policy</span><span class="o">.</span><span class="n">effect</span> <span class="ow">is</span> <span class="n">Effect</span><span class="o">.</span><span class="n">PERMIT</span> <span class="ow">and</span> <span class="n">result</span> <span class="ow">is</span> <span class="n">Tri</span><span class="o">.</span><span class="n">TRUE</span><span class="p">:</span>
+            <span class="n">tally</span><span class="o">.</span><span class="n">permits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">explain</span><span class="p">:</span>
+            <span class="n">tally</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">denies</span><span class="p">,</span> <span class="n">reason</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">reveal</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_trace</span><span class="p">(</span>
+        <span class="n">policy</span><span class="p">:</span> <span class="n">Policy</span><span class="p">,</span>
+        <span class="n">cond</span><span class="p">:</span> <span class="n">Condition</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">Tri</span><span class="p">,</span>
+        <span class="n">denies</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">values</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">reveal</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PolicyTrace</span><span class="p">:</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="n">condition_paths</span><span class="p">(</span><span class="n">cond</span><span class="p">)</span> <span class="k">if</span> <span class="n">cond</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">frozenset</span><span class="p">()</span>
+        <span class="n">absent</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ABSENT</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ABSENT</span><span class="p">))</span>
+        <span class="n">shown</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">values</span><span class="p">}</span> <span class="k">if</span> <span class="n">reveal</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">decisive</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">enforce</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">denies</span> <span class="ow">or</span> <span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">effect</span> <span class="ow">is</span> <span class="n">Effect</span><span class="o">.</span><span class="n">PERMIT</span> <span class="ow">and</span> <span class="n">result</span> <span class="ow">is</span> <span class="n">Tri</span><span class="o">.</span><span class="n">TRUE</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">PolicyTrace</span><span class="p">(</span>
+            <span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">policy</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span>
+            <span class="n">policy</span><span class="o">.</span><span class="n">enforce</span><span class="p">,</span>
+            <span class="n">result</span><span class="p">,</span>
+            <span class="n">decisive</span><span class="p">,</span>
+            <span class="n">reason</span><span class="p">,</span>
+            <span class="n">absent</span><span class="p">,</span>
+            <span class="n">shown</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_outcome</span><span class="p">(</span><span class="n">tally</span><span class="p">:</span> <span class="n">_Tally</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbacOutcome</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tally</span><span class="o">.</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">shadow</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">tally</span><span class="o">.</span><span class="n">shadow</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tally</span><span class="o">.</span><span class="n">denial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">policy</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">tally</span><span class="o">.</span><span class="n">denial</span>
+            <span class="k">return</span> <span class="n">AbacOutcome</span><span class="p">(</span>
+                <span class="n">denied</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">hidden</span><span class="o">=</span><span class="n">policy</span><span class="o">.</span><span class="n">hide</span><span class="p">,</span>
+                <span class="n">policy_ids</span><span class="o">=</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">,),</span>
+                <span class="n">shadow_policy_ids</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span>
+                <span class="n">reason</span><span class="o">=</span><span class="n">reason</span><span class="p">,</span>
+                <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">permits</span> <span class="o">=</span> <span class="n">tally</span><span class="o">.</span><span class="n">permits</span>
+        <span class="k">return</span> <span class="n">AbacOutcome</span><span class="p">(</span>
+            <span class="n">permitted</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">permits</span><span class="p">),</span>
+            <span class="n">policy_ids</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">permits</span><span class="p">),</span>
+            <span class="n">shadow_policy_ids</span><span class="o">=</span><span class="n">shadow</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="sa">f</span><span class="s2">"permit:</span><span class="si">{</span><span class="n">permits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">permits</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

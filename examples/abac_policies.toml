@@ -1,0 +1,58 @@
+# ABAC policies of examples/abac_example.py (also included in the documentation and
+# validated by the test suite: this file cannot rot).
+
+# A suspended studio is read-only, whatever the role.
+[[policies]]
+id = "studio-suspended-readonly"
+description = "A suspended studio cannot be modified"
+effect = "deny"
+permissions = ["design.write", "design.delete"]
+scope = {kind = "studio"}
+condition = {eq = [{attr = "subject.assignment.tenant_status"}, "suspended"]}
+
+# Only the owner of a design may delete it, even for an OWNER of the studio.
+# hide = true: somebody else's design looks like it does not exist (404).
+[[policies]]
+id = "owner-only-delete"
+description = "Only the owner of a design can delete it"
+effect = "require"
+permissions = ["design.delete"]
+scope = {kind = "studio"}
+hide = true
+condition = {eq = [{attr = "resource.attrs.owner_id"}, {attr = "subject.id"}]}
+
+# Support staff read only during office hours (UTC).
+[[policies]]
+id = "support-office-hours"
+description = "Support reads between 08:00 and 20:00 UTC only"
+effect = "deny"
+permissions = ["*.read"]
+scope = {kind = "studio"}
+condition = {all = [
+  {contains = [{attr = "subject.roles"}, "SUPPORT"]},
+  {any = [
+    {lt = [{attr = "env.hour_utc"}, 8]},
+    {gte = [{attr = "env.hour_utc"}, 20]},
+  ]},
+]}
+
+# ... and never billing, at any hour.
+[[policies]]
+id = "support-no-billing"
+description = "Support never reads billing"
+effect = "deny"
+permissions = ["billing.*"]
+scope = {kind = "studio"}
+condition = {contains = [{attr = "subject.roles"}, "SUPPORT"]}
+
+# A document needs a clearance at least as high as its classification.
+[[policies]]
+id = "classification-vs-clearance"
+description = "Clearance must cover the classification of the document"
+effect = "require"
+permissions = ["doc.read"]
+scope = {kind = "studio"}
+condition = {gte = [
+  {attr = "subject.attrs.clearance"},
+  {attr = "resource.attrs.classification"},
+]}

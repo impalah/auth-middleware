@@ -65,10 +65,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#in-code">In code</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#from-toml-or-json">From TOML or JSON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#scope-kinds-and-hide-existence">Scope kinds and <code class="docutils literal notranslate"><span class="pre">hide_existence</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#attributes-for-abac-policies">Attributes for ABAC policies</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abac.html">Attribute-Based Access Control (ABAC)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
@@ -222,6 +224,22 @@ scope of that kind (<code class="docutils literal notranslate"><span class="pre"
 allowed); it does not change enforcement.</p>
 <p>Useful lookups: <code class="docutils literal notranslate"><span class="pre">permissions_for(role)</span></code>, <code class="docutils literal notranslate"><span class="pre">roles_granting(permission)</span></code>, <code class="docutils literal notranslate"><span class="pre">spec(permission)</span></code>,
 <code class="docutils literal notranslate"><span class="pre">to_mapping()</span></code> (round-trips with <code class="docutils literal notranslate"><span class="pre">from_mapping</span></code>).</p>
+</section>
+<section id="attributes-for-abac-policies">
+<h2>Attributes for ABAC policies<a class="headerlink" href="#attributes-for-abac-policies" title="Link to this heading"></a></h2>
+<p>An optional <code class="docutils literal notranslate"><span class="pre">attributes</span></code> section declares what <a class="reference internal" href="abac.html#abac"><span class="std std-ref">policies</span></a> may read besides the built-ins
+(<code class="docutils literal notranslate"><span class="pre">subject.id</span></code>, <code class="docutils literal notranslate"><span class="pre">subject.roles</span></code>, <code class="docutils literal notranslate"><span class="pre">env.now</span></code>, <code class="docutils literal notranslate"><span class="pre">env.hour_utc</span></code>…). Catalogs without it load unchanged.</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[attributes.</span><span class="s2">"subject.assignment.tenant_status"</span><span class="k">]</span>
+<span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"string"</span><span class="w">                      </span><span class="c1"># string | int | float | bool | datetime | string_set</span>
+<span class="n">enum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"active"</span><span class="p">,</span><span class="w"> </span><span class="s2">"suspended"</span><span class="p">]</span><span class="w">       </span><span class="c1"># optional closed set of literal values</span>
+
+<span class="k">[attributes.</span><span class="s2">"subject.attrs.clearance"</span><span class="k">]</span>
+<span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"int"</span>
+</pre></div>
+</div>
+<p>Only members of <code class="docutils literal notranslate"><span class="pre">subject.claims.</span></code>, <code class="docutils literal notranslate"><span class="pre">subject.assignment.</span></code>, <code class="docutils literal notranslate"><span class="pre">subject.attrs.</span></code>, <code class="docutils literal notranslate"><span class="pre">resource.attrs.</span></code> and
+<code class="docutils literal notranslate"><span class="pre">env.header.</span></code> can be declared. In code, pass <code class="docutils literal notranslate"><span class="pre">attributes=[AttributeSpec(...)]</span></code> to
+<code class="docutils literal notranslate"><span class="pre">PermissionCatalog.from_mapping</span></code>.</p>
 </section>
 </section>
 

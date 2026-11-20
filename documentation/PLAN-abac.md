@@ -1,6 +1,8 @@
 # PLAN · ABAC (attribute-based access control) on top of scoped permissions
 
-Status: proposed (2026-11-14). Nothing in this plan is implemented yet.
+Status: implemented on 2026-11-20 as local commits (AUTHZ-023..036), not pushed and not released; the
+version stays 0.7.1 until the owner decides to release 0.8.0. Deviations: resolution log of
+`documentation/issues/README.md`; quality report: `QUALITY-REPORT-0.8.0.md`.
 Issues: `documentation/issues/AUTHZ-023..036` (Epic H; index in `documentation/issues/README.md`).
 Target release: `0.8.0` (additive: with no policy configured, behaviour is byte-for-byte the 0.7.0 one).
 Read first: `PLAN-authz.md` (vocabulary: scope, assignment, catalog, `Authorizer`).

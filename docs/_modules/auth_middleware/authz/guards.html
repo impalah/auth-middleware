@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.authz.guards &mdash; Auth Middleware 0.7.0 documentation</title>
+  <title>auth_middleware.authz.guards &mdash; Auth Middleware 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/guards.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-catalog.html">The Permission Catalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-stores.html">Assignment Stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../abac.html">Attribute-Based Access Control (ABAC)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-migration.html">Migrating from Flat Permissions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-api.html">Scoped Permissions API Reference</a></li>
@@ -169,7 +170,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">starlette.requests</span><span class="w"> </span><span class="kn">import</span> <span class="n">Request</span>
@@ -182,6 +183,7 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">PERMISSION_ATTR</span><span class="p">,</span>
+    <span class="n">RESOURCE_ATTR</span><span class="p">,</span>
     <span class="n">SCOPE_ATTR</span><span class="p">,</span>
     <span class="n">Authz</span><span class="p">,</span>
     <span class="n">DecisionEvent</span><span class="p">,</span>
@@ -194,6 +196,10 @@
     <span class="n">Principal</span><span class="p">,</span>
     <span class="n">ScopeRef</span><span class="p">,</span>
 <span class="p">)</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceContext</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceSource</span>
 
 <span class="n">AuthzSource</span> <span class="o">=</span> <span class="n">Authz</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Request</span><span class="p">],</span> <span class="n">Authz</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
 
@@ -237,6 +243,9 @@
     <span class="n">decision</span><span class="p">:</span> <span class="n">DecisionKind</span><span class="p">,</span>
     <span class="n">started</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">roles</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(),</span>
+    <span class="n">abac</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">policy_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+    <span class="n">shadow_policy_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Deliver the decision to ``on_decision``.</span>
 
@@ -257,6 +266,10 @@
             <span class="n">sensitive</span><span class="o">=</span><span class="n">authz</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">spec</span><span class="p">(</span><span class="n">permission</span><span class="p">)</span><span class="o">.</span><span class="n">sensitive</span><span class="p">,</span>
             <span class="n">duration_ms</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">started</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">,</span>
             <span class="n">request_id</span><span class="o">=</span><span class="n">_request_id</span><span class="p">(</span><span class="n">request</span><span class="p">),</span>
+            <span class="n">policy_ids</span><span class="o">=</span><span class="n">policy_ids</span> <span class="ow">or</span> <span class="p">(</span><span class="n">abac</span><span class="o">.</span><span class="n">policy_ids</span> <span class="k">if</span> <span class="n">abac</span> <span class="k">else</span> <span class="p">()),</span>
+            <span class="n">shadow_policy_ids</span><span class="o">=</span><span class="n">shadow_policy_ids</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">abac</span><span class="o">.</span><span class="n">shadow_policy_ids</span> <span class="k">if</span> <span class="n">abac</span> <span class="k">else</span> <span class="p">()),</span>
+            <span class="n">abac_reason</span><span class="o">=</span><span class="n">abac</span><span class="o">.</span><span class="n">reason</span> <span class="k">if</span> <span class="n">abac</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">hook</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isawaitable</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
@@ -271,6 +284,7 @@
     <span class="n">permission</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeSource</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">resource</span><span class="p">:</span> <span class="n">ResourceSource</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">authz</span><span class="p">:</span> <span class="n">AuthzSource</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Awaitable</span><span class="p">[</span><span class="n">AuthzContext</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">"""Build a FastAPI dependency that enforces ``permission`` in ``scope``.</span>
@@ -286,6 +300,10 @@
 <span class="sd">    Args:</span>
 <span class="sd">        permission: Permission name (a ``StrEnum`` member is accepted).</span>
 <span class="sd">        scope: Where the scope comes from. Defaults to the global scope.</span>
+<span class="sd">        resource: Where the resource comes from (ABAC): a ``ResourceFromPath`` /</span>
+<span class="sd">            ``ResourceFromQuery`` / ``ResourceFromCallable``, optionally with a</span>
+<span class="sd">            loader of the resource's attributes. Needs ``Authz.build(abac=...)``</span>
+<span class="sd">            (startup validation refuses a guard whose resource would be ignored).</span>
 <span class="sd">        authz: An ``Authz`` or a function of the request returning one; default</span>
 <span class="sd">            ``Authz.of(request)`` (``app.state.authz``).</span>
 
@@ -306,9 +324,12 @@
             <span class="k">raise</span> <span class="n">rt</span><span class="o">.</span><span class="n">error_policy</span><span class="o">.</span><span class="n">not_visible</span><span class="p">(</span>
                 <span class="n">request</span><span class="p">,</span> <span class="n">ScopeNotVisibleError</span><span class="p">(</span><span class="n">ScopeRef</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="s2">"invalid"</span><span class="p">))</span>
             <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="n">resource_ctx</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_resource_context</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">rt</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">scope_ref</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">authorizer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">rt</span><span class="o">.</span><span class="n">authorizer_for</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-            <span class="n">ctx</span> <span class="o">=</span> <span class="k">await</span> <span class="n">authorizer</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">principal</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">scope_ref</span><span class="p">)</span>
+            <span class="n">ctx</span> <span class="o">=</span> <span class="k">await</span> <span class="n">authorizer</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span>
+                <span class="n">principal</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">scope_ref</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">resource_ctx</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="n">request</span>
+            <span class="p">)</span>
         <span class="k">except</span> <span class="n">StoreUnavailableError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">rt</span><span class="o">.</span><span class="n">error_policy</span><span class="o">.</span><span class="n">unavailable</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">except</span> <span class="n">ScopeNotVisibleError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
@@ -320,11 +341,19 @@
                 <span class="n">scope_ref</span><span class="p">,</span>
                 <span class="n">DecisionKind</span><span class="o">.</span><span class="n">NOT_VISIBLE</span><span class="p">,</span>
                 <span class="n">started</span><span class="p">,</span>
+                <span class="n">abac</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">abac</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="n">rt</span><span class="o">.</span><span class="n">error_policy</span><span class="o">.</span><span class="n">not_visible</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">except</span> <span class="n">PermissionDeniedError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">await</span> <span class="n">_emit</span><span class="p">(</span>
-                <span class="n">rt</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">principal</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">scope_ref</span><span class="p">,</span> <span class="n">DecisionKind</span><span class="o">.</span><span class="n">DENIED</span><span class="p">,</span> <span class="n">started</span>
+                <span class="n">rt</span><span class="p">,</span>
+                <span class="n">request</span><span class="p">,</span>
+                <span class="n">principal</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">,</span>
+                <span class="n">scope_ref</span><span class="p">,</span>
+                <span class="n">DecisionKind</span><span class="o">.</span><span class="n">DENIED</span><span class="p">,</span>
+                <span class="n">started</span><span class="p">,</span>
+                <span class="n">abac</span><span class="o">=</span><span class="n">exc</span><span class="o">.</span><span class="n">abac</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="n">rt</span><span class="o">.</span><span class="n">error_policy</span><span class="o">.</span><span class="n">denied</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">await</span> <span class="n">_emit</span><span class="p">(</span>
@@ -336,14 +365,39 @@
             <span class="n">DecisionKind</span><span class="o">.</span><span class="n">ALLOWED</span><span class="p">,</span>
             <span class="n">started</span><span class="p">,</span>
             <span class="n">ctx</span><span class="o">.</span><span class="n">roles</span><span class="p">,</span>
+            <span class="n">policy_ids</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">policy_ids</span><span class="p">,</span>
+            <span class="n">shadow_policy_ids</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">shadow_policy_ids</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">request</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">authz_context</span> <span class="o">=</span> <span class="n">ctx</span>
         <span class="k">return</span> <span class="n">ctx</span>
 
     <span class="nb">setattr</span><span class="p">(</span><span class="n">dependency</span><span class="p">,</span> <span class="n">PERMISSION_ATTR</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
     <span class="nb">setattr</span><span class="p">(</span><span class="n">dependency</span><span class="p">,</span> <span class="n">SCOPE_ATTR</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">dependency</span><span class="p">,</span> <span class="n">RESOURCE_ATTR</span><span class="p">,</span> <span class="n">resource</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dependency</span></div>
 
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_resource_context</span><span class="p">(</span>
+    <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
+    <span class="n">rt</span><span class="p">:</span> <span class="n">Authz</span><span class="p">,</span>
+    <span class="n">resource</span><span class="p">:</span> <span class="n">ResourceSource</span> <span class="o">|</span> <span class="n">ResourceContext</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">scope_ref</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResourceContext</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Resolve the guard's resource; an invalid id is answered as "not visible"."""</span>
+    <span class="k">if</span> <span class="n">resource</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResourceContext</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resource</span><span class="p">,</span> <span class="n">ResourceContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">resource</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ref</span> <span class="o">=</span> <span class="k">await</span> <span class="n">resource</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">InvalidScopeError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">rt</span><span class="o">.</span><span class="n">error_policy</span><span class="o">.</span><span class="n">not_visible</span><span class="p">(</span>
+            <span class="n">request</span><span class="p">,</span> <span class="n">ScopeNotVisibleError</span><span class="p">(</span><span class="n">scope_ref</span><span class="p">)</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">return</span> <span class="n">ResourceContext</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">resource</span><span class="o">.</span><span class="n">loader</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="has_permission">
@@ -353,6 +407,7 @@
     <span class="n">permission</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
+    <span class="n">resource</span><span class="p">:</span> <span class="n">ResourceSource</span> <span class="o">|</span> <span class="n">ResourceContext</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">authz</span><span class="p">:</span> <span class="n">AuthzSource</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Non-raising check for use inside handlers.</span>
@@ -373,9 +428,11 @@
         <span class="k">return</span> <span class="kc">False</span>
     <span class="n">principal</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_principal</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">rt</span><span class="p">)</span>
     <span class="n">authorizer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">rt</span><span class="o">.</span><span class="n">authorizer_for</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-    <span class="k">return</span> <span class="k">await</span> <span class="n">authorizer</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">principal</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">permission</span><span class="p">),</span> <span class="n">scope</span><span class="p">)</span> <span class="ow">is</span> <span class="p">(</span>
-        <span class="n">DecisionKind</span><span class="o">.</span><span class="n">ALLOWED</span>
-    <span class="p">)</span></div>
+    <span class="n">resource_ctx</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_resource_context</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">rt</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="k">await</span> <span class="n">authorizer</span><span class="o">.</span><span class="n">check</span><span class="p">(</span>
+        <span class="n">principal</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">permission</span><span class="p">),</span> <span class="n">scope</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">resource_ctx</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="n">request</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">kind</span> <span class="ow">is</span> <span class="n">DecisionKind</span><span class="o">.</span><span class="n">ALLOWED</span></div>
 
 
 

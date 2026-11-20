@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.authz.events &mdash; Auth Middleware 0.7.0 documentation</title>
+  <title>auth_middleware.authz.events &mdash; Auth Middleware 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/events.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-catalog.html">The Permission Catalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-stores.html">Assignment Stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../abac.html">Attribute-Based Access Control (ABAC)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-migration.html">Migrating from Flat Permissions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-api.html">Scoped Permissions API Reference</a></li>
@@ -180,6 +181,8 @@
         <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span>
     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">DecisionKind</span><span class="o">.</span><span class="n">NOT_VISIBLE</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">sensitive</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">shadow_policy_ids</span><span class="p">:</span>  <span class="c1"># allowed, but a shadow policy would have denied</span>
+        <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
     <span class="k">return</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
 
 
@@ -189,8 +192,9 @@
 <span class="w">    </span><span class="sd">"""Build an ``on_decision`` hook that logs through ``AuditLogger``.</span>
 
 <span class="sd">    Levels: ``DENIED`` WARNING, ``NOT_VISIBLE`` INFO, ``ALLOWED`` DEBUG, except</span>
-<span class="sd">    ``sensitive`` permissions which log at INFO even when allowed. Events carry</span>
-<span class="sd">    ids and permission names only.</span>
+<span class="sd">    ``sensitive`` permissions and decisions a shadow (``enforce=false``) policy</span>
+<span class="sd">    would have denied, which log at INFO even when allowed. Events carry ids and</span>
+<span class="sd">    permission names only (ABAC: policy ids and the reason, never attribute values).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        audit: The library's audit logger (its callback is invoked too).</span>
@@ -221,10 +225,25 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">metrics_hook</span><span class="p">(</span>
     <span class="n">collector</span><span class="p">:</span> <span class="n">MetricsCollector</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DecisionEvent</span><span class="p">],</span> <span class="n">Awaitable</span><span class="p">[</span><span class="kc">None</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">"""Build an ``on_decision`` hook counting decisions per kind and permission."""</span>
+<span class="w">    </span><span class="sd">"""Build an ``on_decision`` hook counting decisions per kind and permission.</span>
+
+<span class="sd">    Without ABAC the counters are exactly the 0.7.0 ones. With policies involved</span>
+<span class="sd">    the decision is also counted under ``by_source`` and each policy under</span>
+<span class="sd">    ``abac_policies`` (``denied``, ``permitted`` or ``shadow_denied``).</span>
+<span class="sd">    """</span>
 
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">hook</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">DecisionEvent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">await</span> <span class="n">collector</span><span class="o">.</span><span class="n">record_authz_decision</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">permission</span><span class="p">)</span>
+        <span class="n">abac</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">policy_ids</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">shadow_policy_ids</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">collector</span><span class="o">.</span><span class="n">record_authz_decision</span><span class="p">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">permission</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="p">(</span><span class="s2">"abac"</span> <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">policy_ids</span> <span class="k">else</span> <span class="s2">"rbac"</span><span class="p">)</span> <span class="k">if</span> <span class="n">abac</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">decided</span> <span class="o">=</span> <span class="s2">"permitted"</span> <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">DecisionKind</span><span class="o">.</span><span class="n">ALLOWED</span> <span class="k">else</span> <span class="s2">"denied"</span>
+        <span class="k">for</span> <span class="n">policy_id</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">policy_ids</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">collector</span><span class="o">.</span><span class="n">record_abac_policy</span><span class="p">(</span><span class="n">policy_id</span><span class="p">,</span> <span class="n">decided</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">policy_id</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">shadow_policy_ids</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">collector</span><span class="o">.</span><span class="n">record_abac_policy</span><span class="p">(</span><span class="n">policy_id</span><span class="p">,</span> <span class="s2">"shadow_denied"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">hook</span></div>
 

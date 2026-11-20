@@ -1,0 +1,650 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attribute-Based Access Control (ABAC) &mdash; Auth Middleware 0.7.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/abac.html" />
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5a057da9"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Operations: Service, CLI, Cache, Audit" href="authz-operations.html" />
+    <link rel="prev" title="FastAPI Integration" href="authz-fastapi.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Attribute-Based Access Control (ABAC)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-model">The model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#modes">Modes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#anatomy-of-a-policy">Anatomy of a policy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-condition-language">The condition language</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#wiring-it">Wiring it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cookbook">Cookbook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#persistence">Persistence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sqlalchemy">SQLAlchemy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dynamodb">DynamoDB</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#managing-policies">Managing policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rolling-a-policy-out-safely">Rolling a policy out safely</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#operations">Operations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#policy-cache">Policy cache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#audit-metrics-explain">Audit, metrics, explain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fail-closed">Fail closed</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#expressing-a-tenant-status-gate">Expressing a tenant-status gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#not-covered-yet">Not covered (yet)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Attribute-Based Access Control (ABAC)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/abac.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="attribute-based-access-control-abac">
+<span id="abac"></span><h1>Attribute-Based Access Control (ABAC)<a class="headerlink" href="#attribute-based-access-control-abac" title="Link to this heading"></a></h1>
+<p>Roles answer <em>“what can this member do in this scope?”</em>. Some rules depend on <strong>data</strong> instead:</p>
+<ul class="simple">
+<li><p>a suspended studio cannot be modified, whatever the role;</p></li>
+<li><p>only the owner of a design may delete it, even for an <code class="docutils literal notranslate"><span class="pre">OWNER</span></code> of the studio;</p></li>
+<li><p>support staff read only during office hours and never read billing;</p></li>
+<li><p>a document needs a clearance at least as high as its classification.</p></li>
+</ul>
+<p>ABAC adds those rules <strong>on top of</strong> the roles, without replacing them. A <em>policy</em> is a small
+JSON/TOML document that can be stored in the same databases as the assignments (SQLAlchemy, DynamoDB),
+versioned, audited and validated before it is accepted.</p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#the-model" id="id1">The model</a></p>
+<ul>
+<li><p><a class="reference internal" href="#modes" id="id2">Modes</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#anatomy-of-a-policy" id="id3">Anatomy of a policy</a></p></li>
+<li><p><a class="reference internal" href="#the-condition-language" id="id4">The condition language</a></p></li>
+<li><p><a class="reference internal" href="#attributes" id="id5">Attributes</a></p></li>
+<li><p><a class="reference internal" href="#wiring-it" id="id6">Wiring it</a></p></li>
+<li><p><a class="reference internal" href="#cookbook" id="id7">Cookbook</a></p></li>
+<li><p><a class="reference internal" href="#persistence" id="id8">Persistence</a></p>
+<ul>
+<li><p><a class="reference internal" href="#sqlalchemy" id="id9">SQLAlchemy</a></p></li>
+<li><p><a class="reference internal" href="#dynamodb" id="id10">DynamoDB</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#managing-policies" id="id11">Managing policies</a></p></li>
+<li><p><a class="reference internal" href="#rolling-a-policy-out-safely" id="id12">Rolling a policy out safely</a></p></li>
+<li><p><a class="reference internal" href="#operations" id="id13">Operations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#policy-cache" id="id14">Policy cache</a></p></li>
+<li><p><a class="reference internal" href="#audit-metrics-explain" id="id15">Audit, metrics, explain</a></p></li>
+<li><p><a class="reference internal" href="#fail-closed" id="id16">Fail closed</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#expressing-a-tenant-status-gate" id="id17">Expressing a tenant-status gate</a></p></li>
+<li><p><a class="reference internal" href="#not-covered-yet" id="id18">Not covered (yet)</a></p></li>
+</ul>
+</nav>
+<p>Without a policy source nothing changes: <code class="docutils literal notranslate"><span class="pre">Authz.build(...)</span></code> without <code class="docutils literal notranslate"><span class="pre">abac=</span></code> behaves exactly as in
+0.7.0.</p>
+<section id="the-model">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">The model</a><a class="headerlink" href="#the-model" title="Link to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>request ─&gt; role check (unchanged: 404 not visible / 403 role lacks it)
+              │
+              └─&gt; policies that apply (scope + permission)
+                    deny    -&gt; applies when its condition is TRUE or INDETERMINATE
+                    require -&gt; denies unless its condition is TRUE
+                    permit  -&gt; grants when TRUE (``grant`` mode only, experimental)
+</pre></div>
+</div>
+<p>A <strong>deny overrides</strong> everything. Evaluation is <em>three-valued</em>: a missing attribute or a type mismatch is
+<code class="docutils literal notranslate"><span class="pre">INDETERMINATE</span></code>, and the decision fails closed in both directions (a <code class="docutils literal notranslate"><span class="pre">deny</span></code> on an unknown value
+denies; a <code class="docutils literal notranslate"><span class="pre">require</span></code> on an unknown value is not satisfied).</p>
+<section id="modes">
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Modes</a><a class="headerlink" href="#modes" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">restrict</span></code> (default)</dt><dd><p>Policies only <strong>narrow</strong> what the roles granted. A wrong policy can lock people out, never let anybody
+in.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">grant</span></code> (<strong>experimental</strong>)</dt><dd><p>A <code class="docutils literal notranslate"><span class="pre">permit</span></code> policy whose condition is TRUE grants the permission even if the role does not. It never
+widens visibility: a principal who is not a member of the scope still gets 404. Semantics may be
+refined in a minor release.</p>
+</dd>
+</dl>
+</section>
+</section>
+<section id="anatomy-of-a-policy">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Anatomy of a policy</a><a class="headerlink" href="#anatomy-of-a-policy" title="Link to this heading"></a></h2>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[[policies]]</span>
+<span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"studio-suspended-readonly"</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"A suspended studio cannot be modified"</span>
+<span class="n">effect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"deny"</span>
+<span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"design.write"</span><span class="p">,</span><span class="w"> </span><span class="s2">"design.delete"</span><span class="p">]</span>
+<span class="n">scope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">kind</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"studio"</span><span class="p">}</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">id</span></code></dt><dd><p>Human-chosen, unique across the whole store (<code class="docutils literal notranslate"><span class="pre">[a-z0-9][a-z0-9_.-]{0,99}</span></code>).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">effect</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">deny</span></code>, <code class="docutils literal notranslate"><span class="pre">require</span></code> or <code class="docutils literal notranslate"><span class="pre">permit</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">permissions</span></code></dt><dd><p>Exact catalog names or <code class="docutils literal notranslate"><span class="pre">*</span></code> patterns (<code class="docutils literal notranslate"><span class="pre">design.*</span></code>, <code class="docutils literal notranslate"><span class="pre">*.write</span></code>). A pattern that matches nothing, or
+that spans scope kinds, is rejected when the policy is written.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">scope</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{kind</span> <span class="pre">=</span> <span class="pre">&quot;studio&quot;}</span></code> (every scope of the kind) or <code class="docutils literal notranslate"><span class="pre">{kind</span> <span class="pre">=</span> <span class="pre">&quot;studio&quot;,</span> <span class="pre">id</span> <span class="pre">=</span> <span class="pre">&quot;s1&quot;}</span></code>. The scope of a
+stored policy cannot change.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">hide</span></code></dt><dd><p>A denial answers <em>not visible</em> (404, byte-identical to a non-member’s answer) instead of 403.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">enforce</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">false</span></code> is <strong>shadow mode</strong>: the policy is evaluated and reported in the audit event
+(<code class="docutils literal notranslate"><span class="pre">shadow_policy_ids</span></code>) but never enforced. See <a class="reference internal" href="#abac-rollout"><span class="std std-ref">Rolling a policy out safely</span></a>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">priority</span></code></dt><dd><p>Lower is evaluated first (it decides which denial is reported; it never changes the outcome).</p>
+</dd>
+</dl>
+</section>
+<section id="the-condition-language">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">The condition language</a><a class="headerlink" href="#the-condition-language" title="Link to this heading"></a></h2>
+<p>A condition is a one-key object. There is <strong>no</strong> <code class="docutils literal notranslate"><span class="pre">eval</span></code>, no regular expression, no arithmetic and no
+user-defined operator: policies are data. Operands are literals or <code class="docutils literal notranslate"><span class="pre">{attr</span> <span class="pre">=</span> <span class="pre">&quot;namespace.name&quot;}</span></code>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24.0%" />
+<col style="width: 76.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Operator</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">all</span></code> / <code class="docutils literal notranslate"><span class="pre">any</span></code> / <code class="docutils literal notranslate"><span class="pre">not</span></code></p></td>
+<td><p>Logic over conditions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">eq</span></code> <code class="docutils literal notranslate"><span class="pre">ne</span></code></p></td>
+<td><p>Equality of two values of the <strong>same type</strong> (a number never equals a string or a bool).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lt</span></code> <code class="docutils literal notranslate"><span class="pre">lte</span></code> <code class="docutils literal notranslate"><span class="pre">gt</span></code> <code class="docutils literal notranslate"><span class="pre">gte</span></code></p></td>
+<td><p>Order over numbers or datetimes (ISO-8601 with offset against <code class="docutils literal notranslate"><span class="pre">env.now</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">in</span></code> <code class="docutils literal notranslate"><span class="pre">not_in</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[value,</span> <span class="pre">list]</span></code>: membership.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">contains</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[set,</span> <span class="pre">value]</span></code> or <code class="docutils literal notranslate"><span class="pre">[string,</span> <span class="pre">string]</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">intersects</span></code> <code class="docutils literal notranslate"><span class="pre">subset</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[set,</span> <span class="pre">set]</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">starts_with</span></code> <code class="docutils literal notranslate"><span class="pre">ends_with</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[string,</span> <span class="pre">string]</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exists</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{attr</span> <span class="pre">=</span> <span class="pre">...}</span></code> is present and not <code class="docutils literal notranslate"><span class="pre">null</span></code>; the only operator that turns absence into a
+definite answer.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Limits (checked when a condition is parsed): depth 8, 64 nodes, lists of 100 items, strings of 256
+characters, a policy document of 16 KB.</p>
+</section>
+<section id="attributes">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 72.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Namespace</p></th>
+<th class="head"><p>Comes from</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">subject.id|email|groups|roles</span></code></p></td>
+<td><p>the authenticated principal and the roles found in the scope</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">subject.assignment.&lt;name&gt;</span></code></p></td>
+<td><p>the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> of the principal’s assignment (e.g. <code class="docutils literal notranslate"><span class="pre">tenant_status</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">subject.claims.&lt;name&gt;</span></code></p></td>
+<td><p>token claims, <strong>only</strong> those in <code class="docutils literal notranslate"><span class="pre">AbacConfig.claims_allowlist</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">subject.attrs.&lt;name&gt;</span></code></p></td>
+<td><p>persisted principal attributes (<code class="docutils literal notranslate"><span class="pre">AttributeStore</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">resource.kind|id</span></code></p></td>
+<td><p>the guard’s <code class="docutils literal notranslate"><span class="pre">resource=</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">resource.attrs.&lt;name&gt;</span></code></p></td>
+<td><p>the route’s <strong>loader</strong> (your own data) or, without a loader, persisted resource attributes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">action.permission</span></code></p></td>
+<td><p>the permission being checked</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">env.now|hour_utc|weekday|method|path|ip</span></code></p></td>
+<td><p>the request (<code class="docutils literal notranslate"><span class="pre">env.ip</span></code> honours <code class="docutils literal notranslate"><span class="pre">X-Forwarded-For</span></code> only from <code class="docutils literal notranslate"><span class="pre">trusted_proxies</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">env.header.&lt;name&gt;</span></code></p></td>
+<td><p>request headers, <strong>only</strong> those in <code class="docutils literal notranslate"><span class="pre">headers_allowlist</span></code> (a duplicated header is absent)</p></td>
+</tr>
+</tbody>
+</table>
+<p>Everything except the built-ins must be <strong>declared in the catalog</strong>
+(see <a class="reference internal" href="authz-catalog.html#authz-catalog"><span class="std std-ref">The Permission Catalog</span></a>); a policy that names an undeclared attribute, compares incompatible types or
+uses a literal outside an <code class="docutils literal notranslate"><span class="pre">enum</span></code> is rejected when written. Attributes are loaded <strong>lazily</strong>: a loader is
+called only if an applicable policy reads <code class="docutils literal notranslate"><span class="pre">resource.attrs.*</span></code>, and at most once per decision.</p>
+</section>
+<section id="wiring-it">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Wiring it</a><a class="headerlink" href="#wiring-it" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="n">config</span> <span class="o">=</span> <span class="n">AbacConfig</span><span class="p">(</span>
+        <span class="n">policies</span><span class="o">=</span><span class="n">StaticPolicySource</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">POLICIES</span><span class="p">),</span>
+        <span class="n">attributes</span><span class="o">=</span><span class="n">attributes</span><span class="p">,</span>
+        <span class="o">**</span><span class="p">({</span><span class="s2">"clock"</span><span class="p">:</span> <span class="n">clock</span><span class="p">}</span> <span class="k">if</span> <span class="n">clock</span> <span class="k">else</span> <span class="p">{}),</span>
+    <span class="p">)</span>
+    <span class="n">authz</span> <span class="o">=</span> <span class="n">Authz</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="n">assignments</span><span class="p">,</span> <span class="n">abac</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>    <span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+        <span class="s2">"/studios/</span><span class="si">{studio_id}</span><span class="s2">/designs/</span><span class="si">{design_id}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="n">openapi_extra</span><span class="o">=</span><span class="n">permission_extra</span><span class="p">(</span><span class="s2">"design.delete"</span><span class="p">,</span> <span class="n">abac</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_design</span><span class="p">(</span>
+        <span class="n">design_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ctx</span><span class="p">:</span> <span class="n">AuthzContext</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span>
+            <span class="n">require_permission</span><span class="p">(</span>
+                <span class="s2">"design.delete"</span><span class="p">,</span>
+                <span class="n">scope</span><span class="o">=</span><span class="n">studio</span><span class="p">,</span>
+                <span class="n">resource</span><span class="o">=</span><span class="n">ResourceFromPath</span><span class="p">(</span><span class="s2">"design"</span><span class="p">,</span> <span class="s2">"design_id"</span><span class="p">,</span> <span class="n">design_attributes</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">),</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"design"</span><span class="p">:</span> <span class="n">design_id</span><span class="p">,</span> <span class="s2">"deleted"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">resource=</span></code> takes a <code class="docutils literal notranslate"><span class="pre">ResourceFromPath</span></code>, <code class="docutils literal notranslate"><span class="pre">ResourceFromQuery</span></code> or <code class="docutils literal notranslate"><span class="pre">ResourceFromCallable</span></code> (use the
+callable when the id is in the body, and read the body yourself: the library never consumes it).
+A loader returns the resource’s attributes, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when it does not exist, which is answered exactly
+like a non-member (404). A loader that raises is an outage (503), never an allow.
+Inside a handler use <code class="docutils literal notranslate"><span class="pre">has_permission(request,</span> <span class="pre">&quot;design.delete&quot;,</span> <span class="pre">scope,</span> <span class="pre">resource=...)</span></code>.</p>
+<p>A guard with <code class="docutils literal notranslate"><span class="pre">resource=</span></code> on an app whose <code class="docutils literal notranslate"><span class="pre">Authz</span></code> has no <code class="docutils literal notranslate"><span class="pre">abac=</span></code> is a <strong>startup error</strong> (it would
+otherwise be ignored). Static policies that read a header or a claim nobody allow-listed also fail at
+build: such an attribute is always absent, so a <code class="docutils literal notranslate"><span class="pre">deny</span></code> on it would deny every request.</p>
+</section>
+<section id="cookbook">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Cookbook</a><a class="headerlink" href="#cookbook" title="Link to this heading"></a></h2>
+<p>The five policies of <code class="docutils literal notranslate"><span class="pre">examples/abac_policies.toml</span></code> (the example application loads exactly this file, and
+the test suite validates it):</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ABAC policies of examples/abac_example.py (also included in the documentation and</span>
+<span class="c1"># validated by the test suite: this file cannot rot).</span>
+
+<span class="c1"># A suspended studio is read-only, whatever the role.</span>
+<span class="k">[[policies]]</span>
+<span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"studio-suspended-readonly"</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"A suspended studio cannot be modified"</span>
+<span class="n">effect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"deny"</span>
+<span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"design.write"</span><span class="p">,</span><span class="w"> </span><span class="s2">"design.delete"</span><span class="p">]</span>
+<span class="n">scope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">kind</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"studio"</span><span class="p">}</span>
+<span class="n">condition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">eq</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"subject.assignment.tenant_status"</span><span class="p">},</span><span class="w"> </span><span class="s2">"suspended"</span><span class="p">]}</span>
+
+<span class="c1"># Only the owner of a design may delete it, even for an OWNER of the studio.</span>
+<span class="c1"># hide = true: somebody else's design looks like it does not exist (404).</span>
+<span class="k">[[policies]]</span>
+<span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"owner-only-delete"</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Only the owner of a design can delete it"</span>
+<span class="n">effect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"require"</span>
+<span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"design.delete"</span><span class="p">]</span>
+<span class="n">scope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">kind</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"studio"</span><span class="p">}</span>
+<span class="n">hide</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">condition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">eq</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"resource.attrs.owner_id"</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"subject.id"</span><span class="p">}]}</span>
+
+<span class="c1"># Support staff read only during office hours (UTC).</span>
+<span class="k">[[policies]]</span>
+<span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"support-office-hours"</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Support reads between 08:00 and 20:00 UTC only"</span>
+<span class="n">effect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"deny"</span>
+<span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"*.read"</span><span class="p">]</span>
+<span class="n">scope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">kind</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"studio"</span><span class="p">}</span>
+<span class="n">condition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">all</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="n">contains</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"subject.roles"</span><span class="p">},</span><span class="w"> </span><span class="s2">"SUPPORT"</span><span class="p">]},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">any</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="n">lt</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"env.hour_utc"</span><span class="p">},</span><span class="w"> </span><span class="mi">8</span><span class="p">]},</span>
+<span class="w">    </span><span class="p">{</span><span class="n">gte</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"env.hour_utc"</span><span class="p">},</span><span class="w"> </span><span class="mi">20</span><span class="p">]},</span>
+<span class="w">  </span><span class="p">]},</span>
+<span class="p">]}</span>
+
+<span class="c1"># ... and never billing, at any hour.</span>
+<span class="k">[[policies]]</span>
+<span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"support-no-billing"</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Support never reads billing"</span>
+<span class="n">effect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"deny"</span>
+<span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"billing.*"</span><span class="p">]</span>
+<span class="n">scope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">kind</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"studio"</span><span class="p">}</span>
+<span class="n">condition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">contains</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"subject.roles"</span><span class="p">},</span><span class="w"> </span><span class="s2">"SUPPORT"</span><span class="p">]}</span>
+
+<span class="c1"># A document needs a clearance at least as high as its classification.</span>
+<span class="k">[[policies]]</span>
+<span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"classification-vs-clearance"</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"Clearance must cover the classification of the document"</span>
+<span class="n">effect</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"require"</span>
+<span class="n">permissions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">"doc.read"</span><span class="p">]</span>
+<span class="n">scope</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">kind</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"studio"</span><span class="p">}</span>
+<span class="n">condition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">gte</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"subject.attrs.clearance"</span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="n">attr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">"resource.attrs.classification"</span><span class="p">},</span>
+<span class="p">]}</span>
+</pre></div>
+</div>
+</section>
+<section id="persistence">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Persistence</a><a class="headerlink" href="#persistence" title="Link to this heading"></a></h2>
+<p>Policies and attributes use the same engines and the same pattern as the assignments: optimistic
+<code class="docutils literal notranslate"><span class="pre">revision</span></code>, <code class="docutils literal notranslate"><span class="pre">StoreUnavailableError</span></code> on outages, no new extra.</p>
+<section id="sqlalchemy">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">SQLAlchemy</a><a class="headerlink" href="#sqlalchemy" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">SqlPolicyStore</span></code> and <code class="docutils literal notranslate"><span class="pre">SqlAttributeStore</span></code> accept the three session shapes of <code class="docutils literal notranslate"><span class="pre">SqlAssignmentStore</span></code>
+(a sessionmaker, a callable returning an async context manager, or an open session) and the
+<code class="docutils literal notranslate"><span class="pre">before_query</span></code> hook for row-level security. The tables <code class="docutils literal notranslate"><span class="pre">authz_policy</span></code> and <code class="docutils literal notranslate"><span class="pre">authz_attribute</span></code> come from
+the Alembic revision <code class="docutils literal notranslate"><span class="pre">b7d2e5f1c3a8</span></code> (<code class="docutils literal notranslate"><span class="pre">alembic</span> <span class="pre">upgrade</span> <span class="pre">head</span></code>); it only adds those two tables.
+The JSON columns are <code class="docutils literal notranslate"><span class="pre">JSONB</span></code> on PostgreSQL. <code class="docutils literal notranslate"><span class="pre">condition</span></code> is stored in <code class="docutils literal notranslate"><span class="pre">condition_doc</span></code> (it is a reserved
+word in MySQL).</p>
+</section>
+<section id="dynamodb">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">DynamoDB</a><a class="headerlink" href="#dynamodb" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DynamoDbPolicyStore</span></code> and <code class="docutils literal notranslate"><span class="pre">DynamoDbAttributeStore</span></code> (PynamoDB) use a table with <code class="docutils literal notranslate"><span class="pre">pk</span></code>/<code class="docutils literal notranslate"><span class="pre">sk</span></code> and <strong>no
+index</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Policy       pk=SCOPE#&lt;kind&gt;#&lt;scope id | *&gt;   sk=POLICY#&lt;policy id&gt;
+Id marker    pk=POLICYID#&lt;policy id&gt;          sk=META
+Attributes   pk=ENTITY#&lt;ns&gt;#&lt;kind&gt;#&lt;id&gt;       sk=ATTRS
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">list_policies</span></code> is two consistent <code class="docutils literal notranslate"><span class="pre">Query</span></code> calls (the scope’s partition and the kind-wide <code class="docutils literal notranslate"><span class="pre">*</span></code> one).
+The <em>id marker</em> makes ids unique across scopes. <code class="docutils literal notranslate"><span class="pre">DynamoDbPolicyStore.table_definition(name)</span></code> returns the
+<code class="docutils literal notranslate"><span class="pre">create_table</span></code> arguments; the IAM policy needs <code class="docutils literal notranslate"><span class="pre">GetItem</span></code>, <code class="docutils literal notranslate"><span class="pre">PutItem</span></code>, <code class="docutils literal notranslate"><span class="pre">UpdateItem</span></code>, <code class="docutils literal notranslate"><span class="pre">DeleteItem</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Query</span></code> and (for <code class="docutils literal notranslate"><span class="pre">list_all</span></code> / <code class="docutils literal notranslate"><span class="pre">authcli</span> <span class="pre">authz</span> <span class="pre">policy</span> <span class="pre">list</span></code> only) <code class="docutils literal notranslate"><span class="pre">Scan</span></code>.</p>
+</section>
+</section>
+<section id="managing-policies">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Managing policies</a><a class="headerlink" href="#managing-policies" title="Link to this heading"></a></h2>
+<p>Write through <code class="docutils literal notranslate"><span class="pre">PolicyService</span></code> so nothing invalid reaches the store; it validates against the catalog,
+serialises writes per policy id and runs <code class="docutils literal notranslate"><span class="pre">after_change</span></code> hooks:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">service</span> <span class="o">=</span> <span class="n">PolicyService</span><span class="p">(</span><span class="n">store</span><span class="p">,</span> <span class="n">catalog</span><span class="p">,</span> <span class="n">after_change</span><span class="o">=</span><span class="p">[</span><span class="n">cache</span><span class="o">.</span><span class="n">on_change</span><span class="p">])</span>
+<span class="n">policy</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">NewPolicy</span><span class="p">(</span><span class="o">...</span><span class="p">))</span>
+<span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">NewPolicy</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">expected_revision</span><span class="o">=</span><span class="n">policy</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">disable</span><span class="p">(</span><span class="n">policy</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">expected_revision</span><span class="o">=...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The CLI does the same from a shell (<code class="docutils literal notranslate"><span class="pre">AUTHZ_SQLALCHEMY_DATABASE_URI</span></code> or <code class="docutils literal notranslate"><span class="pre">AUTHZ_POLICY_TABLE</span></code> and
+<code class="docutils literal notranslate"><span class="pre">AUTHZ_DYNAMODB_ENDPOINT</span></code> select the store):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>authcli<span class="w"> </span>authz<span class="w"> </span>policy<span class="w"> </span>validate<span class="w"> </span>--file<span class="w"> </span>policy.json<span class="w"> </span>--catalog<span class="w"> </span>catalog.toml<span class="w">       </span><span class="c1"># offline</span>
+<span class="gp">$ </span>authcli<span class="w"> </span>authz<span class="w"> </span>policy<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--file<span class="w"> </span>policy.json<span class="w"> </span>--context<span class="w"> </span>ctx.json<span class="w">               </span><span class="c1"># offline</span>
+<span class="go">condition: INDETERMINATE</span>
+<span class="go">missing attributes: subject.assignment.tenant_status</span>
+<span class="go">effect deny: would DENY (indeterminate fails closed)</span>
+<span class="gp">$ </span>authcli<span class="w"> </span>authz<span class="w"> </span>policy<span class="w"> </span>add<span class="w"> </span>--store<span class="w"> </span>sqlalchemy<span class="w"> </span>--file<span class="w"> </span>policy.json<span class="w"> </span>--catalog<span class="w"> </span>catalog.toml
+<span class="gp">$ </span>authcli<span class="w"> </span>authz<span class="w"> </span>policy<span class="w"> </span>list<span class="w"> </span>--store<span class="w"> </span>sqlalchemy<span class="w"> </span>--all
+<span class="gp">$ </span>authcli<span class="w"> </span>authz<span class="w"> </span>policy<span class="w"> </span>disable<span class="w"> </span>ID<span class="w"> </span>--store<span class="w"> </span>sqlalchemy<span class="w"> </span>--expected-revision<span class="w"> </span><span class="m">0</span>
+</pre></div>
+</div>
+<p>Static policies (<code class="docutils literal notranslate"><span class="pre">StaticPolicySource.from_file</span></code>) and stored ones can be combined
+(<code class="docutils literal notranslate"><span class="pre">AbacConfig(policies=[static,</span> <span class="pre">store])</span></code>): an id defined twice fails at startup.</p>
+</section>
+<section id="rolling-a-policy-out-safely">
+<span id="abac-rollout"></span><h2><a class="toc-backref" href="#id12" role="doc-backlink">Rolling a policy out safely</a><a class="headerlink" href="#rolling-a-policy-out-safely" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">authcli</span> <span class="pre">authz</span> <span class="pre">policy</span> <span class="pre">test</span></code> the condition against representative contexts.</p></li>
+<li><p>Add it with <code class="docutils literal notranslate"><span class="pre">enforce</span> <span class="pre">=</span> <span class="pre">false</span></code> (shadow mode).</p></li>
+<li><p>Watch <code class="docutils literal notranslate"><span class="pre">shadow_policy_ids</span></code> in the audit events (and the <code class="docutils literal notranslate"><span class="pre">shadow_denied</span></code> counter) for a few days:
+those are the requests it <em>would</em> have denied.</p></li>
+<li><p>Flip it with <code class="docutils literal notranslate"><span class="pre">replace</span></code> and <code class="docutils literal notranslate"><span class="pre">enforce</span> <span class="pre">=</span> <span class="pre">true</span></code>.</p></li>
+</ol>
+</section>
+<section id="operations">
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">Operations</a><a class="headerlink" href="#operations" title="Link to this heading"></a></h2>
+<section id="policy-cache">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Policy cache</a><a class="headerlink" href="#policy-cache" title="Link to this heading"></a></h3>
+<p>The policies of a scope are cached <strong>5 seconds</strong> by default (<code class="docutils literal notranslate"><span class="pre">AbacConfig.policy_cache_ttl</span></code>; <code class="docutils literal notranslate"><span class="pre">0</span></code>
+disables it). Changes written through <code class="docutils literal notranslate"><span class="pre">PolicyService</span></code> in the same process show immediately; <strong>other
+processes see a change only after the TTL</strong>. Failed loads are not cached and an expired entry is never
+served when the reload fails (503). Assignments, unlike policies, are never cached unless you ask.</p>
+</section>
+<section id="audit-metrics-explain">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">Audit, metrics, explain</a><a class="headerlink" href="#audit-metrics-explain" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DecisionEvent</span></code> gains <code class="docutils literal notranslate"><span class="pre">policy_ids</span></code> (the policies that decided), <code class="docutils literal notranslate"><span class="pre">shadow_policy_ids</span></code> and
+<code class="docutils literal notranslate"><span class="pre">abac_reason</span></code> (<code class="docutils literal notranslate"><span class="pre">deny:&lt;id&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">require:&lt;id&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">indeterminate:&lt;id&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">permit:&lt;id&gt;</span></code>): <strong>ids only,
+never attribute values</strong>. <code class="docutils literal notranslate"><span class="pre">metrics_hook</span></code> counts decisions per source (<code class="docutils literal notranslate"><span class="pre">by_source</span></code>) and per policy
+(<code class="docutils literal notranslate"><span class="pre">abac_policies</span></code>, at most 100 ids, the rest under <code class="docutils literal notranslate"><span class="pre">other</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">Authorizer.explain(principal,</span> <span class="pre">permission,</span> <span class="pre">scope,</span> <span class="pre">resource=...)</span></code> evaluates every policy and reports why
+(values are left out unless <code class="docutils literal notranslate"><span class="pre">reveal=True</span></code>). It is for logs and tools: never put it in an HTTP response.</p>
+</section>
+<section id="fail-closed">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink">Fail closed</a><a class="headerlink" href="#fail-closed" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>What goes wrong</p></th>
+<th class="head"><p>Answer</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>policy source down, slow or returns garbage</p></td>
+<td><p>503, never 200</p></td>
+</tr>
+<tr class="row-odd"><td><p>attribute provider or resource loader raises</p></td>
+<td><p>503</p></td>
+</tr>
+<tr class="row-even"><td><p>resource loader returns <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>404 (same as a non-member)</p></td>
+</tr>
+<tr class="row-odd"><td><p>an attribute is missing or of the wrong type</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">deny</span></code> applies, <code class="docutils literal notranslate"><span class="pre">require</span></code> is not satisfied</p></td>
+</tr>
+<tr class="row-even"><td><p>a stored policy cannot be decoded</p></td>
+<td><p>behaves as a <code class="docutils literal notranslate"><span class="pre">deny</span></code> of the permissions it names</p></td>
+</tr>
+<tr class="row-odd"><td><p>a loader returns a value that is huge or of an unsupported type</p></td>
+<td><p>that value is dropped (the attribute is missing)</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="expressing-a-tenant-status-gate">
+<h2><a class="toc-backref" href="#id17" role="doc-backlink">Expressing a tenant-status gate</a><a class="headerlink" href="#expressing-a-tenant-status-gate" title="Link to this heading"></a></h2>
+<p>An application that hard-codes “the tenant is suspended, so no writes” in every handler can express it
+once: store the status in the assignment’s <code class="docutils literal notranslate"><span class="pre">attributes</span></code> (or in <code class="docutils literal notranslate"><span class="pre">resource.attrs</span></code> through a loader) and
+add the first policy of the cookbook. The roles keep saying who may write; the policy says when.</p>
+</section>
+<section id="not-covered-yet">
+<h2><a class="toc-backref" href="#id18" role="doc-backlink">Not covered (yet)</a><a class="headerlink" href="#not-covered-yet" title="Link to this heading"></a></h2>
+<p>Pushing a policy into a list query (“partial evaluation”), obligations, delegation, an HTTP API to manage
+policies and distributed cache invalidation are out of scope for this release.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="authz-fastapi.html" class="btn btn-neutral float-left" title="FastAPI Integration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="authz-operations.html" class="btn btn-neutral float-right" title="Operations: Service, CLI, Cache, Audit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,773 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>auth_middleware.authz.stores.dynamodb_policy &mdash; Auth Middleware 0.7.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/stores/dynamodb_policy.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5a057da9"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../abac.html">Attribute-Based Access Control (ABAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">auth_middleware.authz.stores.dynamodb_policy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for auth_middleware.authz.stores.dynamodb_policy</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""DynamoDB stores for ABAC (policies and persisted attributes), on PynamoDB.</span>
+
+<span class="sd">Same conventions as ``DynamoDbAssignmentStore``: blocking PynamoDB calls run in</span>
+<span class="sd">worker threads, writes are conditional on the optimistic ``revision``, guard-path</span>
+<span class="sd">reads are consistent, outages become ``StoreUnavailableError``. No GSI is needed.</span>
+
+<span class="sd">Key design (one table; two tables, or the assignment table, work as well)::</span>
+
+<span class="sd">    Policy       pk=SCOPE#&lt;kind&gt;#&lt;scope id | *&gt;   sk=POLICY#&lt;policy id&gt;</span>
+<span class="sd">    Id marker    pk=POLICYID#&lt;policy id&gt;          sk=META   (scope of the policy)</span>
+<span class="sd">    Attributes   pk=ENTITY#&lt;ns&gt;#&lt;kind&gt;#&lt;id&gt;       sk=ATTRS</span>
+
+<span class="sd">``list_policies(scope)`` is two consistent ``Query`` calls (the scope's partition and</span>
+<span class="sd">the kind-wide ``*`` one), no scan. The **id marker** makes policy ids unique across</span>
+<span class="sd">scopes: it is created first with ``attribute_not_exists`` (a crash between the two</span>
+<span class="sd">writes leaves an orphan marker that a later ``create`` of that id takes over once it</span>
+<span class="sd">is older than 30 seconds, with a compare-and-set so only one creator can).</span>
+<span class="sd">``list_all`` is a ``Scan``: tooling only, never the request path. A policy of the</span>
+<span class="sd">global scope is stored under ``*`` whether it was created as ``PolicyScope("global")``</span>
+<span class="sd">or ``PolicyScope("global", "*")``.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">UTC</span><span class="p">,</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Effect</span><span class="p">,</span>
+    <span class="n">EntityAttributes</span><span class="p">,</span>
+    <span class="n">EntityRef</span><span class="p">,</span>
+    <span class="n">NewPolicy</span><span class="p">,</span>
+    <span class="n">Policy</span><span class="p">,</span>
+    <span class="n">PolicyScope</span><span class="p">,</span>
+    <span class="n">PolicyStatus</span><span class="p">,</span>
+    <span class="n">validate_attributes</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.errors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AuthzError</span><span class="p">,</span>
+    <span class="n">InvalidPolicyError</span><span class="p">,</span>
+    <span class="n">PolicyConflictError</span><span class="p">,</span>
+    <span class="n">RevisionConflictError</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.stores.dynamodb</span><span class="w"> </span><span class="kn">import</span> <span class="n">blocking_call</span><span class="p">,</span> <span class="n">connection_meta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScopeRef</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">BooleanAttribute</span><span class="p">,</span>
+        <span class="n">NumberAttribute</span><span class="p">,</span>
+        <span class="n">UnicodeAttribute</span><span class="p">,</span>
+        <span class="n">UTCDateTimeAttribute</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">PAY_PER_REQUEST_BILLING_MODE</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoesNotExist</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pynamodb.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+<span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># pragma: no cover - exercised without the extra</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+        <span class="s2">"the DynamoDB ABAC stores need PynamoDB: "</span>
+        <span class="s2">"pip install 'auth-middleware[dynamodb]'"</span>
+    <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+<span class="n">DEFAULT_POLICY_TABLE</span> <span class="o">=</span> <span class="s2">"authz_policy"</span>
+<span class="n">_POLICY</span> <span class="o">=</span> <span class="s2">"POLICY#"</span>
+<span class="c1">#: A marker without its policy item younger than this is a create in flight, not</span>
+<span class="c1">#: the leftover of a crash: nobody may take it over.</span>
+<span class="n">ORPHAN_GRACE_SECONDS</span> <span class="o">=</span> <span class="mf">30.0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_scope_pk</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scope_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"SCOPE#</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">scope_id</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'*'</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_marker_pk</span><span class="p">(</span><span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"POLICYID#</span><span class="si">{</span><span class="n">policy_id</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_entity_pk</span><span class="p">(</span><span class="n">ref</span><span class="p">:</span> <span class="n">EntityRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"ENTITY#</span><span class="si">{</span><span class="n">ref</span><span class="o">.</span><span class="n">namespace</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">ref</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">#</span><span class="si">{</span><span class="n">ref</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_model</span><span class="p">(</span><span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="n">meta_attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"table_name"</span><span class="p">:</span> <span class="n">table_name</span><span class="p">,</span>
+        <span class="s2">"billing_mode"</span><span class="p">:</span> <span class="n">PAY_PER_REQUEST_BILLING_MODE</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">meta_attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+    <span class="n">meta_cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s2">"Meta"</span><span class="p">,</span> <span class="p">(),</span> <span class="n">meta_attrs</span><span class="p">)</span>
+
+    <span class="k">class</span><span class="w"> </span><span class="nc">Item</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>  <span class="c1"># type: ignore[misc,unused-ignore]</span>
+        <span class="n">Meta</span> <span class="o">=</span> <span class="n">meta_cls</span>  <span class="c1"># type: ignore[assignment,unused-ignore]</span>
+        <span class="n">pk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">hash_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">sk</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">range_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">policy_id</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">scope_kind</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">scope_id</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">permissions_json</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">condition_json</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">priority</span> <span class="o">=</span> <span class="n">NumberAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">hide</span> <span class="o">=</span> <span class="n">BooleanAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">enforce</span> <span class="o">=</span> <span class="n">BooleanAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">attrs_json</span> <span class="o">=</span> <span class="n">UnicodeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">revision</span> <span class="o">=</span> <span class="n">NumberAttribute</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">created_at</span> <span class="o">=</span> <span class="n">UTCDateTimeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">updated_at</span> <span class="o">=</span> <span class="n">UTCDateTimeAttribute</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Item</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_DynamoBase</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Connection settings, worker pool and table helpers shared by both stores."""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">connect_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">read_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">max_retry_attempts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">aws_access_key_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">aws_secret_access_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">connection_meta</span><span class="p">(</span>
+            <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+            <span class="n">endpoint_url</span><span class="o">=</span><span class="n">endpoint_url</span><span class="p">,</span>
+            <span class="n">connect_timeout_seconds</span><span class="o">=</span><span class="n">connect_timeout_seconds</span><span class="p">,</span>
+            <span class="n">read_timeout_seconds</span><span class="o">=</span><span class="n">read_timeout_seconds</span><span class="p">,</span>
+            <span class="n">max_retry_attempts</span><span class="o">=</span><span class="n">max_retry_attempts</span><span class="p">,</span>
+            <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">aws_access_key_id</span><span class="p">,</span>
+            <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">aws_secret_access_key</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="p">,</span> <span class="n">thread_name_prefix</span><span class="o">=</span><span class="s2">"authz-dynamodb"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">max_workers</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">table_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item</span> <span class="o">=</span> <span class="n">_build_model</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_call</span><span class="p">[</span><span class="n">T</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="n">blocking_call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">aclose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Stop the dedicated worker pool, if any."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">table_definition</span><span class="p">(</span>
+        <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">billing</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"PAY_PER_REQUEST"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"PAY_PER_REQUEST"</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return ``boto3`` ``create_table`` keyword arguments (no GSI)."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"TableName"</span><span class="p">:</span> <span class="n">table_name</span><span class="p">,</span>
+            <span class="s2">"BillingMode"</span><span class="p">:</span> <span class="n">billing</span><span class="p">,</span>
+            <span class="s2">"AttributeDefinitions"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"pk"</span><span class="p">,</span> <span class="s2">"AttributeType"</span><span class="p">:</span> <span class="s2">"S"</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"sk"</span><span class="p">,</span> <span class="s2">"AttributeType"</span><span class="p">:</span> <span class="s2">"S"</span><span class="p">},</span>
+            <span class="p">],</span>
+            <span class="s2">"KeySchema"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"pk"</span><span class="p">,</span> <span class="s2">"KeyType"</span><span class="p">:</span> <span class="s2">"HASH"</span><span class="p">},</span>
+                <span class="p">{</span><span class="s2">"AttributeName"</span><span class="p">:</span> <span class="s2">"sk"</span><span class="p">,</span> <span class="s2">"KeyType"</span><span class="p">:</span> <span class="s2">"RANGE"</span><span class="p">},</span>
+            <span class="p">],</span>
+        <span class="p">}</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create_table_if_missing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the table if absent. Dev/tests only; never implicit."""</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">create_table</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dumps</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s2">","</span><span class="p">,</span> <span class="s2">":"</span><span class="p">),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_utc</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">UTC</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="DynamoDbPolicyStore">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamoDbPolicyStore</span><span class="p">(</span><span class="n">_DynamoBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``PolicyStore`` + ``PolicyAdmin`` over a DynamoDB table.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        table_name: Existing table (see :meth:`table_definition`).</span>
+<span class="sd">        region: AWS region; default from the botocore chain.</span>
+<span class="sd">        endpoint_url: Custom endpoint (DynamoDB Local, emulators, tests).</span>
+<span class="sd">        connect_timeout_seconds: botocore connect timeout.</span>
+<span class="sd">        read_timeout_seconds: botocore read timeout.</span>
+<span class="sd">        max_retry_attempts: botocore retries (throttling backoff).</span>
+<span class="sd">        aws_access_key_id: Explicit credentials, for tests only.</span>
+<span class="sd">        aws_secret_access_key: Explicit credentials, for tests only.</span>
+<span class="sd">        max_workers: Size of a dedicated thread pool (``None``: the loop's default).</span>
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="DynamoDbPolicyStore.__init__">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_POLICY_TABLE</span><span class="p">,</span>
+        <span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">connect_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">read_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_retry_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">aws_access_key_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">aws_secret_access_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">table_name</span><span class="o">=</span><span class="n">table_name</span><span class="p">,</span>
+            <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+            <span class="n">endpoint_url</span><span class="o">=</span><span class="n">endpoint_url</span><span class="p">,</span>
+            <span class="n">connect_timeout_seconds</span><span class="o">=</span><span class="n">connect_timeout_seconds</span><span class="p">,</span>
+            <span class="n">read_timeout_seconds</span><span class="o">=</span><span class="n">read_timeout_seconds</span><span class="p">,</span>
+            <span class="n">max_retry_attempts</span><span class="o">=</span><span class="n">max_retry_attempts</span><span class="p">,</span>
+            <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">aws_access_key_id</span><span class="p">,</span>
+            <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">aws_secret_access_key</span><span class="p">,</span>
+            <span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># ------------------------------------------------------------------ helpers</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+        <span class="n">scope_id</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">scope_id</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">)</span> <span class="k">else</span> <span class="n">item</span><span class="o">.</span><span class="n">scope_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Policy</span><span class="p">(</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">policy_id</span><span class="p">,</span>
+                <span class="n">effect</span><span class="o">=</span><span class="n">Effect</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">effect</span><span class="p">),</span>
+                <span class="n">permissions</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">permissions_json</span><span class="p">)),</span>
+                <span class="n">scope</span><span class="o">=</span><span class="n">PolicyScope</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">,</span> <span class="n">scope_id</span><span class="p">),</span>
+                <span class="n">condition</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">condition_json</span><span class="p">)),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="n">priority</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">priority</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">hide</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">hide</span><span class="p">),</span>
+                <span class="n">enforce</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">enforce</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">enforce</span><span class="p">),</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">PolicyStatus</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">status</span><span class="p">),</span>
+                <span class="n">revision</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">revision</span><span class="p">),</span>
+                <span class="n">created_at</span><span class="o">=</span><span class="n">_utc</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">created_at</span><span class="p">),</span>
+                <span class="n">updated_at</span><span class="o">=</span><span class="n">_utc</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">updated_at</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">AuthzError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="ne">RecursionError</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"stored policy </span><span class="si">{}</span><span class="s2"> cannot be decoded: it fails closed"</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+            <span class="n">policy_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">policy_id</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">sk</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="n">_POLICY</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">scope</span> <span class="o">=</span> <span class="n">PolicyScope</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">,</span> <span class="n">scope_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">AuthzError</span><span class="p">:</span>
+                <span class="n">scope</span> <span class="o">=</span> <span class="n">PolicyScope</span><span class="p">(</span><span class="s2">"global"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Policy</span><span class="o">.</span><span class="n">fail_closed</span><span class="p">(</span><span class="n">policy_id</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_item_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sk</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">sk</span><span class="p">,</span> <span class="n">consistent_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""``(marker, policy item or None)``; ``None`` when the id is unknown."""</span>
+        <span class="n">marker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_get</span><span class="p">(</span><span class="n">_marker_pk</span><span class="p">(</span><span class="n">policy_id</span><span class="p">),</span> <span class="s2">"META"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">marker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">pk</span> <span class="o">=</span> <span class="n">_scope_pk</span><span class="p">(</span><span class="n">marker</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">,</span> <span class="n">marker</span><span class="o">.</span><span class="n">scope_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">marker</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_get</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">_POLICY</span> <span class="o">+</span> <span class="n">policy_id</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="n">NewPolicy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"effect"</span><span class="p">:</span> <span class="n">new</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">"permissions_json"</span><span class="p">:</span> <span class="n">_dumps</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">permissions</span><span class="p">)),</span>
+            <span class="s2">"condition_json"</span><span class="p">:</span> <span class="n">_dumps</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">condition</span><span class="p">)),</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="n">new</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"priority"</span><span class="p">:</span> <span class="n">new</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+            <span class="s2">"hide"</span><span class="p">:</span> <span class="n">new</span><span class="o">.</span><span class="n">hide</span><span class="p">,</span>
+            <span class="s2">"enforce"</span><span class="p">:</span> <span class="n">new</span><span class="o">.</span><span class="n">enforce</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="c1"># --------------------------------------------------------------------- reads</span>
+
+<div class="viewcode-block" id="DynamoDbPolicyStore.get">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.get">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">loaded</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">policy_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">loaded</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">loaded</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">loaded</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbPolicyStore.list_policies">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.list_policies">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Policy</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+            <span class="n">found</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">pk</span> <span class="ow">in</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">_scope_pk</span><span class="p">(</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">scope</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">_scope_pk</span><span class="p">(</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
+            <span class="p">):</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                    <span class="n">pk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">sk</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_POLICY</span><span class="p">),</span> <span class="n">consistent_read</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">):</span>
+                    <span class="n">found</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">sk</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="n">policies</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">run</span><span class="p">)]</span>
+        <span class="n">active</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">policies</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">status</span> <span class="ow">is</span> <span class="n">PolicyStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbPolicyStore.list_all">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.list_all">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="n">PolicyStatus</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Policy</span><span class="p">]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">sk</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">_POLICY</span><span class="p">),</span> <span class="n">consistent_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">policies</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">run</span><span class="p">)]</span>
+        <span class="n">chosen</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">policies</span> <span class="k">if</span> <span class="n">status</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">status</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chosen</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">id</span><span class="p">))</span></div>
+
+
+    <span class="c1"># -------------------------------------------------------------------- writes</span>
+
+<div class="viewcode-block" id="DynamoDbPolicyStore.create">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.create">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="n">NewPolicy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+        <span class="n">item_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+        <span class="n">marker</span> <span class="o">=</span> <span class="n">item_cls</span><span class="p">(</span>
+            <span class="n">_marker_pk</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
+            <span class="s2">"META"</span><span class="p">,</span>
+            <span class="n">policy_id</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">scope_kind</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">scope_id</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="s2">"*"</span><span class="p">,</span>
+            <span class="n">created_at</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span>
+                <span class="k">lambda</span><span class="p">:</span> <span class="n">marker</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="n">item_cls</span><span class="o">.</span><span class="n">pk</span><span class="o">.</span><span class="n">does_not_exist</span><span class="p">())</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">RevisionConflictError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recover_orphan</span><span class="p">(</span><span class="n">marker</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">PolicyConflictError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"policy </span><span class="si">{</span><span class="n">new</span><span class="o">.</span><span class="n">id</span><span class="si">!r}</span><span class="s2"> already exists"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">item_cls</span><span class="p">(</span>
+            <span class="n">_scope_pk</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
+            <span class="n">_POLICY</span> <span class="o">+</span> <span class="n">new</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">policy_id</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">scope_kind</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">scope_id</span><span class="o">=</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="s2">"*"</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">PolicyStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">revision</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">created_at</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+            <span class="n">updated_at</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">(</span><span class="n">new</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="n">item_cls</span><span class="o">.</span><span class="n">pk</span><span class="o">.</span><span class="n">does_not_exist</span><span class="p">()))</span>
+        <span class="k">except</span> <span class="n">RevisionConflictError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PolicyConflictError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"policy </span><span class="si">{</span><span class="n">new</span><span class="o">.</span><span class="n">id</span><span class="si">!r}</span><span class="s2"> already exists"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drop_marker</span><span class="p">(</span><span class="n">marker</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_recover_orphan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">marker</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Take over a marker whose policy item was never written (a crashed create).</span>
+
+<span class="sd">        Only when the marker is older than :data:`ORPHAN_GRACE_SECONDS` (a younger</span>
+<span class="sd">        one is somebody's create in flight) and with a compare-and-set on its</span>
+<span class="sd">        ``created_at``, so concurrent recoverers cannot both succeed.</span>
+<span class="sd">        """</span>
+        <span class="n">item_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">marker</span><span class="o">.</span><span class="n">policy_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">current</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">old</span> <span class="o">=</span> <span class="n">current</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">created_at</span>
+            <span class="n">age</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">old</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)</span> <span class="o">-</span> <span class="n">old</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">age</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">age</span> <span class="o">&lt;</span> <span class="n">ORPHAN_GRACE_SECONDS</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">marker</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="n">item_cls</span><span class="o">.</span><span class="n">created_at</span> <span class="o">==</span> <span class="n">old</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="n">run</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">RevisionConflictError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_drop_marker</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">marker</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">marker</span><span class="o">.</span><span class="n">delete</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"could not remove the id marker of </span><span class="si">{}</span><span class="s2">"</span><span class="p">,</span> <span class="n">marker</span><span class="o">.</span><span class="n">policy_id</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expected</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">actions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">check</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+        <span class="n">item_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+        <span class="n">loaded</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">policy_id</span><span class="p">))</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">loaded</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">loaded</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"stale revision or unknown policy"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">check</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="o">*</span><span class="n">actions</span><span class="p">,</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">revision</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">updated_at</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)),</span>
+        <span class="p">]</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="n">item_cls</span><span class="o">.</span><span class="n">revision</span> <span class="o">==</span> <span class="n">expected</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="n">condition</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DynamoDbPolicyStore.replace">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.replace">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">replace</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span> <span class="n">NewPolicy</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+        <span class="n">item_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">item_cls</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_cls</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">remove</span><span class="p">())</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">policy_id</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"the id of a policy cannot change"</span><span class="p">)</span>
+            <span class="n">scope_id</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">scope_id</span> <span class="o">==</span> <span class="s2">"*"</span> <span class="k">else</span> <span class="n">item</span><span class="o">.</span><span class="n">scope_id</span>
+            <span class="n">same</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">item</span><span class="o">.</span><span class="n">scope_kind</span> <span class="ow">and</span> <span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">scope_id</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">same</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"the scope of a policy cannot change"</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">policy_id</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">check</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbPolicyStore.set_status">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.set_status">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">set_status</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="n">PolicyStatus</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span>
+            <span class="n">policy_id</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">)]</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DynamoDbAttributeStore">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DynamoDbAttributeStore</span><span class="p">(</span><span class="n">_DynamoBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``AttributeStore`` over a DynamoDB table (principal and resource attributes).</span>
+
+<span class="sd">    Takes the same connection arguments as :class:`DynamoDbPolicyStore`.</span>
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="DynamoDbAttributeStore.__init__">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_POLICY_TABLE</span><span class="p">,</span>
+        <span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">connect_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">read_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_retry_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">aws_access_key_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">aws_secret_access_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">table_name</span><span class="o">=</span><span class="n">table_name</span><span class="p">,</span>
+            <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+            <span class="n">endpoint_url</span><span class="o">=</span><span class="n">endpoint_url</span><span class="p">,</span>
+            <span class="n">connect_timeout_seconds</span><span class="o">=</span><span class="n">connect_timeout_seconds</span><span class="p">,</span>
+            <span class="n">read_timeout_seconds</span><span class="o">=</span><span class="n">read_timeout_seconds</span><span class="p">,</span>
+            <span class="n">max_retry_attempts</span><span class="o">=</span><span class="n">max_retry_attempts</span><span class="p">,</span>
+            <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">aws_access_key_id</span><span class="p">,</span>
+            <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">aws_secret_access_key</span><span class="p">,</span>
+            <span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">EntityRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_entity_pk</span><span class="p">(</span><span class="n">ref</span><span class="p">),</span> <span class="s2">"ATTRS"</span><span class="p">,</span> <span class="n">consistent_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_decode</span><span class="p">(</span><span class="n">ref</span><span class="p">:</span> <span class="n">EntityRef</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EntityAttributes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EntityAttributes</span><span class="p">(</span>
+            <span class="n">ref</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">attrs_json</span> <span class="ow">or</span> <span class="s2">"</span><span class="si">{}</span><span class="s2">"</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="DynamoDbAttributeStore.get_attributes">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.get_attributes">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">EntityRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EntityAttributes</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbAttributeStore.put_attributes">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.put_attributes">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">put_attributes</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ref</span><span class="p">:</span> <span class="n">EntityRef</span><span class="p">,</span>
+        <span class="n">attributes</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">expected_revision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EntityAttributes</span><span class="p">:</span>
+        <span class="n">encoded</span> <span class="o">=</span> <span class="n">_dumps</span><span class="p">(</span><span class="n">validate_attributes</span><span class="p">(</span><span class="n">attributes</span><span class="p">))</span>
+        <span class="n">item_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">UTC</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">expected_revision</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">created</span> <span class="o">=</span> <span class="n">item_cls</span><span class="p">(</span>
+                <span class="n">_entity_pk</span><span class="p">(</span><span class="n">ref</span><span class="p">),</span>
+                <span class="s2">"ATTRS"</span><span class="p">,</span>
+                <span class="n">attrs_json</span><span class="o">=</span><span class="n">encoded</span><span class="p">,</span>
+                <span class="n">revision</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">created_at</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+                <span class="n">updated_at</span><span class="o">=</span><span class="n">now</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span>
+                <span class="k">lambda</span><span class="p">:</span> <span class="n">created</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="n">item_cls</span><span class="o">.</span><span class="n">pk</span><span class="o">.</span><span class="n">does_not_exist</span><span class="p">())</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">created</span><span class="p">)</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_revision</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"stale revision or no attributes"</span><span class="p">)</span>
+        <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">attrs_json</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">revision</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">item_cls</span><span class="o">.</span><span class="n">updated_at</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">now</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="n">item_cls</span><span class="o">.</span><span class="n">revision</span> <span class="o">==</span> <span class="n">expected_revision</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">actions</span><span class="o">=</span><span class="n">actions</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="n">condition</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DynamoDbAttributeStore.delete_attributes">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.delete_attributes">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_attributes</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">EntityRef</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">expected_revision</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">revision</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_revision</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"stale revision or no attributes"</span><span class="p">)</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item</span><span class="o">.</span><span class="n">revision</span> <span class="o">==</span> <span class="n">expected_revision</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_call</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="n">condition</span><span class="p">))</span></div>
+</div>
+
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"DynamoDbAttributeStore"</span><span class="p">,</span> <span class="s2">"DynamoDbPolicyStore"</span><span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

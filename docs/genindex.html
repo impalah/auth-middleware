@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abac.html">Attribute-Based Access Control (ABAC)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
@@ -177,6 +178,7 @@
  | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
@@ -189,9 +191,25 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.__init__">__init__() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource.__init__">__init__() (auth_middleware.authz.abac.cache.CachingPolicySource method)</a>
 
       <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.__init__">(auth_middleware.authz.abac.config.AbacConfig method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.pdp.PolicyDecisionPoint.__init__">(auth_middleware.authz.abac.pdp.PolicyDecisionPoint method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.resources.ResourceFromPath.__init__">(auth_middleware.authz.abac.resources.ResourceFromPath method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.service.PolicyService.__init__">(auth_middleware.authz.abac.service.PolicyService method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.sources.StaticPolicySource.__init__">(auth_middleware.authz.abac.sources.StaticPolicySource method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.__init__">(auth_middleware.authz.abac.types.NewPolicy method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.__init__">(auth_middleware.authz.abac.types.Policy method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.__init__">(auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+</li>
         <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.__init__">(auth_middleware.authz.catalog.PermissionCatalog method)</a>
 </li>
         <li><a href="authz-api.html#auth_middleware.authz.engine.Authorizer.__init__">(auth_middleware.authz.engine.Authorizer method)</a>
@@ -202,9 +220,17 @@
 </li>
         <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.__init__">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
 </li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.__init__">(auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.__init__">(auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore method)</a>
+</li>
         <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore.__init__">(auth_middleware.authz.stores.memory.InMemoryAssignmentStore method)</a>
 </li>
         <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.__init__">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlAttributeStore.__init__">(auth_middleware.authz.stores.sql_policy.SqlAttributeStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore.__init__">(auth_middleware.authz.stores.sql_policy.SqlPolicyStore method)</a>
 </li>
         <li><a href="exceptions.html#auth_middleware.exceptions.AuthenticationError.__init__">(auth_middleware.exceptions.AuthenticationError method)</a>
 </li>
@@ -253,11 +279,15 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig">AbacConfig (class in auth_middleware.authz.abac.config)</a>
+</li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.accepted_token_types">accepted_token_types (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.aclose">aclose() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource.aclose">aclose() (auth_middleware.authz.abac.cache.CachingPolicySource method)</a>
 
       <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.aclose">(auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+</li>
         <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.aclose">(auth_middleware.authz.runtime.Authz method)</a>
 </li>
         <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.aclose">(auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
@@ -279,6 +309,12 @@
       </ul></li>
       <li><a href="authz-api.html#auth_middleware.authz.service.AssignmentService">AssignmentService (class in auth_middleware.authz.service)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.attributes">attributes (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.attributes">(auth_middleware.authz.catalog.PermissionCatalog property)</a>
+</li>
+      </ul></li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.audience">audience (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.events.audit_hook">audit_hook() (in module auth_middleware.authz.events)</a>
@@ -332,6 +368,8 @@
         <li><a href="jwt_auth_middleware.html#module-auth_middleware.jwt_auth_middleware">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     auth_middleware.jwt_bearer_manager
 
@@ -339,8 +377,6 @@
         <li><a href="jwt_bearer_manager.html#module-auth_middleware.jwt_bearer_manager">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     auth_middleware.providers.azure.entra_id_provider
 
@@ -425,8 +461,12 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.build">build() (auth_middleware.authz.runtime.Authz class method)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.build">build() (auth_middleware.authz.abac.config.AbacConfig method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.build">(auth_middleware.authz.runtime.Authz class method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
@@ -444,6 +484,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore">CachingAssignmentStore (class in auth_middleware.authz.cache)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource">CachingPolicySource (class in auth_middleware.authz.abac.cache)</a>
+</li>
       <li><a href="exceptions.html#auth_middleware.exceptions.ChallengeRequiredError">ChallengeRequiredError</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.change_role">change_role() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
@@ -458,16 +500,34 @@
         <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.change_role">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="authz-api.html#auth_middleware.authz.engine.Authorizer.check">check() (auth_middleware.authz.engine.Authorizer method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.claims_allowlist">claims_allowlist (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.client_id">client_id (auth_middleware.services.AuditEvent attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.client_id_claims">client_id_claims (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.clock">clock (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
 </li>
       <li><a href="groups-provider.html#auth_middleware.providers.aws.cognito_groups_provider.CognitoGroupsProvider">CognitoGroupsProvider (class in auth_middleware.providers.aws.cognito_groups_provider)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.condition">condition (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.condition">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.service.PolicyService.create">create() (auth_middleware.authz.abac.service.PolicyService method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.create">(auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore.create">(auth_middleware.authz.stores.sql_policy.SqlPolicyStore method)</a>
+</li>
+      </ul></li>
       <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore.create_table_if_missing">create_table_if_missing() (auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore method)</a>
 </li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.create_user_from_token">create_user_from_token() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
@@ -476,21 +536,41 @@
         <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider.create_user_from_token">(auth_middleware.providers.oidc.oidc_provider.OidcProvider method)</a>
 </li>
       </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.created_at">created_at (auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.detect_m2m_tokens">detect_m2m_tokens (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.delete_attributes">delete_attributes() (auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlAttributeStore.delete_attributes">(auth_middleware.authz.stores.sql_policy.SqlAttributeStore method)</a>
 </li>
-      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.discovery_url">discovery_url (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.description">description (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.description">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.detect_m2m_tokens">detect_m2m_tokens (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.service.PolicyService.disable">disable() (auth_middleware.authz.abac.service.PolicyService method)</a>
+</li>
+      <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.discovery_url">discovery_url (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.dispatch">dispatch() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore">DynamoDbAssignmentStore (class in auth_middleware.authz.stores.dynamodb)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore">DynamoDbAttributeStore (class in auth_middleware.authz.stores.dynamodb_policy)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore">DynamoDbPolicyStore (class in auth_middleware.authz.stores.dynamodb_policy)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -498,11 +578,33 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider">EntraIDProvider (class in auth_middleware.providers.azure.entra_id_provider)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.effect">effect (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.effect">(auth_middleware.authz.abac.types.Policy attribute)</a>
 </li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.service.PolicyService.enable">enable() (auth_middleware.authz.abac.service.PolicyService method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.enforce">enforce (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.enforce">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider">EntraIDProvider (class in auth_middleware.providers.azure.entra_id_provider)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.pdp.PolicyDecisionPoint.evaluate">evaluate() (auth_middleware.authz.abac.pdp.PolicyDecisionPoint method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.conditions.evaluate">(in module auth_middleware.authz.abac.conditions)</a>
+</li>
+      </ul></li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.event_type">event_type (auth_middleware.services.AuditEvent attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.engine.Authorizer.explain">explain() (auth_middleware.authz.engine.Authorizer method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -510,6 +612,8 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.fail_closed">fail_closed() (auth_middleware.authz.abac.types.Policy class method)</a>
+</li>
       <li><a href="groups-provider.html#auth_middleware.contracts.groups_provider.GroupsProvider.fetch_groups">fetch_groups() (auth_middleware.contracts.groups_provider.GroupsProvider method)</a>
 
       <ul>
@@ -528,9 +632,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.forced_jwks_refresh_min_interval_seconds">forced_jwks_refresh_min_interval_seconds (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
-      <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.from_file">from_file() (auth_middleware.authz.catalog.PermissionCatalog class method)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.from_dict">from_dict() (auth_middleware.authz.abac.types.Policy class method)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.sources.StaticPolicySource.from_file">from_file() (auth_middleware.authz.abac.sources.StaticPolicySource class method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.from_file">(auth_middleware.authz.catalog.PermissionCatalog class method)</a>
+</li>
+      </ul></li>
       <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.from_mapping">from_mapping() (auth_middleware.authz.catalog.PermissionCatalog class method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.from_new">from_new() (auth_middleware.authz.abac.types.Policy class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -538,6 +650,14 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.service.PolicyService.get">get() (auth_middleware.authz.abac.service.PolicyService method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.get">(auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore.get">(auth_middleware.authz.stores.sql_policy.SqlPolicyStore method)</a>
+</li>
+      </ul></li>
       <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.get_assignment">get_assignment() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
 
       <ul>
@@ -548,10 +668,18 @@
         <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore.get_assignment">(auth_middleware.authz.stores.sql.SqlAssignmentStore method)</a>
 </li>
       </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.get_attributes">get_attributes() (auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlAttributeStore.get_attributes">(auth_middleware.authz.stores.sql_policy.SqlAttributeStore method)</a>
+</li>
+      </ul></li>
       <li><a href="services.html#auth_middleware.services.M2MTokenDetector.get_client_id">get_client_id() (auth_middleware.services.M2MTokenDetector static method)</a>
 </li>
       <li><a href="jwt_bearer_manager.html#auth_middleware.jwt_bearer_manager.JWTBearerManager.get_credentials">get_credentials() (auth_middleware.jwt_bearer_manager.JWTBearerManager method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.JwtAuthMiddleware.get_current_user">get_current_user() (auth_middleware.jwt_auth_middleware.JwtAuthMiddleware method)</a>
 
       <ul>
@@ -560,8 +688,6 @@
       </ul></li>
       <li><a href="groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider.get_groups_from_db">get_groups_from_db() (auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functions.html#auth_middleware.guards.functions.get_identity">get_identity() (in module auth_middleware.guards.functions)</a>
 </li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.get_keys">get_keys() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
@@ -592,32 +718,52 @@
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.guards.has_permission">has_permission() (in module auth_middleware.authz.guards)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functions.html#auth_middleware.guards.functions.has_permissions">has_permissions() (in module auth_middleware.guards.functions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="functions.html#auth_middleware.guards.functions.has_roles">has_roles() (in module auth_middleware.guards.functions)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.headers_allowlist">headers_allowlist (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.hide">hide (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.hide">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.id">id (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.id">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.identity_claims">identity_claims (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.stores.memory.InMemoryAssignmentStore">InMemoryAssignmentStore (class in auth_middleware.authz.stores.memory)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.install">install() (auth_middleware.authz.runtime.Authz method)</a>
 </li>
-      <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.invalidate">invalidate() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource.invalidate">invalidate() (auth_middleware.authz.abac.cache.CachingPolicySource method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.invalidate">(auth_middleware.authz.cache.CachingAssignmentStore method)</a>
 </li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource.invalidate_kind">invalidate_kind() (auth_middleware.authz.abac.cache.CachingPolicySource method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidAuthorizationException">InvalidAuthorizationException</a>
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidChallengeError">InvalidChallengeError</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidCredentialsException">InvalidCredentialsException</a>
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.InvalidTokenException">InvalidTokenException</a>
@@ -654,6 +800,16 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource.list_all">list_all() (auth_middleware.authz.abac.cache.CachingPolicySource method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.sources.StaticPolicySource.list_all">(auth_middleware.authz.abac.sources.StaticPolicySource method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.list_all">(auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore.list_all">(auth_middleware.authz.stores.sql_policy.SqlPolicyStore method)</a>
+</li>
+      </ul></li>
       <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.list_assignments">list_assignments() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
 
       <ul>
@@ -676,6 +832,16 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource.list_policies">list_policies() (auth_middleware.authz.abac.cache.CachingPolicySource method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.sources.StaticPolicySource.list_policies">(auth_middleware.authz.abac.sources.StaticPolicySource method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.list_policies">(auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore.list_policies">(auth_middleware.authz.stores.sql_policy.SqlPolicyStore method)</a>
+</li>
+      </ul></li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.load_jwks">load_jwks() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 
       <ul>
@@ -705,6 +871,8 @@
       <li><a href="authz-api.html#auth_middleware.authz.events.metrics_hook">metrics_hook() (in module auth_middleware.authz.events)</a>
 </li>
       <li><a href="exceptions.html#auth_middleware.exceptions.MfaSetupError">MfaSetupError</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.mode">mode (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
 </li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.model_config">model_config (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
@@ -746,16 +914,26 @@
   </ul></td>
 </tr></table>
 
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy">NewPolicy (class in auth_middleware.authz.abac.types)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.of">of() (auth_middleware.authz.runtime.Authz class method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider.OidcProvider">OidcProvider (class in auth_middleware.providers.oidc.oidc_provider)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings">OidcProviderSettings (class in auth_middleware.providers.oidc.oidc_provider_settings)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.cache.CachingPolicySource.on_change">on_change() (auth_middleware.authz.abac.cache.CachingPolicySource method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -763,14 +941,20 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.conditions.parse_condition">parse_condition() (in module auth_middleware.authz.abac.conditions)</a>
+</li>
       <li><a href="exceptions.html#auth_middleware.exceptions.PasswordPolicyError">PasswordPolicyError</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.path">path (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog">PermissionCatalog (class in auth_middleware.authz.catalog)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.permissions">permissions (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.permissions">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
       <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.permissions">permissions() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.permissions_for">permissions_for() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
@@ -780,6 +964,36 @@
       <li><a href="permissions-provider.html#auth_middleware.contracts.permissions_provider.PermissionsProvider">PermissionsProvider (class in auth_middleware.contracts.permissions_provider)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.policies">policies (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.sources.StaticPolicySource.policies">(auth_middleware.authz.abac.sources.StaticPolicySource property)</a>
+</li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy">Policy (class in auth_middleware.authz.abac.types)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.policy_cache_ttl">policy_cache_ttl (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.pdp.PolicyDecisionPoint">PolicyDecisionPoint (class in auth_middleware.authz.abac.pdp)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.service.PolicyService">PolicyService (class in auth_middleware.authz.abac.service)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.priority">priority (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.priority">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.providers">providers (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore.put_attributes">put_attributes() (auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlAttributeStore.put_attributes">(auth_middleware.authz.stores.sql_policy.SqlAttributeStore method)</a>
+</li>
+      </ul></li>
+  </ul></td>
 </tr></table>
 
 <h2 id="R">R</h2>
@@ -787,6 +1001,14 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.AuthFailure.reason">reason (auth_middleware.jwt_auth_middleware.AuthFailure attribute)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.service.PolicyService.replace">replace() (auth_middleware.authz.abac.service.PolicyService method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.replace">(auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore method)</a>
+</li>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore.replace">(auth_middleware.authz.stores.sql_policy.SqlPolicyStore method)</a>
+</li>
+      </ul></li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.require_audience">require_audience (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
 </li>
       <li><a href="functions.html#auth_middleware.guards.functions.require_authenticated">require_authenticated() (in module auth_middleware.guards.functions)</a>
@@ -804,6 +1026,12 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="services.html#auth_middleware.services.M2MTokenDetector.requires_user_context">requires_user_context() (auth_middleware.services.M2MTokenDetector static method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.resources.ResourceFromPath.resolve">resolve() (auth_middleware.authz.abac.resources.ResourceFromPath method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.resources.ResourceFromPath">ResourceFromPath (class in auth_middleware.authz.abac.resources)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.revision">revision (auth_middleware.authz.abac.types.Policy attribute)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.cache.CachingAssignmentStore.revoke">revoke() (auth_middleware.authz.cache.CachingAssignmentStore method)</a>
 
@@ -829,18 +1057,40 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.NewPolicy.scope">scope (auth_middleware.authz.abac.types.NewPolicy attribute)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.scope">(auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
+      </ul></li>
       <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.scope_kind">scope_kind() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore.set_status">set_status() (auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore method)</a>
+
+      <ul>
+        <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore.set_status">(auth_middleware.authz.stores.sql_policy.SqlPolicyStore method)</a>
+</li>
+      </ul></li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.sources">sources() (auth_middleware.authz.abac.config.AbacConfig method)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.spec">spec() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.stores.sql.SqlAssignmentStore">SqlAssignmentStore (class in auth_middleware.authz.stores.sql)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlAttributeStore">SqlAttributeStore (class in auth_middleware.authz.stores.sql_policy)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="groups-provider.html#auth_middleware.providers.sqlalchemy.sql_groups_provider.SqlGroupsProvider">SqlGroupsProvider (class in auth_middleware.providers.sqlalchemy.sql_groups_provider)</a>
 </li>
       <li><a href="permissions-provider.html#auth_middleware.providers.sqlalchemy.sql_permissions_provider.SqlPermissionsProvider">SqlPermissionsProvider (class in auth_middleware.providers.sqlalchemy.sql_permissions_provider)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.stores.sql_policy.SqlPolicyStore">SqlPolicyStore (class in auth_middleware.authz.stores.sql_policy)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.sources.StaticPolicySource">StaticPolicySource (class in auth_middleware.authz.abac.sources)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.status">status (auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
       <li><a href="jwt_auth_middleware.html#auth_middleware.jwt_auth_middleware.AuthFailure.status_code">status_code (auth_middleware.jwt_auth_middleware.AuthFailure attribute)</a>
 
       <ul>
@@ -865,15 +1115,23 @@
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.timestamp">timestamp (auth_middleware.services.AuditEvent attribute)</a>
 </li>
-      <li><a href="services.html#auth_middleware.services.AuditEvent.to_dict">to_dict() (auth_middleware.services.AuditEvent method)</a>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.to_dict">to_dict() (auth_middleware.authz.abac.types.Policy method)</a>
+
+      <ul>
+        <li><a href="services.html#auth_middleware.services.AuditEvent.to_dict">(auth_middleware.services.AuditEvent method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="services.html#auth_middleware.services.AuditEvent.to_json">to_json() (auth_middleware.services.AuditEvent method)</a>
 </li>
       <li><a href="authz-api.html#auth_middleware.authz.catalog.PermissionCatalog.to_mapping">to_mapping() (auth_middleware.authz.catalog.PermissionCatalog method)</a>
 </li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.to_new">to_new() (auth_middleware.authz.abac.types.Policy method)</a>
+</li>
       <li><a href="oidc_provider.html#auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings.token_use_claim">token_use_claim (auth_middleware.providers.oidc.oidc_provider_settings.OidcProviderSettings attribute)</a>
+</li>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.config.AbacConfig.trusted_proxies">trusted_proxies (auth_middleware.authz.abac.config.AbacConfig attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -881,6 +1139,8 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.types.Policy.updated_at">updated_at (auth_middleware.authz.abac.types.Policy attribute)</a>
+</li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.user_agent">user_agent (auth_middleware.services.AuditEvent attribute)</a>
 </li>
       <li><a href="services.html#auth_middleware.services.AuditEvent.user_id">user_id (auth_middleware.services.AuditEvent attribute)</a>
@@ -899,10 +1159,14 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.abac.validation.validate_policy">validate_policy() (in module auth_middleware.authz.abac.validation)</a>
+</li>
       <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.validate_routes">validate_routes() (auth_middleware.authz.runtime.Authz method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="authz-api.html#auth_middleware.authz.runtime.Authz.verify_policies">verify_policies() (auth_middleware.authz.runtime.Authz method)</a>
+</li>
       <li><a href="entra_id_provider.html#auth_middleware.providers.azure.entra_id_provider.EntraIDProvider.verify_token">verify_token() (auth_middleware.providers.azure.entra_id_provider.EntraIDProvider method)</a>
 
       <ul>

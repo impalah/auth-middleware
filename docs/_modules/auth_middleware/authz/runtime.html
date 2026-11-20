@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.authz.runtime &mdash; Auth Middleware 0.7.0 documentation</title>
+  <title>auth_middleware.authz.runtime &mdash; Auth Middleware 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/runtime.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../../../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-catalog.html">The Permission Catalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-stores.html">Assignment Stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../abac.html">Attribute-Based Access Control (ABAC)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-migration.html">Migrating from Flat Permissions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../authz-api.html">Scoped Permissions API Reference</a></li>
@@ -170,7 +171,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">AsyncIterator</span><span class="p">,</span> <span class="n">Awaitable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Mapping</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">asynccontextmanager</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
@@ -198,9 +199,15 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
 
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbacConfig</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.abac.pdp</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyDecisionPoint</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.ports</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyStore</span>
+
 <span class="c1">#: Attributes the guard puts on its dependency so routes can be validated.</span>
 <span class="n">PERMISSION_ATTR</span> <span class="o">=</span> <span class="s2">"__authz_permission__"</span>
 <span class="n">SCOPE_ATTR</span> <span class="o">=</span> <span class="s2">"__authz_scope__"</span>
+<span class="n">RESOURCE_ATTR</span> <span class="o">=</span> <span class="s2">"__authz_resource__"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">default_not_visible</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">exc</span><span class="p">:</span> <span class="n">ScopeNotVisibleError</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -265,9 +272,25 @@
     <span class="n">sensitive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">duration_ms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">request_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: ABAC: ids of the policies that decided (never attribute values).</span>
+    <span class="n">policy_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="c1">#: ABAC: shadow (``enforce=false``) policies that would have denied.</span>
+    <span class="n">shadow_policy_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="c1">#: ABAC: ``deny:&lt;id&gt;``, ``require:&lt;id&gt;``, ``indeterminate:&lt;id&gt;`` or ``permit:&lt;id&gt;``.</span>
+    <span class="n">abac_reason</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">"""Return a JSON-serialisable view."""</span>
+<span class="w">        </span><span class="sd">"""Return a JSON-serialisable view (ABAC fields only when present)."""</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy_ids</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"policy_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">policy_ids</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shadow_policy_ids</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"shadow_policy_ids"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shadow_policy_ids</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abac_reason</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"abac_reason"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">abac_reason</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_base_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">"kind"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">"principal_id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">principal_id</span><span class="p">,</span>
@@ -305,8 +328,14 @@
         <span class="n">group_scope_kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">error_policy</span><span class="p">:</span> <span class="n">ErrorPolicy</span><span class="p">,</span>
         <span class="n">hooks</span><span class="p">:</span> <span class="n">AuthzHooks</span><span class="p">,</span>
+        <span class="n">pdp</span><span class="p">:</span> <span class="n">PolicyDecisionPoint</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">policy_source</span><span class="p">:</span> <span class="n">PolicyStore</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">abac</span><span class="p">:</span> <span class="n">AbacConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span> <span class="o">=</span> <span class="n">catalog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abac</span> <span class="o">=</span> <span class="n">abac</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">policy_source</span> <span class="o">=</span> <span class="n">policy_source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pdp</span> <span class="o">=</span> <span class="n">pdp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error_policy</span> <span class="o">=</span> <span class="n">error_policy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hooks</span> <span class="o">=</span> <span class="n">hooks</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_store</span> <span class="o">=</span> <span class="n">store</span>
@@ -329,14 +358,20 @@
         <span class="n">group_scope_kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">GLOBAL_KIND</span><span class="p">,</span>
         <span class="n">error_policy</span><span class="p">:</span> <span class="n">ErrorPolicy</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">hooks</span><span class="p">:</span> <span class="n">AuthzHooks</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">abac</span><span class="p">:</span> <span class="n">AbacConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Authz</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Validate the combination of sources and build the runtime.</span>
 
 <span class="sd">        Exactly one of ``store`` / ``store_factory``; neither is accepted only</span>
 <span class="sd">        for a pure group-based setup (``group_roles`` given).</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            abac: Attribute-based access control (policies refining the roles).</span>
+<span class="sd">                ``None``: exactly the role-based behaviour.</span>
+
 <span class="sd">        Raises:</span>
-<span class="sd">            ConfigurationError: Invalid combination or unknown role/scope kind.</span>
+<span class="sd">            ConfigurationError: Invalid combination or unknown role/scope kind, or</span>
+<span class="sd">                invalid static policies.</span>
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">store</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">store_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">"give either store or store_factory, not both"</span><span class="p">)</span>
@@ -350,8 +385,12 @@
             <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"group_roles use unknown roles: </span><span class="si">{</span><span class="n">unknown</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">catalog</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">(</span><span class="n">group_scope_kind</span><span class="p">)</span>
+        <span class="n">pdp</span><span class="p">,</span> <span class="n">policy_source</span> <span class="o">=</span> <span class="n">abac</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">catalog</span><span class="p">)</span> <span class="k">if</span> <span class="n">abac</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">,</span>
+            <span class="n">pdp</span><span class="o">=</span><span class="n">pdp</span><span class="p">,</span>
+            <span class="n">policy_source</span><span class="o">=</span><span class="n">policy_source</span><span class="p">,</span>
+            <span class="n">abac</span><span class="o">=</span><span class="n">abac</span><span class="p">,</span>
             <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span>
             <span class="n">store_factory</span><span class="o">=</span><span class="n">store_factory</span><span class="p">,</span>
             <span class="n">group_roles</span><span class="o">=</span><span class="n">group_roles</span><span class="p">,</span>
@@ -377,7 +416,7 @@
             <span class="n">resolvers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">GroupRoleResolver</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_roles</span><span class="p">,</span> <span class="n">scope_kind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_group_scope_kind</span><span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">Authorizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">,</span> <span class="n">resolvers</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Authorizer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="p">,</span> <span class="n">resolvers</span><span class="p">,</span> <span class="n">pdp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pdp</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Authz.of">
@@ -426,6 +465,7 @@
         <span class="nd">@asynccontextmanager</span>
         <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">lifespan</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">validate_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_policies</span><span class="p">()</span>
             <span class="k">async</span> <span class="k">with</span> <span class="n">previous</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="k">as</span> <span class="n">state</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">yield</span> <span class="n">state</span>
@@ -450,6 +490,11 @@
         <span class="k">for</span> <span class="n">route_path</span><span class="p">,</span> <span class="n">param_names</span><span class="p">,</span> <span class="n">call</span> <span class="ow">in</span> <span class="n">_iter_guards</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
             <span class="n">permission</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">PERMISSION_ATTR</span><span class="p">)</span>
             <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">catalog</span><span class="o">.</span><span class="n">spec</span><span class="p">(</span><span class="n">permission</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">RESOURCE_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pdp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">route_path</span><span class="si">}</span><span class="s2">: the guard has a resource= but ABAC is not "</span>
+                    <span class="s2">"configured (Authz.build(abac=...)): it would be ignored"</span>
+                <span class="p">)</span>
             <span class="n">source</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">SCOPE_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">kind</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kind</span> <span class="o">!=</span> <span class="n">spec</span><span class="o">.</span><span class="n">scope_kind</span><span class="p">:</span>
@@ -464,15 +509,38 @@
                 <span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="Authz.verify_policies">
+<a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.verify_policies">[docs]</a>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">verify_policies</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Startup check of the policy sources (e.g. no id defined twice).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ConfigurationError: Two sources define the same policy id.</span>
+<span class="sd">        """</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">policy_source</span>
+        <span class="n">inner</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"inner"</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+        <span class="n">verify</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">inner</span><span class="p">,</span> <span class="s2">"verify"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verify</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">verify</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="Authz.aclose">
 <a class="viewcode-back" href="../../../authz-api.html#auth_middleware.authz.runtime.Authz.aclose">[docs]</a>
     <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">aclose</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Close the injected store if it exposes ``aclose()``. Idempotent."""</span>
+<span class="w">        </span><span class="sd">"""Close the injected stores if they expose ``aclose()``. Idempotent."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">closer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">,</span> <span class="s2">"aclose"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">closer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_store</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">abac</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abac</span><span class="o">.</span><span class="n">attributes</span><span class="p">)</span>
+            <span class="n">targets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">abac</span><span class="o">.</span><span class="n">sources</span><span class="p">())</span>
+        <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+            <span class="n">closer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">"aclose"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">closer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">id</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">closer</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isawaitable</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
                 <span class="k">await</span> <span class="n">result</span></div>

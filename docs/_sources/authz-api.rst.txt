@@ -47,3 +47,41 @@ Stores
 
 .. autoclass:: auth_middleware.authz.stores.dynamodb.DynamoDbAssignmentStore
    :members: table_definition, create_table_if_missing
+
+ABAC
+----
+
+.. autoclass:: auth_middleware.authz.abac.config.AbacConfig
+
+.. autoclass:: auth_middleware.authz.abac.types.Policy
+
+.. autoclass:: auth_middleware.authz.abac.types.NewPolicy
+
+.. autoclass:: auth_middleware.authz.abac.service.PolicyService
+   :members: create, replace, enable, disable, get
+
+.. autoclass:: auth_middleware.authz.abac.pdp.PolicyDecisionPoint
+   :members: evaluate
+
+.. autofunction:: auth_middleware.authz.abac.validation.validate_policy
+
+.. autofunction:: auth_middleware.authz.abac.conditions.parse_condition
+
+.. autofunction:: auth_middleware.authz.abac.conditions.evaluate
+
+.. autoclass:: auth_middleware.authz.abac.cache.CachingPolicySource
+   :members: invalidate, invalidate_kind, on_change
+
+.. autoclass:: auth_middleware.authz.abac.sources.StaticPolicySource
+   :members: from_file
+
+.. autoclass:: auth_middleware.authz.abac.resources.ResourceFromPath
+
+.. autoclass:: auth_middleware.authz.stores.sql_policy.SqlPolicyStore
+
+.. autoclass:: auth_middleware.authz.stores.sql_policy.SqlAttributeStore
+
+.. autoclass:: auth_middleware.authz.stores.dynamodb_policy.DynamoDbPolicyStore
+   :members: table_definition, create_table_if_missing
+
+.. autoclass:: auth_middleware.authz.stores.dynamodb_policy.DynamoDbAttributeStore

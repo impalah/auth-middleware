@@ -1,6 +1,65 @@
 CHANGELOG
 =========
 
+Version 0.8.0 (unreleased)
+---------------------------
+
+Attribute-based access control (ABAC) on top of the scoped permissions of 0.7. Everything is opt-in:
+``Authz.build(...)`` without ``abac=`` behaves exactly as in 0.7.x. Plan and decisions:
+``documentation/PLAN-abac.md``; quality report: ``documentation/QUALITY-REPORT-0.8.0.md``.
+
+Upgrade notes
+~~~~~~~~~~~~~
+
+- Nothing to do unless you configure ``abac=``. To store policies and attributes in SQL, run the Alembic
+  revision ``b7d2e5f1c3a8`` (``alembic upgrade head``): it only adds the ``authz_policy`` and
+  ``authz_attribute`` tables.
+- ``Authorizer.authorize/check`` take optional keyword-only ``resource`` and ``request``;
+  ``AuthzContext`` and ``DecisionEvent`` gained fields with defaults. ``PermissionCatalog`` accepts an
+  optional ``attributes`` declaration; catalogs without it load unchanged.
+- ``MetricsCollector.record_authz_decision`` takes an optional ``source``; its output is unchanged
+  unless policies are involved.
+
+Added
+~~~~~
+
+- ``auth_middleware.authz.abac``: policies (``deny`` / ``require`` / ``permit``) as JSON/TOML data with
+  a closed, three-valued condition language (no ``eval``, no regular expressions), validated against the
+  catalog and an attribute schema when written; ``restrict`` mode (policies only narrow what roles grant)
+  and an **experimental** ``grant`` mode.
+- Attributes of the subject (token, assignment, persisted), the resource (the route's loader or persisted)
+  and the environment (time, request, allow-listed headers and claims); lazy and loaded at most once per
+  decision.
+- ``require_permission(..., resource=...)``, ``has_permission(..., resource=...)``,
+  ``ResourceFromPath`` / ``ResourceFromQuery`` / ``ResourceFromCallable``, ``permission_extra(..., abac=True)``
+  (``x-abac``), ``Authorizer.explain``.
+- Stores: in-memory, ``SqlPolicyStore`` / ``SqlAttributeStore`` (PostgreSQL, MySQL, SQLite) and
+  ``DynamoDbPolicyStore`` / ``DynamoDbAttributeStore`` (no index), with a public contract suite
+  (``auth_middleware.authz.testing``).
+- ``PolicyService`` (validated, serialised writes), ``StaticPolicySource`` (TOML/JSON files),
+  ``CompositePolicySource`` and ``CachingPolicySource`` (5 s default; other processes see a change only
+  after the TTL).
+- ``authcli authz policy add|replace|list|show|enable|disable|validate|test`` (``validate`` and ``test`` work
+  offline).
+- Shadow mode (``enforce = false``), ``hide`` (a denial answers 404), audit fields (``policy_ids``,
+  ``shadow_policy_ids``, ``abac_reason``: ids only, never values) and per-policy metrics capped at 100 ids.
+
+Security
+~~~~~~~~
+
+- Fail closed everywhere: an unreachable or garbage policy source, a failing attribute provider or loader
+  and a poisoned cache entry answer 503, never 200; a missing attribute applies a ``deny``; a stored policy
+  that cannot be decoded behaves as a ``deny``; a mismatch of operand types (including a bool against a
+  number) is indeterminate.
+- Static policies that read a header or a claim nobody allow-listed are rejected at build (the attribute
+  would always be absent and a ``deny`` on it would deny everything).
+
+Documentation
+~~~~~~~~~~~~~
+
+- New guide "Attribute-Based Access Control" with a cookbook that the test suite validates
+  (``examples/abac_policies.toml``, ``examples/abac_example.py``); catalog reference updated.
+
 Version 0.7.1 (2026-11-20)
 ---------------------------
 

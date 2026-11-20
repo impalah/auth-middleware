@@ -50,3 +50,22 @@ allowed); it does not change enforcement.
 
 Useful lookups: ``permissions_for(role)``, ``roles_granting(permission)``, ``spec(permission)``,
 ``to_mapping()`` (round-trips with ``from_mapping``).
+
+Attributes for ABAC policies
+----------------------------
+
+An optional ``attributes`` section declares what :ref:`policies <abac>` may read besides the built-ins
+(``subject.id``, ``subject.roles``, ``env.now``, ``env.hour_utc``...). Catalogs without it load unchanged.
+
+.. code-block:: toml
+
+   [attributes."subject.assignment.tenant_status"]
+   type = "string"                      # string | int | float | bool | datetime | string_set
+   enum = ["active", "suspended"]       # optional closed set of literal values
+
+   [attributes."subject.attrs.clearance"]
+   type = "int"
+
+Only members of ``subject.claims.``, ``subject.assignment.``, ``subject.attrs.``, ``resource.attrs.`` and
+``env.header.`` can be declared. In code, pass ``attributes=[AttributeSpec(...)]`` to
+``PermissionCatalog.from_mapping``.

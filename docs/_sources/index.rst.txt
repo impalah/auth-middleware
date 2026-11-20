@@ -98,6 +98,7 @@ Contents
    authz-catalog
    authz-stores
    authz-fastapi
+   abac
    authz-operations
    authz-migration
    authz-api

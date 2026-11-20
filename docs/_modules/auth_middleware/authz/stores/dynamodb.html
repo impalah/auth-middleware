@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>auth_middleware.authz.stores.dynamodb &mdash; Auth Middleware 0.7.0 documentation</title>
+  <title>auth_middleware.authz.stores.dynamodb &mdash; Auth Middleware 0.7.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
 
@@ -13,7 +13,7 @@
     <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/stores/dynamodb.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=fe7df9b0"></script>
+      <script src="../../../../_static/documentation_options.js?v=5a057da9"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../abac.html">Attribute-Based Access Control (ABAC)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
@@ -197,7 +198,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">UTC</span><span class="p">,</span> <span class="n">datetime</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">RevisionConflictError</span><span class="p">,</span> <span class="n">StoreUnavailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -239,7 +240,55 @@
     <span class="p">}</span>
 <span class="p">)</span>
 <span class="n">_CONDITIONAL</span> <span class="o">=</span> <span class="s2">"ConditionalCheckFailedException"</span>
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">"T"</span><span class="p">)</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">blocking_call</span><span class="p">[</span><span class="n">T</span><span class="p">](</span>
+    <span class="n">executor</span><span class="p">:</span> <span class="n">ThreadPoolExecutor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">T</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Run a blocking PynamoDB call in a worker thread, mapping DynamoDB errors.</span>
+
+<span class="sd">    A failed conditional write becomes ``RevisionConflictError``; throttling,</span>
+<span class="sd">    server errors, timeouts and unreachable endpoints become</span>
+<span class="sd">    ``StoreUnavailableError``. Shared by every DynamoDB store of the library.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="n">executor</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">PynamoDBException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="s2">"cause_response_code"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">_CONDITIONAL</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"conditional check failed"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">_UNAVAILABLE_CODES</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">PynamoDBConnectionError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">StoreUnavailableError</span><span class="p">(</span><span class="s2">"DynamoDB is unavailable"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="k">raise</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">connection_meta</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">connect_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">read_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">max_retry_attempts</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">aws_access_key_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">aws_secret_access_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The PynamoDB ``Meta`` connection settings shared by the DynamoDB stores."""</span>
+    <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"connect_timeout_seconds"</span><span class="p">:</span> <span class="n">connect_timeout_seconds</span><span class="p">,</span>
+        <span class="s2">"read_timeout_seconds"</span><span class="p">:</span> <span class="n">read_timeout_seconds</span><span class="p">,</span>
+        <span class="s2">"max_retry_attempts"</span><span class="p">:</span> <span class="n">max_retry_attempts</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">region</span><span class="p">:</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">"region"</span><span class="p">]</span> <span class="o">=</span> <span class="n">region</span>
+    <span class="k">if</span> <span class="n">endpoint_url</span><span class="p">:</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span> <span class="o">=</span> <span class="n">endpoint_url</span>
+    <span class="k">if</span> <span class="n">aws_access_key_id</span><span class="p">:</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">"aws_access_key_id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_access_key_id</span>
+    <span class="k">if</span> <span class="n">aws_secret_access_key</span><span class="p">:</span>
+        <span class="n">meta</span><span class="p">[</span><span class="s2">"aws_secret_access_key"</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_secret_access_key</span>
+    <span class="k">return</span> <span class="n">meta</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_scope_key</span><span class="p">(</span><span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -334,19 +383,15 @@
         <span class="n">aws_secret_access_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">max_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">meta</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">"connect_timeout_seconds"</span><span class="p">:</span> <span class="n">connect_timeout_seconds</span><span class="p">,</span>
-            <span class="s2">"read_timeout_seconds"</span><span class="p">:</span> <span class="n">read_timeout_seconds</span><span class="p">,</span>
-            <span class="s2">"max_retry_attempts"</span><span class="p">:</span> <span class="n">max_retry_attempts</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="k">if</span> <span class="n">region</span><span class="p">:</span>
-            <span class="n">meta</span><span class="p">[</span><span class="s2">"region"</span><span class="p">]</span> <span class="o">=</span> <span class="n">region</span>
-        <span class="k">if</span> <span class="n">endpoint_url</span><span class="p">:</span>
-            <span class="n">meta</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span> <span class="o">=</span> <span class="n">endpoint_url</span>
-        <span class="k">if</span> <span class="n">aws_access_key_id</span><span class="p">:</span>
-            <span class="n">meta</span><span class="p">[</span><span class="s2">"aws_access_key_id"</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_access_key_id</span>
-        <span class="k">if</span> <span class="n">aws_secret_access_key</span><span class="p">:</span>
-            <span class="n">meta</span><span class="p">[</span><span class="s2">"aws_secret_access_key"</span><span class="p">]</span> <span class="o">=</span> <span class="n">aws_secret_access_key</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">connection_meta</span><span class="p">(</span>
+            <span class="n">region</span><span class="o">=</span><span class="n">region</span><span class="p">,</span>
+            <span class="n">endpoint_url</span><span class="o">=</span><span class="n">endpoint_url</span><span class="p">,</span>
+            <span class="n">connect_timeout_seconds</span><span class="o">=</span><span class="n">connect_timeout_seconds</span><span class="p">,</span>
+            <span class="n">read_timeout_seconds</span><span class="o">=</span><span class="n">read_timeout_seconds</span><span class="p">,</span>
+            <span class="n">max_retry_attempts</span><span class="o">=</span><span class="n">max_retry_attempts</span><span class="p">,</span>
+            <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">aws_access_key_id</span><span class="p">,</span>
+            <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">aws_secret_access_key</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="c1"># A dedicated, bounded pool keeps a slow DynamoDB from starving the other</span>
         <span class="c1"># users of the event loop's default executor (and bounds our own concurrency).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="o">=</span> <span class="p">(</span>
@@ -369,20 +414,9 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"attributes larger than </span><span class="si">{</span><span class="n">MAX_ATTRIBUTES_BYTES</span><span class="si">}</span><span class="s2"> bytes"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_call</span><span class="p">[</span><span class="n">T</span><span class="p">](</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Run a blocking PynamoDB call in a thread, mapping errors."""</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">to_thread</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-            <span class="k">return</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_running_loop</span><span class="p">()</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
-        <span class="k">except</span> <span class="n">PynamoDBException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="s2">"cause_response_code"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">_CONDITIONAL</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">RevisionConflictError</span><span class="p">(</span><span class="s2">"conditional check failed"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-            <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">_UNAVAILABLE_CODES</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">PynamoDBConnectionError</span><span class="p">):</span>
-                <span class="c1"># throttling, server errors, timeouts and unreachable endpoints</span>
-                <span class="k">raise</span> <span class="n">StoreUnavailableError</span><span class="p">(</span><span class="s2">"DynamoDB is unavailable"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-            <span class="k">raise</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="n">blocking_call</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_to_assignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Assignment</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span>

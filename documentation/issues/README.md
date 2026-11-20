@@ -129,3 +129,29 @@ is the critical path; 029 -> 030/031 (stores) run in parallel from 023; then 032
   validly signed oversized token is accepted by the library (no size cap), the test only asserts no 500; a 200 KB garbage
   token is 401. Defaults not changed (would be breaking: follow-up for a major version + ADR). CHANGELOG has an
   "Unreleased (0.7.x)" entry; the version bump is left to the owner.
+- AUTHZ-023..036 · 2026-11-20 · Epic H (ABAC), local commits, **not pushed, version not bumped** (0.8.0 is
+  documented as unreleased). Deviations from the issues:
+  - 023: the policy status enum is `PolicyStatus` (`active`/`disabled`) instead of `AssignmentStatus`;
+    added `new_policy_from_dict`, `Policy.fail_closed`, `ResourceNotFoundError`. In-memory stores are
+    `InMemoryPolicyStore` / `InMemoryAttributeStore` (like `InMemoryAssignmentStore`). `Principal` has no
+    `claims`: claims are read from the request by the context provider, through an allow-list.
+  - 024: **any** type mismatch is INDETERMINATE, including `eq(true, 1)` (the issue said FALSE): a `deny`
+    must never silently miss. `condition_paths` and `parse_many` are extra helpers.
+  - 025: `catalog.attributes` always exists (built-ins included); there is no "ABAC unavailable" state.
+  - 026: providers declare `prefixes` (disjoint, checked at build); `ContextAttributeProvider`,
+    `SubjectAttributeProvider`, `ResourceAttributeProvider`, `EnvironmentProvider`; the resource sources live
+    in `abac/resources.py`. A loader's per-value garbage is dropped; a non-mapping result is an outage.
+  - 027: the decision point takes no `catalog`; `Authorizer.authorize/check/explain` gained keyword-only
+    `resource`/`request`; denial exceptions carry `.abac`; any unexpected error becomes
+    `StoreUnavailableError`.
+  - 028: a guard with `resource=` and no `abac=` is **always** a startup error (not only under `strict`);
+    `Authz.verify_policies()` runs at startup; `permission_extra(..., abac=True)` publishes `x-abac`.
+    Static policies reading un-allow-listed headers/claims fail at build (found by the hostile battery).
+  - 029: outage case is optional (`make_failing_store`). 030: column `condition_doc`; Alembic
+    `b7d2e5f1c3a8`. 031: marker items give id uniqueness; orphan recovery needs a 30 s old marker and a CAS
+    (Floci found a race in the first version); shared helpers `blocking_call`/`connection_meta` extracted from
+    `dynamodb.py`.
+  - 032: `authcli authz policy` also has `show`, `enable`, `replace`, `validate`, `test`. 033: default TTL 5 s
+    (owner decision Q5). 034: `record_authz_decision(..., source=)` and `record_abac_policy`.
+  - 035/036: see `documentation/QUALITY-REPORT-0.8.0.md`; `make test-floci` now runs every `floci` test under
+    `tests/authz/integration`. AUTHZ-037 (licence) was done earlier as release 0.7.1.

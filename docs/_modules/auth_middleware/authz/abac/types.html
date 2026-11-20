@@ -1,0 +1,634 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>auth_middleware.authz.abac.types &mdash; Auth Middleware 0.7.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+
+  
+    <link rel="canonical" href="/auth-middleware/_modules/auth_middleware/authz/abac/types.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5a057da9"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Auth Middleware
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-guide.html">User Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../middleware-configuration.html">Middleware Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Infrastructure Setup:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html">Infrastructure Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#provider-specific-setup-guides">Provider-Specific Setup Guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#security-considerations">Security Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../infrastructure.html#next-steps">Next Steps</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scoped Permissions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-quickstart.html">Scoped Permissions: Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-overview.html">Scoped Permissions: Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-catalog.html">The Permission Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-stores.html">Assignment Stores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../abac.html">Attribute-Based Access Control (ABAC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-migration.html">Migrating from Flat Permissions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../authz-api.html">Scoped Permissions API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Authentication Providers:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../entra_id_provider.html">Azure Entra ID Authentication Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html">Generic OIDC Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../oidc_provider.html#hardening-options">Hardening options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Advanced Topics:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html">Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#using-groups-in-your-application">Using Groups in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#custom-groups-provider">Custom Groups Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#testing-groups-providers">Testing Groups Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#migration-and-deployment">Migration and Deployment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../groups-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html">Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#built-in-providers">Built-in Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#using-permissions-in-your-application">Using Permissions in Your Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-patterns">Permission Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#custom-permissions-provider">Custom Permissions Provider</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#advanced-features">Advanced Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#permission-management">Permission Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#testing-permissions-providers">Testing Permissions Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#api-reference">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../permissions-provider.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html">Extending Authorization Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#overview">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#understanding-the-provider-interface">Understanding the Provider Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#integration-patterns">Integration Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#advanced-patterns">Advanced Patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#caching-and-performance">Caching and Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#error-handling-and-resilience">Error Handling and Resilience</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#testing-custom-providers">Testing Custom Providers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#deployment-considerations">Deployment Considerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#best-practices-summary">Best Practices Summary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../extending-authz-providers.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user-property.html">The User Property</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../auth-authn.html">Control Authentication and Authorization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html">Services Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#m2m-token-detection">M2M Token Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#rate-limiting">Rate Limiting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#audit-logging">Audit Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#metrics-collection">Metrics Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../services.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html">JWKS Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#cache-strategies">Cache Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#background-refresh">Background Refresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#configuration-examples">Configuration Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#monitoring-cache-performance">Monitoring Cache Performance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#best-practices">Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#performance-comparison">Performance Comparison</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwks-cache.html#see-also">See Also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../jwt_bearer_manager.html">jwt_bearer_manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../exceptions.html">Exception Handling</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../types.html">Type Definitions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../functions.html">Authentication Functions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Auth Middleware</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">auth_middleware.authz.abac.types</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for auth_middleware.authz.abac.types</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Dependency-free vocabulary of the ABAC subsystem (policies and attributes)."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvalidPolicyError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">auth_middleware.authz.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GLOBAL_KIND</span><span class="p">,</span> <span class="n">MAX_ID_LENGTH</span><span class="p">,</span> <span class="n">ScopeRef</span>
+
+<span class="n">POLICY_ID_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[a-z0-9][a-z0-9_.-]{0,99}"</span><span class="p">)</span>
+<span class="n">PATTERN_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[a-z0-9_.*]{1,100}"</span><span class="p">)</span>
+<span class="n">_KIND_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[a-z][a-z0-9_]*"</span><span class="p">)</span>
+<span class="n">_KEY_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[A-Za-z_][A-Za-z0-9_]{0,63}"</span><span class="p">)</span>
+
+<span class="n">MAX_PERMISSIONS</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">MAX_DESCRIPTION</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">MAX_POLICY_BYTES</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="mi">1024</span>
+<span class="n">MAX_ATTRIBUTES_BYTES</span> <span class="o">=</span> <span class="mi">4096</span>
+<span class="n">MAX_ATTRIBUTE_LIST</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">MAX_ATTRIBUTE_DEPTH</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">MAX_ENTITY_ID_LENGTH</span> <span class="o">=</span> <span class="mi">500</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Effect</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""What a policy does when its condition holds."""</span>
+
+    <span class="n">DENY</span> <span class="o">=</span> <span class="s2">"deny"</span>
+    <span class="n">REQUIRE</span> <span class="o">=</span> <span class="s2">"require"</span>
+    <span class="n">PERMIT</span> <span class="o">=</span> <span class="s2">"permit"</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PolicyStatus</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Lifecycle status of a policy (a disabled policy is kept as history)."""</span>
+
+    <span class="n">ACTIVE</span> <span class="o">=</span> <span class="s2">"active"</span>
+    <span class="n">DISABLED</span> <span class="o">=</span> <span class="s2">"disabled"</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PolicyScope</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where a policy applies: one scope, or every scope of a kind (``id=None``)."""</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_KIND_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid policy scope kind: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_ID_LENGTH</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"invalid policy scope id"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="s2">"*"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">GLOBAL_KIND</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"'*' is only valid for the global scope"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">matches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">ScopeRef</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether a policy with this scope applies to ``scope``."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">scope</span><span class="o">.</span><span class="n">kind</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">scope</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_permissions</span><span class="p">(</span><span class="n">permissions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">permissions</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">permissions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_PERMISSIONS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"a policy needs 1..</span><span class="si">{</span><span class="n">MAX_PERMISSIONS</span><span class="si">}</span><span class="s2"> permissions"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">permissions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">PATTERN_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid permission pattern: </span><span class="si">{</span><span class="n">p</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_condition</span><span class="p">(</span><span class="n">condition</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"condition must be an object"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">condition</span><span class="p">,</span> <span class="n">allow_nan</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">RecursionError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"condition is not valid JSON data"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="n">MAX_POLICY_BYTES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"condition larger than </span><span class="si">{</span><span class="n">MAX_POLICY_BYTES</span><span class="si">}</span><span class="s2"> bytes"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_fields</span><span class="p">(</span>
+    <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="n">Effect</span><span class="p">,</span>
+    <span class="n">permissions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">condition</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">POLICY_ID_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">policy_id</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid policy id: </span><span class="si">{</span><span class="n">policy_id</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">Effect</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid effect: </span><span class="si">{</span><span class="n">effect</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">_check_permissions</span><span class="p">(</span><span class="n">permissions</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">description</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_DESCRIPTION</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"description too long"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">priority</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">priority</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"priority must be an integer"</span><span class="p">)</span>
+    <span class="n">_check_condition</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NewPolicy">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.types.NewPolicy">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NewPolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Input of ``PolicyAdmin.create`` / ``replace``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        id: Human-chosen id, ``[a-z0-9][a-z0-9_.-]{0,99}``, unique across the store.</span>
+<span class="sd">        effect: ``deny``, ``require`` or ``permit``.</span>
+<span class="sd">        permissions: Exact names or ``*`` patterns (``design.*``, ``*.write``).</span>
+<span class="sd">        scope: Where it applies.</span>
+<span class="sd">        condition: The raw condition AST (parsed by ``parse_condition``).</span>
+<span class="sd">        description: Free text (&lt;= 500 characters).</span>
+<span class="sd">        priority: Lower is evaluated first.</span>
+<span class="sd">        hide: A denial answers "not visible" (404) instead of 403.</span>
+<span class="sd">        enforce: ``False`` is shadow mode: evaluated and reported, never enforced.</span>
+<span class="sd">    """</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="n">Effect</span>
+    <span class="n">permissions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">scope</span><span class="p">:</span> <span class="n">PolicyScope</span>
+    <span class="n">condition</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">hide</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">enforce</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"permissions"</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">))</span>
+        <span class="n">_check_fields</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">condition</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="Policy">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.types.Policy">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Policy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A stored policy: a :class:`NewPolicy` plus status, revision and timestamps."""</span>
+
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">effect</span><span class="p">:</span> <span class="n">Effect</span>
+    <span class="n">permissions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">scope</span><span class="p">:</span> <span class="n">PolicyScope</span>
+    <span class="n">condition</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">hide</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">enforce</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">PolicyStatus</span> <span class="o">=</span> <span class="n">PolicyStatus</span><span class="o">.</span><span class="n">ACTIVE</span>
+    <span class="n">revision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">created_at</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">updated_at</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"permissions"</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">))</span>
+        <span class="n">_check_fields</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">condition</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Policy.from_new">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.types.Policy.from_new">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_new</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">new</span><span class="p">:</span> <span class="n">NewPolicy</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">status</span><span class="p">:</span> <span class="n">PolicyStatus</span> <span class="o">=</span> <span class="n">PolicyStatus</span><span class="o">.</span><span class="n">ACTIVE</span><span class="p">,</span>
+        <span class="n">revision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">created_at</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">updated_at</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build a stored policy from a :class:`NewPolicy`."""</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">permissions</span><span class="p">,</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">scope</span><span class="p">,</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">new</span><span class="o">.</span><span class="n">condition</span><span class="p">),</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">hide</span><span class="p">,</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">enforce</span><span class="p">,</span>
+            <span class="n">status</span><span class="p">,</span>
+            <span class="n">revision</span><span class="p">,</span>
+            <span class="n">created_at</span><span class="p">,</span>
+            <span class="n">updated_at</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Policy.fail_closed">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.types.Policy.fail_closed">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fail_closed</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">policy_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scope</span><span class="p">:</span> <span class="n">PolicyScope</span><span class="p">,</span> <span class="n">permissions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"*"</span><span class="p">,)</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A ``deny`` that always applies (stands in for an undecodable policy)."""</span>
+        <span class="n">safe_id</span> <span class="o">=</span> <span class="n">policy_id</span> <span class="k">if</span> <span class="n">POLICY_ID_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">policy_id</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"invalid-policy"</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">safe_id</span><span class="p">,</span>
+            <span class="n">Effect</span><span class="o">.</span><span class="n">DENY</span><span class="p">,</span>
+            <span class="n">permissions</span><span class="p">,</span>
+            <span class="n">scope</span><span class="p">,</span>
+            <span class="p">{</span><span class="s2">"exists"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"attr"</span><span class="p">:</span> <span class="s2">"action.permission"</span><span class="p">}},</span>
+            <span class="s2">"undecodable stored policy: denies (fail closed)"</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Policy.to_new">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.types.Policy.to_new">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_new</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NewPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the writable part."""</span>
+        <span class="k">return</span> <span class="n">NewPolicy</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">effect</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scope</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">condition</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enforce</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Policy.to_dict">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.types.Policy.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Return a JSON-serialisable dict (round-trips through :meth:`from_dict`)."""</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="s2">"effect"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">"permissions"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">permissions</span><span class="p">),</span>
+            <span class="s2">"scope"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"kind"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">id</span><span class="p">},</span>
+            <span class="s2">"condition"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">condition</span><span class="p">),</span>
+            <span class="s2">"description"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s2">"priority"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span>
+            <span class="s2">"hide"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">,</span>
+            <span class="s2">"enforce"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">enforce</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">"revision"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">revision</span><span class="p">,</span>
+            <span class="s2">"created_at"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">created_at</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">created_at</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"updated_at"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">updated_at</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">updated_at</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Policy.from_dict">
+<a class="viewcode-back" href="../../../../authz-api.html#auth_middleware.authz.abac.types.Policy.from_dict">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Policy</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Rebuild a policy from :meth:`to_dict` (or a hand-written document).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            InvalidPolicyError: Missing/invalid fields.</span>
+<span class="sd">        """</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">new_policy_from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">PolicyStatus</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"status"</span><span class="p">,</span> <span class="s2">"active"</span><span class="p">))</span>
+            <span class="n">revision</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"revision"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">created</span> <span class="o">=</span> <span class="n">_opt_dt</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created_at"</span><span class="p">))</span>
+            <span class="n">updated</span> <span class="o">=</span> <span class="n">_opt_dt</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"updated_at"</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid policy document: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_new</span><span class="p">(</span>
+            <span class="n">new</span><span class="p">,</span>
+            <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+            <span class="n">revision</span><span class="o">=</span><span class="n">revision</span><span class="p">,</span>
+            <span class="n">created_at</span><span class="o">=</span><span class="n">created</span><span class="p">,</span>
+            <span class="n">updated_at</span><span class="o">=</span><span class="n">updated</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_opt_dt</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">new_policy_from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NewPolicy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build a :class:`NewPolicy` from a plain document (JSON/TOML).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        InvalidPolicyError: Missing/invalid fields or unknown keys.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"a policy must be an object"</span><span class="p">)</span>
+    <span class="n">allowed</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"id"</span><span class="p">,</span>
+        <span class="s2">"effect"</span><span class="p">,</span>
+        <span class="s2">"permissions"</span><span class="p">,</span>
+        <span class="s2">"scope"</span><span class="p">,</span>
+        <span class="s2">"condition"</span><span class="p">,</span>
+        <span class="s2">"description"</span><span class="p">,</span>
+        <span class="s2">"priority"</span><span class="p">,</span>
+        <span class="s2">"hide"</span><span class="p">,</span>
+        <span class="s2">"enforce"</span><span class="p">,</span>
+        <span class="s2">"status"</span><span class="p">,</span>
+        <span class="s2">"revision"</span><span class="p">,</span>
+        <span class="s2">"created_at"</span><span class="p">,</span>
+        <span class="s2">"updated_at"</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">allowed</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">extra</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown policy fields: </span><span class="si">{</span><span class="n">extra</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">scope</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"scope"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scope</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"scope must be an object"</span><span class="p">)</span>
+        <span class="n">raw_perms</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"permissions"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_perms</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_perms</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"permissions must be a list"</span><span class="p">)</span>
+        <span class="n">hide</span><span class="p">,</span> <span class="n">enforce</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"hide"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"enforce"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hide</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">enforce</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"hide and enforce must be booleans"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">NewPolicy</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]),</span>
+            <span class="n">effect</span><span class="o">=</span><span class="n">Effect</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"effect"</span><span class="p">]),</span>
+            <span class="n">permissions</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">raw_perms</span><span class="p">),</span>
+            <span class="n">scope</span><span class="o">=</span><span class="n">PolicyScope</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">scope</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]),</span> <span class="n">scope</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"id"</span><span class="p">)),</span>
+            <span class="n">condition</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"condition"</span><span class="p">],</span>
+            <span class="n">description</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)),</span>
+            <span class="n">priority</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"priority"</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">hide</span><span class="o">=</span><span class="n">hide</span><span class="p">,</span>
+            <span class="n">enforce</span><span class="o">=</span><span class="n">enforce</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"missing policy field: </span><span class="si">{</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">InvalidPolicyError</span><span class="p">):</span>
+            <span class="k">raise</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid policy document: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EntityRef</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The owner of persisted attributes: a principal or a resource."""</span>
+
+    <span class="n">namespace</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"principal"</span><span class="p">,</span> <span class="s2">"resource"</span><span class="p">]</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">namespace</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"principal"</span><span class="p">,</span> <span class="s2">"resource"</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid namespace: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">namespace</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_KIND_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid entity kind: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_ENTITY_ID_LENGTH</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"invalid entity id"</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">principal</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">principal_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EntityRef</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Reference to a principal (kind is always ``principal``)."""</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="s2">"principal"</span><span class="p">,</span> <span class="s2">"principal"</span><span class="p">,</span> <span class="n">principal_id</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_float</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"NaN and infinity are not allowed"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_value</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># A str subclass could override comparison: keep an exact copy.</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_check_float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">MAX_ATTRIBUTE_LIST</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"attribute list too long"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_check_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;=</span> <span class="n">MAX_ATTRIBUTE_DEPTH</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"attribute map nested too deeply"</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">_KEY_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"invalid attribute name: </span><span class="si">{</span><span class="n">k</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_check_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">depth</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+    <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unsupported attribute value type: </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_attributes</span><span class="p">(</span><span class="n">attributes</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Check and copy an attribute map.</span>
+
+<span class="sd">    Values are JSON scalars, lists of scalars (&lt;= 100) or nested maps (depth &lt;= 3);</span>
+<span class="sd">    keys are identifiers; the whole map is at most 4 KB.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        InvalidPolicyError: Anything else.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"attributes must be an object"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="n">_check_value</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="n">allow_nan</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">RecursionError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="s2">"attribute map nested too deeply"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="n">MAX_ATTRIBUTES_BYTES</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InvalidPolicyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"attributes larger than </span><span class="si">{</span><span class="n">MAX_ATTRIBUTES_BYTES</span><span class="si">}</span><span class="s2"> bytes"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">copy</span><span class="p">)</span>
+
+
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EntityAttributes</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Persisted attributes of one entity, with an optimistic ``revision``."""</span>
+
+    <span class="n">ref</span><span class="p">:</span> <span class="n">EntityRef</span>
+    <span class="n">attributes</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">revision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">revision</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, impalah.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

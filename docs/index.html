@@ -63,6 +63,7 @@
 <li class="toctree-l1"><a class="reference internal" href="authz-catalog.html">The Permission Catalog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-fastapi.html">FastAPI Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="abac.html">Attribute-Based Access Control (ABAC)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-migration.html">Migrating from Flat Permissions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="authz-api.html">Scoped Permissions API Reference</a></li>
@@ -348,6 +349,7 @@ Keycloak, Auth0, Okta, …):</p>
 <li class="toctree-l2"><a class="reference internal" href="authz-catalog.html#in-code">In code</a></li>
 <li class="toctree-l2"><a class="reference internal" href="authz-catalog.html#from-toml-or-json">From TOML or JSON</a></li>
 <li class="toctree-l2"><a class="reference internal" href="authz-catalog.html#scope-kinds-and-hide-existence">Scope kinds and <code class="docutils literal notranslate"><span class="pre">hide_existence</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-catalog.html#attributes-for-abac-policies">Attributes for ABAC policies</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="authz-stores.html">Assignment Stores</a><ul>
@@ -367,6 +369,21 @@ Keycloak, Auth0, Okta, …):</p>
 <li class="toctree-l2"><a class="reference internal" href="authz-fastapi.html#mounted-sub-applications">Mounted sub-applications</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="abac.html">Attribute-Based Access Control (ABAC)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#the-model">The model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#anatomy-of-a-policy">Anatomy of a policy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#the-condition-language">The condition language</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#attributes">Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#wiring-it">Wiring it</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#cookbook">Cookbook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#persistence">Persistence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#managing-policies">Managing policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#rolling-a-policy-out-safely">Rolling a policy out safely</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#operations">Operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#expressing-a-tenant-status-gate">Expressing a tenant-status gate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="abac.html#not-covered-yet">Not covered (yet)</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="authz-operations.html">Operations: Service, CLI, Cache, Audit</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="authz-operations.html#assignment-service">Assignment service</a></li>
 <li class="toctree-l2"><a class="reference internal" href="authz-operations.html#cli">CLI</a></li>
@@ -380,6 +397,7 @@ Keycloak, Auth0, Okta, …):</p>
 <li class="toctree-l2"><a class="reference internal" href="authz-api.html#catalog-and-engine">Catalog and engine</a></li>
 <li class="toctree-l2"><a class="reference internal" href="authz-api.html#service-cache-and-events">Service, cache and events</a></li>
 <li class="toctree-l2"><a class="reference internal" href="authz-api.html#stores">Stores</a></li>
+<li class="toctree-l2"><a class="reference internal" href="authz-api.html#abac">ABAC</a></li>
 </ul>
 </li>
 </ul>

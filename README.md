@@ -348,6 +348,29 @@ Runnable, tested examples: [`examples/authz_example.py`](examples/authz_example.
 documentation): quick start, catalog, stores, FastAPI integration, operations and migration from the flat
 guards, which are unchanged.
 
+### 5. Refine the roles with data (ABAC)
+
+Roles say *what* a member can do; **policies** say *when*, using attributes of the subject, the resource and
+the environment: "a suspended studio is read-only", "only the owner deletes a design", "support reads only
+during office hours", "clearance must cover the document's classification". Policies are small JSON/TOML
+documents stored in the same SQLAlchemy or DynamoDB databases, validated against the catalog, rolled out in
+shadow mode, and they can only *narrow* what roles grant unless you opt into the experimental `grant` mode.
+
+```python
+from auth_middleware.authz.abac import AbacConfig, ResourceFromPath, StaticPolicySource
+
+authz = Authz.build(
+    catalog=catalog,
+    store=store,
+    abac=AbacConfig(policies=StaticPolicySource.from_file("policies.toml")),
+)
+# require_permission("design.delete", scope=..., resource=ResourceFromPath("design", "design_id", loader))
+```
+
+Runnable example: [`examples/abac_example.py`](examples/abac_example.py) with its
+[`abac_policies.toml`](examples/abac_policies.toml); full guide: "Attribute-Based Access Control" in the
+documentation. Without `abac=`, nothing changes.
+
 ## Package Structure
 
 ```
