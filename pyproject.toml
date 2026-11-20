@@ -107,6 +107,7 @@ docs = [
 
 [tool.ruff]
 line-length = 88
+extend-exclude = ["mutants"]  # mutmut's working copy
 src = ["src"]  # First, add the source code folder
 target-version = "py312"  # Lowest supported Python
 
@@ -179,6 +180,8 @@ warn_return_any = false
 asyncio_default_fixture_loop_scope = "function"
 # Floci tests start Docker containers: opt in with `-m floci` (make test-floci)
 addopts = "-m 'not floci'"
+# mutmut keeps a mutated copy of the package and the tests in mutants/: never collect it
+norecursedirs = [".*", "build", "dist", "*.egg", "venv", "mutants"]
 markers = [
     "integration: needs a real external service (set AUTHZ_TEST_POSTGRES_URL / AUTHZ_TEST_DYNAMODB_*) or Docker; skipped when absent",
     "floci: runs against a Floci container started with testcontainers (needs Docker); excluded by default, select with -m floci",
