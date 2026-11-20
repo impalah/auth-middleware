@@ -3,7 +3,7 @@
 [![PyPI version](https://badge.fury.io/py/auth-middleware.svg)](https://badge.fury.io/py/auth-middleware)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
-[![Coverage](https://img.shields.io/badge/coverage-83%25-green.svg)](https://github.com/impalah/auth-middleware)
+[![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen.svg)](https://github.com/impalah/auth-middleware)
 
 **Async Authentication and Authorization Middleware for FastAPI/Starlette Applications**
 
