@@ -90,11 +90,11 @@ def update_sphinx_conf(version: str) -> bool:
 
         # Update release = 'x.y.z'
         release_pattern = r"release\s*=\s*['\"]([^'\"]+)['\"]"
-        content = re.sub(release_pattern, f"release = '{version}'", content)
+        content = re.sub(release_pattern, f'release = "{version}"', content)
 
         # Update version = 'x.y.z'
         version_pattern = r"version\s*=\s*['\"]([^'\"]+)['\"]"
-        content = re.sub(version_pattern, f"version = '{version}'", content)
+        content = re.sub(version_pattern, f'version = "{version}"', content)
 
         if content != original_content:
             conf_path.write_text(content, encoding="utf-8")
