@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 from starlette.requests import Request
@@ -18,6 +18,7 @@ from auth_middleware.authz.errors import (
 )
 from auth_middleware.authz.runtime import (
     PERMISSION_ATTR,
+    RESOURCE_ATTR,
     SCOPE_ATTR,
     Authz,
     DecisionEvent,
@@ -30,6 +31,10 @@ from auth_middleware.authz.types import (
     Principal,
     ScopeRef,
 )
+
+if TYPE_CHECKING:
+    from auth_middleware.authz.abac.attributes import ResourceContext
+    from auth_middleware.authz.abac.resources import ResourceSource
 
 AuthzSource = Authz | Callable[[Request], Authz] | None
 
@@ -73,6 +78,9 @@ async def _emit(
     decision: DecisionKind,
     started: float,
     roles: frozenset[str] = frozenset(),
+    abac: Any = None,
+    policy_ids: tuple[str, ...] = (),
+    shadow_policy_ids: tuple[str, ...] = (),
 ) -> None:
     """Deliver the decision to ``on_decision``.
 
@@ -93,6 +101,10 @@ async def _emit(
             sensitive=authz.catalog.spec(permission).sensitive,
             duration_ms=(time.perf_counter() - started) * 1000,
             request_id=_request_id(request),
+            policy_ids=policy_ids or (abac.policy_ids if abac else ()),
+            shadow_policy_ids=shadow_policy_ids
+            or (abac.shadow_policy_ids if abac else ()),
+            abac_reason=abac.reason if abac else None,
         )
         result = hook(event)
         if inspect.isawaitable(result):
@@ -105,6 +117,7 @@ def require_permission(
     permission: str,
     *,
     scope: ScopeSource | None = None,
+    resource: ResourceSource | None = None,
     authz: AuthzSource = None,
 ) -> Callable[..., Awaitable[AuthzContext]]:
     """Build a FastAPI dependency that enforces ``permission`` in ``scope``.
@@ -120,6 +133,10 @@ def require_permission(
     Args:
         permission: Permission name (a ``StrEnum`` member is accepted).
         scope: Where the scope comes from. Defaults to the global scope.
+        resource: Where the resource comes from (ABAC): a ``ResourceFromPath`` /
+            ``ResourceFromQuery`` / ``ResourceFromCallable``, optionally with a
+            loader of the resource's attributes. Needs ``Authz.build(abac=...)``
+            (startup validation refuses a guard whose resource would be ignored).
         authz: An ``Authz`` or a function of the request returning one; default
             ``Authz.of(request)`` (``app.state.authz``).
 
@@ -140,9 +157,12 @@ def require_permission(
             raise rt.error_policy.not_visible(
                 request, ScopeNotVisibleError(ScopeRef(exc.kind, "invalid"))
             ) from None
+        resource_ctx = await _resource_context(request, rt, resource, scope_ref)
         try:
             authorizer = await rt.authorizer_for(request)
-            ctx = await authorizer.authorize(principal, name, scope_ref)
+            ctx = await authorizer.authorize(
+                principal, name, scope_ref, resource=resource_ctx, request=request
+            )
         except StoreUnavailableError as exc:
             raise rt.error_policy.unavailable(request, exc) from None
         except ScopeNotVisibleError as exc:
@@ -154,11 +174,19 @@ def require_permission(
                 scope_ref,
                 DecisionKind.NOT_VISIBLE,
                 started,
+                abac=exc.abac,
             )
             raise rt.error_policy.not_visible(request, exc) from None
         except PermissionDeniedError as exc:
             await _emit(
-                rt, request, principal, name, scope_ref, DecisionKind.DENIED, started
+                rt,
+                request,
+                principal,
+                name,
+                scope_ref,
+                DecisionKind.DENIED,
+                started,
+                abac=exc.abac,
             )
             raise rt.error_policy.denied(request, exc) from None
         await _emit(
@@ -170,13 +198,38 @@ def require_permission(
             DecisionKind.ALLOWED,
             started,
             ctx.roles,
+            policy_ids=ctx.policy_ids,
+            shadow_policy_ids=ctx.shadow_policy_ids,
         )
         request.state.authz_context = ctx
         return ctx
 
     setattr(dependency, PERMISSION_ATTR, name)
     setattr(dependency, SCOPE_ATTR, source)
+    setattr(dependency, RESOURCE_ATTR, resource)
     return dependency
+
+
+async def _resource_context(
+    request: Request,
+    rt: Authz,
+    resource: ResourceSource | ResourceContext | None,
+    scope_ref: ScopeRef,
+) -> ResourceContext | None:
+    """Resolve the guard's resource; an invalid id is answered as "not visible"."""
+    if resource is None:
+        return None
+    from auth_middleware.authz.abac.attributes import ResourceContext
+
+    if isinstance(resource, ResourceContext):
+        return resource
+    try:
+        ref = await resource.resolve(request)
+    except InvalidScopeError:
+        raise rt.error_policy.not_visible(
+            request, ScopeNotVisibleError(scope_ref)
+        ) from None
+    return ResourceContext(ref, resource.loader)
 
 
 async def has_permission(
@@ -184,6 +237,7 @@ async def has_permission(
     permission: str,
     scope: ScopeRef,
     *,
+    resource: ResourceSource | ResourceContext | None = None,
     authz: AuthzSource = None,
 ) -> bool:
     """Non-raising check for use inside handlers.
@@ -204,9 +258,11 @@ async def has_permission(
         return False
     principal = await _principal(request, rt)
     authorizer = await rt.authorizer_for(request)
-    return await authorizer.check(principal, str(permission), scope) is (
-        DecisionKind.ALLOWED
+    resource_ctx = await _resource_context(request, rt, resource, scope)
+    kind = await authorizer.check(
+        principal, str(permission), scope, resource=resource_ctx, request=request
     )
+    return kind is DecisionKind.ALLOWED
 
 
 __all__: list[Any] = ["has_permission", "require_permission"]

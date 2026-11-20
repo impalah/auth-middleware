@@ -6,7 +6,7 @@ import inspect
 from collections.abc import AsyncIterator, Awaitable, Callable, Mapping
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException
 from loguru import logger
@@ -34,9 +34,15 @@ from auth_middleware.authz.types import (
 )
 from auth_middleware.settings import settings
 
+if TYPE_CHECKING:
+    from auth_middleware.authz.abac.config import AbacConfig
+    from auth_middleware.authz.abac.pdp import PolicyDecisionPoint
+    from auth_middleware.authz.ports import PolicyStore
+
 #: Attributes the guard puts on its dependency so routes can be validated.
 PERMISSION_ATTR = "__authz_permission__"
 SCOPE_ATTR = "__authz_scope__"
+RESOURCE_ATTR = "__authz_resource__"
 
 
 def default_not_visible(request: Request, exc: ScopeNotVisibleError) -> Exception:
@@ -101,9 +107,25 @@ class DecisionEvent:
     sensitive: bool = False
     duration_ms: float = 0.0
     request_id: str | None = None
+    #: ABAC: ids of the policies that decided (never attribute values).
+    policy_ids: tuple[str, ...] = ()
+    #: ABAC: shadow (``enforce=false``) policies that would have denied.
+    shadow_policy_ids: tuple[str, ...] = ()
+    #: ABAC: ``deny:<id>``, ``require:<id>``, ``indeterminate:<id>`` or ``permit:<id>``.
+    abac_reason: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        """Return a JSON-serialisable view."""
+        """Return a JSON-serialisable view (ABAC fields only when present)."""
+        data = self._base_dict()
+        if self.policy_ids:
+            data["policy_ids"] = list(self.policy_ids)
+        if self.shadow_policy_ids:
+            data["shadow_policy_ids"] = list(self.shadow_policy_ids)
+        if self.abac_reason:
+            data["abac_reason"] = self.abac_reason
+        return data
+
+    def _base_dict(self) -> dict[str, Any]:
         return {
             "kind": self.kind.value,
             "principal_id": self.principal_id,
@@ -137,8 +159,14 @@ class Authz:
         group_scope_kind: str,
         error_policy: ErrorPolicy,
         hooks: AuthzHooks,
+        pdp: PolicyDecisionPoint | None = None,
+        policy_source: PolicyStore | None = None,
+        abac: AbacConfig | None = None,
     ) -> None:
         self.catalog = catalog
+        self.abac = abac
+        self.policy_source = policy_source
+        self._pdp = pdp
         self.error_policy = error_policy
         self.hooks = hooks
         self._store = store
@@ -158,14 +186,20 @@ class Authz:
         group_scope_kind: str = GLOBAL_KIND,
         error_policy: ErrorPolicy | None = None,
         hooks: AuthzHooks | None = None,
+        abac: AbacConfig | None = None,
     ) -> Authz:
         """Validate the combination of sources and build the runtime.
 
         Exactly one of ``store`` / ``store_factory``; neither is accepted only
         for a pure group-based setup (``group_roles`` given).
 
+        Args:
+            abac: Attribute-based access control (policies refining the roles).
+                ``None``: exactly the role-based behaviour.
+
         Raises:
-            ConfigurationError: Invalid combination or unknown role/scope kind.
+            ConfigurationError: Invalid combination or unknown role/scope kind, or
+                invalid static policies.
         """
         if store is not None and store_factory is not None:
             raise ConfigurationError("give either store or store_factory, not both")
@@ -179,8 +213,12 @@ class Authz:
             if unknown:
                 raise ConfigurationError(f"group_roles use unknown roles: {unknown}")
             catalog.scope_kind(group_scope_kind)
+        pdp, policy_source = abac.build(catalog) if abac is not None else (None, None)
         return cls(
             catalog=catalog,
+            pdp=pdp,
+            policy_source=policy_source,
+            abac=abac,
             store=store,
             store_factory=store_factory,
             group_roles=group_roles,
@@ -203,7 +241,7 @@ class Authz:
             resolvers.append(
                 GroupRoleResolver(self._group_roles, scope_kind=self._group_scope_kind)
             )
-        return Authorizer(self.catalog, resolvers)
+        return Authorizer(self.catalog, resolvers, pdp=self._pdp)
 
     @classmethod
     def of(cls, request: Request) -> Authz:
@@ -246,6 +284,7 @@ class Authz:
         @asynccontextmanager
         async def lifespan(a: Any) -> AsyncIterator[Any]:
             self.validate_routes(app)
+            await self.verify_policies()
             async with previous(a) as state:
                 try:
                     yield state
@@ -267,6 +306,11 @@ class Authz:
         for route_path, param_names, call in _iter_guards(app):
             permission = getattr(call, PERMISSION_ATTR)
             spec = self.catalog.spec(permission)
+            if getattr(call, RESOURCE_ATTR, None) is not None and self._pdp is None:
+                raise ConfigurationError(
+                    f"{route_path}: the guard has a resource= but ABAC is not "
+                    "configured (Authz.build(abac=...)): it would be ignored"
+                )
             source = getattr(call, SCOPE_ATTR, None)
             kind = getattr(source, "kind", None)
             if kind is not None and kind != spec.scope_kind:
@@ -280,13 +324,33 @@ class Authz:
                     f"{route_path}: scope path parameter {param!r} not in the route"
                 )
 
+    async def verify_policies(self) -> None:
+        """Startup check of the policy sources (e.g. no id defined twice).
+
+        Raises:
+            ConfigurationError: Two sources define the same policy id.
+        """
+        source = self.policy_source
+        inner = getattr(source, "inner", source)
+        verify = getattr(inner, "verify", None)
+        if verify is not None:
+            await verify()
+
     async def aclose(self) -> None:
-        """Close the injected store if it exposes ``aclose()``. Idempotent."""
+        """Close the injected stores if they expose ``aclose()``. Idempotent."""
         if self._closed:
             return
         self._closed = True
-        closer = getattr(self._store, "aclose", None)
-        if closer is not None:
+        targets: list[Any] = [self._store]
+        if self.abac is not None:
+            targets.append(self.abac.attributes)
+            targets.extend(self.abac.sources())
+        seen: set[int] = set()
+        for target in targets:
+            closer = getattr(target, "aclose", None)
+            if closer is None or id(target) in seen:
+                continue
+            seen.add(id(target))
             result = closer()
             if inspect.isawaitable(result):
                 await result

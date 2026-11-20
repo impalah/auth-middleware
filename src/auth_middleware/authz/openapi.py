@@ -2,15 +2,26 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
 
 _HTTP_METHODS = {"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 
 
-def permission_extra(permission: str) -> dict[str, str]:
-    """Return ``{"x-permission": permission}`` for ``openapi_extra=``."""
-    return {"x-permission": str(permission)}
+def permission_extra(permission: str, *, abac: bool = False) -> dict[str, Any]:
+    """Return ``{"x-permission": permission}`` for ``openapi_extra=``.
+
+    Args:
+        permission: The permission the route's guard enforces.
+        abac: Also publish ``x-abac: true`` (the guard has a resource source and
+            policies may refine the roles).
+    """
+    extra: dict[str, Any] = {"x-permission": str(permission)}
+    if abac:
+        extra["x-abac"] = True
+    return extra
 
 
 def declared_permissions(app: FastAPI) -> dict[tuple[str, str], str | None]:
