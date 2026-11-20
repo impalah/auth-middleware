@@ -8,6 +8,7 @@ from typing import Any
 try:
     from sqlalchemy import (
         JSON,
+        Boolean,
         CheckConstraint,
         Column,
         DateTime,
@@ -26,6 +27,8 @@ except ImportError as exc:  # pragma: no cover - exercised without the extra
     ) from exc
 
 DEFAULT_TABLE_NAME = "authz_assignment"
+DEFAULT_POLICY_TABLE = "authz_policy"
+DEFAULT_ATTRIBUTE_TABLE = "authz_attribute"
 _IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 #: Metadata applications can include in their own ``target_metadata``.
@@ -72,4 +75,73 @@ def build_table(meta: MetaData, name: str = DEFAULT_TABLE_NAME) -> Table:
     )
 
 
+def _json() -> Any:
+    return JSON().with_variant(JSONB(), "postgresql")
+
+
+def build_policy_table(meta: MetaData, name: str = DEFAULT_POLICY_TABLE) -> Table:
+    """Build the ABAC policy table in ``meta`` under ``name``.
+
+    ``scope_id`` is ``NULL`` for a policy of every scope of its kind. The JSON
+    documents live in ``permissions`` and ``condition_doc`` (``condition`` is a
+    reserved word in MySQL).
+
+    Raises:
+        ValueError: ``name`` is not a plain SQL identifier.
+    """
+    if not _IDENT_RE.fullmatch(name):
+        raise ValueError(f"invalid table name: {name!r}")
+    return Table(
+        name,
+        meta,
+        Column("id", _ident(100), primary_key=True),
+        Column("effect", String(10), nullable=False),
+        Column("scope_kind", _ident(50), nullable=False),
+        Column("scope_id", _ident(200), nullable=True),
+        Column("permissions", _json(), nullable=False),
+        Column("condition_doc", _json(), nullable=False),
+        Column("description", String(500), nullable=False, default=""),
+        Column("priority", Integer, nullable=False, default=0),
+        Column("hide", Boolean, nullable=False, default=False),
+        Column("enforce", Boolean, nullable=False, default=True),
+        Column("status", String(10), nullable=False),
+        Column("revision", Integer, nullable=False, default=0),
+        Column("created_at", DateTime(timezone=True), nullable=False),
+        Column("updated_at", DateTime(timezone=True), nullable=False),
+        CheckConstraint(
+            "effect IN ('deny', 'require', 'permit')", name=f"ck_{name}_effect"
+        ),
+        CheckConstraint("status IN ('active', 'disabled')", name=f"ck_{name}_status"),
+        Index(f"ix_{name}_scope", "scope_kind", "scope_id", "status"),
+    )
+
+
+def build_attribute_table(meta: MetaData, name: str = DEFAULT_ATTRIBUTE_TABLE) -> Table:
+    """Build the persisted-attributes table (principals and resources).
+
+    Raises:
+        ValueError: ``name`` is not a plain SQL identifier.
+    """
+    if not _IDENT_RE.fullmatch(name):
+        raise ValueError(f"invalid table name: {name!r}")
+    return Table(
+        name,
+        meta,
+        Column("id", String(27), primary_key=True),
+        Column("namespace", String(10), nullable=False),
+        Column("kind", _ident(50), nullable=False),
+        Column("entity_id", _ident(500), nullable=False),
+        Column("attributes", _json(), nullable=False),
+        Column("revision", Integer, nullable=False, default=0),
+        Column("created_at", DateTime(timezone=True), nullable=False),
+        Column("updated_at", DateTime(timezone=True), nullable=False),
+        CheckConstraint(
+            "namespace IN ('principal', 'resource')", name=f"ck_{name}_namespace"
+        ),
+        UniqueConstraint("namespace", "kind", "entity_id", name=f"uq_{name}_entity"),
+    )
+
+
 assignment_table = build_table(metadata)
+policy_table = build_policy_table(metadata)
+attribute_table = build_attribute_table(metadata)

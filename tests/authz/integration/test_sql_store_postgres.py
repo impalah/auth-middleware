@@ -156,6 +156,18 @@ async def test_injected_session_rolls_back_with_the_caller(schema):
             assert await SqlAssignmentStore(other).get_assignment("u", scope) is None
 
 
+def _tables(conn, schema_name):
+    return set(
+        conn.execute(
+            text(
+                "SELECT table_name FROM information_schema.tables "
+                "WHERE table_schema = :s"
+            ),
+            {"s": schema_name},
+        ).scalars()
+    )
+
+
 def test_migration_round_trip_keeps_legacy_table(schema):
     from alembic import command
     from alembic.config import Config
@@ -182,17 +194,18 @@ def test_migration_round_trip_keeps_legacy_table(schema):
                     {"s": name},
                 ).scalars()
             )
+            assert {
+                "authz_permissions",
+                "authz_assignment",
+                "authz_policy",
+                "authz_attribute",
+            } <= tables
+            command.downgrade(cfg, "-1")  # the ABAC revision drops only its own tables
+            tables = _tables(conn, name)
+            assert {"authz_policy", "authz_attribute"}.isdisjoint(tables)
             assert {"authz_permissions", "authz_assignment"} <= tables
             command.downgrade(cfg, "-1")
-            tables = set(
-                conn.execute(
-                    text(
-                        "SELECT table_name FROM information_schema.tables "
-                        "WHERE table_schema = :s"
-                    ),
-                    {"s": name},
-                ).scalars()
-            )
+            tables = _tables(conn, name)
             assert "authz_assignment" not in tables
             assert "authz_permissions" in tables
     finally:

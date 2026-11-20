@@ -150,9 +150,7 @@ def test_audit_levels_for_abac(catalog, caplog):
     with make(catalog, SHADOW, hooks=AuthzHooks(on_decision=audit_hook(audit))) as c:
         c.put("/studios/s1/x", headers={"x-user": "u1"})
     assert records and records[-1][0] == logging.INFO  # allowed, but shadow would deny
-    assert seen and seen[0].to_dict()["shadow_policy_ids"] == [
-        "shadow-susp"
-    ]
+    assert seen and seen[0].to_dict()["shadow_policy_ids"] == ["shadow-susp"]
 
 
 @pytest.mark.asyncio
