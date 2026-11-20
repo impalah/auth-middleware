@@ -144,7 +144,7 @@ test-floci:
 # Mutation testing of the access-decision code (slow: run it by hand or nightly, not on every push).
 # Override the scope with: make mutation MUTATION_MODULES="auth_middleware.authz.engine*"
 MUTATION_MODULES ?= auth_middleware.authz.abac.conditions* auth_middleware.authz.abac.pdp* auth_middleware.authz.abac.validation* auth_middleware.authz.abac.cache* auth_middleware.authz.abac.types* auth_middleware.authz.engine*
-MUTATION_MIN ?= 85
+MUTATION_MIN ?= 90
 mutation:
 	uv run --with mutmut mutmut run --max-children 6 $(MUTATION_MODULES)
 	uv run python scripts/mutation_summary.py --min $(MUTATION_MIN)

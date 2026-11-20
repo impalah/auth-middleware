@@ -53,3 +53,28 @@ Date: 2026-11-20 · Scope: `src/auth_middleware/authz/abac/`, `stores/sql_policy
 * A policy of the global scope is stored under `*` in DynamoDB whether it was created as
   `PolicyScope("global")` or `PolicyScope("global", "*")`.
 * No list filtering (partial evaluation), obligations or HTTP management API.
+
+## Mutation testing (added 2026-11-20)
+
+`make mutation` runs `mutmut` over the code that decides access (`abac.conditions`, `abac.pdp`,
+`abac.validation`, `abac.cache`, `abac.types`, `engine`); `make mutation-report` lists the survivors and
+`scripts/mutation_summary.py` gives the score per module (the default floor is 90 %, `MUTATION_MIN`). It is
+slow (minutes per module): run it by hand or nightly, not on every push.
+
+| Module | Before | After |
+|---|---|---|
+| `abac.conditions` | 83.6 % | 94.6 % |
+| `abac.pdp` | 73.9 % | 92.6 % |
+| `abac.validation` | 78.7 % | 98.7 % |
+| `abac.types` | 73.3 % | 93.3 % |
+| `abac.cache` | 65.6 % | 100 % |
+| `engine` | 71.9 % | 93.7 % |
+
+What the survivors showed (all with 96-98 % line coverage): comparison operators never tested at equality
+(`gt` vs `gte` on "clearance covers classification"), every size limit never tested at its boundary, type
+guards whose precedence could be swapped unnoticed, the content of `explain()` in each branch, the
+restrict-mode short circuit, shadow policies after an enforced denial, the `request` reaching the providers,
+and the exact location of each validation problem. Dead code the mutants exposed was removed (redundant
+`ABSENT` checks in `_in`, an unreachable branch in `cond_to_dict`, the unused `parse_many`). Mutants proven
+equivalent (generation counters, lock-table housekeeping, default values) carry `# pragma: no mutate`.
+What still survives is almost entirely the text of messages.
