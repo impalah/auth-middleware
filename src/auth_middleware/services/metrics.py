@@ -12,6 +12,8 @@ from typing import Any
 
 #: Validation timings kept for the average/percentiles (oldest are dropped).
 _MAX_SAMPLES = 10_000
+#: Distinct ABAC policy ids tracked individually (cardinality guard).
+MAX_POLICY_SERIES = 100
 
 
 class MetricsCollector:
@@ -49,30 +51,60 @@ class MetricsCollector:
         self._errors_by_type: dict[str, int] = defaultdict(int)
         self._authz_decisions: dict[str, int] = defaultdict(int)
         self._authz_by_permission: dict[str, dict[str, int]] = {}
+        self._authz_by_source: dict[str, int] = defaultdict(int)
+        self._abac_policies: dict[str, dict[str, int]] = {}
         self._lock = asyncio.Lock()
         self._start_time = datetime.now(UTC)
 
-    async def record_authz_decision(self, kind: str, permission: str) -> None:
+    async def record_authz_decision(
+        self, kind: str, permission: str, source: str | None = None
+    ) -> None:
         """Record one scoped-permission decision (``auth_middleware.authz``).
 
         Args:
             kind: ``allowed``, ``not_visible`` or ``denied``.
             permission: Permission name checked.
+            source: ``rbac`` or ``abac`` (who decided); ``None`` leaves it out.
         """
         async with self._lock:
             self._authz_decisions[kind] += 1
             per = self._authz_by_permission.setdefault(permission, defaultdict(int))
             per[kind] += 1
+            if source is not None:
+                self._authz_by_source[source] += 1
+
+    async def record_abac_policy(self, policy_id: str, result: str) -> None:
+        """Count a policy outcome (``denied``, ``permitted`` or ``shadow_denied``).
+
+        At most :data:`MAX_POLICY_SERIES` distinct policy ids are tracked; the
+        rest are counted under ``other`` so a flood of ids cannot grow memory
+        or the number of exported series.
+        """
+        async with self._lock:
+            if (
+                policy_id not in self._abac_policies
+                and len(self._abac_policies) >= MAX_POLICY_SERIES
+            ):
+                policy_id = "other"
+            per = self._abac_policies.setdefault(policy_id, defaultdict(int))
+            per[result] += 1
 
     async def get_authz_metrics(self) -> dict[str, Any]:
         """Return decision counters: totals per kind and per permission."""
         async with self._lock:
-            return {
+            data: dict[str, Any] = {
                 "decisions": dict(self._authz_decisions),
                 "by_permission": {
                     p: dict(v) for p, v in self._authz_by_permission.items()
                 },
             }
+            if self._authz_by_source:
+                data["by_source"] = dict(self._authz_by_source)
+            if self._abac_policies:
+                data["abac_policies"] = {
+                    p: dict(v) for p, v in self._abac_policies.items()
+                }
+            return data
 
     async def record_validation_success(self, duration_ms: float) -> None:
         """Record successful token validation.
@@ -186,4 +218,6 @@ class MetricsCollector:
             self._errors_by_type = defaultdict(int)
             self._authz_decisions = defaultdict(int)
             self._authz_by_permission = {}
+            self._authz_by_source = defaultdict(int)
+            self._abac_policies = {}
             self._start_time = datetime.now(UTC)
