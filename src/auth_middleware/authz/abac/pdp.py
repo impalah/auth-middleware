@@ -138,18 +138,19 @@ class PolicyDecisionPoint:
     async def _load(self, ctx: AttributeRequest, permission: str) -> list[Policy]:
         try:
             found = await self._policies.list_policies(ctx.scope)
+            usable = [
+                p
+                for p in found
+                if p.status is PolicyStatus.ACTIVE
+                and any(policy_matches_permission(x, permission) for x in p.permissions)
+            ]
+            return sorted(usable, key=lambda p: (p.priority, p.id))
         except AuthzError:
             raise
         except Exception as exc:
+            # A broken source or a poisoned cache entry is an outage, never an allow.
             logger.opt(exception=True).error("policy source failed")
             raise StoreUnavailableError("policy source failed") from exc
-        usable = [
-            p
-            for p in found
-            if p.status is PolicyStatus.ACTIVE
-            and any(policy_matches_permission(x, permission) for x in p.permissions)
-        ]
-        return sorted(usable, key=lambda p: (p.priority, p.id))
 
     def _parse(self, policy: Policy) -> Condition | None:
         try:
@@ -184,6 +185,17 @@ class PolicyDecisionPoint:
             ResourceNotFoundError: The resource loader said it does not exist.
             StoreUnavailableError: A source or provider failed (never an allow).
         """
+        try:
+            return await self._evaluate(ctx, explain, reveal)
+        except AuthzError:
+            raise
+        except Exception as exc:
+            logger.opt(exception=True).error("policy evaluation failed")
+            raise StoreUnavailableError("policy evaluation failed") from exc
+
+    async def _evaluate(
+        self, ctx: AttributeRequest, explain: bool, reveal: bool
+    ) -> AbacOutcome:
         policies = [
             p for p in await self._load(ctx, ctx.permission) if not self._skip_permit(p)
         ]

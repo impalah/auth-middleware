@@ -9,6 +9,7 @@ from typing import Any
 
 from auth_middleware.authz.abac.attributes import AttributeProvider, AttributeResolver
 from auth_middleware.authz.abac.cache import CachingPolicySource
+from auth_middleware.authz.abac.conditions import condition_paths, parse_condition
 from auth_middleware.authz.abac.pdp import Mode, PolicyDecisionPoint
 from auth_middleware.authz.abac.sources import CompositePolicySource, StaticPolicySource
 from auth_middleware.authz.abac.validation import validate_policy
@@ -103,8 +104,39 @@ class AbacConfig:
                     validate_policy(policy, catalog, allow_permit=self.mode == "grant")
                 except InvalidPolicyError as exc:
                     problems.extend(exc.problems if exc.problems else [str(exc)])
+        problems.extend(self._unreachable_attributes(sources))
         if problems:
             raise ConfigurationError("invalid static policies: " + "; ".join(problems))
+
+    def _unreachable_attributes(self, sources: Sequence[PolicyStore]) -> list[str]:
+        """Static policies reading headers/claims nobody allow-listed.
+
+        Such an attribute is always absent, so a ``deny`` on it would deny every
+        request (indeterminate fails closed): better a startup error than an outage.
+        """
+        headers = {h.strip().lower().replace("_", "-") for h in self.headers_allowlist}
+        claims = set(self.claims_allowlist)  # a mapping contributes its keys
+        problems: list[str] = []
+        for source in sources:
+            if not isinstance(source, StaticPolicySource):
+                continue
+            for policy in source.policies:
+                for path in sorted(condition_paths(parse_condition(policy.condition))):
+                    if path.startswith("env.header."):
+                        name = path.removeprefix("env.header.").replace("_", "-")
+                        if name not in headers:
+                            problems.append(
+                                f"policy {policy.id!r} reads {path}, which is not in "
+                                "headers_allowlist"
+                            )
+                    elif path.startswith("subject.claims."):
+                        segment = path.removeprefix("subject.claims.").split(".")[0]
+                        if segment not in claims:
+                            problems.append(
+                                f"policy {policy.id!r} reads {path}, which is not in "
+                                "claims_allowlist"
+                            )
+        return problems
 
 
 __all__: list[Any] = ["AbacConfig"]
