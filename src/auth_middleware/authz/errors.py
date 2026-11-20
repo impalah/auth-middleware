@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from auth_middleware.authz.types import ScopeRef
 
 
@@ -15,6 +17,9 @@ class ScopeNotVisibleError(AuthzError):
     Both cases are deliberately indistinguishable (default HTTP 404).
     """
 
+    #: ABAC outcome that produced this answer (``None`` for a plain RBAC one).
+    abac: Any = None
+
     def __init__(self, scope: ScopeRef) -> None:
         super().__init__(f"scope not visible: {scope.kind}")
         self.scope = scope
@@ -22,6 +27,9 @@ class ScopeNotVisibleError(AuthzError):
 
 class PermissionDeniedError(AuthzError):
     """The principal is known in the scope but lacks ``required``."""
+
+    #: ABAC outcome that produced this answer (``None`` for a plain RBAC one).
+    abac: Any = None
 
     def __init__(self, required: str, scope: ScopeRef) -> None:
         super().__init__(f"permission denied: {required}")

@@ -115,6 +115,10 @@ class AuthzContext:
     roles: frozenset[str]
     permissions: frozenset[str]
     attributes: Mapping[str, Any] = field(default_factory=dict)
+    #: ABAC: ids of the policies that decided (a ``permit`` that granted).
+    policy_ids: tuple[str, ...] = ()
+    #: ABAC: shadow (``enforce=false``) policies that would have denied.
+    shadow_policy_ids: tuple[str, ...] = ()
 
     def __hash__(self) -> int:
         return hash((self.principal, self.scope, self.roles))
