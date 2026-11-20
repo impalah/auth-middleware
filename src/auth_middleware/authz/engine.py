@@ -14,6 +14,7 @@ from loguru import logger
 
 from auth_middleware.authz.catalog import PermissionCatalog
 from auth_middleware.authz.errors import (
+    ConfigurationError,
     PermissionDeniedError,
     ResourceNotFoundError,
     ScopeKindMismatchError,
@@ -175,7 +176,8 @@ class Authorizer:
         from auth_middleware.authz.abac.attributes import AttributeRequest
 
         pdp = self._pdp
-        assert pdp is not None  # noqa: S101 - narrowed by the caller
+        if pdp is None:  # pragma: no cover - the caller checked it
+            raise ConfigurationError("no policy decision point configured")
         frozen = frozenset(roles)
 
         def result(
@@ -255,7 +257,8 @@ class Authorizer:
         """
         ev = await self._evaluate(principal, str(permission), scope, resource, request)
         if ev.kind is DecisionKind.ALLOWED:
-            assert ev.context is not None  # noqa: S101
+            if ev.context is None:  # pragma: no cover - ALLOWED always has one
+                raise ConfigurationError("allowed decision without a context")
             return ev.context
         error: ScopeNotVisibleError | PermissionDeniedError
         if ev.kind is DecisionKind.NOT_VISIBLE:

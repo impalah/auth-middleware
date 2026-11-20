@@ -14,21 +14,27 @@ Epic H · Size M · Depends on: none · Blocks: 024, 026, 029
 ## Design
 
 ```python
-class Effect(StrEnum): DENY = "deny"; REQUIRE = "require"; PERMIT = "permit"
+class Effect(StrEnum):
+    DENY = "deny"
+    REQUIRE = "require"
+    PERMIT = "permit"
+
 
 @dataclass(frozen=True, slots=True)
-class PolicyScope:            # kind (+ optional id); id None = every scope of the kind
-    kind: str; id: str | None = None
+class PolicyScope:  # kind (+ optional id); id None = every scope of the kind
+    kind: str
+    id: str | None = None
+
 
 @dataclass(frozen=True, slots=True)
 class Policy:
-    id: str                    # [a-z0-9][a-z0-9_.-]{0,99}
+    id: str  # [a-z0-9][a-z0-9_.-]{0,99}
     effect: Effect
-    permissions: tuple[str, ...]      # exact or "*"-pattern, 1..50 entries
+    permissions: tuple[str, ...]  # exact or "*"-pattern, 1..50 entries
     scope: PolicyScope
-    condition: Mapping[str, Any]      # raw AST, parsed by AUTHZ-024
+    condition: Mapping[str, Any]  # raw AST, parsed by AUTHZ-024
     description: str = ""
-    priority: int = 0                 # lower evaluated first (only affects explain order)
+    priority: int = 0  # lower evaluated first (only affects explain order)
     hide: bool = False
     enforce: bool = True
     status: AssignmentStatus = ACTIVE
@@ -36,14 +42,23 @@ class Policy:
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
-@dataclass(frozen=True, slots=True)
-class EntityRef:                      # who owns attributes
-    namespace: Literal["principal", "resource"]; kind: str; id: str
 
 @dataclass(frozen=True, slots=True)
-class EntityAttributes:  ref: EntityRef; attributes: Mapping[str, Any]; revision: int = 0
+class EntityRef:  # who owns attributes
+    namespace: Literal["principal", "resource"]
+    kind: str
+    id: str
+
+
 @dataclass(frozen=True, slots=True)
-class NewPolicy: ...                  # Policy without status/revision/timestamps
+class EntityAttributes:
+    ref: EntityRef
+    attributes: Mapping[str, Any]
+    revision: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class NewPolicy: ...  # Policy without status/revision/timestamps
 ```
 
 Ports (`ports.py`, all `runtime_checkable` Protocols, same style as `AssignmentStore`):

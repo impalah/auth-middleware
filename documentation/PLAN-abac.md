@@ -107,22 +107,28 @@ on outages, injected sessions / PynamoDB models, lazy imports behind the existin
 
 ```python
 authz = Authz.build(
-    catalog=catalog, store_factory=...,
+    catalog=catalog,
+    store_factory=...,
     abac=AbacConfig(
-        policies=SqlPolicyStore(sessionmaker),      # or Dynamo, memory, static, a list of several
-        attributes=SqlAttributeStore(sessionmaker), # optional
+        policies=SqlPolicyStore(
+            sessionmaker
+        ),  # or Dynamo, memory, static, a list of several
+        attributes=SqlAttributeStore(sessionmaker),  # optional
         mode="restrict",
-        policy_cache_ttl=5.0,                       # seconds; 0 disables (default)
+        policy_cache_ttl=5.0,  # seconds; 0 disables (default)
     ),
 )
 
+
 @router.delete("/studios/{studio_id}/designs/{design_id}")
 async def delete_design(
-    ctx = Depends(require_permission(
-        "design.delete",
-        scope=ScopeFromPath("studio_id"),
-        resource=ResourceFromPath("design", "design_id", loader=load_design_attrs),
-    )),
+    ctx=Depends(
+        require_permission(
+            "design.delete",
+            scope=ScopeFromPath("studio_id"),
+            resource=ResourceFromPath("design", "design_id", loader=load_design_attrs),
+        )
+    ),
 ): ...
 ```
 

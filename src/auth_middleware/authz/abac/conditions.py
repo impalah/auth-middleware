@@ -139,21 +139,12 @@ def _parse_condition(
     here = f"{pointer}/{op}"
     _tick(counter, limits, here)
     if op in LOGIC_OPS:
-        if not isinstance(arg, (list, tuple)) or not 1 <= len(arg) <= limits.max_list:
-            raise ConditionError(f"{op} needs a non-empty list", here)
-        return Node(
-            op,
-            tuple(
-                _parse_condition(c, f"{here}/{i}", depth + 1, limits, counter)
-                for i, c in enumerate(arg)
-            ),
-        )
+        return _parse_logic(op, arg, here, depth, limits, counter)
     if op == "not":
         return Node(op, (_parse_condition(arg, here, depth + 1, limits, counter),))
     if op == "exists":
-        return Node(
-            op, (_parse_operand(arg, here, depth + 1, limits, counter, attr_only=True),)
-        )
+        operand = _parse_operand(arg, here, depth + 1, limits, counter, attr_only=True)
+        return Node(op, (operand,))
     if not isinstance(arg, (list, tuple)) or len(arg) != 2:
         raise ConditionError(f"{op} needs exactly two operands", here)
     return Node(
@@ -161,6 +152,25 @@ def _parse_condition(
         tuple(
             _parse_operand(a, f"{here}/{i}", depth + 1, limits, counter)
             for i, a in enumerate(arg)
+        ),
+    )
+
+
+def _parse_logic(
+    op: str,
+    arg: Any,
+    here: str,
+    depth: int,
+    limits: ConditionLimits,
+    counter: list[int],
+) -> Node:
+    if not isinstance(arg, (list, tuple)) or not 1 <= len(arg) <= limits.max_list:
+        raise ConditionError(f"{op} needs a non-empty list", here)
+    return Node(
+        op,
+        tuple(
+            _parse_condition(c, f"{here}/{i}", depth + 1, limits, counter)
+            for i, c in enumerate(arg)
         ),
     )
 
@@ -272,18 +282,22 @@ def _aware(v: datetime) -> bool:
     return v.tzinfo is not None and v.utcoffset() is not None
 
 
+def _iso(value: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
 def _pair(a: Any, b: Any) -> tuple[str, Any, Any] | None:
     """Same-kind operands (coercing an ISO string against a datetime), or ``None``."""
     ka, kb = _kind(a), _kind(b)
-    if ka == "datetime" and kb == "string":
-        try:
-            b, kb = datetime.fromisoformat(b), "datetime"
-        except ValueError:
-            return None
-    elif ka == "string" and kb == "datetime":
-        try:
-            a, ka = datetime.fromisoformat(a), "datetime"
-        except ValueError:
+    if {ka, kb} == {"datetime", "string"}:
+        if ka == "string":
+            a, ka = _iso(a), "datetime"
+        else:
+            b, kb = _iso(b), "datetime"
+        if a is None or b is None:
             return None
     if ka != kb or ka in ("list", "other"):
         return None
@@ -398,20 +412,23 @@ def _binary(op: str, a: Any, b: Any) -> Tri:
     return _string_op(op, a, b)
 
 
+def _logic(node: Node, values: Mapping[str, Any], depth: int) -> Tri:
+    results = [_walk(c, values, depth + 1) for c in node.args]
+    if node.op == "all":
+        if Tri.FALSE in results:
+            return Tri.FALSE
+        return Tri.INDETERMINATE if Tri.INDETERMINATE in results else Tri.TRUE
+    if Tri.TRUE in results:
+        return Tri.TRUE
+    return Tri.INDETERMINATE if Tri.INDETERMINATE in results else Tri.FALSE
+
+
 def _walk(node: Node, values: Mapping[str, Any], depth: int) -> Tri:
     if depth > _MAX_EVAL_DEPTH:
         return Tri.INDETERMINATE
     op = node.op
-    if op == "all":
-        results = [_walk(c, values, depth + 1) for c in node.args]
-        if Tri.FALSE in results:
-            return Tri.FALSE
-        return Tri.INDETERMINATE if Tri.INDETERMINATE in results else Tri.TRUE
-    if op == "any":
-        results = [_walk(c, values, depth + 1) for c in node.args]
-        if Tri.TRUE in results:
-            return Tri.TRUE
-        return Tri.INDETERMINATE if Tri.INDETERMINATE in results else Tri.FALSE
+    if op in LOGIC_OPS:
+        return _logic(node, values, depth)
     if op == "not":
         return _negate(_walk(node.args[0], values, depth + 1))
     if op == "exists":

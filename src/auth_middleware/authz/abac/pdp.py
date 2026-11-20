@@ -13,7 +13,7 @@ but never change the outcome.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Literal
 
 from loguru import logger
@@ -95,6 +95,16 @@ class Explanation:
                 + (f" absent={list(t.absent)}" if t.absent else "")
             )
         return "\n".join(lines)
+
+
+@dataclass(slots=True)
+class _Tally:
+    """Running result of the policies of one decision."""
+
+    denial: tuple[Policy, str] | None = None
+    permits: list[str] = field(default_factory=list)
+    shadow: list[str] = field(default_factory=list)
+    trace: list[PolicyTrace] = field(default_factory=list)
 
 
 def _denies(effect: Effect, result: Tri) -> bool:
@@ -205,28 +215,37 @@ class PolicyDecisionPoint:
         )
         values = await self._resolver.resolve(ctx, needed) if needed else {}
 
-        denial: tuple[Policy, str] | None = None
-        permits: list[str] = []
-        shadow: list[str] = []
-        trace: list[PolicyTrace] = []
+        tally = _Tally()
         for policy, cond in parsed:
-            if denial is not None and policy.enforce and not explain:
+            if tally.denial is not None and policy.enforce and not explain:
                 continue
-            result = Tri.INDETERMINATE if cond is None else evaluate(cond, values)
-            denies = _denies(policy.effect, result)
-            reason = _reason(policy.effect, result, policy.id)
-            if policy.enforce:
-                if denies and denial is None:
-                    denial = (policy, reason)
-                elif policy.effect is Effect.PERMIT and result is Tri.TRUE:
-                    permits.append(policy.id)
-            elif denies:
-                shadow.append(policy.id)
-            if explain:
-                trace.append(
-                    self._trace(policy, cond, result, denies, reason, values, reveal)
-                )
-        return self._outcome(denial, permits, shadow, trace)
+            self._judge(tally, policy, cond, values, explain, reveal)
+        return self._outcome(tally)
+
+    def _judge(
+        self,
+        tally: _Tally,
+        policy: Policy,
+        cond: Condition | None,
+        values: Mapping[str, Any],
+        explain: bool,
+        reveal: bool,
+    ) -> None:
+        result = Tri.INDETERMINATE if cond is None else evaluate(cond, values)
+        denies = _denies(policy.effect, result)
+        reason = _reason(policy.effect, result, policy.id)
+        if not policy.enforce:
+            if denies:
+                tally.shadow.append(policy.id)
+        elif denies:
+            if tally.denial is None:
+                tally.denial = (policy, reason)
+        elif policy.effect is Effect.PERMIT and result is Tri.TRUE:
+            tally.permits.append(policy.id)
+        if explain:
+            tally.trace.append(
+                self._trace(policy, cond, result, denies, reason, values, reveal)
+            )
 
     @staticmethod
     def _trace(
@@ -256,26 +275,24 @@ class PolicyDecisionPoint:
         )
 
     @staticmethod
-    def _outcome(
-        denial: tuple[Policy, str] | None,
-        permits: list[str],
-        shadow: list[str],
-        trace: list[PolicyTrace],
-    ) -> AbacOutcome:
-        if denial is not None:
-            policy, reason = denial
+    def _outcome(tally: _Tally) -> AbacOutcome:
+        trace = tuple(tally.trace)
+        shadow = tuple(tally.shadow)
+        if tally.denial is not None:
+            policy, reason = tally.denial
             return AbacOutcome(
                 denied=True,
                 hidden=policy.hide,
                 policy_ids=(policy.id,),
-                shadow_policy_ids=tuple(shadow),
+                shadow_policy_ids=shadow,
                 reason=reason,
-                trace=tuple(trace),
+                trace=trace,
             )
+        permits = tally.permits
         return AbacOutcome(
             permitted=bool(permits),
             policy_ids=tuple(permits),
-            shadow_policy_ids=tuple(shadow),
+            shadow_policy_ids=shadow,
             reason=f"permit:{permits[0]}" if permits else None,
-            trace=tuple(trace),
+            trace=trace,
         )

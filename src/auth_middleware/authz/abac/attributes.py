@@ -274,7 +274,8 @@ class ResourceAttributeProvider:
     async def _run_loader(
         self, res: ResourceContext, request: Request | None
     ) -> Mapping[str, Any]:
-        assert res.loader is not None  # noqa: S101 - narrowed by the caller
+        if res.loader is None:  # pragma: no cover - the caller checked it
+            raise ConfigurationError("no resource loader")
         try:
             data = res.loader(request, res.ref)
             if inspect.isawaitable(data):
@@ -291,7 +292,8 @@ class ResourceAttributeProvider:
         return data
 
     async def _read_store(self, ref: ResourceRef) -> Mapping[str, Any]:
-        assert self._store is not None  # noqa: S101
+        if self._store is None:  # pragma: no cover - the caller checked it
+            raise ConfigurationError("no attribute store")
         try:
             stored = await self._store.get_attributes(
                 EntityRef("resource", ref.kind, ref.id)
