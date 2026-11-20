@@ -33,7 +33,7 @@ import json
 from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
-from typing import Any, Literal, TypeVar
+from typing import Any, Literal
 
 from auth_middleware.authz.errors import RevisionConflictError, StoreUnavailableError
 from auth_middleware.authz.types import (
@@ -75,7 +75,55 @@ _UNAVAILABLE_CODES = frozenset(
     }
 )
 _CONDITIONAL = "ConditionalCheckFailedException"
-T = TypeVar("T")
+
+
+async def blocking_call[T](
+    executor: ThreadPoolExecutor | None, fn: Callable[[], T]
+) -> T:
+    """Run a blocking PynamoDB call in a worker thread, mapping DynamoDB errors.
+
+    A failed conditional write becomes ``RevisionConflictError``; throttling,
+    server errors, timeouts and unreachable endpoints become
+    ``StoreUnavailableError``. Shared by every DynamoDB store of the library.
+    """
+    try:
+        if executor is None:
+            return await asyncio.to_thread(fn)
+        return await asyncio.get_running_loop().run_in_executor(executor, fn)
+    except PynamoDBException as exc:
+        code = getattr(exc, "cause_response_code", None)
+        if code == _CONDITIONAL:
+            raise RevisionConflictError("conditional check failed") from None
+        if code in _UNAVAILABLE_CODES or isinstance(exc, PynamoDBConnectionError):
+            raise StoreUnavailableError("DynamoDB is unavailable") from None
+        raise
+
+
+def connection_meta(
+    *,
+    region: str | None,
+    endpoint_url: str | None,
+    connect_timeout_seconds: int,
+    read_timeout_seconds: int,
+    max_retry_attempts: int,
+    aws_access_key_id: str | None,
+    aws_secret_access_key: str | None,
+) -> dict[str, Any]:
+    """The PynamoDB ``Meta`` connection settings shared by the DynamoDB stores."""
+    meta: dict[str, Any] = {
+        "connect_timeout_seconds": connect_timeout_seconds,
+        "read_timeout_seconds": read_timeout_seconds,
+        "max_retry_attempts": max_retry_attempts,
+    }
+    if region:
+        meta["region"] = region
+    if endpoint_url:
+        meta["host"] = endpoint_url
+    if aws_access_key_id:
+        meta["aws_access_key_id"] = aws_access_key_id
+    if aws_secret_access_key:
+        meta["aws_secret_access_key"] = aws_secret_access_key
+    return meta
 
 
 def _scope_key(scope: ScopeRef) -> str:
@@ -166,19 +214,15 @@ class DynamoDbAssignmentStore:
         aws_secret_access_key: str | None = None,
         max_workers: int | None = None,
     ) -> None:
-        meta: dict[str, Any] = {
-            "connect_timeout_seconds": connect_timeout_seconds,
-            "read_timeout_seconds": read_timeout_seconds,
-            "max_retry_attempts": max_retry_attempts,
-        }
-        if region:
-            meta["region"] = region
-        if endpoint_url:
-            meta["host"] = endpoint_url
-        if aws_access_key_id:
-            meta["aws_access_key_id"] = aws_access_key_id
-        if aws_secret_access_key:
-            meta["aws_secret_access_key"] = aws_secret_access_key
+        meta = connection_meta(
+            region=region,
+            endpoint_url=endpoint_url,
+            connect_timeout_seconds=connect_timeout_seconds,
+            read_timeout_seconds=read_timeout_seconds,
+            max_retry_attempts=max_retry_attempts,
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+        )
         # A dedicated, bounded pool keeps a slow DynamoDB from starving the other
         # users of the event loop's default executor (and bounds our own concurrency).
         self._executor = (
@@ -200,20 +244,9 @@ class DynamoDbAssignmentStore:
             raise ValueError(f"attributes larger than {MAX_ATTRIBUTES_BYTES} bytes")
         return data
 
-    async def _call(self, fn: Callable[[], T]) -> T:
+    async def _call[T](self, fn: Callable[[], T]) -> T:
         """Run a blocking PynamoDB call in a thread, mapping errors."""
-        try:
-            if self._executor is None:
-                return await asyncio.to_thread(fn)
-            return await asyncio.get_running_loop().run_in_executor(self._executor, fn)
-        except PynamoDBException as exc:
-            code = getattr(exc, "cause_response_code", None)
-            if code == _CONDITIONAL:
-                raise RevisionConflictError("conditional check failed") from None
-            if code in _UNAVAILABLE_CODES or isinstance(exc, PynamoDBConnectionError):
-                # throttling, server errors, timeouts and unreachable endpoints
-                raise StoreUnavailableError("DynamoDB is unavailable") from None
-            raise
+        return await blocking_call(self._executor, fn)
 
     def _to_assignment(self, item: Any) -> Assignment:
         return Assignment(
