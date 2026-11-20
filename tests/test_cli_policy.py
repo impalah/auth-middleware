@@ -300,7 +300,8 @@ def test_policy_cli_imports_without_sqlalchemy():
         "from click.testing import CliRunner\n"
         "from auth_middleware.cli import cli\n"
         "args = ['authz', 'policy', 'list', '--store', 'sqlalchemy']\n"
-        "r = CliRunner().invoke(cli, args, env={'AUTHZ_SQLALCHEMY_DATABASE_URI': 'x'})\n"
+        "env = {'AUTHZ_SQLALCHEMY_DATABASE_URI': 'x'}\n"
+        "r = CliRunner().invoke(cli, args, env=env)\n"
         "print(r.exit_code, 'sqlalchemy' in r.output)\n"
     )
     out = subprocess.run(
