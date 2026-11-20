@@ -141,6 +141,17 @@ info:
 test-floci:
 	uv run pytest -m floci tests/authz/integration -v
 
+# Mutation testing of the access-decision code (slow: run it by hand or nightly, not on every push).
+# Override the scope with: make mutation MUTATION_MODULES="auth_middleware.authz.engine*"
+MUTATION_MODULES ?= auth_middleware.authz.abac.conditions* auth_middleware.authz.abac.pdp* auth_middleware.authz.abac.validation* auth_middleware.authz.abac.cache* auth_middleware.authz.abac.types* auth_middleware.authz.engine*
+MUTATION_MIN ?= 85
+mutation:
+	uv run --with mutmut mutmut run --max-children 6 $(MUTATION_MODULES)
+	uv run python scripts/mutation_summary.py --min $(MUTATION_MIN)
+
+mutation-report:
+	uv run python scripts/mutation_summary.py --survivors
+
 docs:
 	uv run sphinx-build -W --keep-going pages_source docs
 
@@ -169,6 +180,8 @@ help:
 	@echo "  docker-release- Release Docker image"
 	@echo "  test-floci    - Run the store tests on Floci (Docker, testcontainers)"
 	@echo "  deps-check    - Check declared vs imported dependencies (deptry)"
+	@echo "  mutation      - Mutation testing of the access-decision code (slow; MUTATION_MODULES, MUTATION_MIN)"
+	@echo "  mutation-report - List the surviving mutants of the last run"
 	@echo "  docs          - Build the Sphinx site (pages_source) into docs/"
 	@echo "  docs-serve    - Serve the built site locally"
 	@echo "  run           - Run the application"
@@ -183,7 +196,7 @@ sonar: ## Run SonarQube analysis with pysonar
 
 sonar-check: test-cov sonar ## Run coverage and SonarQube analysis
 
-.PHONY: venv bump-version sync-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info test-floci docs docs-serve deps-check help sonar sonar-check
+.PHONY: venv bump-version sync-version build clean-artifacts clean publish publish-test docker-build docker-release lint format type-check security-check check test test-cov install install-all run shell info test-floci docs docs-serve deps-check mutation mutation-report help sonar sonar-check
 
 # Dependency hygiene (undeclared / unused / misplaced dependencies)
 deps-check:

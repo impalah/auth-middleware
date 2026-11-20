@@ -195,3 +195,10 @@ package_module_name_map = { "svix-ksuid" = "ksuid" }
 DEP002 = ["python-dotenv", "asyncpg", "aiomysql"]
 # botocore ships with boto3 (the `cognito` extra), imported lazily with it.
 DEP001 = ["botocore"]
+
+# Mutation testing (``make mutation``): mutmut mutates the package, runs the tests that cover each
+# mutant and reports the ones that survive. Scoped on purpose to the code that decides access.
+[tool.mutmut]
+source_paths = ["src/auth_middleware/"]
+also_copy = ["tests"]
+pytest_add_cli_args_test_selection = ["tests/authz", "tests/test_cli_policy.py"]

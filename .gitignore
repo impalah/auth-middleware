@@ -216,3 +216,7 @@ CLAUDE.md
 
 # Claude Code local state
 .claude/
+
+# mutmut
+mutants/
+.mutmut-cache/
