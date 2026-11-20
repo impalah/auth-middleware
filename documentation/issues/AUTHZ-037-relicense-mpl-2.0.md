@@ -1,6 +1,6 @@
 # AUTHZ-037 · Relicense from MIT to MPL-2.0 (from 0.8.0)
 
-Epic H · Size S · Depends on: none · Must land **in the 0.8.0 release**, not before
+Epic H · Size S · Depends on: none · **Done 2026-11-20 and released as 0.7.1** (owner request; it no longer waits for 0.8.0)
 
 ## Context
 
@@ -24,7 +24,7 @@ Facts verified on 2026-11-14:
   compatible with MPL-2.0.
 - No source file carries a licence header; there is no `NOTICE`.
 
-## Do not do it earlier
+## Why it was originally planned for 0.8.0 (superseded)
 
 `main` currently describes 0.7.0, published under MIT. Changing `LICENSE` on `main` before the 0.8.0
 release would put an MPL file next to MIT metadata on PyPI. Do this issue as part of the 0.8.0
@@ -81,3 +81,9 @@ bump.
 
 Trademark registration, a commercial dual licence, CLA/DCO for future contributors (consider a DCO
 sign-off requirement if outside contributions start).
+
+## Resolution
+
+2026-11-20: done ahead of 0.8.0 as release **0.7.1** (license-only). PyPI metadata cannot be edited on an
+existing release, so 0.7.0 keeps showing MIT; a new version was needed. Source headers (`SPDX-License-Identifier`)
+were not added (optional). GitHub detects the licence from `LICENSE` by itself.

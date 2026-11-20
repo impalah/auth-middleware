@@ -1,17 +1,17 @@
 [project]
 name = "auth-middleware"
-version = "0.7.0"
+version = "0.7.1"
 description = "Async Auth Middleware for FastAPI/Starlette"
 authors = [
     {name = "impalah", email = "impalah@gmail.com"}
 ]
 readme = "README.md"
-license = {text = "MIT"}
+license = "MPL-2.0"
+license-files = ["LICENSE", "NOTICE"]
 keywords = ["auth", "middleware", "fastapi", "starlette"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Framework :: FastAPI",
     "Typing :: Typed",
     "Programming Language :: Python :: 3",

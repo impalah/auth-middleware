@@ -1,6 +1,27 @@
 CHANGELOG
 =========
 
+Version 0.7.1 (2026-11-20)
+---------------------------
+
+License change only: no code differs from 0.7.0.
+
+Upgrade notes
+~~~~~~~~~~~~~
+
+- The project is now licensed under the **Mozilla Public License 2.0** (MPL-2.0) instead of the MIT
+  License. Releases up to and including 0.7.0 remain available under MIT (a published release cannot be
+  relicensed retroactively).
+- Using the library from closed-source or commercial applications is unchanged: your own code is not
+  affected. Only modifications of the library's own files, when distributed, must be published under
+  MPL-2.0.
+
+Packaging
+~~~~~~~~~
+
+- ``LICENSE`` is the MPL-2.0 text and a new ``NOTICE`` names the copyright holder; ``pyproject.toml``
+  declares ``license = "MPL-2.0"`` (SPDX) and ships both files in the distributions.
+
 Version 0.7.0 (2026-11-14)
 ---------------------------
 

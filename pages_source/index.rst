@@ -16,7 +16,7 @@ Auth Middleware Documentation
    :target: https://pypi.org/project/auth-middleware/
    :alt: Python Version
 
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+.. image:: https://img.shields.io/badge/license-MPL--2.0-brightgreen.svg
    :target: https://github.com/impalah/auth-middleware/blob/main/LICENSE
    :alt: License
 
@@ -130,6 +130,13 @@ Contents
    api
    types
    functions
+
+License
+=======
+
+Mozilla Public License 2.0 (MPL-2.0). The library can be used freely in closed-source and commercial
+applications. If you modify the library's own files and distribute the result, those files must be
+published under MPL-2.0. Releases up to and including 0.7.0 were published under the MIT License.
 
 Indices and tables
 ==================

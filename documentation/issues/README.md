@@ -45,7 +45,7 @@ Legend: size S (< 1 h), M (half a day), L (a day or more). "Repo" says where the
 | [AUTHZ-034](AUTHZ-034-abac-audit-metrics-shadow.md) | Audit, metrics, explain and shadow mode | H | S | auth-middleware | 027 |
 | [AUTHZ-035](AUTHZ-035-abac-security-hardening.md) | Security hardening battery | H | M | auth-middleware | 027, 030, 031 |
 | [AUTHZ-036](AUTHZ-036-abac-docs-example-release.md) | Docs, example, CHANGELOG, `0.8.0` | H | M | auth-middleware | all of H |
-| [AUTHZ-037](AUTHZ-037-relicense-mpl-2.0.md) | Relicense from MIT to MPL-2.0 (from 0.8.0) | H | S | auth-middleware | none; lands in the 0.8.0 release |
+| [AUTHZ-037](AUTHZ-037-relicense-mpl-2.0.md) | Relicense from MIT to MPL-2.0 (from 0.8.0) | H | S | auth-middleware | none; done, released as 0.7.1 |
 
 Suggested order: 001 -> 002 -> 003 -> 004 -> 005, with 006 in parallel from 001; then B and C
 (independent, can run in parallel); then 011, 012, 013; then 014 (release `0.7.0`). Epic F is independent
