@@ -98,3 +98,7 @@ class ConditionError(InvalidPolicyError):
 
 class PolicyConflictError(PolicyError):
     """A policy with that id already exists."""
+
+
+class ResourceNotFoundError(AuthzError):
+    """A resource loader answered "no such resource" (answered like "not visible")."""
