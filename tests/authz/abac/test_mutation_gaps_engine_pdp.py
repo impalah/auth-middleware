@@ -423,3 +423,96 @@ async def test_failure_messages_are_exact(catalog):
     with pytest.raises(StoreUnavailableError) as exc2:
         await PolicyDecisionPoint(Weird(), BadResolver()).evaluate(attr_request())  # type: ignore[arg-type]
     assert str(exc2.value) == "policy evaluation failed"
+
+
+# ------------------------------------------------ second pass over the engine
+
+
+@pytest.mark.asyncio
+async def test_scope_kind_mismatch_message_and_denial_exception_fields(catalog):
+    from auth_middleware.authz import PermissionDeniedError, ScopeKindMismatchError
+
+    a, _ = await build(catalog)
+    with pytest.raises(ScopeKindMismatchError) as mismatch:
+        await a.authorize(U1, "design.read", ScopeRef("global", "*"))
+    assert str(mismatch.value) == (
+        "permission design.read belongs to scope kind studio, not global"
+    )
+    with pytest.raises(PermissionDeniedError) as denied:
+        await a.authorize(U1, "design.delete", S1)
+    assert denied.value.scope == S1 and denied.value.required == "design.delete"
+
+
+@pytest.mark.asyncio
+async def test_explain_reasons_for_resource_grant_and_attributes(catalog):
+    # a loader that says "no such resource": not visible, with its own reason
+    a, _ = await build(catalog, pol("o", Effect.REQUIRE, ("design.write",), OWNER))
+    gone = ResourceContext(ResourceRef("design", "d1"), lambda r, f: None)
+    e = await a.explain(U1, "design.write", S1, resource=gone)
+    assert (e.kind, e.reason, e.visible, e.rbac_granted) == (
+        DecisionKind.NOT_VISIBLE,
+        "resource not found",
+        True,
+        True,
+    )
+
+    # grant mode, the role does not grant it and no permit applies: denied by the role
+    g, _ = await build(
+        catalog,
+        pol("p", Effect.PERMIT, ("design.delete",), {"eq": [CLEAR, 99]}),
+        mode="grant",
+    )
+    e = await g.explain(U1, "design.delete", S1)
+    assert (e.kind, e.reason, e.rbac_granted) == (
+        DecisionKind.DENIED,
+        "role does not grant it",
+        False,
+    )
+    assert e.outcome is not None and e.outcome.permitted is False
+
+    # grant mode with a permit that holds: allowed by the policy, reason names it
+    g2, _ = await build(
+        catalog, pol("p", Effect.PERMIT, ("design.delete",)), mode="grant"
+    )
+    e = await g2.explain(U1, "design.delete", S1)
+    assert (e.kind, e.reason, e.rbac_granted) == (
+        DecisionKind.ALLOWED,
+        "permit:p",
+        False,
+    )
+
+    # a hide policy: the reason is the policy's, never an empty string
+    h, _ = await build(catalog, pol("h", hide=True))
+    e = await h.explain(U1, "design.read", S1)
+    assert (e.kind, e.reason) == (DecisionKind.NOT_VISIBLE, "deny:h")
+
+
+@pytest.mark.asyncio
+async def test_the_abac_context_keeps_the_assignment_attributes(catalog):
+    assignments = InMemoryAssignmentStore()
+    await assignments.assign(
+        NewAssignment("u1", S1, "EDI", {"tenant_status": "active"})
+    )
+    store = InMemoryPolicyStore()
+    await store.create(pol("shadow", enforce=False, cond={"eq": [CLEAR, 99]}))
+    pdp = PolicyDecisionPoint(store, AttributeResolver.default())
+    a = Authorizer(catalog, [AssignmentRoleResolver(assignments)], pdp=pdp)
+    ctx = await a.authorize(U1, "design.read", S1)
+    assert ctx.attributes == {"tenant_status": "active"}
+
+
+@pytest.mark.asyncio
+async def test_authorize_and_explain_pass_the_request_to_the_providers(catalog):
+    from auth_middleware.authz import PermissionDeniedError
+
+    a, _ = await build(
+        catalog, pol("no-delete", cond={"eq": [{"attr": "env.method"}, "DELETE"]})
+    )
+    with pytest.raises(PermissionDeniedError):
+        await a.authorize(U1, "design.read", S1, request=request("DELETE"))
+    ctx = await a.authorize(U1, "design.read", S1, request=request("GET"))
+    assert ctx.policy_ids == ()
+    e = await a.explain(U1, "design.read", S1, request=request("DELETE"))
+    assert (e.kind, e.reason) == (DecisionKind.DENIED, "deny:no-delete")
+    e = await a.explain(U1, "design.read", S1, request=request("GET"))
+    assert e.kind is DecisionKind.ALLOWED

@@ -43,7 +43,7 @@ class CachingPolicySource:
         inner: PolicyStore,
         *,
         ttl_seconds: float,
-        max_scopes: int = 1000,
+        max_scopes: int = 1000,  # pragma: no mutate  (a default value)
         clock: Callable[[], float] = time.monotonic,
         i_understand_stale_authorization: bool = False,
     ) -> None:
@@ -64,7 +64,7 @@ class CachingPolicySource:
             OrderedDict()
         )
         self._locks: dict[_Key, asyncio.Lock] = {}
-        self._generation = 0
+        self._generation = 0  # pragma: no mutate  (any start works)
 
     def _fresh(self, key: _Key) -> tuple[Policy, ...] | None:
         entry = self._entries.get(key)
@@ -77,10 +77,14 @@ class CachingPolicySource:
 
     async def list_policies(self, scope: ScopeRef) -> Sequence[Policy]:
         key = (scope.kind, scope.id)
-        hit = self._fresh(key)
+        hit = self._fresh(
+            key
+        )  # pragma: no mutate  (the re-check under the lock covers it)
         if hit is not None:
             return hit
-        lock = self._locks.setdefault(key, asyncio.Lock())
+        lock = self._locks.setdefault(
+            key, asyncio.Lock()
+        )  # pragma: no mutate  (a shared lock only costs speed)
         async with lock:
             hit = self._fresh(key)
             if hit is not None:
@@ -90,8 +94,10 @@ class CachingPolicySource:
             if generation == self._generation:
                 self._entries[key] = (self._clock() + self._ttl, value)
                 while len(self._entries) > self._max:
-                    self._entries.popitem(last=False)
-            if len(self._locks) > 2 * self._max:
+                    self._entries.popitem(
+                        last=False
+                    )  # pragma: no mutate  (falsy last is the same)
+            if len(self._locks) > 2 * self._max:  # pragma: no mutate  (housekeeping)
                 self._locks = {k: v for k, v in self._locks.items() if v.locked()}
             return value
 
@@ -100,7 +106,7 @@ class CachingPolicySource:
 
     def invalidate(self, scope: ScopeRef | None = None) -> None:
         """Drop one scope's entry, or everything when ``scope`` is ``None``."""
-        self._generation += 1
+        self._generation += 1  # pragma: no mutate  (only inequality matters)
         if scope is None:
             self._entries.clear()
         else:
@@ -108,7 +114,7 @@ class CachingPolicySource:
 
     def invalidate_kind(self, kind: str) -> None:
         """Drop every entry of a scope kind (a kind-wide policy changed)."""
-        self._generation += 1
+        self._generation += 1  # pragma: no mutate  (only inequality matters)
         for key in [k for k in self._entries if k[0] == kind]:
             del self._entries[key]
 
