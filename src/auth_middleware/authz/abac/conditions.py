@@ -13,7 +13,7 @@ policies and "not satisfied" for ``require``/``permit`` (fail closed both ways).
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -229,12 +229,10 @@ def _parse_operand(
 def cond_to_dict(cond: Condition) -> dict[str, Any]:
     """Return the plain-data form of a parsed condition (round-trips with parse)."""
 
-    def operand(a: Any) -> Any:
+    def operand(a: Attr | Lit) -> Any:
         if isinstance(a, Attr):
             return {"attr": a.path}
-        if isinstance(a, Lit):
-            return list(a.value) if isinstance(a.value, list) else a.value
-        return cond_to_dict(a)
+        return list(a.value) if isinstance(a.value, list) else a.value
 
     if cond.op in LOGIC_OPS:
         return {cond.op: [cond_to_dict(c) for c in cond.args]}
@@ -327,7 +325,8 @@ def _is_list(v: Any) -> bool:
 
 
 def _in(a: Any, s: Any) -> Tri:
-    if a is ABSENT or s is ABSENT or not _is_list(s) or _kind(a) in ("list", "other"):
+    # ``a`` and ``s`` are never ABSENT here: ``_binary`` answered that case already.
+    if not _is_list(s) or _kind(a) in ("list", "other"):
         return Tri.INDETERMINATE
     same_kind = len(s) == 0
     for e in s:
@@ -447,8 +446,3 @@ def evaluate(cond: Condition, values: Mapping[str, Any]) -> Tri:
         return _walk(cond, values, 0)
     except (RecursionError, TypeError, ValueError, OverflowError, AttributeError):
         return Tri.INDETERMINATE
-
-
-def parse_many(raws: Sequence[Mapping[str, Any]]) -> list[Condition]:
-    """Parse several conditions (helper for tools)."""
-    return [parse_condition(r) for r in raws]

@@ -67,6 +67,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"{'module':58} {'score':>6} {'killed':>7} {'survived':>9} {'other':>6}")
     for module in sorted(counts):
         c = counts[module]
+        if c.get("killed", 0) + c.get("survived", 0) == 0:
+            continue  # not part of this run (mutmut lists every mutant of the package)
         other = sum(v for k, v in c.items() if k not in ("killed", "survived"))
         s = score(c)
         killed, survived = c.get("killed", 0), c.get("survived", 0)

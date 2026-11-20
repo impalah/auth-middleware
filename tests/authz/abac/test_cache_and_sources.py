@@ -254,3 +254,89 @@ async def test_composite_first_wins_and_verify():
     await CompositePolicySource(a, StaticPolicySource([doc("other")])).verify()
     with pytest.raises(ConfigurationError):
         CompositePolicySource()
+
+
+# ------------------------------------------------- boundaries (mutation testing)
+
+
+@pytest.mark.parametrize(
+    "kwargs,message",
+    [
+        ({"ttl_seconds": 0}, "ttl_seconds must be positive"),
+        (
+            {"ttl_seconds": 60.5},
+            "ttl_seconds above 60 needs i_understand_stale_authorization=True",
+        ),
+        ({"ttl_seconds": 5, "max_scopes": 0}, "max_scopes must be >= 1"),
+    ],
+)
+def test_cache_configuration_messages_are_exact(kwargs, message):
+    with pytest.raises(ConfigurationError) as exc:
+        CachingPolicySource(InMemoryPolicyStore(), **kwargs)
+    assert str(exc.value) == message
+
+
+def test_cache_configuration_boundaries_are_valid():
+    inner = InMemoryPolicyStore()
+    CachingPolicySource(inner, ttl_seconds=0.001)
+    CachingPolicySource(inner, ttl_seconds=1)
+    CachingPolicySource(inner, ttl_seconds=60)  # the cap itself is allowed
+    CachingPolicySource(inner, ttl_seconds=5, max_scopes=1)
+
+
+@pytest.mark.asyncio
+async def test_an_entry_expires_exactly_at_its_ttl():
+    clock, inner = Clock(), CountingStore()
+    cache = CachingPolicySource(inner, ttl_seconds=5, clock=clock)
+    await cache.list_policies(S1)
+    clock.now += 4.999
+    await cache.list_policies(S1)
+    assert inner.calls == 1
+    clock.now += 0.001  # now exactly 5 s after the load
+    await cache.list_policies(S1)
+    assert inner.calls == 2
+
+
+@pytest.mark.asyncio
+async def test_capacity_is_max_scopes_entries_and_the_oldest_goes_first():
+    inner = CountingStore()
+    cache = CachingPolicySource(inner, ttl_seconds=30, max_scopes=2)
+    s3 = ScopeRef("studio", "s3")
+    await cache.list_policies(S1)
+    await cache.list_policies(S2)
+    await cache.list_policies(S1)
+    await cache.list_policies(S2)
+    assert inner.calls == 2  # both fit: max_scopes entries are kept, not one fewer
+    await cache.list_policies(s3)  # evicts the oldest (S1), keeps S2
+    assert inner.calls == 3
+    await cache.list_policies(S2)
+    assert inner.calls == 3
+    await cache.list_policies(S1)
+    assert inner.calls == 4
+
+
+@pytest.mark.asyncio
+async def test_list_all_passes_the_status_filter_through():
+    inner = InMemoryPolicyStore()
+    await inner.create(np("a"))
+    await inner.create(np("b"))
+    await inner.set_status("b", PolicyStatus.DISABLED, expected_revision=0)
+    cache = CachingPolicySource(inner, ttl_seconds=5)
+    assert [p.id for p in await cache.list_all(PolicyStatus.DISABLED)] == ["b"]
+    assert [p.id for p in await cache.list_all(PolicyStatus.ACTIVE)] == ["a"]
+    assert len(await cache.list_all()) == 2
+
+
+@pytest.mark.asyncio
+async def test_aclose_is_a_no_op_when_the_inner_source_cannot_close():
+    cache = CachingPolicySource(InMemoryPolicyStore(), ttl_seconds=5)
+    await cache.aclose()  # InMemoryPolicyStore has no aclose(): must not raise
+
+
+@pytest.mark.asyncio
+async def test_the_lock_table_stays_bounded():
+    inner = InMemoryPolicyStore()
+    cache = CachingPolicySource(inner, ttl_seconds=30, max_scopes=3)
+    for i in range(60):
+        await cache.list_policies(ScopeRef("studio", f"s{i}"))
+    assert len(cache._locks) <= 2 * 3 + 1

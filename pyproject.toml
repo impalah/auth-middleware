@@ -201,4 +201,11 @@ DEP001 = ["botocore"]
 [tool.mutmut]
 source_paths = ["src/auth_middleware/"]
 also_copy = ["tests"]
-pytest_add_cli_args_test_selection = ["tests/authz", "tests/test_cli_policy.py"]
+pytest_add_cli_args_test_selection = [
+    "tests/authz",
+    "tests/test_cli_policy.py",
+    # the examples seed module-level state on import, which mutmut's double import trips on
+    "--ignore=tests/authz/test_example.py",
+    "--ignore=tests/authz/test_stores_config_example.py",
+    "--ignore=tests/authz/abac/test_example.py",
+]
